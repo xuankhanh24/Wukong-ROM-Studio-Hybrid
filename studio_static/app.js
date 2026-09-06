@@ -63,10 +63,19 @@ function nativeAction(action, payload = {}, { timeout = 60000 } = {}) {
 }
 
 const presetDefaultModExcludes = {
-  resume: new Set(["Gallery_mod_CN"]),
-  both: new Set(["Gallery_mod_CN"]),
+  plus: new Set(["Disable_flag_secure"]),
+  resume: new Set(["Gallery_mod_CN", "Disable_flag_secure"]),
+  both: new Set(["Gallery_mod_CN", "Disable_flag_secure"]),
 };
 const forcedLiteDefaultMods = ["Fix_Metis", "WK_Installer"];
+const exclusiveMods = new Set(["Disable_flag_secure", "WK_Manager"]);
+
+function enforceExclusiveModSelection(changedName = "") {
+  if (![...exclusiveMods].every((name) => state.draftModSelection.has(name))) return false;
+  const removeName = changedName === "Disable_flag_secure" ? "WK_Manager" : "Disable_flag_secure";
+  state.draftModSelection.delete(removeName);
+  return true;
+}
 
 const i18n = {
   vi: {
@@ -124,7 +133,8 @@ const i18n = {
     "debloat.title": "Tùy chỉnh đường dẫn cần xóa",
     "debloat.hint": "Mỗi dòng là một đường dẫn tương đối bắt đầu bằng tên partition. Ví dụ: my_stock\\app\\Browser",
     "mods.title": "Chọn MOD",
-    "mods.hint": "Mỗi thư mục con là một lựa chọn độc lập. MOD có cảnh báo vẫn hiển thị để bạn biết trạng thái preflight.",
+    "mods.hint": "Mỗi thư mục con là một lựa chọn độc lập. Disable_flag_secure và WK_Manager là hai lựa chọn thay thế nhau.",
+    "mods.exclusive": "Disable_flag_secure và WK_Manager không thể dùng cùng nhau.",
     "mods.selectLite": "Chọn Lite",
     "mods.selectAll": "Chọn tất cả",
     "mods.clear": "Bỏ chọn",
@@ -273,7 +283,8 @@ const i18n = {
     "debloat.title": "Customize removal paths",
     "debloat.hint": "Enter one relative path per line, starting with a partition name. Example: my_stock\\app\\Browser",
     "mods.title": "Select MODs",
-    "mods.hint": "Each child folder is an independent option. MODs with warnings remain visible so preflight status is explicit.",
+    "mods.hint": "Each child folder is an independent option. Disable_flag_secure and WK_Manager are mutually exclusive.",
+    "mods.exclusive": "Disable_flag_secure and WK_Manager cannot be selected together.",
     "mods.selectLite": "Select Lite",
     "mods.selectAll": "Select all",
     "mods.clear": "Clear",
@@ -795,6 +806,7 @@ async function saveDebloatEditor() {
 
 function renderModDialog() {
   const selection = state.draftModSelection;
+  enforceExclusiveModSelection();
   document.querySelector("#mod-selection-summary").textContent = `${state.modVersion} · ${
     selection.size ? fmt("common.selectedMods", { count: selection.size }) : t("common.noSelection")
   }`;
@@ -834,6 +846,7 @@ function setDraftMods(names) {
 }
 
 function saveModEditor() {
+  enforceExclusiveModSelection();
   state.modSelection = new Set(state.draftModSelection);
   if (!state.pipelineSelection) state.pipelineSelection = new Set();
   if (state.modSelection.size) state.pipelineSelection.add("apply_mod");
@@ -1515,6 +1528,9 @@ document.addEventListener("change", (event) => {
   if (event.target.matches("[data-draft-mod]")) {
     if (event.target.checked) state.draftModSelection.add(event.target.dataset.draftMod);
     else state.draftModSelection.delete(event.target.dataset.draftMod);
+    if (event.target.checked && enforceExclusiveModSelection(event.target.dataset.draftMod)) {
+      toast(t("mods.exclusive"));
+    }
     renderModDialog();
   }
   if (event.target.id === "notify-toggle") {

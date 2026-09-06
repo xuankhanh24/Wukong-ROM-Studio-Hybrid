@@ -58,6 +58,12 @@ checksum.
 When a ROM version no longer matches an expected class, method or anchor, the
 worker stops instead of packaging a partially patched ROM.
 
+`Disable_flag_secure` is a standalone security-flag MOD. It applies the
+provided guide's direct-return patches to five `services.jar` methods and four
+`oplus-services.jar` methods, so screenshot capture is no longer blocked by
+`FLAG_SECURE`. The Studio, Mini App and Windows UI treat it as mutually
+exclusive with `WK_Manager`; selecting one automatically clears the other.
+
 ## Optional Telegram Notification
 
 Credentials are read from environment variables or the ignored local file
@@ -97,8 +103,10 @@ bin/Windows/AMD64/apktool_3.0.2.jar
 Java
 ```
 
-`WK_Manager` additionally requires its `STARK` smali assets. Diagnostics shows
-the apktool path, and preflight blocks only builds that select an affected MOD.
+`WK_Manager` additionally requires its `STARK` smali assets. `Disable_flag_secure`
+uses the same apktool/Java dependency but does not require a MOD content folder.
+Diagnostics shows the apktool path, and preflight blocks only builds that select
+an affected MOD.
 
 ## Runtime Data
 

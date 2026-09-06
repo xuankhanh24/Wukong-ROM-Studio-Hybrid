@@ -2469,10 +2469,44 @@ class StudioCoreTests(unittest.TestCase):
                 sorted(event["progress"] for event in progress_events),
             )
 
+    def test_apply_mod_disable_flag_secure_patches_only_two_screen_capture_jars(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            mods = [{"name": "Disable_flag_secure", "partitions": []}]
+            calls = []
+
+            def fake_patch(jar, work_dir, patcher, **kwargs):
+                calls.append((jar.name, work_dir))
+                return {"jar": jar.name, "patchedMethods": 5 if jar.name == "services.jar" else 4}
+
+            with mock.patch.object(studio_core, "validate_mods", return_value=mods), mock.patch.object(
+                studio_core, "_patch_jar_with_apktool", side_effect=fake_patch
+            ):
+                result = studio_core.apply_selected_mods(
+                    ["Disable_flag_secure"],
+                    root / "rom-unpack",
+                    None,
+                    root,
+                )
+
+            self.assertEqual([call[0] for call in calls], ["services.jar", "oplus-services.jar"])
+            self.assertTrue(all("Disable_flag_secure" in str(call[1]) for call in calls))
+            self.assertEqual(result["patched"], 9)
+            self.assertEqual(result["modifiedPartitions"], ["system"])
+
     def test_wk_manager_is_visible_and_ready(self):
         mod = next(mod for mod in studio_core.list_mods() if mod["name"] == "WK_Manager")
         self.assertTrue(mod["ready"])
         self.assertEqual(studio_core.validate_mods(["WK_Manager"])[0]["name"], "WK_Manager")
+
+    def test_disable_flag_secure_is_visible_and_exclusive_with_wk_manager(self):
+        mod = next(mod for mod in studio_core.list_mods() if mod["name"] == "Disable_flag_secure")
+        self.assertTrue(mod["ready"])
+        self.assertTrue(mod["patchOnly"])
+        self.assertEqual(mod["partitions"], [])
+        self.assertEqual(studio_core.validate_mods(["Disable_flag_secure"])[0]["name"], "Disable_flag_secure")
+        with self.assertRaisesRegex(studio_core.StudioError, "mutually exclusive"):
+            studio_core.validate_mods(["Disable_flag_secure", "WK_Manager"])
 
     def test_inspect_small_fixture_rom(self):
         with tempfile.TemporaryDirectory() as temp, mock.patch.object(

@@ -30,6 +30,7 @@ venv/
 # Local editor/agent state
 .agents/
 .codex/
+.codegraph/
 .idea/
 .vscode/
 

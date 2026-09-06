@@ -137,7 +137,9 @@ PROTECTED_DEBLOAT_PATHS = {
 }
 PATCH_ONLY_MODS = {
     "Block_ota": "Remove lines containing ota, romupdate or com.oplusos.sau from my_stock app-features.xml",
+    "Disable_flag_secure": "Patch services.jar and oplus-services.jar to disable FLAG_SECURE screen-capture blocking",
 }
+MUTUALLY_EXCLUSIVE_MODS = frozenset({"Disable_flag_secure", "WK_Manager"})
 BLOCK_OTA_FEATURE_KEYWORDS = ("ota", "romupdate", "com.oplusos.sau")
 THEME_CR_REMOVE_PATHS = [r"my_stock\del-app\KeKeThemeSpace"]
 AI_GLOBAL_COLOROS_1605_REMOVE_PATHS = [r"my_stock\app\AIUnit"]
@@ -1335,6 +1337,8 @@ def _mod_special_actions(name: str) -> list[str]:
         actions.append("Allow WukongManager priv-app metric reads via platform SELinux")
         actions.append("Install the isolated Wukong system-power daemon and init socket service")
         actions.append("Assign the app and power daemon dedicated SELinux domains")
+    if name == "Disable_flag_secure":
+        actions.append("Patch 5 services.jar methods and 4 oplus-services.jar methods from the secure-flag guide")
     if name == "Fake_lock":
         actions.append("Inject wk commands into init.rc on post-fs-data")
         actions.append("Force wk executable permission and SELinux repack context")
@@ -1462,6 +1466,11 @@ def validate_mods(
         if mod.get("blockedReason") and not allow_blocked:
             raise StudioError(str(mod["blockedReason"]))
         results.append(mod)
+    selected_names = {str(mod["name"]) for mod in results}
+    if MUTUALLY_EXCLUSIVE_MODS.issubset(selected_names):
+        raise StudioError(
+            "Disable_flag_secure and WK_Manager are mutually exclusive; select only one"
+        )
     return results
 
 
@@ -1585,7 +1594,7 @@ def inspect_rom(
             validate_debloat_paths(debloat_paths)
         except StudioError as exc:
             errors.append(str(exc))
-    jar_patch_mods = {"Fix_noti", "WK_Manager"}.intersection(selected_mod_names)
+    jar_patch_mods = {"Fix_noti", "WK_Manager", "Disable_flag_secure"}.intersection(selected_mod_names)
     if "apply_mod" in requested_steps and jar_patch_mods:
         if not APKTOOL_JAR.is_file():
             errors.append(f"Missing apktool dependency: {APKTOOL_JAR}")
@@ -2580,6 +2589,37 @@ def _patch_wk_manager_jars(
     return reports
 
 
+def _patch_disable_flag_secure_jars(
+    rom_unpack: Path,
+    workspace: Path,
+    status_callback: Callable[[str], None] | None = None,
+) -> list[dict[str, Any]]:
+    from wk_manager_patcher import (
+        WkManagerPatchError,
+        patch_disable_flag_secure_oplus_services_decoded,
+        patch_disable_flag_secure_services_decoded,
+    )
+
+    framework_dir = rom_unpack / "system_unpacked" / "system" / "system" / "framework"
+    patchers: list[tuple[str, Callable[[Path], dict[str, Any]]]] = [
+        ("services.jar", patch_disable_flag_secure_services_decoded),
+        ("oplus-services.jar", patch_disable_flag_secure_oplus_services_decoded),
+    ]
+    reports: list[dict[str, Any]] = []
+    for jar_name, patcher in patchers:
+        try:
+            report = _patch_jar_with_apktool(
+                framework_dir / jar_name,
+                workspace / "mod-tools" / "Disable_flag_secure" / Path(jar_name).stem,
+                patcher,
+                status_callback=status_callback,
+            )
+        except WkManagerPatchError as exc:
+            raise StudioError(f"Disable_flag_secure {jar_name} patch failed: {exc}") from exc
+        reports.append(report)
+    return reports
+
+
 def _fake_lock_init_body(mod_dir: Path) -> list[str]:
     source = mod_dir / "system" / "system" / "etc" / "init" / "hw" / "stark_init.rc"
     if not source.is_file():
@@ -3087,6 +3127,7 @@ def apply_selected_mods(
     modified_partitions: set[str] = set()
     fix_noti_selected = False
     wk_manager_mod_dir: Path | None = None
+    disable_flag_secure_selected = False
     last_progress = -1
 
     def emit_progress(progress: int, message: str) -> None:
@@ -3139,6 +3180,8 @@ def apply_selected_mods(
             fix_noti_selected = True
         if mod["name"] == "WK_Manager":
             wk_manager_mod_dir = mod_dir
+        if mod["name"] == "Disable_flag_secure":
+            disable_flag_secure_selected = True
         if mod["name"] == "Fake_lock":
             patched += _patch_fake_lock_init_rc(rom_unpack, mod_dir)
             _sync_fake_lock_repack_configs(rom_unpack)
@@ -3202,6 +3245,15 @@ def apply_selected_mods(
         copied += int(system_power_report["copied"])
         copied_bytes += int(system_power_report["copiedBytes"])
         patched += int(system_power_report["patched"])
+        modified_partitions.add("system")
+    if disable_flag_secure_selected:
+        reports = _patch_disable_flag_secure_jars(
+            rom_unpack,
+            workspace,
+            emit_jar_progress,
+        )
+        jar_reports.extend({"mod": "Disable_flag_secure", **report} for report in reports)
+        patched += sum(int(report.get("patchedMethods", 0)) for report in reports)
         modified_partitions.add("system")
     sepolicy_hash = None
     if SELINUX_HASH_MODS.intersection(applied):
