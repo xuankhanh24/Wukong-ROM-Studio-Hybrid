@@ -439,6 +439,7 @@ describe("atomic Accepted Job creation", () => {
   it("never exposes repository identity or GitHub run links in public jobs and events", async () => {
     const bindings = env as unknown as Env;
     const subject = "42005";
+    const privateRunId = "run-id-private-fixture";
     await seedApprovedUser(subject, 5);
     const headers = {
       ...(await tmaHeaders(Number(subject))),
@@ -458,11 +459,12 @@ describe("atomic Accepted Job creation", () => {
            manifest_json,
            '$.error', ?,
            '$.repository', ?,
-           '$.external_run_id', 8123
+           '$.external_run_id', ?
          ) WHERE job_id = ?`
       ).bind(
         `Build failed: https://github.com/${privateRepository}/actions/runs/8123`,
         privateRepository,
+        privateRunId,
         job.job_id
       ),
       bindings.DB.prepare(
@@ -475,7 +477,7 @@ describe("atomic Accepted Job creation", () => {
         JSON.stringify({
           repository: privateRepository,
           githubOwner: privateRepository.split("/", 1)[0],
-          runId: 8123,
+          runId: privateRunId,
           warning: `GitHub owner: ${privateRepository.split("/", 1)[0]}; Cloud sync failed in ${privateRepository}`
         })
       )
@@ -491,7 +493,7 @@ describe("atomic Accepted Job creation", () => {
     });
     expect(publicPayload).not.toContain(privateRepository);
     expect(publicPayload).not.toContain("github.com");
-    expect(publicPayload).not.toContain("8123");
+    expect(publicPayload).not.toContain(privateRunId);
     expect(publicPayload).toContain("[internal");
   });
 });
