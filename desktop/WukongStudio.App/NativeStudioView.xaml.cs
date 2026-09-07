@@ -401,6 +401,7 @@ public sealed partial class NativeStudioView : UserControl
             _modCards[mod.Name] = card;
             ModsPanel.Children.Add(card);
         }
+        EnforceExclusiveModSelection();
         ApplyModFilter();
         RelayoutModCards();
         UpdateConfigurationSummaries();
@@ -4129,10 +4130,33 @@ public sealed partial class NativeStudioView : UserControl
             return;
         }
         _configuring = true;
+        if (sender is CheckBox { IsChecked: true, Tag: string changedName })
+        {
+            EnforceExclusiveModSelection(changedName);
+        }
         SelectComboByTag(PresetCombo, "custom");
         _configuring = false;
         UpdateConfigurationSummaries();
         InvalidatePreflight();
+    }
+
+    private void EnforceExclusiveModSelection(string? changedName = null)
+    {
+        if (!_modChecks.TryGetValue("Disable_flag_secure", out var disableFlagSecure)
+            || !_modChecks.TryGetValue("WK_Manager", out var wkManager)
+            || disableFlagSecure.IsChecked != true
+            || wkManager.IsChecked != true)
+        {
+            return;
+        }
+        if (string.Equals(changedName, "Disable_flag_secure", StringComparison.Ordinal))
+        {
+            wkManager.IsChecked = false;
+        }
+        else
+        {
+            disableFlagSecure.IsChecked = false;
+        }
     }
 
     private void StudioPageSizeChanged(object sender, SizeChangedEventArgs e)
@@ -4294,6 +4318,7 @@ public sealed partial class NativeStudioView : UserControl
         {
             check.IsChecked = selected;
         }
+        EnforceExclusiveModSelection();
         SelectComboByTag(PresetCombo, "custom");
         _configuring = false;
         UpdateConfigurationSummaries();
@@ -4442,6 +4467,7 @@ public sealed partial class NativeStudioView : UserControl
             {
                 check.IsChecked = check.IsEnabled && requestedMods.Contains(name);
             }
+            EnforceExclusiveModSelection();
             var requestedSteps = profile.EnabledSteps.ToHashSet(StringComparer.Ordinal);
             foreach (var (stepId, check) in _stepChecks)
             {

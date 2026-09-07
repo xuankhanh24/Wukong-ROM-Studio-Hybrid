@@ -8,6 +8,7 @@ from wukong.catalog import (
     LITE_DEFAULT_MODS,
     MODIFIABLE_PARTITIONS,
     PLUS_DEFAULT_EXCLUDED_MODS,
+    PUBLIC_PATCH_ONLY_MOD_NAMES,
     SHARED_MOD_NAMES,
 )
 from wukong.content_packs import validate_content_index
@@ -77,6 +78,11 @@ def export_catalog(
     if shared_mods:
         for version, mods in mods_by_version.items():
             mods_by_version[version] = sorted(set(mods) | shared_mods, key=str.casefold)
+    for version, mods in mods_by_version.items():
+        mods_by_version[version] = sorted(
+            set(mods) | set(PUBLIC_PATCH_ONLY_MOD_NAMES),
+            key=str.casefold,
+        )
     payload: dict[str, object] = {
         "schemaVersion": 1,
         "presetLabels": {"lite": "Lite", "plus": "Plus", "custom": "Custom"},

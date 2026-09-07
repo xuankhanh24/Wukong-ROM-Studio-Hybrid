@@ -16,6 +16,19 @@ function defaultMods() {
   return state.catalog?.presetDefaultsByVersion?.[version]?.[preset] || [];
 }
 
+const EXCLUSIVE_MODS = new Set(["Disable_flag_secure", "WK_Manager"]);
+
+function enforceExclusiveMods(changedName = "") {
+  const selected = new Set(selectedMods());
+  if (![...EXCLUSIVE_MODS].every((name) => selected.has(name))) return false;
+  const removeName = changedName === "Disable_flag_secure"
+    ? "WK_Manager"
+    : "Disable_flag_secure";
+  const input = [...$$("#mod-list input")].find((candidate) => candidate.value === removeName);
+  if (input) input.checked = false;
+  return true;
+}
+
 function modCategory(name) {
   const value = name.toLocaleLowerCase();
   if (/gapps|google|play[_ -]?store|youtube|chrome|maps/.test(value)) return "google";
@@ -51,6 +64,7 @@ function renderMods(reset = true) {
   const list = $("#mod-list");
   if (!list || !state.catalog) return;
   const current = new Set(reset ? defaultMods() : selectedMods());
+  if ([...EXCLUSIVE_MODS].every((name) => current.has(name))) current.delete("Disable_flag_secure");
   const names = state.catalog.modsByVersion[selectedModVersion()] || [];
   renderReleaseVersion();
   renderCustomPresetLabelEditor();
@@ -166,6 +180,7 @@ function updatePipelineCount() {
 function setMods(mode) {
   const defaults = new Set(defaultMods());
   $$("#mod-list input").forEach((input) => { input.checked = mode === "all" || (mode === "defaults" && defaults.has(input.value)); });
+  enforceExclusiveMods();
   if (mode !== "defaults") $("#preset").value = "custom";
   renderCustomPresetLabelEditor();
   updateSummary();
@@ -557,4 +572,4 @@ async function submitRecipe() {
   }
 }
 
-export { selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };
+export { selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, enforceExclusiveMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };

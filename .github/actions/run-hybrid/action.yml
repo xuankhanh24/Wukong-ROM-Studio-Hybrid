@@ -3,6 +3,9 @@ description: Materialize one private recipe and run the shared Wukong orchestrat
 inputs:
   recipe_ref:
     required: true
+  recipe_b64:
+    description: Validated secret-free recipe passed from the route job
+    required: false
   job_id:
     required: true
   rclone_config_b64:
@@ -90,10 +93,15 @@ runs:
       shell: bash
       env:
         RECIPE_REF: ${{ inputs.recipe_ref }}
+        RECIPE_B64: ${{ inputs.recipe_b64 }}
         WUKONG_RCLONE_CONFIG: ${{ github.workspace }}/.wkstudio/secrets/rclone.conf
       run: |
         set -euo pipefail
-        python3 -m tools.fetch_recipe "$RECIPE_REF" --output .wkstudio/recipe.json --rclone-config "$WUKONG_RCLONE_CONFIG" --coerce-github
+        if [ -n "$RECIPE_B64" ]; then
+          printf '%s' "$RECIPE_B64" | base64 --decode > .wkstudio/recipe.json
+        else
+          python3 -m tools.fetch_recipe "$RECIPE_REF" --output .wkstudio/recipe.json --rclone-config "$WUKONG_RCLONE_CONFIG" --coerce-github
+        fi
         task="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['task'])")"
         if [ "$task" = build ]; then
           mod_version="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['build']['modVersion'])")"

@@ -1,6 +1,6 @@
 import { bindViewport } from "./viewport.js";
 import { $, $$, miniApiEndpoint, runtime, state, t, themeMedia } from "./state.js";
-import { applyCustomPresetLabelForJob, closeDebloatEditor, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
+import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
 import { runQuickAction, activeSignedLaunchToken, apiRequest, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
@@ -155,6 +155,9 @@ function bindEvents() {
   $("#device").addEventListener("change", updateSummary);
   $("#mod-list").addEventListener("change", (event) => {
     if (event.target.matches('input[type="checkbox"]')) {
+      if (event.target.checked && enforceExclusiveMods(event.target.value)) {
+        toast(t("modExclusiveNotice"));
+      }
       $("#preset").value = "custom";
       renderCustomPresetLabelEditor();
     }

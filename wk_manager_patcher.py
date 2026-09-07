@@ -29,6 +29,9 @@ class PatchReport:
     importedSmali: int = 0
 
 
+DISABLE_FLAG_SECURE_MARKER = "# WK_STUDIO_DISABLE_FLAG_SECURE"
+
+
 def _code(value: str) -> str:
     return dedent(value).strip("\n")
 
@@ -302,6 +305,47 @@ def _patch_after_directive(
             f"{class_name}.{signature}",
         ),
     )
+
+
+def _replace_method_after_directive(
+    decoded: Path,
+    class_name: str,
+    signature: str,
+    directive_pattern: str,
+    snippet: str,
+    marker: str,
+) -> bool:
+    """Replace a method body while retaining its smali header/directives.
+
+    The disable-flag-secure guide intentionally drops every original
+    instruction after the last method directive and returns the safe value.
+    Keeping the header, register declaration, parameters, and annotations
+    makes the patch valid across apktool output variants.
+    """
+    path = _find_smali(decoded, class_name)
+    content = path.read_text(encoding="utf-8")
+    matches = list(_method_pattern(signature).finditer(content))
+    if len(matches) != 1:
+        raise WkManagerPatchError(
+            f"{class_name}.{signature}: expected one method, found {len(matches)}"
+        )
+    method = matches[0].group(0)
+    if marker in method:
+        return False
+    lines = method.splitlines()
+    directive_matches = [
+        index
+        for index, line in enumerate(lines)
+        if re.search(directive_pattern, line)
+    ]
+    if len(directive_matches) != 1:
+        raise WkManagerPatchError(
+            f"{class_name}.{signature}: expected one directive anchor, found {len(directive_matches)}"
+        )
+    prefix = "\n".join(lines[: directive_matches[0] + 1]).rstrip()
+    updated = f"{prefix}\n\n{_code(snippet)}\n{DISABLE_FLAG_SECURE_MARKER}\n.end method"
+    _write_text_lf(path, content[: matches[0].start()] + updated + content[matches[0].end() :])
+    return True
 
 
 def _copy_stark_smali(decoded: Path, stark_dir: Path) -> int:
@@ -1243,10 +1287,138 @@ def patch_oplus_services_decoded(decoded: Path) -> dict[str, int | str]:
     return asdict(report)
 
 
+def patch_disable_flag_secure_services_decoded(decoded: Path) -> dict[str, int | str]:
+    """Apply the standalone disable-``FLAG_SECURE`` guide to services.jar."""
+    report = PatchReport(jar="services.jar")
+    patches = [
+        (
+            "com.android.server.devicepolicy.DevicePolicyCacheImpl",
+            "isScreenCaptureAllowed(I)Z",
+            r'^[ \t]*\.param p1, "userHandle".*$',
+            """
+                const/4 v0, 0x1
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.devicepolicy.DevicePolicyManagerService",
+            "getScreenCaptureDisabled(Landroid/content/ComponentName;IZ)Z",
+            r'^[ \t]*\.param p3, "parent".*$',
+            """
+                const/4 v0, 0x0
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.wm.DisplayContent",
+            "hasSecureWindowOnScreen()Z",
+            r"^[ \t]*\.(?:registers|locals) [0-9]+[ \t]*$",
+            """
+                const/4 v0, 0x0
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.wm.WindowManagerService",
+            "notifyScreenshotListeners(I)Ljava/util/List;",
+            r"^[ \t]*\.end annotation[ \t]*$",
+            """
+                new-instance v0, Ljava/util/ArrayList;
+
+                invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+
+                return-object v0
+            """,
+        ),
+        (
+            "com.android.server.wm.WindowState",
+            "isSecureLocked()Z",
+            r"^[ \t]*\.(?:registers|locals) [0-9]+[ \t]*$",
+            """
+                const/4 v0, 0x0
+
+                return v0
+            """,
+        ),
+    ]
+    for class_name, signature, directive, snippet in patches:
+        report.patchedMethods += _replace_method_after_directive(
+            decoded,
+            class_name,
+            signature,
+            directive,
+            snippet,
+            DISABLE_FLAG_SECURE_MARKER,
+        )
+    return asdict(report)
+
+
+def patch_disable_flag_secure_oplus_services_decoded(decoded: Path) -> dict[str, int | str]:
+    """Apply the standalone disable-``FLAG_SECURE`` guide to oplus-services.jar."""
+    report = PatchReport(jar="oplus-services.jar")
+    patches = [
+        (
+            "com.android.server.wm.IOplusWindowManagerServiceEx",
+            "dumpWindowsForScreenShot(Ljava/io/PrintWriter;Ljava/lang/String;[Ljava/lang/String;)Z",
+            r'^[ \t]*\.param p3, "args".*$',
+            """
+                const/4 v0, 0x1
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.wm.OplusLongshotMainWindow",
+            "hasSecure()Z",
+            r"^[ \t]*\.(?:registers|locals) [0-9]+[ \t]*$",
+            """
+                const/4 v0, 0x0
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.wm.OplusWindowDumpUtils",
+            "isSecureWindow(Lcom/android/server/wm/WindowState;)Z",
+            r'^[ \t]*\.param p1, "w".*$',
+            """
+                const/4 v0, 0x0
+
+                return v0
+            """,
+        ),
+        (
+            "com.android.server.wm.OplusWindowManagerServiceEx",
+            "dumpWindowsForScreenShot(Ljava/io/PrintWriter;Ljava/lang/String;[Ljava/lang/String;)Z",
+            r'^[ \t]*\.param p3, "args".*$',
+            """
+                const/4 v0, 0x1
+
+                return v0
+            """,
+        ),
+    ]
+    for class_name, signature, directive, snippet in patches:
+        report.patchedMethods += _replace_method_after_directive(
+            decoded,
+            class_name,
+            signature,
+            directive,
+            snippet,
+            DISABLE_FLAG_SECURE_MARKER,
+        )
+    return asdict(report)
+
+
 PATCHERS: dict[str, Callable[[Path], dict[str, int | str]]] = {
     "framework": patch_framework_decoded,
     "services": patch_services_decoded,
     "oplus-services": patch_oplus_services_decoded,
+    "disable-flag-secure-services": patch_disable_flag_secure_services_decoded,
+    "disable-flag-secure-oplus-services": patch_disable_flag_secure_oplus_services_decoded,
 }
 
 

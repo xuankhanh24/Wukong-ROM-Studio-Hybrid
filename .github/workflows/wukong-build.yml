@@ -113,6 +113,7 @@ jobs:
       runner_kind: ${{ steps.route.outputs.runner_kind }}
       recipe_digest: ${{ steps.route.outputs.recipe_digest }}
       recipe_ref: ${{ steps.route.outputs.recipe_ref }}
+      recipe_b64: ${{ steps.route.outputs.recipe_b64 }}
       mod_version: ${{ steps.route.outputs.mod_version }}
       task: ${{ steps.route.outputs.task }}
     steps:
@@ -184,22 +185,20 @@ jobs:
               --secret "$WUKONG_ACTIONS_CALLBACK_SECRET" \
               --output .wkstudio/actions-bootstrap.json \
               --recipe-output .wkstudio/recipe.json
-            effective_recipe_ref="wukong-gdrive:WukongROM/recipes/${WUKONG_JOB_ID}.json"
-            rclone copyto .wkstudio/recipe.json "$effective_recipe_ref" \
-              --config "$WUKONG_RCLONE_CONFIG" --retries 3
+            effective_recipe_ref="$RECIPE_REF"
           elif [ -n "$RECIPE_REF" ]; then
             python -m tools.fetch_recipe "$RECIPE_REF" --output .wkstudio/recipe.json --rclone-config "$WUKONG_RCLONE_CONFIG" --coerce-github
             effective_recipe_ref="$RECIPE_REF"
           else
             python -m tools.materialize_workflow_recipe --output .wkstudio/recipe.json
-            effective_recipe_ref="wukong-gdrive:WukongROM/recipes/${WUKONG_JOB_ID}.json"
-            rclone copyto .wkstudio/recipe.json "$effective_recipe_ref" --config "$WUKONG_RCLONE_CONFIG" --retries 3
+            effective_recipe_ref="workflow://${WUKONG_JOB_ID}"
           fi
           if ! python wukong_cli.py validate --recipe .wkstudio/recipe.json > .wkstudio/route.json; then
             cat .wkstudio/route.json
             exit 2
           fi
           printf 'recipe_ref=%s\n' "$effective_recipe_ref" >> "$GITHUB_OUTPUT"
+          printf 'recipe_b64=%s\n' "$(base64 -w0 .wkstudio/recipe.json)" >> "$GITHUB_OUTPUT"
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           data = json.load(open('.wkstudio/route.json', encoding='utf-8'))
@@ -304,6 +303,7 @@ jobs:
         uses: ./.github/actions/run-hybrid
         with:
           recipe_ref: ${{ needs.route.outputs.recipe_ref }}
+          recipe_b64: ${{ needs.route.outputs.recipe_b64 }}
           job_id: ${{ inputs.job_id }}
           rclone_config_b64: ${{ secrets.RCLONE_CONFIG_B64 }}
           github_token: ${{ secrets.WUKONG_GITHUB_TOKEN }}
@@ -351,6 +351,7 @@ jobs:
         uses: ./.github/actions/run-hybrid
         with:
           recipe_ref: ${{ needs.route.outputs.recipe_ref }}
+          recipe_b64: ${{ needs.route.outputs.recipe_b64 }}
           job_id: ${{ inputs.job_id }}
           rclone_config_b64: ${{ secrets.RCLONE_CONFIG_B64 }}
           github_token: ${{ secrets.WUKONG_GITHUB_TOKEN }}

@@ -6,6 +6,56 @@ import wk_manager_patcher
 
 
 class WkManagerPatcherTests(unittest.TestCase):
+    @staticmethod
+    def _write_method(root: Path, class_name: str, signature: str, directive: str) -> None:
+        path = root / "smali" / Path(*class_name.split("."))
+        path = path.with_suffix(".smali")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        method_name = signature.split("(", 1)[0]
+        register_line = "" if directive.startswith(".registers") else "    .registers 2\n"
+        path.write_text(
+            ".class public Lfixture/Target;\n"
+            f".method public {method_name}{signature[len(method_name):]}\n"
+            f"{register_line}"
+            f"    {directive}\n"
+            "    const/4 v0, 0x1\n"
+            "    return v0\n"
+            ".end method\n",
+            encoding="utf-8",
+        )
+
+    def test_disable_flag_secure_patchers_replace_guide_methods_and_are_idempotent(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            services = [
+                ("com.android.server.devicepolicy.DevicePolicyCacheImpl", "isScreenCaptureAllowed(I)Z", '.param p1, "userHandle"  # I'),
+                ("com.android.server.devicepolicy.DevicePolicyManagerService", "getScreenCaptureDisabled(Landroid/content/ComponentName;IZ)Z", '.param p3, "parent"  # Z'),
+                ("com.android.server.wm.DisplayContent", "hasSecureWindowOnScreen()Z", ".registers 2"),
+                ("com.android.server.wm.WindowManagerService", "notifyScreenshotListeners(I)Ljava/util/List;", ".end annotation"),
+                ("com.android.server.wm.WindowState", "isSecureLocked()Z", ".registers 2"),
+            ]
+            for class_name, signature, directive in services:
+                self._write_method(root, class_name, signature, directive)
+            first = wk_manager_patcher.patch_disable_flag_secure_services_decoded(root)
+            second = wk_manager_patcher.patch_disable_flag_secure_services_decoded(root)
+            self.assertEqual(first["patchedMethods"], 5)
+            self.assertEqual(second["patchedMethods"], 0)
+            self.assertIn(wk_manager_patcher.DISABLE_FLAG_SECURE_MARKER, "\n".join(p.read_text(encoding="utf-8") for p in root.rglob("*.smali")))
+
+            oplus = tempfile.TemporaryDirectory()
+            try:
+                oplus_root = Path(oplus.name)
+                oplus_methods = [
+                    ("com.android.server.wm.IOplusWindowManagerServiceEx", "dumpWindowsForScreenShot(Ljava/io/PrintWriter;Ljava/lang/String;[Ljava/lang/String;)Z", '.param p3, "args"  # [Ljava/lang/String;'),
+                    ("com.android.server.wm.OplusLongshotMainWindow", "hasSecure()Z", ".registers 2"),
+                    ("com.android.server.wm.OplusWindowDumpUtils", "isSecureWindow(Lcom/android/server/wm/WindowState;)Z", '.param p1, "w"  # Lcom/android/server/wm/WindowState;'),
+                    ("com.android.server.wm.OplusWindowManagerServiceEx", "dumpWindowsForScreenShot(Ljava/io/PrintWriter;Ljava/lang/String;[Ljava/lang/String;)Z", '.param p3, "args"  # [Ljava/lang/String;'),
+                ]
+                for class_name, signature, directive in oplus_methods:
+                    self._write_method(oplus_root, class_name, signature, directive)
+                self.assertEqual(wk_manager_patcher.patch_disable_flag_secure_oplus_services_decoded(oplus_root)["patchedMethods"], 4)
+            finally:
+                oplus.cleanup()
     def test_smali_anchor_preserves_instruction_indentation(self):
         self.assertEqual(
             wk_manager_patcher._smali_anchor(

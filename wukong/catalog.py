@@ -12,8 +12,9 @@ LITE_DEFAULT_MODS: list[str] = [
     "GlobalSearch",
     "WK_Installer",
 ]
-PLUS_DEFAULT_EXCLUDED_MODS: set[str] = {"Gallery_mod_CN"}
+PLUS_DEFAULT_EXCLUDED_MODS: set[str] = {"Gallery_mod_CN", "Disable_flag_secure"}
 SHARED_MOD_NAMES: frozenset[str] = frozenset({"WK_Manager", "WK_Installer"})
+PUBLIC_PATCH_ONLY_MOD_NAMES: frozenset[str] = frozenset({"Disable_flag_secure"})
 MODIFIABLE_PARTITIONS: frozenset[str] = frozenset(
     {
         "my_company",
