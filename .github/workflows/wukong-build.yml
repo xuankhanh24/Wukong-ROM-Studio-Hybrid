@@ -197,9 +197,10 @@ jobs:
             cat .wkstudio/route.json
             exit 2
           fi
-          printf 'recipe_ref=%s\n' "$effective_recipe_ref" >> "$GITHUB_OUTPUT"
-          printf 'recipe_b64=%s\n' "$(base64 -w0 .wkstudio/recipe.json)" >> "$GITHUB_OUTPUT"
-          python - <<'PY' >> "$GITHUB_OUTPUT"
+          {
+            printf 'recipe_ref=%s\n' "$effective_recipe_ref"
+            printf 'recipe_b64=%s\n' "$(base64 -w0 .wkstudio/recipe.json)"
+            python - <<'PY'
           import json
           data = json.load(open('.wkstudio/route.json', encoding='utf-8'))
           print(f"runner_kind={data['runner']['kind']}")
@@ -208,6 +209,7 @@ jobs:
           print(f"task={recipe['task']}")
           print(f"mod_version={recipe['build']['modVersion']}")
           PY
+          } >> "$GITHUB_OUTPUT"
           {
             echo "## 01–02 · Recipe preflight & runner route"
             echo ""
