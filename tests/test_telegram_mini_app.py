@@ -2244,6 +2244,9 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('class="job-history-card selected"', dom)
         self.assertIn("ColorOS_16.0.8", dom)
         self.assertIn('data-job-detail-sync-calls="1"', dom)
+        self.assertRegex(dom, r'<details(?=[^>]*class="job-technical")(?=[^>]*data-always-open="true")(?=[^>]*open="")[^>]*>')
+        jobs_source = (ROOT / "telegram_mini_app" / "modules" / "jobs.js").read_text(encoding="utf-8")
+        self.assertIn('technicalTitle.addEventListener("click", (event) => event.preventDefault())', jobs_source)
         self.assertGreater(screenshot_size, 10_000)
 
     def test_admin_opens_user_job_on_separate_page_without_changing_own_job(self) -> None:

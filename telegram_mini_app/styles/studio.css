@@ -66,7 +66,7 @@ main { padding-bottom: 128px; }
 .session-recovery { padding: 14px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-raised); }
 .session-recovery button { width: 100%; }
 .job-technical { border-block: 1px solid var(--line); margin: 16px 0; }
-.job-technical > summary { cursor: pointer; padding: 12px 0; font-size: 14px; }
+.job-technical > summary { cursor: default; padding: 12px 0; font-size: 14px; }
 .job-technical .job-facts, .job-technical .job-context { border: 0; background: transparent; padding-inline: 0; }
 .job-sync-time { display: block; font-size: 12px; color: var(--muted); margin-top: 8px; }
 .job-events { max-height: 540px; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; }

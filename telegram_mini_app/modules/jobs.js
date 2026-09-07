@@ -789,8 +789,12 @@ function renderActiveJob(job, events, inspection = null) {
   if (!inspection && ["failed", "cancelled"].includes(job.status) && job.checkpoint) actions.append(jobAction(t("resume"), "resume", job));
   const config = state.me?.role === "admin" ? renderJobParameters(job, root, reader) : null;
   const technical = document.createElement("details"); technical.className = "job-technical";
-  technical.open = root.querySelector(".job-technical")?.open || false;
+  technical.open = true;
+  technical.dataset.alwaysOpen = "true";
+  technical.addEventListener("toggle", () => { if (!technical.open) technical.open = true; });
   const technicalTitle = document.createElement("summary"); technicalTitle.textContent = t("metadataDetails");
+  technicalTitle.setAttribute("aria-disabled", "true");
+  technicalTitle.addEventListener("click", (event) => event.preventDefault());
   technical.append(technicalTitle, context, facts);
   const updated = document.createElement("small"); updated.className = "job-sync-time";
   updated.textContent = `${t("latestUpdate")}: ${formatDate(job.updated_at || job.updatedAt)}`;
