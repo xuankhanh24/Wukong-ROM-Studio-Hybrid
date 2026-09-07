@@ -117,6 +117,12 @@ describe("Vercel source transport", () => {
             headers: { Location: "https://gauss-compota-c-cn.allawnfs.com/PKG110.zip?Signature=private" }
           });
         }
+        if (url.hostname.endsWith("allawnfs.com")) {
+          expect(current.headers.get("Range")).toBe("bytes=0-0");
+          expect(current.headers.get("User-Agent")).toBe("Wukong-ROM-Studio/1.0");
+          expect(current.headers.get("userId")).toBeNull();
+          expect(current.headers.get("Cache-Control")).toBeNull();
+        }
         return new Response(new Uint8Array([0x50]), {
           status: 206,
           headers: {
@@ -162,6 +168,11 @@ describe("Vercel source transport", () => {
             status: 302,
             headers: { Location: "https://cdn.allawnfs.com/rom.zip" }
           });
+        }
+        if (url.hostname.endsWith("allawnfs.com")) {
+          expect(current.headers.get("User-Agent")).toBe("Wukong-ROM-Studio/1.0");
+          expect(current.headers.get("userId")).toBeNull();
+          expect(current.headers.get("Cache-Control")).toBeNull();
         }
         return new Response(new Uint8Array([0]), {
           status: 206,

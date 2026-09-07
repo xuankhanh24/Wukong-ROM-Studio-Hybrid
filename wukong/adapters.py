@@ -50,6 +50,17 @@ class SourceError(RuntimeError):
     pass
 
 
+class RcloneCommandError(subprocess.CalledProcessError):
+    """Preserve rclone's stderr in the job error instead of hiding it."""
+
+    def __str__(self) -> str:
+        message = super().__str__()
+        detail = str(self.stderr or self.output or "").strip()
+        if len(detail) > 4000:
+            detail = "…" + detail[-3999:]
+        return f"{message}: {detail}" if detail else message
+
+
 class SourceIntegrityError(SourceError):
     pass
 
@@ -859,7 +870,25 @@ class _SafeRedirectHandler(HTTPRedirectHandler):
         newurl: str,
     ) -> Request | None:
         validate_http_url(newurl, resolve_dns=True)
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is None:
+            return None
+        # Resolver-only headers are rejected by the allawnfs CDN.  Rebuild
+        # headers for the redirect target instead of forwarding userId and
+        # the okhttp identity across origins; keep byte-range continuation.
+        target_headers = HttpSourceAdapter._request_headers(newurl)
+        for name in ("Range", "If-Range"):
+            value = redirected.get_header(name)
+            if value:
+                target_headers[name] = value
+        return Request(
+            newurl,
+            data=redirected.data,
+            headers=target_headers,
+            origin_req_host=redirected.origin_req_host,
+            unverifiable=redirected.unverifiable,
+            method=redirected.get_method(),
+        )
 
 
 RunCommand = Callable[..., str]
@@ -907,15 +936,23 @@ class _HashingReader:
 
 
 def _run_text(args: list[str], **kwargs: object) -> str:
-    completed = subprocess.run(
-        args,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        **kwargs,
-    )
+    try:
+        completed = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            **kwargs,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RcloneCommandError(
+            exc.returncode,
+            exc.cmd,
+            output=exc.output,
+            stderr=exc.stderr,
+        ) from exc
     return completed.stdout
 
 
@@ -976,7 +1013,7 @@ def _run_rclone_copy_with_progress(
         process.wait()
         raise
     if return_code != 0:
-        raise subprocess.CalledProcessError(return_code, args, output="".join(output))
+        raise RcloneCommandError(return_code, args, output="".join(output))
     return "".join(output)
 
 
@@ -1026,6 +1063,23 @@ class RcloneStorageAdapter:
             args.extend(["--config", str(self.config_path)])
         return args
 
+    def _copy_options(self) -> list[str]:
+        """Return bounded, resumable transfer settings for object uploads."""
+
+        options = [
+            "--retries", "5",
+            "--low-level-retries", "20",
+            "--retries-sleep", "10s",
+            "--contimeout", "30s",
+            "--timeout", "120s",
+        ]
+        # Google Drive's default 8 MiB chunks create thousands of requests for
+        # multi-gigabyte ROMs.  A 64 MiB resumable chunk cuts request count while
+        # keeping memory bounded on the hosted runner.
+        if self.remote.casefold().endswith("gdrive"):
+            options.extend(["--drive-chunk-size", "64M"])
+        return options
+
     def remote_uri(self, relative_path: str) -> str:
         normalized = relative_path.replace("\\", "/").strip("/")
         if not normalized or ".." in PurePosixPath(normalized).parts:
@@ -1044,7 +1098,7 @@ class RcloneStorageAdapter:
     ) -> str:
         uri = self.remote_uri(relative_path)
         options = {"timeout": timeout} if timeout is not None else {}
-        args = self._args("copyto", str(source), uri, "--retries", "3")
+        args = self._args("copyto", str(source), uri, *self._copy_options())
         if progress_callback is not None and self.run_command is _run_text and timeout is None:
             _run_rclone_copy_with_progress(args, progress_callback)
         else:

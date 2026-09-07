@@ -127,6 +127,23 @@ async function validateDestination(value: string): Promise<URL> {
   return url;
 }
 
+function headersForRedirect(headers: HeadersInit | undefined, from: URL, to: URL): Headers {
+  const next = new Headers(headers);
+  // OPlus resolver headers are valid only on the resolver endpoint.  The
+  // allawnfs CDN rejects them after the resolver redirects the download.
+  if (isOplusResolver(from) && !isOplusResolver(to)) {
+    next.delete("userId");
+    next.delete("Cache-Control");
+    next.set("User-Agent", "Wukong-ROM-Studio/1.0");
+  }
+  if (from.origin !== to.origin) {
+    next.delete("Authorization");
+    next.delete("Proxy-Authorization");
+    next.delete("Cookie");
+  }
+  return next;
+}
+
 async function secureFetch(
   initialUrl: string,
   init: RequestInit,
@@ -135,8 +152,9 @@ async function secureFetch(
   let url = initialDestinationValidated
     ? validatedUrl(initialUrl)
     : await validateDestination(initialUrl);
+  let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
-    const response = await fetch(url, { ...init, redirect: "manual" });
+    const response = await fetch(url, { ...requestInit, redirect: "manual" });
     if (![301, 302, 303, 307, 308].includes(response.status)) {
       return { response, url };
     }
@@ -146,7 +164,9 @@ async function secureFetch(
       throw new SourceProbeHttpError("ROM source has too many redirects");
     }
     await response.body?.cancel();
-    url = await validateDestination(new URL(location, url).toString());
+    const nextUrl = await validateDestination(new URL(location, url).toString());
+    requestInit = { ...requestInit, headers: headersForRedirect(requestInit.headers, url, nextUrl) };
+    url = nextUrl;
   }
   throw new SourceProbeHttpError("ROM source has too many redirects");
 }

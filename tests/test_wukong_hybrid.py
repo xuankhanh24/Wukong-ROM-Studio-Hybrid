@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import HTTPCookieProcessor, Request
 
 from wukong.adapters import (
@@ -696,6 +696,57 @@ class SourceAndStorageContractTests(unittest.TestCase):
             self.assertEqual(request_headers["User-agent"], "okhttp/3.12.12")
             self.assertEqual(request_headers["Userid"], "oplus-ota|16002018")
 
+    def test_http_source_uses_generic_headers_for_direct_allawnfs_downloads(self) -> None:
+        download_url = "https://gauss-compotaauto-c-cn.allawnfs.com/rom.zip?Signature=signed"
+        payload = b"PK\x03\x04direct-oplus-rom"
+
+        class _HeaderGatedOpener:
+            def __init__(self) -> None:
+                self.requests: list[Request] = []
+
+            def open(self, request: Request, *, timeout: int) -> io.BytesIO:
+                self.requests.append(request)
+                if request.get_header("User-agent") != "Wukong-ROM-Studio/1" or request.get_header("Userid"):
+                    raise HTTPError(request.full_url, 403, "Forbidden", {}, io.BytesIO())
+                return SourceAndStorageContractTests._HttpResponse(
+                    payload,
+                    url=download_url,
+                    content_type="application/zip",
+                    headers={"Content-Length": str(len(payload))},
+                )
+
+        opener = _HeaderGatedOpener()
+        with tempfile.TemporaryDirectory() as root, patch("wukong.adapters.validate_http_url"):
+            result = HttpSourceAdapter(attempts=1, opener=opener).materialize(
+                download_url,
+                Path(root, "rom.zip"),
+            )
+            self.assertEqual(payload, result.path.read_bytes())
+        self.assertEqual(1, len(opener.requests))
+
+    def test_safe_redirect_handler_does_not_forward_resolver_headers_to_allawnfs(self) -> None:
+        from wukong.adapters import _SafeRedirectHandler
+
+        resolver_url = "https://component-ota-cn.allawntech.com/downloadCheck"
+        download_url = "https://gauss-compotaauto-c-cn.allawnfs.com/rom.zip?Signature=signed"
+        request = Request(resolver_url, headers=HttpSourceAdapter._request_headers(resolver_url))
+        request.add_header("Range", "bytes=0-0")
+
+        with patch("wukong.adapters.validate_http_url"):
+            redirected = _SafeRedirectHandler().redirect_request(
+                request,
+                object(),
+                302,
+                "Found",
+                {},
+                download_url,
+            )
+
+        assert redirected is not None
+        self.assertEqual("Wukong-ROM-Studio/1", redirected.get_header("User-agent"))
+        self.assertIsNone(redirected.get_header("Userid"))
+        self.assertEqual("bytes=0-0", redirected.get_header("Range"))
+
     def test_http_source_retries_transient_tls_handshake_failures_beyond_three_attempts(self) -> None:
         download_url = "https://93.184.216.35/rom.zip"
         payload = b"PK\x03\x04eventual-rom"
@@ -925,6 +976,33 @@ class SourceAndStorageContractTests(unittest.TestCase):
             metadata = json.loads(Path(root, "artifact.zip.metadata.json").read_text(encoding="utf-8"))
             self.assertEqual(metadata["sha256"], record.sha256)
             self.assertEqual(metadata["sizeBytes"], 8)
+
+    def test_rclone_drive_copy_uses_resumable_retry_options(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_run(args: list[str], **_: object) -> str:
+            calls.append(args)
+            return ""
+
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root, "artifact.zip")
+            source.write_bytes(b"artifact")
+            RcloneStorageAdapter(remote="wukong-gdrive", run_command=fake_run).copy_file(
+                source,
+                "ROM/V4.1/Lite/artifact.zip",
+            )
+
+        command = calls[0]
+        self.assertEqual(command[1], "copyto")
+        for option, value in (
+            ("--retries", "5"),
+            ("--low-level-retries", "20"),
+            ("--retries-sleep", "10s"),
+            ("--contimeout", "30s"),
+            ("--timeout", "120s"),
+            ("--drive-chunk-size", "64M"),
+        ):
+            self.assertEqual(command[command.index(option) + 1], value)
 
     def test_rclone_batch_publish_uses_release_and_edition_folders(self) -> None:
         with tempfile.TemporaryDirectory() as root:
@@ -1551,7 +1629,7 @@ class CloudSyncContractTests(unittest.TestCase):
 
             self.assertEqual(["manifest"], uploaded)
 
-    def test_push_bounds_a_timed_out_state_copy_to_one_attempt(self) -> None:
+    def test_push_retries_a_timed_out_state_copy_within_bound(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             store = InMemoryJobStore()
             orchestrator = HybridOrchestrator(store=store, workspace_root=Path(root, "workspace"))
@@ -1572,15 +1650,15 @@ class CloudSyncContractTests(unittest.TestCase):
             def fake_run(args: list[str], **options: object) -> str:
                 state_file = "manifest" if args[3].endswith("manifest.json") else "events"
                 attempts[state_file] += 1
-                self.assertEqual(options.get("timeout"), 15.0)
+                self.assertEqual(options.get("timeout"), 45.0)
                 if state_file == "manifest":
-                    raise subprocess.TimeoutExpired(cmd=args, timeout=15.0)
+                    raise subprocess.TimeoutExpired(cmd=args, timeout=45.0)
                 return ""
 
             with self.assertRaises(subprocess.TimeoutExpired):
                 CloudJobSync(store, RcloneStorageAdapter(run_command=fake_run)).push(job.job_id)
 
-            self.assertEqual(attempts, {"manifest": 1, "events": 0})
+            self.assertEqual(attempts, {"manifest": 2, "events": 0})
 
     def test_pull_imports_remote_events_once(self) -> None:
         with tempfile.TemporaryDirectory() as root:
@@ -1617,7 +1695,7 @@ class CloudSyncContractTests(unittest.TestCase):
             imported = [event for event in store.events(job.job_id) if event.payload.get("remoteSequence") == 5]
             self.assertEqual(len(imported), 1)
             self.assertTrue(command_timeouts)
-            self.assertTrue(all(value == 15.0 for value in command_timeouts))
+            self.assertTrue(all(value == 45.0 for value in command_timeouts))
 
     def test_pull_retries_after_a_state_timeout_and_recovers(self) -> None:
         with tempfile.TemporaryDirectory() as root:
@@ -1647,7 +1725,7 @@ class CloudSyncContractTests(unittest.TestCase):
                 if args[2].endswith("manifest.json"):
                     attempts["manifest"] += 1
                     if attempts["manifest"] == 1:
-                        raise subprocess.TimeoutExpired(cmd=args, timeout=15.0)
+                        raise subprocess.TimeoutExpired(cmd=args, timeout=45.0)
                     destination.write_text(json.dumps(remote_manifest), encoding="utf-8")
                 return ""
 
@@ -1705,7 +1783,7 @@ class CloudSyncContractTests(unittest.TestCase):
 
             def fake_run(args: list[str], **options: object) -> str:
                 if args[2].endswith("manifest.json"):
-                    raise subprocess.TimeoutExpired(cmd=args, timeout=15.0)
+                    raise subprocess.TimeoutExpired(cmd=args, timeout=45.0)
                 raise AssertionError("events merge must not run when the pull times out")
 
             CloudJobSync._pull_warning_at.clear()

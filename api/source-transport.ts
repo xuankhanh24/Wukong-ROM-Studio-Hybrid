@@ -113,6 +113,25 @@ async function validateDestination(value: string, resolveAddresses: ResolveAddre
   return url;
 }
 
+function headersForRedirect(headers: HeadersInit | undefined, from: URL, to: URL): Headers {
+  const next = new Headers(headers);
+  // Resolver credentials are accepted only by the OPlus resolver.  Never
+  // forward them to the redirected allawnfs CDN, which rejects those headers.
+  if (sourceKind(from) === "resolver" && sourceKind(to) !== "resolver") {
+    next.delete("userId");
+    next.delete("Cache-Control");
+    next.set("User-Agent", "Wukong-ROM-Studio/1.0");
+  }
+  // Do not leak caller credentials or cookies across origins while following
+  // a source redirect.
+  if (from.origin !== to.origin) {
+    next.delete("Authorization");
+    next.delete("Proxy-Authorization");
+    next.delete("Cookie");
+  }
+  return next;
+}
+
 async function secureFetch(
   initial: string,
   init: RequestInit,
@@ -120,18 +139,21 @@ async function secureFetch(
   resolveAddresses: ResolveAddresses
 ): Promise<{ response: Response; url: URL }> {
   let url = await validateDestination(initial, resolveAddresses);
+  let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
-    const response = await fetchImpl(url, { ...init, redirect: "manual", cache: "no-store" });
+    const response = await fetchImpl(url, { ...requestInit, redirect: "manual", cache: "no-store" });
     if (![301, 302, 303, 307, 308].includes(response.status)) return { response, url };
     const location = response.headers.get("Location");
     await response.body?.cancel();
     if (!location || redirects === MAX_REDIRECTS) {
       throw new TransportError("Source redirect is invalid", 502);
     }
-    if (!["GET", "HEAD"].includes(String(init.method ?? "GET").toUpperCase())) {
+    if (!["GET", "HEAD"].includes(String(requestInit.method ?? "GET").toUpperCase())) {
       throw new TransportError("Source resolver returned an unexpected redirect", 502);
     }
-    url = await validateDestination(new URL(location, url).toString(), resolveAddresses);
+    const nextUrl = await validateDestination(new URL(location, url).toString(), resolveAddresses);
+    requestInit = { ...requestInit, headers: headersForRedirect(requestInit.headers, url, nextUrl) };
+    url = nextUrl;
   }
   throw new TransportError("Source has too many redirects", 502);
 }

@@ -19,8 +19,10 @@ class CloudJobSync:
     # 10-12 seconds to authenticate and reach Drive. Eight seconds caused each
     # attempt to be killed before a healthy request could finish, leaving the
     # Mini App at the GitHub fallback progress for the whole build.
-    STATE_OPERATION_TIMEOUT_SECONDS = 15.0
-    STATE_PUSH_ATTEMPTS = 1
+    # Hosted runners can spend 10–12 seconds starting rclone.  Keep state
+    # writes bounded but allow one transient startup/network retry.
+    STATE_OPERATION_TIMEOUT_SECONDS = 45.0
+    STATE_PUSH_ATTEMPTS = 2
     STATE_PULL_ATTEMPTS = 2
     PULL_WARNING_INTERVAL_SECONDS = 600.0
     # Instances are short-lived (one per refresh call), so the throttle lives
