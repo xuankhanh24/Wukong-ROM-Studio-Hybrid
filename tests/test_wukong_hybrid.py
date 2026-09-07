@@ -23,6 +23,7 @@ from wukong.adapters import (
     HttpSourceAdapter,
     LocalSourceAdapter,
     RcloneStorageAdapter,
+    SourceError,
     SourceIntegrityError,
     SourceResolutionError,
 )
@@ -723,6 +724,29 @@ class SourceAndStorageContractTests(unittest.TestCase):
             )
             self.assertEqual(payload, result.path.read_bytes())
         self.assertEqual(1, len(opener.requests))
+
+    def test_http_source_fails_fast_on_permanent_not_found(self) -> None:
+        download_url = "https://gauss-compotaauto-c-cn.allawnfs.com/missing.zip"
+
+        class _NotFoundOpener:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def open(self, request: Request, *, timeout: int) -> io.BytesIO:
+                self.calls += 1
+                raise HTTPError(request.full_url, 404, "Not Found", {}, io.BytesIO())
+
+        opener = _NotFoundOpener()
+        with tempfile.TemporaryDirectory() as root, patch("wukong.adapters.validate_http_url"), patch(
+            "wukong.adapters.time.sleep"
+        ) as sleep:
+            with self.assertRaisesRegex(SourceError, "HTTP 404: Not Found"):
+                HttpSourceAdapter(attempts=6, opener=opener).materialize(
+                    download_url,
+                    Path(root, "rom.zip"),
+                )
+        self.assertEqual(1, opener.calls)
+        sleep.assert_not_called()
 
     def test_safe_redirect_handler_does_not_forward_resolver_headers_to_allawnfs(self) -> None:
         from wukong.adapters import _SafeRedirectHandler

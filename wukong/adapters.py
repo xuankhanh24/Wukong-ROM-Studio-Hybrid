@@ -302,7 +302,23 @@ class HttpSourceAdapter:
                 self._cleanup_range_files(temporary)
                 self._checkpoint_path(temporary).unlink(missing_ok=True)
                 raise
-            except (HTTPError, URLError, TimeoutError, OSError, SourceError) as exc:
+            except HTTPError as exc:
+                # A missing or malformed source will not become available by
+                # repeating the same request six times.  Fail fast for
+                # permanent client responses while retaining retries for
+                # throttling and transient authorization responses.
+                if exc.code in {400, 404, 410, 422}:
+                    temporary.unlink(missing_ok=True)
+                    self._cleanup_range_files(temporary)
+                    self._checkpoint_path(temporary).unlink(missing_ok=True)
+                    reason = str(exc.reason or "HTTP error").strip()
+                    raise SourceError(
+                        f"ROM source returned HTTP {exc.code}: {reason}"
+                    ) from exc
+                if attempt >= self.attempts:
+                    raise SourceError(f"ROM download failed after {self.attempts} attempts: {exc}") from exc
+                time.sleep(min(2**attempt, HTTP_RETRY_BACKOFF_CAP_SECONDS))
+            except (URLError, TimeoutError, OSError, SourceError) as exc:
                 if attempt >= self.attempts:
                     raise SourceError(f"ROM download failed after {self.attempts} attempts: {exc}") from exc
                 time.sleep(min(2**attempt, HTTP_RETRY_BACKOFF_CAP_SECONDS))
