@@ -1,5 +1,5 @@
 import { env, SELF } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { actionsHeaders, tmaHeaders } from "./helpers";
 
 const recipe = {
@@ -10,6 +10,8 @@ const recipe = {
   execution: { target: "github-auto" },
   build: { preset: "custom", modVersion: "ColorOS_16.0.10", modReleaseVersion: "V6.0", mods: ["Core"] }
 };
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("GitHub Actions callbacks", () => {
   it("deduplicates callbacks, prevents progress regression, and releases locks once", async () => {
@@ -232,6 +234,14 @@ describe("GitHub Actions callbacks", () => {
         }]
       }
     });
+    const fetchMock = vi.fn(async () => Response.json({
+      code: 0,
+      data: {
+        urls: [{ url: "https://downloads.dccloud.example/Wukong_Plus_V6.0_fixture.zip?sig=direct" }],
+        expires: "2026-09-08T20:00:00+07:00"
+      }
+    }));
+    vi.stubGlobal("fetch", fetchMock);
     const response = await SELF.fetch("https://worker.example/internal/actions/mirror-repair", {
       method: "POST",
       headers: await actionsHeaders(body),
@@ -265,9 +275,10 @@ describe("GitHub Actions callbacks", () => {
       .flat()
       .find((button) => String(button.text).includes("(DC Cloud)"));
     expect(dcCloudButton).toMatchObject({ text: "Tải Plus · 120.56 KiB (DC Cloud)" });
-    expect(String(dcCloudButton?.url)).toMatch(
-      /^https:\/\/wukong-control-plane\.wukong-rom-studio-api\.workers\.dev\/v1\/jobs\/mirror-callback-fixture\/artifacts\/0\/dccloud-download\?ticket=v1\.0\.[0-9]+\.[0-9a-f]{64}$/
+    expect(String(dcCloudButton?.url)).toBe(
+      "https://downloads.dccloud.example/Wukong_Plus_V6.0_fixture.zip?sig=direct"
     );
+    expect(String(dcCloudButton?.url)).not.toContain("workers.dev/v1/jobs");
     expect(String(dcCloudButton?.url)).not.toContain("/s/BokhN");
     const duplicate = await SELF.fetch("https://worker.example/internal/actions/mirror-repair", {
       method: "POST",

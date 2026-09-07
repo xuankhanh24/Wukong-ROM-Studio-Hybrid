@@ -2,7 +2,7 @@ import type { JobRow } from "./jobs";
 import { artifactEdition, presetEditionLabel } from "./artifact-metadata";
 import { friendlyDeviceName } from "./catalog";
 import { directArtifactUrl } from "./public-links";
-import { issueDcCloudArtifactDownloadTicket } from "./auth";
+import { resolveDcCloudArtifactDownload } from "./dccloud-download";
 
 type JsonObject = Record<string, unknown>;
 
@@ -73,35 +73,10 @@ function boundedHtml(lines: string[], limit = 4096): string {
 
 async function dcCloudDownloadLink(
   env: Env,
-  jobId: string,
-  artifactIndex: number
+  mirrorUri: string
 ): Promise<string> {
-  let api: URL;
   try {
-    api = new URL(env.WUKONG_PUBLIC_API_URL.trim());
-  } catch {
-    return "";
-  }
-  if (
-    api.protocol !== "https:"
-    || !api.hostname
-    || api.username
-    || api.password
-    || api.search
-    || api.hash
-  ) return "";
-  try {
-    const ticket = await issueDcCloudArtifactDownloadTicket(
-      jobId,
-      artifactIndex,
-      env.WUKONG_TELEGRAM_BOT_TOKEN
-    );
-    const link = new URL(
-      `/v1/jobs/${encodeURIComponent(jobId)}/artifacts/${artifactIndex}/dccloud-download`,
-      api
-    );
-    link.searchParams.set("ticket", ticket);
-    return link.toString();
+    return (await resolveDcCloudArtifactDownload(env, mirrorUri)).downloadUrl;
   } catch {
     return "";
   }
@@ -181,7 +156,7 @@ export async function terminalTelegramNotification(
       const status = String(mirror.status ?? "").trim().toLowerCase();
       const mirrorUri = typeof mirror.uri === "string" ? mirror.uri.trim() : "";
       const mirrorUrl = status === "available" && mirrorUri
-        ? await dcCloudDownloadLink(env, row.job_id, offset)
+        ? await dcCloudDownloadLink(env, mirrorUri)
         : "";
       if (status === "available" && mirrorUrl) {
         lines.push("DC Cloud mirror  <i>sẵn sàng</i>");
