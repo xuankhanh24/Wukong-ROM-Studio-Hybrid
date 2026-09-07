@@ -1,7 +1,7 @@
 /* Studio: source → configuration → review. Wukong identity stays shared. */
 :root {
-  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-data: "JetBrains Mono", ui-monospace, monospace;
+  --font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "Geist Mono", ui-monospace, monospace;
   --text-body: 16px;
   --text-label: 12px;
   --target-size: 44px;
