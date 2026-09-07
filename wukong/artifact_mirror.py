@@ -31,6 +31,7 @@ _ERROR_CODES = {
     "SourceIntegrityError": "integrity_mismatch",
     "TimeoutExpired": "timeout",
     "CalledProcessError": "remote_command_failed",
+    "RcloneCommandError": "remote_command_failed",
     "PermissionError": "permission_denied",
 }
 
