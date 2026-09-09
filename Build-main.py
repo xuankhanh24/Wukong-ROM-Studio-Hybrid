@@ -382,23 +382,31 @@ def patch_build_branding(rom_unpack_dir, build_edition=DEFAULT_BUILD_EDITION):
 #  Sẽ được map thành: rom-unpack/<partition>_unpacked/<đường dẫn>
 # ═══════════════════════════════════════════════════════════════
 def remove_stock_ota_feature_lines(rom_unpack_dir):
-    feature_xml = os.path.join(
-        rom_unpack_dir,
-        "my_stock_unpacked",
-        "my_stock",
-        "etc",
-        "extension",
-        "com.oplus.app-features.xml",
-    )
-    if not os.path.isfile(feature_xml):
-        return 0
-    with open(feature_xml, "r", encoding="utf-8", errors="replace") as handle:
-        lines = handle.read().splitlines()
-    kept = [line for line in lines if "ota" not in line.lower()]
-    removed = len(lines) - len(kept)
-    if removed:
-        with open(feature_xml, "w", encoding="utf-8", newline="\n") as handle:
-            handle.write("\n".join(kept) + ("\n" if kept else ""))
+    keywords = ("ota", "update", "com.oplusos.sau")
+    removed = 0
+    for unpack_dir_name in ("my_stock_unpacked", "my_stock_a", "my_stock_b"):
+        feature_xml = os.path.join(
+            rom_unpack_dir,
+            unpack_dir_name,
+            "my_stock",
+            "etc",
+            "extension",
+            "com.oplus.app-features.xml",
+        )
+        if not os.path.isfile(feature_xml):
+            continue
+        with open(feature_xml, "r", encoding="utf-8", errors="replace") as handle:
+            lines = handle.read().splitlines()
+        kept = [
+            line
+            for line in lines
+            if not any(keyword in line.lower() for keyword in keywords)
+        ]
+        removed_here = len(lines) - len(kept)
+        if removed_here:
+            with open(feature_xml, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write("\n".join(kept) + ("\n" if kept else ""))
+            removed += removed_here
     return removed
 
 
@@ -1047,9 +1055,9 @@ def apply_mod(mod_path, rom_unpack_dir, device_db=None):
     if mod_name == "Block_ota":
         removed_ota = remove_stock_ota_feature_lines(rom_unpack_dir)
         if removed_ota:
-            print(f"  [✓] Xóa {removed_ota} dòng chứa ota trong my_stock app-features.xml")
+            print(f"  [✓] Xóa {removed_ota} dòng chứa ota/update trong my_stock app-features.xml")
         else:
-            print("  [-] Block_ota: không tìm thấy dòng chứa ota để xóa")
+            print("  [-] Block_ota: không tìm thấy dòng chứa ota/update để xóa")
 
     print(f"\n[*] Áp dụng MOD xong: {copied} file đã copy, {errors} lỗi.")
     if mod_name in SELINUX_HASH_MODS:

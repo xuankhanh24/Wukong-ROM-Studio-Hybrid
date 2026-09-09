@@ -136,11 +136,12 @@ PROTECTED_DEBLOAT_PATHS = {
     r"system_ext\priv-app\OplusLauncher".lower(),
 }
 PATCH_ONLY_MODS = {
-    "Block_ota": "Remove lines containing ota, romupdate or com.oplusos.sau from my_stock app-features.xml",
+    "Block_ota": "Remove lines containing ota, update or com.oplusos.sau from my_stock app-features.xml",
     "Disable_flag_secure": "Patch services.jar and oplus-services.jar to disable FLAG_SECURE screen-capture blocking",
 }
 MUTUALLY_EXCLUSIVE_MODS = frozenset({"Disable_flag_secure", "WK_Manager"})
-BLOCK_OTA_FEATURE_KEYWORDS = ("ota", "romupdate", "com.oplusos.sau")
+BLOCK_OTA_FEATURE_KEYWORDS = ("ota", "update", "com.oplusos.sau")
+MY_STOCK_UNPACK_DIR_NAMES = ("my_stock_unpacked", "my_stock_a", "my_stock_b")
 THEME_CR_REMOVE_PATHS = [r"my_stock\del-app\KeKeThemeSpace"]
 AI_GLOBAL_COLOROS_1605_REMOVE_PATHS = [r"my_stock\app\AIUnit"]
 SELINUX_HASH_MODS = {"Fake_lock", "WK_Manager"}
@@ -2318,25 +2319,28 @@ def _replace_oneplus_brand(path: Path) -> int:
 
 
 def remove_stock_ota_feature_lines(rom_unpack: Path) -> int:
-    feature_xml = (
-        rom_unpack
-        / "my_stock_unpacked"
-        / "my_stock"
-        / "etc"
-        / "extension"
-        / "com.oplus.app-features.xml"
-    )
-    if not feature_xml.is_file():
-        return 0
-    lines = feature_xml.read_text(encoding="utf-8", errors="replace").splitlines()
-    kept = [
-        line
-        for line in lines
-        if not any(keyword in line.lower() for keyword in BLOCK_OTA_FEATURE_KEYWORDS)
-    ]
-    removed = len(lines) - len(kept)
-    if removed:
-        _write_text_lf(feature_xml, "\n".join(kept) + ("\n" if kept else ""))
+    removed = 0
+    for unpack_dir_name in MY_STOCK_UNPACK_DIR_NAMES:
+        feature_xml = (
+            rom_unpack
+            / unpack_dir_name
+            / "my_stock"
+            / "etc"
+            / "extension"
+            / "com.oplus.app-features.xml"
+        )
+        if not feature_xml.is_file():
+            continue
+        lines = feature_xml.read_text(encoding="utf-8", errors="replace").splitlines()
+        kept = [
+            line
+            for line in lines
+            if not any(keyword in line.lower() for keyword in BLOCK_OTA_FEATURE_KEYWORDS)
+        ]
+        removed_here = len(lines) - len(kept)
+        if removed_here:
+            _write_text_lf(feature_xml, "\n".join(kept) + ("\n" if kept else ""))
+            removed += removed_here
     return removed
 
 

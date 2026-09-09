@@ -14,7 +14,9 @@ LITE_DEFAULT_MODS: list[str] = [
 ]
 PLUS_DEFAULT_EXCLUDED_MODS: set[str] = {"Gallery_mod_CN", "Disable_flag_secure"}
 SHARED_MOD_NAMES: frozenset[str] = frozenset({"WK_Manager", "WK_Installer"})
-PUBLIC_PATCH_ONLY_MOD_NAMES: frozenset[str] = frozenset({"Disable_flag_secure"})
+PUBLIC_PATCH_ONLY_MOD_NAMES: frozenset[str] = frozenset(
+    {"Block_ota", "Disable_flag_secure"}
+)
 MODIFIABLE_PARTITIONS: frozenset[str] = frozenset(
     {
         "my_company",

@@ -1714,7 +1714,7 @@ class StudioCoreTests(unittest.TestCase):
                 with self.assertRaisesRegex(studio_core.StudioError, "actual MOD writes.*vendor"):
                     studio_core._stage_apply_mod(context)
 
-    def test_block_ota_mod_removes_ota_lines_from_stock_features(self):
+    def test_block_ota_mod_removes_ota_and_update_lines_from_stock_features(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             unpack = root / "rom-unpack"
@@ -1745,12 +1745,44 @@ class StudioCoreTests(unittest.TestCase):
                 root,
             )
             self.assertEqual(result["modifiedPartitions"], ["my_stock"])
-            self.assertEqual(result["stockOtaFeatureLines"], 4)
+            self.assertEqual(result["stockOtaFeatureLines"], 5)
             content = feature_xml.read_text(encoding="utf-8")
-            self.assertIn("com.oplus.system_update.keep", content)
             self.assertNotIn("com.oplusos.sau", content)
-            self.assertNotIn("romupdate", content.lower())
             self.assertNotIn("ota", content.lower())
+            self.assertNotIn("update", content.lower())
+
+    def test_block_ota_supports_my_stock_a_partition_layout(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            unpack = root / "rom-unpack"
+            feature_xml = (
+                unpack
+                / "my_stock_a"
+                / "my_stock"
+                / "etc"
+                / "extension"
+                / "com.oplus.app-features.xml"
+            )
+            feature_xml.parent.mkdir(parents=True)
+            feature_xml.write_text(
+                "<extend_features>\n"
+                "  <app_feature name=\"com.oplus.ota.service\"/>\n"
+                "  <app_feature name=\"com.oplus.system_update.service\"/>\n"
+                "  <app_feature name=\"com.oplus.keep\"/>\n"
+                "</extend_features>\n",
+                encoding="utf-8",
+            )
+
+            result = studio_core.apply_selected_mods(
+                ["Block_ota"], unpack, {"soc": "86xx"}, root
+            )
+
+            self.assertEqual(result["modifiedPartitions"], ["my_stock"])
+            self.assertEqual(result["stockOtaFeatureLines"], 2)
+            content = feature_xml.read_text(encoding="utf-8")
+            self.assertIn("com.oplus.keep", content)
+            self.assertNotIn("ota", content.lower())
+            self.assertNotIn("update", content.lower())
 
     def test_block_ota_is_listed_as_patch_only_mod(self):
         mod = next(mod for mod in studio_core.list_mods() if mod["name"] == "Block_ota")

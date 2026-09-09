@@ -1276,11 +1276,18 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertEqual(["ColorOS_16.0.9"], payload["modVersions"])
         self.assertEqual("V5.0", payload["modReleaseVersions"]["ColorOS_16.0.9"])
         self.assertEqual(
-            ["Disable_flag_secure", "Gapps", "GlobalSearch", "WK_Installer", "WK_Manager"],
+            [
+                "Block_ota",
+                "Disable_flag_secure",
+                "Gapps",
+                "GlobalSearch",
+                "WK_Installer",
+                "WK_Manager",
+            ],
             payload["modsByVersion"]["ColorOS_16.0.9"],
         )
         self.assertEqual(
-            ["Gapps", "GlobalSearch", "WK_Installer", "WK_Manager"],
+            ["Block_ota", "Gapps", "GlobalSearch", "WK_Installer", "WK_Manager"],
             payload["presetDefaultsByVersion"]["ColorOS_16.0.9"]["both"],
         )
         self.assertIn("sync_configs", [item["id"] for item in payload["pipelineSteps"]])
