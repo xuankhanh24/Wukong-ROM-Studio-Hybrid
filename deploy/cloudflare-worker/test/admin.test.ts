@@ -49,7 +49,20 @@ describe("admin user management", () => {
     );
     expect(approved.status).toBe(200);
     await expect(approved.json()).resolves.toMatchObject({
-      user: { accessStatus: "approved", buildCredits: 1 }
+      user: { accessStatus: "approved", buildCredits: 1, concurrentJobLimit: 1 }
+    });
+
+    const concurrency = await SELF.fetch(
+      "https://worker.example/v1/admin/users/88001/allowance",
+      {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({ operation: "concurrency", value: 3, reason: "Parallel ROM testing" })
+      }
+    );
+    expect(concurrency.status).toBe(200);
+    await expect(concurrency.json()).resolves.toMatchObject({
+      user: { concurrentJobLimit: 3 }
     });
 
     const allowance = await SELF.fetch(
@@ -68,6 +81,22 @@ describe("admin user management", () => {
     await expect(me.json()).resolves.toMatchObject({
       user: { accessStatus: "approved", buildCredits: 4 }
     });
+  });
+
+  it("rejects invalid per-user concurrent job limits", async () => {
+    const adminHeaders = {
+      ...(await tmaHeaders(1678823419)),
+      "Content-Type": "application/json"
+    };
+    const response = await SELF.fetch(
+      "https://worker.example/v1/admin/users/88001/allowance",
+      {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({ operation: "concurrency", value: 0, reason: "invalid" })
+      }
+    );
+    expect(response.status).toBe(409);
   });
 
   it("does not allow the configured admin to be revoked", async () => {

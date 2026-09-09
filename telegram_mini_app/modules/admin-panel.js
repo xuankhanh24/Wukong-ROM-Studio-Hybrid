@@ -406,17 +406,18 @@ function requestAdminAction(user, action) {
   const reasonInput = $("#admin-action-reason");
   const error = $("#admin-action-error");
   const confirm = $("#admin-action-confirm");
-  const needsValue = ["credit-subtract", "credit-set"].includes(action);
+  const needsValue = ["credit-subtract", "credit-set", "concurrency-set"].includes(action);
   const needsReason = action === "revoke" || action === "credit-subtract" || (action === "unlimited" && user.unlimited);
-  const allowsReason = needsReason || action === "approve" || action === "credit-set";
+  const allowsReason = needsReason || action === "approve" || action === "credit-set" || action === "concurrency-set";
   $("#admin-action-title").textContent = t({
     approve: "approveUser", revoke: "revokeUser", "credit-subtract": "subtractCredit",
-    "credit-set": "setCredit", unlimited: "toggleUnlimited"
+    "credit-set": "setCredit", "concurrency-set": "setConcurrentJobs", unlimited: "toggleUnlimited"
   }[action]);
   $("#admin-action-message").textContent = t("adminActionMessage");
   valueField.hidden = !needsValue;
   reasonField.hidden = !allowsReason;
-  valueInput.value = action === "credit-set" ? String(user.buildCredits || 0) : "1";
+  valueInput.value = action === "credit-set" ? String(user.buildCredits || 0)
+    : action === "concurrency-set" ? String(user.concurrentJobLimit || 1) : "1";
   reasonInput.value = action === "approve" ? "approved by admin" : "";
   error.hidden = true;
   confirm.classList.toggle("danger-confirm", action === "revoke");
@@ -436,7 +437,8 @@ function requestAdminAction(user, action) {
       if (event.submitter?.value === "cancel") { dialog.close("cancel"); return; }
       const rawValue = valueInput.value.trim();
       const valueValid = !needsValue || /^\d+$/.test(rawValue)
-        && (action === "credit-set" || Number(rawValue) > 0);
+        && (action === "credit-set" || Number(rawValue) > 0)
+        && (action !== "concurrency-set" || Number(rawValue) <= 20);
       if (!valueValid) {
         error.textContent = t("actionValueInvalid");
         error.hidden = false;
@@ -469,6 +471,10 @@ async function runAdminUserAction(user, action) {
   if (action === "credit-set") {
     path = "allowance";
     body = { operation: "set", value: input.value, reason: input.reason || "admin allocation" };
+  }
+  if (action === "concurrency-set") {
+    path = "allowance";
+    body = { operation: "concurrency", value: input.value, reason: input.reason || "admin concurrency allocation" };
   }
   if (action === "unlimited") {
     path = "allowance";
@@ -508,6 +514,7 @@ async function openAdminUser(telegramId) {
   const grid = document.createElement("div"); grid.className = "user-detail-grid";
   grid.append(
     detailFact(t("accessStatus"), accessLabel(user.accessStatus)), detailFact(t("allowance"), user.unlimited ? t("unlimited") : String(user.buildCredits || 0)),
+    detailFact(t("concurrentJobs"), String(user.concurrentJobLimit || 1)),
     detailFact(t("firstAccess"), formatDate(user.firstSeenAt)), detailFact(t("lastAccess"), formatDate(user.lastSeenAt)),
     detailFact(t("activity"), `${t("openCount", { count: user.miniAppOpenCount || 0 })} · ${t("jobsCount", { count: user.jobCount || 0 })}`), detailFact(t("lastJob"), `${user.lastJobId || "—"} · ${user.lastJobStatus || "—"}`),
     detailFact("Username", user.username ? `@${user.username}` : "—"), detailFact(t("role"), user.role || "user"),
@@ -517,7 +524,7 @@ async function openAdminUser(telegramId) {
   );
   const actions = document.createElement("div"); actions.className = "user-detail-actions";
   const definitions = user.accessStatus === "approved"
-    ? [["credit-add", t("addCredit")], ["credit-subtract", t("subtractCredit")], ["credit-set", t("setCredit")], ["unlimited", t("toggleUnlimited")], ["revoke", t("revokeUser"), "danger"]]
+    ? [["credit-add", t("addCredit")], ["credit-subtract", t("subtractCredit")], ["credit-set", t("setCredit")], ["concurrency-set", t("setConcurrentJobs")], ["unlimited", t("toggleUnlimited")], ["revoke", t("revokeUser"), "danger"]]
     : [["approve", t("approveUser")]];
   definitions.forEach(([action, label, className]) => { const button = document.createElement("button"); button.type = "button"; button.textContent = label; if (className) button.className = className; button.disabled = Boolean(user.configuredAdmin); button.addEventListener("click", () => runAdminUserAction(user, action).catch((error) => toast(error.message, true))); actions.append(button); });
   const auditTitle = document.createElement("h3"); auditTitle.textContent = t("auditTitle");

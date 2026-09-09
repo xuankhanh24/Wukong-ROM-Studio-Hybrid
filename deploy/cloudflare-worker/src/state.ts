@@ -12,6 +12,7 @@ export interface TelegramProfile {
   miniAppOpenCount: number;
   jobCount: number;
   buildCredits: number;
+  concurrentJobLimit: number;
   unlimited: boolean;
   lifetimeGranted: number;
   lifetimeUsed: number;
@@ -30,7 +31,7 @@ export interface TelegramProfile {
 const PROFILE_COLUMNS = `
   subject, username, display_name, photo_url, access_status, role,
   first_seen_at, last_seen_at, mini_app_open_count, job_count,
-  build_credits, unlimited, lifetime_granted, lifetime_used,
+  build_credits, concurrent_job_limit, unlimited, lifetime_granted, lifetime_used,
   last_job_id, last_job_status, approved_at, revoked_at,
   access_actor, access_reason, language, platform, app_version,
   configured_admin
@@ -59,6 +60,7 @@ export function profilePayload(row: Record<string, unknown> | null): TelegramPro
     miniAppOpenCount: integer(row.mini_app_open_count),
     jobCount: integer(row.job_count),
     buildCredits: integer(row.build_credits),
+    concurrentJobLimit: Math.max(1, integer(row.concurrent_job_limit)),
     unlimited: Boolean(row.unlimited),
     lifetimeGranted: integer(row.lifetime_granted),
     lifetimeUsed: integer(row.lifetime_used),
@@ -345,12 +347,12 @@ export async function approveUser(
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO wukong_telegram_users
-       (subject, access_status, role, first_seen_at, last_seen_at, build_credits,
+       (subject, access_status, role, first_seen_at, last_seen_at, build_credits, concurrent_job_limit,
         lifetime_granted, approved_at, access_actor, access_reason)
-       VALUES (?, 'approved', 'user', ?, ?, 1, 1, ?, ?, ?)
+       VALUES (?, 'approved', 'user', ?, ?, 1, 1, 1, ?, ?, ?)
        ON CONFLICT (subject) DO UPDATE SET
          access_status = 'approved', role = 'user', build_credits = 1,
-         unlimited = 0, lifetime_granted = lifetime_granted + 1,
+         concurrent_job_limit = 1, unlimited = 0, lifetime_granted = lifetime_granted + 1,
          approved_at = excluded.approved_at, revoked_at = '',
          access_actor = excluded.access_actor, access_reason = excluded.access_reason`
     ).bind(subject, now, now, now, actorSubject, reason.slice(0, 1024)),
@@ -432,6 +434,35 @@ export async function updateAllowance(
     throw new Error("Telegram account is not approved");
   }
   const operation = String(payload.operation ?? "").trim().toLowerCase();
+  if (operation === "concurrency") {
+    const limit = Number(payload.value);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 20) {
+      throw new Error("Concurrent job limit must be an integer from 1 to 20");
+    }
+    const reason = String(payload.reason ?? "").trim();
+    if (limit < current.concurrentJobLimit && !reason) {
+      throw new Error("A reason is required to reduce concurrent jobs");
+    }
+    const now = new Date().toISOString();
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE wukong_telegram_users SET concurrent_job_limit = ? WHERE subject = ?"
+      ).bind(limit, subject),
+      eventStatement(env, subject, "concurrency_limit_changed", now, {
+        actor: actorSubject,
+        reason,
+        details: { before: current.concurrentJobLimit, after: limit }
+      }),
+      notificationStatement(
+        env,
+        subject,
+        `concurrency:${subject}:${now}`,
+        `⚙️ <b>Số job build đồng thời đã thay đổi</b>\n\nGiới hạn mới: <b>${limit} job</b>.`,
+        now
+      )
+    ]);
+    return (await profile(env, subject))!;
+  }
   let after = current.buildCredits;
   let unlimited = current.unlimited;
   if (operation === "add") {

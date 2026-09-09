@@ -249,7 +249,7 @@ describe("atomic Accepted Job creation", () => {
     });
   }, 30_000);
 
-  it("allows concurrent jobs for the same user and device", async () => {
+  it("defaults users to one active job and honors an admin concurrency increase", async () => {
     await seedApprovedUser("42003", 25);
     const competingRecipe = { ...recipe, device: "PKG111" };
     const firstHeaders = {
@@ -261,24 +261,29 @@ describe("atomic Accepted Job creation", () => {
       ...firstHeaders,
       "Idempotency-Key": "second-build"
     };
-    const [first, second] = await Promise.all([
-      SELF.fetch("https://worker.example/v1/jobs", {
+    const first = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: firstHeaders, body: JSON.stringify(competingRecipe)
+    });
+    expect(first.status).toBe(201);
+    const blocked = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: secondHeaders, body: JSON.stringify(competingRecipe)
+    });
+    expect(blocked.status).toBe(409);
+    await expect(blocked.json()).resolves.toMatchObject({ code: "user_build_concurrency_limit" });
+
+    const adminResponse = await SELF.fetch(
+      "https://worker.example/v1/admin/users/42003/allowance",
+      {
         method: "POST",
-        headers: firstHeaders,
-        body: JSON.stringify(competingRecipe)
-      }),
-      SELF.fetch("https://worker.example/v1/jobs", {
-        method: "POST",
-        headers: secondHeaders,
-        body: JSON.stringify(competingRecipe)
-      })
-    ]);
-    expect([first.status, second.status].sort()).toEqual([201, 201]);
-    const payloads = await Promise.all([
-      first.json() as Promise<{ job_id: string }>,
-      second.json() as Promise<{ job_id: string }>
-    ]);
-    expect(payloads[0].job_id).not.toBe(payloads[1].job_id);
+        headers: { ...(await tmaHeaders(1678823419)), "Content-Type": "application/json" },
+        body: JSON.stringify({ operation: "concurrency", value: 2, reason: "Allow two builds" })
+      }
+    );
+    expect(adminResponse.status).toBe(200);
+    const second = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: secondHeaders, body: JSON.stringify(competingRecipe)
+    });
+    expect(second.status).toBe(201);
   });
 
   it("rejects the twenty-first active job across the system", async () => {

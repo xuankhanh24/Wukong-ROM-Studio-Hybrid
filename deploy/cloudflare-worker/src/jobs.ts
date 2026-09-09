@@ -410,6 +410,13 @@ function mapD1JobError(error: unknown): JobHttpError {
   if (message.includes("access_denied")) {
     return new JobHttpError("Telegram account is not approved", 403, "access_denied");
   }
+  if (message.includes("user_build_concurrency_limit")) {
+    return new JobHttpError(
+      "This account has reached its concurrent job limit; wait for an active job to finish",
+      409,
+      "user_build_concurrency_limit"
+    );
+  }
   if (message.includes("build_concurrency_limit")) {
     return new JobHttpError(
       "The system has reached its concurrent build limit; wait for one to finish",
