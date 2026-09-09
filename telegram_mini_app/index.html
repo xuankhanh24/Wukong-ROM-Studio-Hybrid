@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f3f1eb">
+  <link rel="preload" href="./assets/fonts/geist-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
   <meta name="wukong-mini-api-endpoint" content="__WUKONG_TELEGRAM_MINI_APP_API_URL__">
 <meta name="wukong-telegram-bot" content="WK_build_bot">
   <title>Wukong ROM Studio</title>
@@ -171,7 +172,7 @@
         <form class="job-history-filters" id="job-history-filters">
           <label class="field job-history-search"><span data-i18n="jobSearch">Tìm lịch sử job</span><input id="job-history-search" type="search" maxlength="128" autocomplete="off" data-i18n-placeholder="jobSearchPlaceholder" placeholder="Job ID / thiết bị / phiên bản / user"></label>
           <label class="field"><span data-i18n="jobPresetFilter">Preset</span><select id="job-history-preset"><option value="" data-i18n="allJobs">Tất cả</option><option value="lite">Lite</option><option value="plus">Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select></label>
-          <label class="field"><span data-i18n="jobModFilter">MOD version</span><input id="job-history-mod" type="search" list="job-mod-options" maxlength="128" autocomplete="off" data-i18n-placeholder="jobModPlaceholder" placeholder="ColorOS_16.0.10"><datalist id="job-mod-options"></datalist></label>
+          <label class="field"><span data-i18n="jobModFilter">MOD version</span><select id="job-history-mod"><option value="" data-i18n="allJobs">Tất cả</option></select></label>
           <label class="field"><span data-i18n="jobDateFrom">Từ ngày</span><input id="job-history-from" type="date"></label>
           <label class="field"><span data-i18n="jobDateTo">Đến ngày</span><input id="job-history-to" type="date"></label>
           <button class="secondary compact" id="clear-job-history-filters" type="reset" data-i18n="clearJobFilters">Xóa bộ lọc</button>

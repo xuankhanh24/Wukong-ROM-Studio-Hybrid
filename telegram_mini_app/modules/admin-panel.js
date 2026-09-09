@@ -567,15 +567,13 @@ async function openAdminUser(telegramId) {
   const adminJobSearch = document.createElement("input"); adminJobSearch.type = "search"; adminJobSearch.maxLength = 128; adminJobSearch.autocomplete = "off"; adminJobSearch.dataset.i18nPlaceholder = "jobSearchPlaceholder"; adminJobSearch.placeholder = t("jobSearchPlaceholder");
   const adminJobPreset = document.createElement("select");
   [["", "allJobs"], ["lite", "lite"], ["plus", "plus"], ["both", "both"], ["custom", "custom"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label === "allJobs" ? t(label) : label === "both" ? "Lite + Plus" : label[0].toUpperCase() + label.slice(1); adminJobPreset.append(option); });
-  const adminJobMod = document.createElement("input"); adminJobMod.type = "search"; adminJobMod.maxLength = 128; adminJobMod.dataset.i18nPlaceholder = "jobModPlaceholder"; adminJobMod.placeholder = t("jobModPlaceholder");
+  const adminJobMod = document.createElement("select");
+  adminJobMod.append(...["", ...(state.catalog?.modVersions || [])].map((value) => { const option = document.createElement("option"); option.value = value; option.textContent = value || t("allJobs"); return option; }));
   const adminJobFrom = document.createElement("input"); adminJobFrom.type = "date";
   const adminJobTo = document.createElement("input"); adminJobTo.type = "date";
-  const adminJobDatalist = document.createElement("datalist");
-  if (state.catalog?.modVersions) adminJobDatalist.append(...state.catalog.modVersions.map((value) => { const option = document.createElement("option"); option.value = value; return option; }));
-  adminJobDatalist.id = "admin-job-mod-options"; adminJobMod.setAttribute("list", adminJobDatalist.id);
   const adminJobField = (labelKey, control, wide = false) => { const label = document.createElement("label"); label.className = wide ? "field job-history-search" : "field"; const text = document.createElement("span"); text.dataset.i18n = labelKey; text.textContent = t(labelKey); label.append(text, control); return label; };
   jobFilters.append(adminJobField("jobSearch", adminJobSearch, true), adminJobField("jobPresetFilter", adminJobPreset), adminJobField("jobModFilter", adminJobMod), adminJobField("jobDateFrom", adminJobFrom), adminJobField("jobDateTo", adminJobTo));
-  const clearAdminJobFilters = document.createElement("button"); clearAdminJobFilters.type = "reset"; clearAdminJobFilters.className = "secondary compact"; clearAdminJobFilters.textContent = t("clearJobFilters"); jobFilters.append(clearAdminJobFilters, adminJobDatalist);
+  const clearAdminJobFilters = document.createElement("button"); clearAdminJobFilters.type = "reset"; clearAdminJobFilters.className = "secondary compact"; clearAdminJobFilters.textContent = t("clearJobFilters"); jobFilters.append(clearAdminJobFilters);
   const jobHistory = document.createElement("div"); jobHistory.className = "user-audit";
   const jobPagination = document.createElement("div"); jobPagination.className = "job-history-pagination admin-job-history-pagination";
   const jobPageSummary = document.createElement("span"); const jobPageButtons = document.createElement("nav"); jobPageButtons.className = "job-page-buttons"; jobPageButtons.setAttribute("aria-label", t("jobHistory"));

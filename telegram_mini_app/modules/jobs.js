@@ -1003,13 +1003,16 @@ function renderJobHistory() {
     state.jobHistoryFilter, state.jobHistoryTotal, state.jobHistoryStatusCounts, historyHasFilters()]);
   if (history.dataset.signature === signature && (!state.jobHistoryLoading || jobs.length)) return;
   if (!state.jobHistoryLoading) history.dataset.signature = signature;
-  const modOptions = $("#job-mod-options");
-  if (modOptions && state.catalog?.modVersions) {
-    modOptions.replaceChildren(...state.catalog.modVersions.map((value) => {
+  const modFilter = $("#job-history-mod");
+  if (modFilter && state.catalog?.modVersions) {
+    const selected = modFilter.value;
+    modFilter.replaceChildren(...["", ...state.catalog.modVersions].map((value) => {
       const option = document.createElement("option");
       option.value = value;
+      option.textContent = value || t("allJobs");
       return option;
     }));
+    if ([...modFilter.options].some((option) => option.value === selected)) modFilter.value = selected;
   }
   $$("[data-job-filter]").forEach((button) => {
     const selected = button.dataset.jobFilter === state.jobHistoryFilter;
