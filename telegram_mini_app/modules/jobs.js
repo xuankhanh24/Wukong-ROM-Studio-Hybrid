@@ -996,13 +996,7 @@ function applyJobHistoryPayload(payload) {
   state.jobHistoryStatusCounts = page.statusCounts;
 }
 
-function renderJobHistory() {
-  const history = $("#job-history");
-  const jobs = state.jobs;
-  const signature = JSON.stringify([jobs, state.language, state.activeJobId, state.jobHistoryPage,
-    state.jobHistoryFilter, state.jobHistoryTotal, state.jobHistoryStatusCounts, historyHasFilters()]);
-  if (history.dataset.signature === signature && (!state.jobHistoryLoading || jobs.length)) return;
-  if (!state.jobHistoryLoading) history.dataset.signature = signature;
+function renderJobModFilter() {
   const modFilter = $("#job-history-mod");
   if (modFilter && state.catalog?.modVersions) {
     const selected = modFilter.value;
@@ -1014,6 +1008,16 @@ function renderJobHistory() {
     }));
     if ([...modFilter.options].some((option) => option.value === selected)) modFilter.value = selected;
   }
+}
+
+function renderJobHistory() {
+  const history = $("#job-history");
+  const jobs = state.jobs;
+  const signature = JSON.stringify([jobs, state.language, state.activeJobId, state.jobHistoryPage,
+    state.jobHistoryFilter, state.jobHistoryTotal, state.jobHistoryStatusCounts, historyHasFilters()]);
+  renderJobModFilter();
+  if (history.dataset.signature === signature && (!state.jobHistoryLoading || jobs.length)) return;
+  if (!state.jobHistoryLoading) history.dataset.signature = signature;
   $$("[data-job-filter]").forEach((button) => {
     const selected = button.dataset.jobFilter === state.jobHistoryFilter;
     button.classList.toggle("active", selected);
@@ -1270,4 +1274,4 @@ async function runJobAction(action, jobId) {
   await loadJobs({ force: true });
 }
 
-export { renderSelectedJob, jobNeedsMirrorPoll, jobShouldPoll, readableEventType, readableEventStage, readableStep, readableStepStatus, uploadProgressSnapshot, uploadProgressKey, compactLiveEvents, eventTitle, formatEventValue, eventDetailEntries, renderUploadProgressCard, statusLabel, jobMetadata, jobDeviceLabel, jobEditionBadge, jobHistoryDayLabel, catalogDeviceName, jobProgress, jobModBadge, formatDate, formatElapsed, jobFact, artifactCloudUrl, artifactMirrorUrl, repairDcCloudMirror, dcCloudDownloadUrl, downloadDcCloudMirror, copyDcCloudMirrorLink, artifactProvider, openArtifactUrl, renderArtifacts, renderEvents, jobAction, openAdminJobPage, closeAdminJobPage, loadAdminJobDetail, openJob, renderJobParameters, renderActiveJob, historyDateBoundary, appendJobHistoryFilters, jobHistoryParams, historyHasFilters, legacyJobHistoryPage, renderPageButtons, renderJobHistoryPagination, applyJobHistoryPayload, renderJobHistory, setJobsConnection, loadLogPage, loadJobDetail, scheduleJobsPoll, loadJobs, runJobAction };
+export { renderSelectedJob, renderJobModFilter, jobNeedsMirrorPoll, jobShouldPoll, readableEventType, readableEventStage, readableStep, readableStepStatus, uploadProgressSnapshot, uploadProgressKey, compactLiveEvents, eventTitle, formatEventValue, eventDetailEntries, renderUploadProgressCard, statusLabel, jobMetadata, jobDeviceLabel, jobEditionBadge, jobHistoryDayLabel, catalogDeviceName, jobProgress, jobModBadge, formatDate, formatElapsed, jobFact, artifactCloudUrl, artifactMirrorUrl, repairDcCloudMirror, dcCloudDownloadUrl, downloadDcCloudMirror, copyDcCloudMirrorLink, artifactProvider, openArtifactUrl, renderArtifacts, renderEvents, jobAction, openAdminJobPage, closeAdminJobPage, loadAdminJobDetail, openJob, renderJobParameters, renderActiveJob, historyDateBoundary, appendJobHistoryFilters, jobHistoryParams, historyHasFilters, legacyJobHistoryPage, renderPageButtons, renderJobHistoryPagination, applyJobHistoryPayload, renderJobHistory, setJobsConnection, loadLogPage, loadJobDetail, scheduleJobsPoll, loadJobs, runJobAction };

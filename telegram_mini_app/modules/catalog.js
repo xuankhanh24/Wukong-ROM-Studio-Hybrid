@@ -3,7 +3,7 @@ import { probeSourceInPlace, updateSourceDetection } from "./source-rom.js";
 import { options, toast } from "./shell.js";
 import { renderCatalog, renderDebloatSummary, renderMods, renderPipelineSteps, renderPresetLabels, renderReleaseVersion, updateSummary } from "./build.js";
 import { apiRequest, privateApiAvailable } from "./session.js";
-import { renderSelectedJob } from "./jobs.js";
+import { renderJobModFilter, renderSelectedJob } from "./jobs.js";
 import { renderBatchChoices, updateBatchSummary } from "./admin.js";
 
 function scheduleSourceProbe() {
@@ -37,6 +37,7 @@ async function loadCatalog() {
     renderMods();
     renderDebloatSummary();
     renderCatalog();
+    renderJobModFilter();
     updateSourceDetection();
     renderSelectedJob();
   } catch (error) {
