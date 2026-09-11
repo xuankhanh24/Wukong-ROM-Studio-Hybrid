@@ -826,7 +826,13 @@ class LocalJobExecutor:
                 )
             target = (self.content_root / str(pack["target"])).resolve()
             try:
-                manager.verify(target, pack)
+                manager.verify(
+                    target,
+                    pack,
+                    allowed_extra_prefixes=("Fake_lock/",)
+                    if pack_id == "STARK/common"
+                    else (),
+                )
             except (FileNotFoundError, SourceIntegrityError):
                 if not self.rclone_config:
                     raise OrchestrationError(

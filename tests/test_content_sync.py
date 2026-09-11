@@ -24,10 +24,24 @@ class ContentSyncTests(unittest.TestCase):
                 source = local / name / "system"
                 source.mkdir(parents=True)
                 (source / f"{name}.apk").write_bytes(name.encode())
+            fake_lock = (
+                install
+                / "Content"
+                / "MOD"
+                / "ColorOS_16.0.7"
+                / "Fake_lock"
+                / "system"
+            )
+            fake_lock.mkdir(parents=True)
+            (fake_lock / "Fake_lock.rc").write_bytes(b"fake-lock")
 
             migrated = migrate_shared_mods(install, version="ColorOS_16.0.10")
 
-            self.assertEqual(["WK_Installer", "WK_Manager"], migrated)
+            self.assertEqual(["Fake_lock", "WK_Installer", "WK_Manager"], migrated)
+            self.assertFalse((install / "Content" / "MOD" / "ColorOS_16.0.7" / "Fake_lock").exists())
+            self.assertTrue(
+                (install / "Content" / "STARK" / "Fake_lock" / "system" / "Fake_lock.rc").is_file()
+            )
             for name in ("WK_Manager", "WK_Installer"):
                 self.assertFalse((local / name).exists())
                 self.assertTrue((install / "Content" / "STARK" / name / "system" / f"{name}.apk").is_file())

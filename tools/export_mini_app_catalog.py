@@ -17,6 +17,7 @@ from wukong.mod_release_versions import default_mod_release_version
 
 
 DEFAULT_DEBLOAT_PATH = Path(__file__).resolve().parents[1] / "config" / "debloat.json"
+BUNDLED_SHARED_MOD_ROOT = Path(__file__).resolve().parents[1] / "STARK"
 
 
 def export_catalog(
@@ -43,7 +44,15 @@ def export_catalog(
         if isinstance(item, dict) and str(item.get("product_name") or "")
     ]
     mods_by_version: dict[str, list[str]] = {}
-    shared_mods: set[str] = set()
+    shared_mods: set[str] = {
+        name
+        for name in SHARED_MOD_NAMES
+        if (BUNDLED_SHARED_MOD_ROOT / name).is_dir()
+        and any(
+            (BUNDLED_SHARED_MOD_ROOT / name / partition).is_dir()
+            for partition in MODIFIABLE_PARTITIONS
+        )
+    }
     for pack in index["packs"]:
         pack_id = str(pack.get("id") or "")
         archive = pack.get("archive")

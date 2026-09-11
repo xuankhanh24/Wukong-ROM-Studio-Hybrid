@@ -1248,7 +1248,7 @@ class TelegramMiniAppTests(unittest.TestCase):
                                 "id": "STARK/common",
                                 "target": "STARK",
                                 "remote": "drive:STARK/common",
-                                "sizeBytes": 1,
+                                "sizeBytes": 2,
                                 "archive": {
                                     "uri": "drive:STARK/common.tar.zst",
                                     "sha256": "e" * 64,
@@ -1256,6 +1256,7 @@ class TelegramMiniAppTests(unittest.TestCase):
                                     "sizeBytes": 1,
                                 },
                                 "files": [
+                                    {"path": "Fake_lock/system/init.rc", "sha256": "0" * 64, "sizeBytes": 1},
                                     {"path": "WK_Installer/system_ext/app.apk", "sha256": "1" * 64, "sizeBytes": 1},
                                 ],
                             },
@@ -1279,6 +1280,7 @@ class TelegramMiniAppTests(unittest.TestCase):
             [
                 "Block_ota",
                 "Disable_flag_secure",
+                "Fake_lock",
                 "Gapps",
                 "GlobalSearch",
                 "WK_Installer",
@@ -1287,7 +1289,7 @@ class TelegramMiniAppTests(unittest.TestCase):
             payload["modsByVersion"]["ColorOS_16.0.9"],
         )
         self.assertEqual(
-            ["Block_ota", "Gapps", "GlobalSearch", "WK_Installer", "WK_Manager"],
+            ["Block_ota", "Fake_lock", "Gapps", "GlobalSearch", "WK_Installer", "WK_Manager"],
             payload["presetDefaultsByVersion"]["ColorOS_16.0.9"]["both"],
         )
         self.assertIn("sync_configs", [item["id"] for item in payload["pipelineSteps"]])

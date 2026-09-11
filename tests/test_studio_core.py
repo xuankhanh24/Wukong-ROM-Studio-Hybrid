@@ -1791,6 +1791,24 @@ class StudioCoreTests(unittest.TestCase):
         self.assertEqual(mod["partitions"], [])
         self.assertIn("Block_ota", studio_core.preset_default_mods("lite"))
 
+    def test_shared_fake_lock_wins_over_version_local_copy(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            local = root / "MOD" / "ColorOS_16.0.7" / "Fake_lock" / "system"
+            shared = root / "STARK" / "Fake_lock" / "system"
+            local.mkdir(parents=True)
+            shared.mkdir(parents=True)
+            (local / "local.bin").write_bytes(b"local")
+            (shared / "shared.bin").write_bytes(b"shared")
+
+            mods = studio_core.list_mods(
+                "ColorOS_16.0.7",
+                mod_root=root / "MOD",
+            )
+
+        fake_lock = next(mod for mod in mods if mod["name"] == "Fake_lock")
+        self.assertTrue(fake_lock["shared"])
+
     def test_ai_global_removes_aiunit_only_for_coloros_1605(self):
         with tempfile.TemporaryDirectory() as temp, mock.patch.object(
             studio_core, "MOD_DIR", Path(temp) / "MOD"
@@ -2255,12 +2273,14 @@ class StudioCoreTests(unittest.TestCase):
                 unpack,
                 {"soc": "86xx"},
                 root,
+                fake_lock_vbmeta_digest="a" * 64,
             )
             second = studio_core.apply_selected_mods(
                 ["Fake_lock"],
                 unpack,
                 {"soc": "86xx"},
                 root,
+                fake_lock_vbmeta_digest="a" * 64,
             )
             context = studio_core.BuildContext(
                 job_id="fixture",
@@ -2285,6 +2305,8 @@ class StudioCoreTests(unittest.TestCase):
             self.assertIn("ro.product.manufacturer_for_attestation OnePlus", content)
             self.assertIn("ro.boot.vbmeta.invalidate_on_error yes", content)
             self.assertIn("ro.boot.vbmeta.device /dev/block/by-name/vbmeta_a", content)
+            self.assertIn("ro.boot.vbmeta.digest " + "a" * 64, content)
+            self.assertIn("vendor.boot.vbmeta.digest " + "a" * 64, content)
             wk_binary = unpack / "system_unpacked" / "system" / "system" / "bin" / "wk"
             self.assertTrue(wk_binary.is_file())
             self.assertGreater(wk_binary.stat().st_size, 0)
@@ -2309,6 +2331,52 @@ class StudioCoreTests(unittest.TestCase):
                 self.assertNotIn(b"\r", path.read_bytes(), str(path))
             self.assertEqual(first["mods"], ["Fake_lock"])
             self.assertEqual(second["mods"], ["Fake_lock"])
+
+    def test_stage_apply_mod_prepares_patched_vbmeta_before_fake_lock(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            context = studio_core.BuildContext(
+                job_id="fixture",
+                spec=studio_core.BuildSpec(
+                    romPath="fixture.zip",
+                    modNames=["Fake_lock"],
+                ),
+                workspace=root,
+                metadata={},
+                device={"soc": "86xx"},
+            )
+            order = []
+
+            def prepare(_context):
+                order.append("patch_vbmeta")
+                return {
+                    "digest": "b" * 64,
+                    "image": str(root / "Build" / "vbmeta.img"),
+                    "flags": "0x00000003",
+                }
+
+            def apply(*_args, **kwargs):
+                order.append("apply_fake_lock")
+                self.assertEqual("b" * 64, kwargs["fake_lock_vbmeta_digest"])
+                return {"modifiedPartitions": ["system"], "mods": ["Fake_lock"]}
+
+            with mock.patch.object(
+                studio_core,
+                "_prepare_fake_lock_vbmeta",
+                side_effect=prepare,
+            ), mock.patch.object(
+                studio_core,
+                "apply_selected_mods",
+                side_effect=apply,
+            ), mock.patch.object(
+                studio_core,
+                "_passthrough_partition_fingerprints",
+                return_value={},
+            ):
+                result = studio_core._stage_apply_mod(context)
+
+            self.assertEqual(["patch_vbmeta", "apply_fake_lock"], order)
+            self.assertEqual("b" * 64, result["fakeLockVbmeta"]["digest"])
 
     def test_fix_noti_smali_patch_replaces_branch(self):
         with tempfile.TemporaryDirectory() as temp:

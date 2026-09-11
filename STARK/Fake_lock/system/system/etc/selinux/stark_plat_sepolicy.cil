@@ -1,0 +1,6 @@
++(type wk_exec)
++(roletype object_r wk_exec)
++(typeattributeset file_type (wk_exec))
++(typeattributeset exec_type (wk_exec))
++(typeattributeset system_file_type (wk_exec))
++(allow init wk_exec (file (read getattr map execute open execute_no_trans entrypoint)))

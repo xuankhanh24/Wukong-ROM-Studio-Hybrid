@@ -2352,6 +2352,38 @@ class ContentPackContractTests(unittest.TestCase):
                 manager.install(index, "TWRP/v1")
             self.assertFalse((target / "TWRP" / "recovery.img").exists())
 
+    def test_content_pack_verify_allows_only_an_explicit_bundled_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as root:
+            content = Path(root)
+            (content / "manager.apk").write_bytes(b"manager")
+            (content / "Fake_lock" / "system").mkdir(parents=True)
+            (content / "Fake_lock" / "system" / "wk").write_bytes(b"wk")
+            pack = {
+                "id": "STARK/common",
+                "files": [
+                    {
+                        "path": "manager.apk",
+                        "sizeBytes": 7,
+                        "sha256": hashlib.sha256(b"manager").hexdigest(),
+                    }
+                ],
+            }
+
+            ContentPackManager.verify(
+                content,
+                pack,
+                allowed_extra_prefixes=("Fake_lock/",),
+            )
+
+            (content / "Other").mkdir()
+            (content / "Other" / "rogue").write_bytes(b"rogue")
+            with self.assertRaisesRegex(SourceIntegrityError, "file set"):
+                ContentPackManager.verify(
+                    content,
+                    pack,
+                    allowed_extra_prefixes=("Fake_lock/",),
+                )
+
     def test_archive_round_trip_uses_one_remote_payload(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             content = Path(root, "content")

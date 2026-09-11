@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "content-packs" / "index.json"
 MOD_ROOT = ROOT / "MOD"
@@ -40,12 +39,14 @@ TEXT_FIXTURES = {
 """,
     "Fake_lock/system/system/etc/init/hw/stark_init.rc": """+on post-fs-data
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.boot.vbmeta.device_state locked
++    exec u:r:init:s0 root root -- /system/bin/wk -n ro.boot.vbmeta.digest {{VBMETA_BLOB_HASH}}
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.secureboot.lockstate locked
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.bootloader OP5D2BL1-locked
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.product.brand_for_attestation OnePlus
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.product.manufacturer_for_attestation OnePlus
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.boot.vbmeta.invalidate_on_error yes
 +    exec u:r:init:s0 root root -- /system/bin/wk -n ro.boot.vbmeta.device /dev/block/by-name/vbmeta_a
++    exec u:r:init:s0 root root -- /system/bin/wk -n vendor.boot.vbmeta.digest {{VBMETA_BLOB_HASH}}
 """,
     "Fake_lock/system/system/etc/selinux/stark_plat_file_contexts": "+/system/bin/wk u:object_r:wk_exec:s0\n+/system/system/bin/wk u:object_r:wk_exec:s0\n",
     "Fake_lock/system/system/etc/selinux/stark_plat_sepolicy.cil": "+(allow init wk_exec (file (read getattr map execute open execute_no_trans entrypoint)))\n",
@@ -97,12 +98,22 @@ def main() -> int:
             "Refusing to modify an existing shared content directory without the "
             f"fixture marker: {SHARED_WK_ROOT}"
         )
+    shared_fake_lock = STARK_ROOT / "Fake_lock"
+    shared_fake_lock_marker = shared_fake_lock / ".wukong-test-fixture"
+    materialize_fake_lock = (
+        not shared_fake_lock.exists() or shared_fake_lock_marker.is_file()
+    )
     MOD_ROOT.mkdir(parents=True, exist_ok=True)
     MARKER.write_text("Generated placeholders only; never use for ROM builds.\n", encoding="utf-8")
     SHARED_WK_ROOT.mkdir(parents=True, exist_ok=True)
     SHARED_WK_MARKER.write_text(
         "Generated placeholders only; never use for ROM builds.\n", encoding="utf-8"
     )
+    if materialize_fake_lock:
+        shared_fake_lock.mkdir(parents=True, exist_ok=True)
+        shared_fake_lock_marker.write_text(
+            "Generated placeholders only; never use for ROM builds.\n", encoding="utf-8"
+        )
     payload = json.loads(INDEX.read_text(encoding="utf-8"))
     count = 0
     for pack in payload["packs"]:
@@ -112,6 +123,8 @@ def main() -> int:
         version = target.split("/", 1)[1]
         for entry in pack["files"]:
             relative = str(entry["path"])
+            if relative.split("/", 1)[0] == "Fake_lock":
+                continue
             path = MOD_ROOT / version / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             text = TEXT_FIXTURES.get(relative)
@@ -126,6 +139,15 @@ def main() -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
         count += 1
+    if materialize_fake_lock:
+        for relative, text in TEXT_FIXTURES.items():
+            prefix = "Fake_lock/"
+            if not relative.startswith(prefix):
+                continue
+            path = shared_fake_lock / relative[len(prefix) :]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8", newline="\n")
+            count += 1
     daemon = shared / "system" / "system" / "bin" / "wukong-system-powerd"
     daemon.parent.mkdir(parents=True, exist_ok=True)
     elf = bytearray(64)

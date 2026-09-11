@@ -604,14 +604,25 @@ class ContentPackManager:
             raise
 
     @staticmethod
-    def verify(root: Path, pack: Mapping[str, Any]) -> None:
+    def verify(
+        root: Path,
+        pack: Mapping[str, Any],
+        *,
+        allowed_extra_prefixes: tuple[str, ...] = (),
+    ) -> None:
         expected = {str(item["path"]): item for item in pack.get("files", [])}
         actual = {
             path.relative_to(root).as_posix(): path
             for path in root.rglob("*")
             if path.is_file()
         }
-        if set(actual) != set(expected):
+        unexpected = set(actual).difference(expected)
+        blocked_extras = {
+            relative
+            for relative in unexpected
+            if not any(relative.startswith(prefix) for prefix in allowed_extra_prefixes)
+        }
+        if set(expected).difference(actual) or blocked_extras:
             raise SourceIntegrityError(f"Invalid content-pack file set: {pack.get('id')}")
         for relative, item in expected.items():
             path = actual[relative]

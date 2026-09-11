@@ -51,18 +51,34 @@ def _tree_manifest(root: Path) -> list[tuple[str, int, str]]:
 def migrate_shared_mods(install_root: Path, *, version: str = "ColorOS_16.0.10") -> list[str]:
     """Move verified shared MOD trees into the canonical Content/STARK tree."""
     install = install_root.resolve()
-    source_root = install / "Content" / "MOD" / version
+    mod_root = install / "Content" / "MOD"
     target_root = install / "Content" / "STARK"
     staging_root = install / "Data" / "ContentSync" / "staging"
     staging_root.mkdir(parents=True, exist_ok=True)
     migrated: list[str] = []
     for name in sorted(SHARED_MOD_NAMES, key=str.casefold):
-        source = source_root / name
-        if not source.is_dir():
+        candidates = sorted(
+            (
+                candidate
+                for candidate in mod_root.glob(f"*/{name}")
+                if candidate.is_dir()
+            ),
+            key=lambda candidate: (
+                candidate.parent.name != version,
+                candidate.parent.name.casefold(),
+            ),
+        )
+        if not candidates:
             continue
+        source = candidates[0]
         source_manifest = _tree_manifest(source)
         if not source_manifest:
             raise ValueError(f"Shared MOD source is empty: {source}")
+        for candidate in candidates[1:]:
+            if _tree_manifest(candidate) != source_manifest:
+                raise ValueError(
+                    f"Shared MOD sources differ between versions: {source} and {candidate}"
+                )
         target = target_root / name
         if target.exists():
             if not target.is_dir() or _tree_manifest(target) != source_manifest:
@@ -81,7 +97,8 @@ def migrate_shared_mods(install_root: Path, *, version: str = "ColorOS_16.0.10")
                 shutil.rmtree(staging, ignore_errors=True)
         if _tree_manifest(target) != source_manifest:
             raise OSError(f"Shared MOD verification failed after migration: {name}")
-        shutil.rmtree(source)
+        for candidate in candidates:
+            shutil.rmtree(candidate)
         migrated.append(name)
     return migrated
 

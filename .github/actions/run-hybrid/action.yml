@@ -105,6 +105,9 @@ runs:
         task="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['task'])")"
         if [ "$task" = build ]; then
           mod_version="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['build']['modVersion'])")"
+          mkdir -p .wkstudio/bundled-shared
+          rm -rf .wkstudio/bundled-shared/Fake_lock
+          cp -a STARK/Fake_lock .wkstudio/bundled-shared/Fake_lock
           install_pack() {
             local pack="$1"
             if python3 content_pack_tool.py verify --content-root . --index content-packs/index.json --pack "$pack" >/dev/null 2>&1; then
@@ -118,6 +121,10 @@ runs:
           for pack in STARK/common Flash_script/common copy-image/v1 OFX/v1 TWRP/v1; do
             install_pack "$pack"
           done
+          # The current remote STARK archive predates the shared Fake_lock.
+          # Restore its bundled canonical tree after the atomic pack install.
+          rm -rf STARK/Fake_lock
+          cp -a .wkstudio/bundled-shared/Fake_lock STARK/Fake_lock
           # Validate before downloading the multi-GB ROM. Strict mode preserves
           # channel parity: a requested MOD is never silently removed.
           if [ "${WUKONG_DROP_MISSING_MODS:-0}" = 1 ]; then

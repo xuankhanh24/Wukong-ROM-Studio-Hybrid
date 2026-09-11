@@ -59,6 +59,7 @@ Name: "{app}\Backups"; Permissions: users-modify
 Source: "{#SourceRoot}\App\*"; DestDir: "{app}\App"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourceRoot}\Runtime\*"; DestDir: "{app}\Runtime"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourceRoot}\Content\*"; DestDir: "{app}\Content"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist uninsneveruninstall; Check: IsFreshInstall
+Source: "{#SourceRoot}\Content\STARK\Fake_lock\*"; DestDir: "{app}\Content\STARK\Fake_lock"; Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\App\WebView2"

@@ -1,0 +1,2 @@
++/system/bin/wk	u:object_r:wk_exec:s0
++/system/system/bin/wk u:object_r:wk_exec:s0

@@ -81,9 +81,9 @@ The Hybrid Cloud page also provides two operator actions:
   every pack has a verified Drive archive. The GitHub token used for this
   action needs Contents write permission.
 
-`WK_Manager` and `WK_Installer` live once in the shared `STARK/common` pack and
+`Fake_lock`, `WK_Manager` and `WK_Installer` live once in the shared `STARK/common` pack and
 are exposed in every MOD catalog version. The first Drive sync safely migrates
-matching version-local copies through a file-by-file SHA-256 verification.
+matching version-local copies through a file-by-file SHA-256 verification. For each build that selects `Fake_lock`, the pipeline patches `vbmeta.img` first, runs `get_blob_hash.py`, and injects the resulting digest into both boot digest properties.
 Credentials remain DPAPI-protected; temporary rclone configuration files are
 hidden and deleted after each operation.
 

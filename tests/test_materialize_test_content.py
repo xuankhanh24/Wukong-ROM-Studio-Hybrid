@@ -39,6 +39,39 @@ class MaterializeTestContentSafetyTests(unittest.TestCase):
 
             self.assertEqual(daemon.read_bytes(), b"real-daemon")
 
+    def test_preserves_bundled_shared_fake_lock_content(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mod_root = root / "MOD"
+            mod_root.mkdir()
+            mod_marker = mod_root / ".wukong-test-fixture"
+            mod_marker.write_text("fixture\n", encoding="utf-8")
+            shared_root = root / "STARK" / "WK_Manager"
+            shared_root.mkdir(parents=True)
+            shared_marker = shared_root / ".wukong-test-fixture"
+            shared_marker.write_text("fixture\n", encoding="utf-8")
+            fake_lock = root / "STARK" / "Fake_lock"
+            fake_lock.mkdir()
+            real_file = fake_lock / "real.bin"
+            real_file.write_bytes(b"real-fake-lock")
+            index = root / "index.json"
+            index.write_text(json.dumps({"packs": []}), encoding="utf-8")
+
+            with mock.patch.multiple(
+                materialize_test_content,
+                INDEX=index,
+                MOD_ROOT=mod_root,
+                MARKER=mod_marker,
+                STARK_ROOT=root / "STARK",
+                SHARED_WK_ROOT=shared_root,
+                SHARED_WK_MARKER=shared_marker,
+            ):
+                result = materialize_test_content.main()
+
+            self.assertEqual(0, result)
+            self.assertEqual(b"real-fake-lock", real_file.read_bytes())
+            self.assertFalse((fake_lock / ".wukong-test-fixture").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

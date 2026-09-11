@@ -7,6 +7,7 @@ import shutil
 import re
 import json
 import hashlib
+import tempfile
 from studio_paths import (
     CONFIG_ROOT,
     CONTENT_ROOT,
@@ -964,7 +965,26 @@ def select_mod_folder():
             print("[!] Vui lòng nhập số.")
 
 
-def apply_mod(mod_path, rom_unpack_dir, device_db=None):
+def _render_fake_lock_init_patch(source, vbmeta_digest):
+    digest = str(vbmeta_digest or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise RuntimeError("Fake_lock requires the patched vbmeta blob SHA-256 digest")
+    with open(source, "r", encoding="utf-8") as handle:
+        content = handle.read()
+    properties = ("ro.boot.vbmeta.digest", "vendor.boot.vbmeta.digest")
+    for property_name in properties:
+        pattern = re.compile(
+            rf"(?m)^(\+\s*exec\s+u:r:init:s0\s+root\s+root\s+--\s+/system/bin/wk\s+-n\s+{re.escape(property_name)}\s+)\S+\s*$"
+        )
+        content, count = pattern.subn(rf"\g<1>{digest}", content)
+        if count != 1:
+            raise RuntimeError(
+                f"Fake_lock init patch must contain exactly one {property_name} command"
+            )
+    return content
+
+
+def apply_mod(mod_path, rom_unpack_dir, device_db=None, vbmeta_digest=None):
     """
     Copy tất cả file từ MOD/<tên mod>/<partition>/... 
     vào rom-unpack/<partition>_unpacked/...
@@ -1024,15 +1044,35 @@ def apply_mod(mod_path, rom_unpack_dir, device_db=None):
                     dst_file = os.path.join(partition_dst, rel_root, filename)
 
                 if filename.startswith("stark_"):
+                    patch_source = src_file
+                    temporary_patch = None
                     try:
+                        if mod_name == "Fake_lock" and filename == "stark_init.rc":
+                            rendered = _render_fake_lock_init_patch(
+                                src_file,
+                                vbmeta_digest,
+                            )
+                            descriptor, temporary_patch = tempfile.mkstemp(
+                                prefix="fake-lock-init-",
+                                suffix=".rc",
+                            )
+                            os.close(descriptor)
+                            write_text_lf(temporary_patch, rendered)
+                            patch_source = temporary_patch
                         dst_file = stark_destination(partition_dst, os.path.join(rel_root, filename))
-                        result = apply_stark_patch(src_file, dst_file)
+                        result = apply_stark_patch(patch_source, dst_file)
                         rel_display = os.path.relpath(dst_file, rom_unpack_dir)
                         print(f"    [✓] patch {rel_display} {result}")
                         copied += sum(result.values())
                     except Exception as e:
                         print(f"    [!] Lỗi patch: {src_file} → {e}")
                         errors += 1
+                    finally:
+                        if temporary_patch:
+                            try:
+                                os.remove(temporary_patch)
+                            except OSError:
+                                pass
                     continue
 
                 try:
@@ -1792,6 +1832,45 @@ def run_extra_patches(version_dir, source_rom_dir, rom_unpack_dir):
     return True
 
 
+def read_vbmeta_blob_hash(image_path, cwd):
+    hash_script = os.path.join(SCRIPT_DIR, "get_blob_hash.py")
+    if not os.path.isfile(hash_script):
+        raise RuntimeError(f"Missing hash script: {hash_script}")
+    cmd = [sys.executable, hash_script, image_path]
+    print(f"[*] Reading patched vbmeta blob hash: {' '.join(cmd)}")
+    result = subprocess.run(
+        cmd,
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        print(result.stdout.rstrip())
+    if result.stderr:
+        print(result.stderr.rstrip(), file=sys.stderr)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"get_blob_hash.py failed for vbmeta.img (code={result.returncode})"
+        )
+    match = re.search(
+        r"Hashed Vbmeta Blob of vbmeta\.img:\s*([0-9a-fA-F]{64})",
+        result.stdout,
+    )
+    if not match:
+        raise RuntimeError("get_blob_hash.py did not return a vbmeta blob SHA-256 digest")
+    return match.group(1).lower()
+
+
+def prepare_fake_lock_vbmeta(version_dir, source_rom_dir, rom_unpack_dir):
+    if not run_extra_patches(version_dir, source_rom_dir, rom_unpack_dir):
+        raise RuntimeError("Patch vbmeta failed before Fake_lock")
+    patched = os.path.join(version_dir, "Build", "vbmeta.img")
+    if not os.path.isfile(patched):
+        raise RuntimeError(f"Patched vbmeta.img is missing before Fake_lock: {patched}")
+    return read_vbmeta_blob_hash(patched, version_dir)
+
+
 def generate_md5(file_path):
     hash_md5 = hashlib.md5()
     with open(file_path, "rb") as f:
@@ -2184,9 +2263,29 @@ def main():
         clean_bloatware(rom_unpack_dir)
 
         # ─── STEP 5: Áp dụng MOD ──────────────────────────────────
+        fake_lock_vbmeta_digest = None
         if selected_mod:
+            if os.path.basename(selected_mod) == "Fake_lock":
+                try:
+                    fake_lock_vbmeta_digest = prepare_fake_lock_vbmeta(
+                        version_dir,
+                        source_rom_dir,
+                        rom_unpack_dir,
+                    )
+                    print(
+                        "[✓] Patched vbmeta digest prepared before Fake_lock: "
+                        + fake_lock_vbmeta_digest
+                    )
+                except Exception as exc:
+                    print(f"[!] Chuẩn bị vbmeta cho Fake_lock thất bại: {exc}")
+                    continue
             print_step(5, f"Áp dụng MOD: {os.path.basename(selected_mod)}")
-            apply_mod(selected_mod, rom_unpack_dir, device_db)
+            apply_mod(
+                selected_mod,
+                rom_unpack_dir,
+                device_db,
+                vbmeta_digest=fake_lock_vbmeta_digest,
+            )
         else:
             print_step(5, "Áp dụng MOD")
             print("[*] Bỏ qua — không có MOD nào được chọn.")
@@ -2226,7 +2325,11 @@ def main():
             print("\n[*] Bỏ qua STEP 8: Không tìm thấy database thiết bị phù hợp.")
 
         # ─── STEP 9: Extra Patches ────────────────────────────────
-        if not run_extra_patches(version_dir, source_rom_dir, rom_unpack_dir):
+        if fake_lock_vbmeta_digest is None and not run_extra_patches(
+            version_dir,
+            source_rom_dir,
+            rom_unpack_dir,
+        ):
             print("[!] Patch vbmeta thất bại.")
             continue
 

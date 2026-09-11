@@ -89,7 +89,7 @@ APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
 WORKSPACE_MARKER_KIND = "wukong-rom-studio-workspace"
-WORKSPACE_PIPELINE_VERSION = 21
+WORKSPACE_PIPELINE_VERSION = 22
 ROM_STUDIO_VERSION = DEFAULT_MOD_RELEASE_VERSION
 MOD_VERSION_STUDIO_VERSIONS = DEFAULT_MOD_RELEASE_VERSIONS
 # A release label is presentation metadata, not a directory or a semantic
@@ -148,6 +148,11 @@ SELINUX_HASH_MODS = {"Fake_lock", "WK_Manager"}
 FAKE_LOCK_INIT_BLOCK_START = "    # WK_STUDIO_FAKE_LOCK_BEGIN"
 FAKE_LOCK_INIT_BLOCK_END = "    # WK_STUDIO_FAKE_LOCK_END"
 FAKE_LOCK_LEGACY_INIT_MARKER = "    # wk needs init context for readonly boot property updates; make sure"
+FAKE_LOCK_VBMETA_DIGEST_PLACEHOLDER = "{{VBMETA_BLOB_HASH}}"
+FAKE_LOCK_VBMETA_DIGEST_PROPERTIES = (
+    "ro.boot.vbmeta.digest",
+    "vendor.boot.vbmeta.digest",
+)
 WK_MANAGER_METRICS_INIT_BLOCK_START = "# WK_STUDIO_WK_MANAGER_METRICS_BEGIN"
 WK_MANAGER_METRICS_INIT_BLOCK_END = "# WK_STUDIO_WK_MANAGER_METRICS_END"
 WK_MANAGER_POWER_RELATIVE_ROOT = Path("WK_Manager/system/system")
@@ -1390,7 +1395,9 @@ def list_mods(mod_version: str | None = None, *, mod_root: Path | None = None) -
     collection_dir = _mod_collection_dir(version, mod_root=root)
     results = []
     seen = set()
-    sources = [(collection_dir, False), (shared_root, True)]
+    # Canonical shared MODs must win over stale version-local copies that may
+    # still exist in older downloadable MOD archives during migration.
+    sources = [(shared_root, True), (collection_dir, False)]
     for source_root, shared in sources:
         if source_root.is_dir():
             for mod_dir in sorted(path for path in source_root.iterdir() if path.is_dir()):
@@ -2633,15 +2640,25 @@ def _patch_disable_flag_secure_jars(
     return reports
 
 
-def _fake_lock_init_body(mod_dir: Path) -> list[str]:
+def _fake_lock_init_body(mod_dir: Path, vbmeta_digest: str) -> list[str]:
     source = mod_dir / "system" / "system" / "etc" / "init" / "hw" / "stark_init.rc"
     if not source.is_file():
         raise StudioError(f"Fake_lock init patch is missing: {source}")
+    digest = str(vbmeta_digest or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise StudioError("Fake_lock requires the patched vbmeta blob SHA-256 digest")
     lines = []
+    replaced_properties: set[str] = set()
     for line in source.read_text(encoding="utf-8").splitlines():
         if not line.startswith("+"):
             raise StudioError(f"Fake_lock init patch contains an invalid line: {line}")
         value = line[1:]
+        for property_name in FAKE_LOCK_VBMETA_DIGEST_PROPERTIES:
+            prefix = f"    exec u:r:init:s0 root root -- /system/bin/wk -n {property_name} "
+            if value.startswith(prefix):
+                value = prefix + digest
+                replaced_properties.add(property_name)
+                break
         if value == "on post-fs-data":
             continue
         lines.append(value)
@@ -2651,6 +2668,11 @@ def _fake_lock_init_body(mod_dir: Path) -> list[str]:
         lines.pop()
     if not lines or not any("/system/bin/wk" in line for line in lines):
         raise StudioError("Fake_lock init patch contains no wk commands")
+    missing = sorted(set(FAKE_LOCK_VBMETA_DIGEST_PROPERTIES) - replaced_properties)
+    if missing:
+        raise StudioError(
+            "Fake_lock init patch is missing vbmeta digest properties: " + ", ".join(missing)
+        )
     return lines
 
 
@@ -2687,7 +2709,11 @@ def _remove_marked_init_block(
     return lines[:start] + lines[end + 1 :]
 
 
-def _patch_fake_lock_init_rc(rom_unpack: Path, mod_dir: Path) -> int:
+def _patch_fake_lock_init_rc(
+    rom_unpack: Path,
+    mod_dir: Path,
+    vbmeta_digest: str,
+) -> int:
     target = (
         rom_unpack
         / "system_unpacked"
@@ -2711,7 +2737,7 @@ def _patch_fake_lock_init_rc(rom_unpack: Path, mod_dir: Path) -> int:
         trigger = len(lines) - 1
     block = [
         FAKE_LOCK_INIT_BLOCK_START,
-        *_fake_lock_init_body(mod_dir),
+        *_fake_lock_init_body(mod_dir, vbmeta_digest),
         FAKE_LOCK_INIT_BLOCK_END,
         "",
     ]
@@ -3127,6 +3153,7 @@ def apply_selected_mods(
     workspace: Path,
     mod_version: str | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
+    fake_lock_vbmeta_digest: str | None = None,
 ) -> dict[str, Any]:
     version = normalize_mod_version(mod_version)
     mods = validate_mods(mod_names, mod_version=version)
@@ -3196,7 +3223,11 @@ def apply_selected_mods(
         if mod["name"] == "Disable_flag_secure":
             disable_flag_secure_selected = True
         if mod["name"] == "Fake_lock":
-            patched += _patch_fake_lock_init_rc(rom_unpack, mod_dir)
+            patched += _patch_fake_lock_init_rc(
+                rom_unpack,
+                mod_dir,
+                fake_lock_vbmeta_digest or "",
+            )
             _sync_fake_lock_repack_configs(rom_unpack)
             modified_partitions.add("system")
         if mod["name"] == "Block_ota":
@@ -3667,10 +3698,57 @@ def _stage_debloat(context: BuildContext) -> dict[str, Any]:
     return report
 
 
+def _read_vbmeta_blob_hash(image: Path, *, cwd: Path) -> str:
+    script = ROOT_DIR / "get_blob_hash.py"
+    if not script.is_file():
+        raise StudioError(f"VBMeta blob hash script is missing: {script}")
+    command = [sys.executable, str(script), str(image)]
+    print(f"[*] CMD: {' '.join(command)}", flush=True)
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        print(result.stdout.rstrip(), flush=True)
+    if result.stderr:
+        print(result.stderr.rstrip(), file=sys.stderr, flush=True)
+    if result.returncode != 0:
+        raise StudioError(
+            f"get_blob_hash.py failed with exit code {result.returncode}"
+        )
+    match = re.search(
+        r"Hashed Vbmeta Blob of vbmeta\.img:\s*([0-9a-fA-F]{64})",
+        result.stdout,
+    )
+    if not match:
+        raise StudioError("get_blob_hash.py did not return a vbmeta blob SHA-256 digest")
+    return match.group(1).lower()
+
+
+def _prepare_fake_lock_vbmeta(context: BuildContext) -> dict[str, Any]:
+    patch_details = _stage_vbmeta(context)
+    image_details = patch_details.get("vbmeta", {}).get("vbmeta.img", {})
+    image = Path(str(image_details.get("path") or ""))
+    if not image.is_file():
+        raise StudioError("Patched vbmeta.img is missing before Fake_lock")
+    digest = _read_vbmeta_blob_hash(image, cwd=context.workspace)
+    return {
+        "digest": digest,
+        "image": str(image),
+        "flags": image_details.get("flags"),
+    }
+
+
 def _stage_apply_mod(context: BuildContext) -> dict[str, Any]:
     mod_names = context.spec.selected_mod_names()
     if not mod_names:
         return {"skipped": True}
+    fake_lock_vbmeta = (
+        _prepare_fake_lock_vbmeta(context) if "Fake_lock" in mod_names else None
+    )
     passthrough_before = _passthrough_partition_fingerprints(context.rom_unpack)
     details = apply_selected_mods(
         mod_names,
@@ -3679,6 +3757,9 @@ def _stage_apply_mod(context: BuildContext) -> dict[str, Any]:
         context.workspace,
         context.spec.modVersion,
         context.progress_callback,
+        fake_lock_vbmeta_digest=(
+            str(fake_lock_vbmeta["digest"]) if fake_lock_vbmeta else None
+        ),
     )
     passthrough_after = _passthrough_partition_fingerprints(context.rom_unpack)
     changed_passthrough = sorted(
@@ -3700,6 +3781,8 @@ def _stage_apply_mod(context: BuildContext) -> dict[str, Any]:
             + ", ".join(forbidden)
         )
     context.modified_partitions.update(details.get("modifiedPartitions") or [])
+    if fake_lock_vbmeta:
+        details["fakeLockVbmeta"] = fake_lock_vbmeta
     return details
 
 

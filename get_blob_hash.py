@@ -1,9 +1,10 @@
 import sys
 import hashlib
 import os
+from pathlib import Path
 
 # Thêm đường dẫn tới thư mục chứa avbtool để import
-sys.path.append(r"C:\Android\Auto_Build_WK\platform_external_avb-master")
+sys.path.append(str(Path(__file__).resolve().parent / "platform_external_avb-master"))
 import avbtool
 
 def get_vbmeta_blob_hash(image_filename):
@@ -37,10 +38,11 @@ def get_vbmeta_blob_hash(image_filename):
     
     print(f"Hashed Vbmeta Blob of {os.path.basename(image_filename)}:")
     print(blob_hash)
+    return blob_hash
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         target = sys.argv[1].strip('\"').strip('\'')
     else:
         target = input("Enter path to vbmeta.img: ").strip('\"').strip('\'')
-    get_vbmeta_blob_hash(target)
+    raise SystemExit(0 if get_vbmeta_blob_hash(target) else 1)

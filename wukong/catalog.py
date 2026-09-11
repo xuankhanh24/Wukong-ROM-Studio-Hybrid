@@ -13,7 +13,9 @@ LITE_DEFAULT_MODS: list[str] = [
     "WK_Installer",
 ]
 PLUS_DEFAULT_EXCLUDED_MODS: set[str] = {"Gallery_mod_CN", "Disable_flag_secure"}
-SHARED_MOD_NAMES: frozenset[str] = frozenset({"WK_Manager", "WK_Installer"})
+SHARED_MOD_NAMES: frozenset[str] = frozenset(
+    {"Fake_lock", "WK_Manager", "WK_Installer"}
+)
 PUBLIC_PATCH_ONLY_MOD_NAMES: frozenset[str] = frozenset(
     {"Block_ota", "Disable_flag_secure"}
 )
