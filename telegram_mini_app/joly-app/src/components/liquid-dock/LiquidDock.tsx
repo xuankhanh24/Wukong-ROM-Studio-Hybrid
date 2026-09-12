@@ -1,17 +1,36 @@
-import { useEffect, useId, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { ClipboardList, Library, Settings2, UserRound, WandSparkles, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import type { AccountProfile, Language } from "../../api/types";
 import type { View } from "../../state/app-state";
 import { hapticSelection } from "../../telegram/adapter";
 
-type DockItem = { view: View; label: string; icon: LucideIcon };
+type DockIconName = "studio" | "jobs" | "catalog" | "system";
+type DockView = Exclude<View, "lab">;
+type DockItem = { view: DockView; icon: DockIconName };
 
 const items: DockItem[] = [
-  { view: "studio", label: "Studio", icon: WandSparkles },
-  { view: "jobs", label: "Jobs", icon: ClipboardList },
-  { view: "profile", label: "Profile", icon: UserRound },
-  { view: "catalog", label: "Catalog", icon: Library },
-  { view: "system", label: "System", icon: Settings2 },
+  { view: "studio", icon: "studio" },
+  { view: "jobs", icon: "jobs" },
+  { view: "profile", icon: "studio" },
+  { view: "catalog", icon: "catalog" },
+  { view: "system", icon: "system" },
 ];
+
+function LegacyDockIcon({ name }: { name: DockIconName }) {
+  if (name === "studio") return <><path d="M3.5 11.5 12 4l8.5 7.5M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6" /></>;
+  if (name === "jobs") return <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>;
+  if (name === "catalog") return <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z" />;
+  return <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.1 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.3V9.55h.1A1.7 1.7 0 0 0 4.1 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.56 3.7l.06.06A1.7 1.7 0 0 0 8.5 4.1a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1v-.1h4.05v.1A1.7 1.7 0 0 0 15 4.1a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.5c.2.4.5.75.9 1 .32.2.7.3 1.1.3h.1v4.05h-.1a1.7 1.7 0 0 0-2 1.15Z" />;</>;
+}
+
+function profileInitials(profile?: AccountProfile | null): string {
+  const label = String(profile?.displayName || profile?.username || profile?.telegramId || "WK").trim();
+  const parts = label.split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)?.[0] || ""}` : label.slice(0, 2)).toUpperCase();
+}
+
+function profileHue(profile?: AccountProfile | null): number {
+  return [...String(profile?.telegramId || "wukong")].reduce((total, char) => total + char.charCodeAt(0), 0) % 360;
+}
 
 export function nearestLiquidSlot(value: number): number {
   return [0, 1, 2, 3, 4].reduce((best, slot) => Math.abs(slot - value) < Math.abs(best - value) ? slot : best, 0);
@@ -51,7 +70,7 @@ export function dockShellPath(width: number): string {
 
 const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-export function LiquidDock({ view, onNavigate }: { view: View; onNavigate: (view: View) => void }) {
+export function LiquidDock({ view, onNavigate, account, language = "vi" }: { view: View; onNavigate: (view: View) => void; account?: AccountProfile | null; language?: Language }) {
   const navRef = useRef<HTMLElement>(null);
   const shellRef = useRef<SVGSVGElement>(null);
   const clipPathRef = useRef<SVGPathElement>(null);
@@ -69,7 +88,10 @@ export function LiquidDock({ view, onNavigate }: { view: View; onNavigate: (view
   const suppressClick = useRef(false);
   const suppressTimer = useRef(0);
   const shiftingTimer = useRef(0);
-  const clipId = `liquid-dock-${useId().replace(/:/g, "")}`;
+  const clipId = "dock-shell-clip";
+  const labels = language === "vi"
+    ? { studio: "Studio", jobs: "Jobs", profile: "Mở hồ sơ", catalog: "Thư viện", system: "Hệ thống" }
+    : { studio: "Studio", jobs: "Jobs", profile: "Open profile", catalog: "Library", system: "System" };
 
   const setLiquidPosition = (value: number, _velocity = 0, pressed = false) => {
     const next = Math.max(0, Math.min(4, Number(value) || 0));
@@ -122,10 +144,10 @@ export function LiquidDock({ view, onNavigate }: { view: View; onNavigate: (view
     animateLiquidPosition(target);
   }, [view]);
 
-  const navigate = (slot: number) => {
+  const navigate = (slot: number, smooth = true) => {
     const item = items[slot];
     if (!item) return;
-    hapticSelection();
+    if (smooth) hapticSelection();
     onNavigate(item.view);
   };
 
@@ -167,7 +189,7 @@ export function LiquidDock({ view, onNavigate }: { view: View; onNavigate: (view
     if (dragged.current) {
       const releasedPosition = position.current;
       suppressClick.current = true;
-      navigate(target);
+      navigate(target, false);
       setLiquidPosition(releasedPosition, velocity.current, true);
       animateLiquidPosition(target);
     } else {
@@ -194,19 +216,26 @@ export function LiquidDock({ view, onNavigate }: { view: View; onNavigate: (view
   };
 
   return (
-    <div className="dock-wrap liquid-dock-wrap">
-      <nav ref={navRef} className="dock liquid-dock" aria-label="Điều hướng chính" onClickCapture={onClickCapture} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish}>
+      <nav ref={navRef} className="bottom-nav liquid-dock" aria-label="Workspace navigation" onClickCapture={onClickCapture} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finish} onPointerCancel={finish}>
         <svg ref={shellRef} className="dock-shell" aria-hidden="true" preserveAspectRatio="none">
-          <defs><clipPath id={clipId} clipPathUnits="userSpaceOnUse"><path ref={clipPathRef} /></clipPath></defs>
-          <path ref={rimPathRef} className="dock-rim" />
+          <defs><clipPath id={clipId} clipPathUnits="userSpaceOnUse"><path id="dock-shell-path" ref={clipPathRef} /></clipPath></defs>
+          <path id="dock-rim-path" ref={rimPathRef} className="dock-rim" />
         </svg>
         <span className="liquid-surface" style={{ clipPath: `url(#${clipId})` }} aria-hidden="true" />
         <i className="liquid-lens" aria-hidden="true"><span /></i>
         {items.map((item, index) => {
-          const Icon = item.icon;
-          return <button key={item.view} type="button" data-slot={index} className={`${view === item.view ? "active" : ""} ${item.view === "profile" ? "dock-profile" : ""}`} aria-label={item.label} aria-current={view === item.view ? "page" : undefined}><Icon className="nav-icon" size={22} aria-hidden="true" /><span>{item.label}</span></button>;
+          const label = labels[item.view];
+          const isProfile = item.view === "profile";
+          const navName = item.view === "studio" ? "build" : item.view;
+          const profileStyle = {
+            "--avatar-hue": profileHue(account),
+            "--avatar-image": account?.photoUrl ? `url(${JSON.stringify(String(account.photoUrl))})` : "none",
+          } as CSSProperties;
+          return <button key={item.view} id={isProfile ? "dock-profile" : undefined} type="button" data-nav={navName} data-slot={index} className={`${view === item.view ? "active" : ""} ${isProfile ? "dock-profile" : ""}`} style={isProfile ? profileStyle : undefined} aria-label={label} aria-current={view === item.view ? "page" : undefined}>
+            {isProfile ? <>{account?.photoUrl ? <img src={String(account.photoUrl)} alt="" referrerPolicy="no-referrer" onError={(event) => event.currentTarget.remove()} /> : null}<span>{profileInitials(account)}</span></> : <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><LegacyDockIcon name={item.icon} /></svg>}
+            {!isProfile ? <span>{label}</span> : null}
+          </button>;
         })}
       </nav>
-    </div>
   );
 }

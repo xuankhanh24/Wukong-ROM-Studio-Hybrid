@@ -19,18 +19,30 @@ test("Liquid Dock preserves the legacy geometry and interaction constants", () =
   assert.match(dock, /Math\.abs\(delta\)\s*>\s*5/);
   assert.match(dock, /350/);
   assert.match(dock, /profile-dragging/);
-  assert.match(dock, /aria-label=\{item\.label\}/);
+  assert.match(dock, /className="bottom-nav liquid-dock"/);
+  assert.match(dock, /data-nav=\{navName\}/);
+  assert.match(dock, /id=\{isProfile \? "dock-profile" : undefined\}/);
+  assert.match(dock, /aria-label=\{label\}/);
   assert.match(dock, /<path[^>]+ref=\{clipPathRef\}/);
 });
 
 test("Liquid Dock uses a translucent frosted-glass material", () => {
   const css = read("joly-app/src/joly-native.css");
   assert.match(css, /--dock-glass-bg:\s*color-mix\([^;]+transparent\)/);
-  assert.match(css, /\.liquid-dock-wrap\s*\{[^}]*z-index:\s*60/);
+  assert.match(css, /\.liquid-dock\s*\{[^}]*z-index:\s*60/);
   assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*background:\s*var\(--dock-glass-bg\)/);
   assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
   assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*backdrop-filter:\s*blur\(10px\)/);
   assert.match(css, /\.liquid-dock \.liquid-lens\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
+});
+
+test("Catalog keeps a responsive ROM list instead of forcing the desktop table on mobile", () => {
+  const catalog = read("joly-app/src/features/catalog/RomLibrary.tsx");
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(catalog, /className="rom-desktop-table"/);
+  assert.match(catalog, /className="rom-mobile-list"/);
+  assert.match(css, /\.rom-library > \.rom-desktop-table\s*\{\s*display:\s*none;/);
+  assert.match(css, /\.rom-mobile-list\s*\{\s*display:\s*grid;/);
 });
 
 test("production routes do not render Lab-only showcase fixtures", () => {

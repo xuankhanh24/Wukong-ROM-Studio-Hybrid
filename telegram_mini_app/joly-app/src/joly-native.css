@@ -34,11 +34,15 @@
   --dock-glass-border: color-mix(in oklch, var(--foreground) 18%, transparent);
   --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 20%);
   --dock-lens-bg: color-mix(in oklch, var(--secondary) 46%, transparent);
-  /* Compatibility aliases for the legacy markup; JolyUI keeps the route zinc-neutral. */
-  --mint: var(--foreground);
-  --mint-soft: var(--secondary);
-  --violet: var(--foreground);
-  --orange: var(--foreground);
+  /* JolyUI remains the surface authority; these restrained semantic accents
+     only make success, warning and informational states scannable. */
+  --status-success: oklch(.48 .14 158);
+  --status-warning: oklch(.58 .14 80);
+  --status-info: oklch(.48 .12 250);
+  --mint: var(--status-success);
+  --mint-soft: color-mix(in oklch, var(--status-success) 10%, var(--card));
+  --violet: var(--status-info);
+  --orange: var(--status-warning);
   --danger: var(--destructive);
   --shadow: none;
   color: var(--foreground);
@@ -67,9 +71,13 @@
   --sidebar: oklch(.17 .005 285.823);
   --sidebar-foreground: oklch(.985 0 0);
   --sidebar-accent: oklch(.274 .006 286.033);
-  --mint: var(--foreground);
-  --violet: var(--foreground);
-  --orange: var(--foreground);
+  --status-success: oklch(.74 .13 158);
+  --status-warning: oklch(.8 .14 80);
+  --status-info: oklch(.76 .12 250);
+  --mint: var(--status-success);
+  --mint-soft: color-mix(in oklch, var(--status-success) 16%, var(--card));
+  --violet: var(--status-info);
+  --orange: var(--status-warning);
   --dock-glass-bg: color-mix(in oklch, var(--foreground) 12%, transparent);
   --dock-glass-border: oklch(1 0 0 / 22%);
   --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 38%);
@@ -115,26 +123,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .language-toggle { color: var(--muted-foreground); padding: 0 9px; font-family: Geist, sans-serif; font-size: 10px; }
 .avatar { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); border-radius: 8px; }
 
-.dock-wrap {
-  position: fixed; inset: 56px auto 0 0; z-index: 30; width: 240px; transform: none;
-  border-right: 1px solid var(--border); background: var(--sidebar); padding: 18px 12px;
-}
-.dock {
-  width: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; gap: 3px;
-  border: 0; border-radius: 0; background: transparent; box-shadow: none;
-}
-.dock::before { content: "Workspace"; padding: 5px 10px 9px; color: var(--muted-foreground); font-size: 11px; font-weight: 500; }
-.dock button {
-  width: 100%; min-width: 0; height: 40px; display: flex; flex-direction: row; justify-content: flex-start;
-  gap: 11px; padding: 0 10px; border: 0; border-radius: 8px; color: var(--muted-foreground); background: transparent;
-}
-.dock button:hover { background: var(--sidebar-accent); color: var(--sidebar-foreground); }
-.dock button.active { background: var(--sidebar-accent); color: var(--sidebar-foreground); box-shadow: none; }
-.dock button span { width: 19px; height: 19px; background: transparent; color: currentColor; }
-.dock button small { font-size: 13px; font-weight: 500; }
-.dock button.active small { color: currentColor; }
-
-main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
+main { max-width: none; margin: 0; padding: 88px 32px 56px; }
 .screen { width: min(100%, 1180px); margin: 0 auto; }
 .screen-heading { align-items: flex-start; margin-bottom: 24px; }
 .screen-heading h1 { margin: 0; color: var(--foreground); font-size: clamp(27px, 3vw, 34px); line-height: 1.12; letter-spacing: -.03em; font-weight: 650; }
@@ -162,14 +151,24 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 .j-button-ghost:hover:not(:disabled) { background: var(--accent); color: var(--accent-foreground); }
 .status-pill { padding: 5px 8px; border-color: var(--border); background: var(--card); color: var(--muted-foreground); font-family: Geist, sans-serif; font-size: 10px; }
 .status-pill i { width: 5px; height: 5px; }
-.status-success { color: color-mix(in oklch, var(--mint) 86%, var(--foreground)); background: color-mix(in oklch, var(--mint) 9%, var(--card)); }
-.status-blue { color: var(--foreground); background: var(--secondary); }
-.stat-readout.stat-green strong, .stat-readout.stat-violet strong, .stat-readout.stat-orange strong,
+.status-success { color: var(--status-success); background: color-mix(in oklch, var(--status-success) 11%, var(--card)); }
+.status-blue { color: var(--status-info); background: color-mix(in oklch, var(--status-info) 10%, var(--card)); }
+.status-warning { color: var(--status-warning); background: color-mix(in oklch, var(--status-warning) 12%, var(--card)); }
+.status-danger { color: var(--destructive); background: color-mix(in oklch, var(--destructive) 10%, var(--card)); }
+.stat-readout.stat-green strong { color: var(--status-success); }
+.stat-readout.stat-violet strong { color: var(--status-info); }
+.stat-readout.stat-orange strong { color: var(--status-warning); }
 .catalog-summary strong, .health-metric strong { color: var(--foreground); }
-.mod-dot.blue, .mod-dot.violet, .mod-dot.orange, .mod-dot.green, .mod-dot.cyan { background: var(--muted-foreground); }
+.mod-dot.blue, .mod-dot.cyan { background: var(--status-info); }
+.mod-dot.violet { background: var(--status-info); }
+.mod-dot.orange { background: var(--status-warning); }
+.mod-dot.green { background: var(--status-success); }
 .stat-readout.stat-green, .stat-readout.stat-violet, .stat-readout.stat-orange { border-color: var(--border); }
-.map-node i, .map-node.node-sg i, .map-node.node-us i { background: var(--foreground); outline-color: var(--foreground); }
-.route-two, .beam-track::after { background: var(--foreground); }
+.map-node i { background: var(--status-success); outline-color: var(--status-success); }
+.map-node.node-sg i { background: var(--status-warning); outline-color: var(--status-warning); }
+.map-node.node-us i { background: var(--status-info); outline-color: var(--status-info); }
+.route-two { background: var(--status-success); }
+.beam-track::after { background: var(--status-info); }
 .contributor-avatar { color: var(--primary-foreground); background: var(--primary); }
 .avatar-0, .avatar-1, .avatar-2, .avatar-3, .avatar-4 { background: var(--primary); }
 
@@ -221,7 +220,7 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 .active-job-panel { padding: 20px; }
 .job-progress-readout strong { color: var(--foreground); }
 .big-progress { background: var(--secondary); }
-.big-progress i { background: var(--foreground); }
+.big-progress i { background: var(--status-info); }
 .beam-track { background: var(--border); }
 .beam-node.current > div { border-color: var(--foreground); color: var(--foreground); box-shadow: 0 0 0 4px var(--secondary); }
 .log-strip { border: 1px solid var(--border); border-radius: 10px; background: oklch(.115 .004 285.823); }
@@ -302,8 +301,7 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 }
 
 @media (max-width: 1000px) {
-  main { margin-left: 210px; padding: 80px 20px 44px; }
-  .dock-wrap { width: 210px; }
+  main { padding: 80px 20px 44px; }
   .topbar-center { left: 228px; }
   .bento-grid, .job-layout, .system-two-col, .profile-grid { grid-template-columns: 1fr; }
   .lab-grid { grid-template-columns: 1fr 1fr; }
@@ -325,20 +323,6 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
   .status-ribbon { margin: 0 0 12px; }
   .source-panel, .recipe-panel, .review-panel, .runner-map, .system-tools, .contributors-panel, .profile-card, .tutorial-card, .feedback-card { padding: 16px; }
   .panel { border-radius: 11px; }
-  .dock-wrap {
-    inset: auto 50% max(10px, env(safe-area-inset-bottom)) auto; width: auto; padding: 0; transform: translateX(50%);
-    border: 0; background: transparent;
-  }
-  .dock {
-    width: auto; min-height: 58px; padding: 5px; flex-direction: row; gap: 1px;
-    border: 1px solid var(--border); border-radius: 14px; background: color-mix(in oklch, var(--card) 94%, transparent);
-    box-shadow: 0 12px 36px oklch(0 0 0 / 26%); backdrop-filter: blur(12px);
-  }
-  .dock::before { display: none; }
-  .dock button { width: auto; min-width: 55px; height: 48px; flex-direction: column; justify-content: center; gap: 3px; padding: 0 6px; border-radius: 10px; }
-  .dock button span { width: 18px; height: 18px; }
-  .dock button small { font-size: 8px; }
-  .dock button:nth-child(5) { display: flex; }
   .bento-grid, .job-layout, .system-two-col, .profile-grid { grid-template-columns: 1fr; }
   .metadata-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .catalog-summary, .system-grid { grid-template-columns: repeat(2, 1fr); }
@@ -354,12 +338,13 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 
 /* The geometry and motion model below is a direct React port of the legacy
    bottom-nav. Only material roles are remapped to JolyUI tokens. */
-.liquid-dock-wrap { z-index: 60; width: clamp(540px, 52vw, 760px); max-width: calc(100vw - 32px); pointer-events: none; }
 .liquid-dock {
   --dock-slot-count: 5; --liquid-position: 0; --liquid-offset: 0%; --liquid-press: 1;
-  position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(var(--dock-slot-count), minmax(0, 1fr));
-  width: 100%; height: 72px; padding: 5px; overflow: visible; border: 0; border-radius: 999px;
-  color: var(--foreground); background: transparent; box-shadow: none; touch-action: pan-y; pointer-events: auto; cursor: grab;
+  position: fixed; top: auto; right: auto; bottom: max(15px, env(safe-area-inset-bottom)); left: 50%; z-index: 60;
+  isolation: isolate; display: grid; grid-template-columns: repeat(var(--dock-slot-count), minmax(0, 1fr));
+  width: clamp(540px, 52vw, 760px); max-width: calc(100vw - 32px); height: 72px; padding: 5px; overflow: visible;
+  border: 0; border-radius: 999px; color: var(--foreground); background: transparent; box-shadow: none;
+  touch-action: pan-y; pointer-events: auto; cursor: grab; transform: translateX(-50%);
 }
 .liquid-dock.is-pressed { cursor: grabbing; }
 .liquid-dock .dock-shell { position: absolute; z-index: -1; inset: -24px 0 0; width: 100%; height: calc(100% + 24px); overflow: visible; filter: drop-shadow(0 12px 24px oklch(0 0 0 / 20%)); pointer-events: none; }
@@ -379,14 +364,15 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 .liquid-dock > button > span { display: block; overflow: hidden; max-width: 100%; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .liquid-dock > button.active .nav-icon { stroke-width: 2.15; transform: translateY(-1px) scale(1.1); }
 .liquid-dock > button:focus-visible { outline: 3px solid var(--ring); outline-offset: -2px; }
-.liquid-dock > button.dock-profile { position: relative; z-index: 4; align-self: center; justify-self: center; width: 60px; height: 60px; min-height: 60px; overflow: visible; padding: 0; border: 2px solid color-mix(in oklch, var(--background) 75%, transparent); border-radius: 50%; color: var(--primary-foreground); background: var(--primary); box-shadow: inset 0 1px 2px oklch(1 0 0 / 38%), 0 10px 23px oklch(0 0 0 / 22%); transform: translateY(-15px); }
-.liquid-dock > button.dock-profile > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.liquid-dock > button.dock-profile::before { content: ""; position: absolute; z-index: -1; inset: -9px; border-radius: 50%; opacity: 0; background: color-mix(in oklch, var(--ring) 32%, transparent); box-shadow: 0 7px 24px color-mix(in oklch, var(--ring) 35%, transparent); filter: blur(5px); transform: scale(.82); transition: opacity .28s ease, transform .34s cubic-bezier(.22,1,.36,1); pointer-events: none; }
+.liquid-dock > button.dock-profile { position: relative; z-index: 4; align-self: center; justify-self: center; width: 60px; height: 60px; min-height: 60px; overflow: visible; padding: 0; border: 2px solid oklch(1 0 0 / 72%); border-radius: 50%; color: #fff; background: hsl(var(--avatar-hue, 210) 58% 42%); box-shadow: inset 0 1px 2px oklch(1 0 0 / 38%), 0 10px 23px oklch(0 0 0 / 22%); transform: translateY(-15px); }
+.liquid-dock > button.dock-profile > span { position: relative; width: auto; height: auto; overflow: visible; clip-path: none; font: 700 13px/1 "Geist Mono", monospace; white-space: nowrap; }
+.liquid-dock > button.dock-profile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; clip-path: circle(50%); }
+.liquid-dock > button.dock-profile::before { content: ""; position: absolute; z-index: -1; inset: -9px; border-radius: 50%; opacity: 0; background-image: var(--avatar-image, none); background-position: center; background-size: cover; box-shadow: 0 0 0 5px color-mix(in oklch, var(--ring) 28%, transparent), 0 7px 24px color-mix(in oklch, var(--ring) 54%, transparent), 0 2px 10px oklch(1 0 0 / 20%); filter: blur(5px) saturate(1.25); transform: scale(.82); transition: opacity .28s ease, transform .34s cubic-bezier(.22,1,.36,1); pointer-events: none; }
 .liquid-dock > button.dock-profile::after { content: ""; position: absolute; inset: 2px; border: 1px solid oklch(1 0 0 / 30%); border-radius: inherit; pointer-events: none; }
 .liquid-dock > button.dock-profile.active::before { opacity: 1; transform: scale(1); }
 .liquid-dock > button.dock-profile.active { box-shadow: inset 0 1px 2px oklch(1 0 0 / 44%), 0 13px 28px oklch(0 0 0 / 28%); }
 @media (max-width: 650px) {
-  .liquid-dock-wrap { width: calc(100vw - 20px); bottom: max(10px, env(safe-area-inset-bottom)); }
+  .liquid-dock { width: calc(100vw - 20px); bottom: max(10px, env(safe-area-inset-bottom)); }
   .liquid-dock { min-height: 64px; padding: 5px; }
   .liquid-dock .liquid-lens { top: 5px; left: 5px; width: calc((100% - 10px) / 5); height: 52px; }
   .liquid-dock > button { min-height: 52px; }
@@ -394,21 +380,6 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
   .liquid-dock > button.dock-profile { width: 54px; height: 54px; min-height: 54px; transform: translateY(-12px); }
 }
 
-/* The legacy shell styles .dock-wrap as a desktop sidebar. The production
-   dock keeps the original horizontal liquid surface at every breakpoint. */
-.liquid-dock-wrap {
-  position: fixed;
-  top: auto;
-  right: auto;
-  bottom: max(15px, env(safe-area-inset-bottom));
-  left: 50%;
-  inset: auto auto max(15px, env(safe-area-inset-bottom)) 50%;
-  width: min(760px, calc(100vw - 32px));
-  padding: 0;
-  border: 0;
-  background: transparent;
-  transform: translateX(-50%);
-}
 .liquid-dock::before { content: none; display: none; }
 
 @media (min-width: 651px) {
@@ -416,13 +387,12 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 }
 
 @media (max-width: 650px) {
-  .liquid-dock-wrap {
-    bottom: max(10px, env(safe-area-inset-bottom));
-    left: 50%;
-    inset: auto auto max(10px, env(safe-area-inset-bottom)) 50%;
-    width: calc(100vw - 20px);
-    transform: translateX(-50%);
-  }
+  .liquid-dock { bottom: max(10px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
+}
+
+@media (max-width: 390px) {
+  .liquid-dock { width: calc(100vw - 14px); }
+  .liquid-dock > button.dock-profile { width: 56px; height: 56px; min-height: 56px; }
 }
 
 @media (min-width: 651px) {
@@ -521,6 +491,7 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 .job-events > .j-button { margin-top: 8px; }
 .rom-library { margin-top: 16px; }
 .rom-library .panel-head { align-items: flex-start; }
+.rom-library .panel-head > .mono { flex: 0 0 auto; white-space: nowrap; }
 .rom-library .panel-head p { margin: 5px 0 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
 .rom-library-controls { display: grid; grid-template-columns: 1.2fr 1.4fr 1.1fr auto; align-items: end; gap: 10px; margin: 14px 0 10px; }
 .rom-library-controls label { display: grid; gap: 6px; color: var(--muted-foreground); font-size: 10px; }
@@ -528,8 +499,18 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 .rom-library-controls .search-field { min-height: 36px; }
 .rom-library-controls select:disabled { cursor: not-allowed; opacity: .55; }
 .rom-library-status { min-height: 18px; color: var(--muted-foreground); font: 10px "Geist Mono", monospace; }
-.rom-library [data-slot="animated-table"] { margin-top: 8px; border-color: var(--border); border-radius: 10px; background: var(--card); box-shadow: none; }
-.rom-library [data-slot="animated-table"] table { min-width: 640px; }
+.rom-library .rom-desktop-table { margin-top: 8px; border-color: var(--border); border-radius: 10px; background: var(--card); box-shadow: none; }
+.rom-library .rom-desktop-table table { min-width: 640px; }
+.rom-mobile-list { display: none; }
+.rom-mobile-row { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
+.rom-mobile-row.is-selected { border-color: var(--ring); background: var(--accent); }
+.rom-mobile-row-head { display: flex; min-width: 0; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.rom-mobile-row-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 12px; line-height: 1.35; }
+.rom-mobile-row p { margin: 0; color: var(--muted-foreground); font-size: 11px; }
+.rom-mobile-row > code { overflow-wrap: anywhere; color: var(--muted-foreground); font-size: 10px; }
+.rom-mobile-row-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rom-mobile-row-actions .j-button { min-width: 0; padding-inline: 8px; font-size: 10px; }
+.rom-mobile-empty { min-height: 76px; display: grid; place-items: center; padding: 14px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted-foreground); font-size: 11px; text-align: center; }
 .rom-release-cell { display: grid; gap: 3px; }
 .rom-release-cell small { color: var(--muted-foreground); }
 .rom-row-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
@@ -547,6 +528,8 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
   .admin-detail-stream { grid-template-columns: 1fr; }
   .rom-library-controls { grid-template-columns: 1fr; }
   .rom-library-controls > .j-button { width: 100%; }
+  .rom-library > .rom-desktop-table { display: none; }
+  .rom-mobile-list { display: grid; gap: 8px; margin-top: 8px; }
   .rom-row-actions .j-button { padding-inline: 8px; }
   .rom-library-actions { width: 100%; margin-left: 0; }
   .rom-library-actions .j-button { flex: 1; }

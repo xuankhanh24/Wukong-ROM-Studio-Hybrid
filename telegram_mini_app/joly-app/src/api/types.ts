@@ -6,6 +6,7 @@ export interface AccountProfile {
   userId?: string | number;
   username?: string;
   displayName?: string;
+  photoUrl?: string;
   role?: "admin" | "user" | string;
   accessStatus?: "approved" | "pending" | "revoked" | string;
   buildCredits?: number;
