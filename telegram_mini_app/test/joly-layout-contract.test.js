@@ -23,6 +23,16 @@ test("Liquid Dock preserves the legacy geometry and interaction constants", () =
   assert.match(dock, /<path[^>]+ref=\{clipPathRef\}/);
 });
 
+test("Liquid Dock uses a translucent frosted-glass material", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /--dock-glass-bg:\s*color-mix\([^;]+transparent\)/);
+  assert.match(css, /\.liquid-dock-wrap\s*\{[^}]*z-index:\s*60/);
+  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*background:\s*var\(--dock-glass-bg\)/);
+  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
+  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*backdrop-filter:\s*blur\(10px\)/);
+  assert.match(css, /\.liquid-dock \.liquid-lens\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
+});
+
 test("production routes do not render Lab-only showcase fixtures", () => {
   const app = read("joly-app/src/App.tsx");
   for (const id of ["infinite-ribbon", "expanded-map", "github-star", "github-contributors", "video-player", "feedback-widget", "image-comparison"]) {

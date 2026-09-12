@@ -13,7 +13,7 @@
       "dependency": "JolyUI registry source + declared imports",
       "usage": "core",
       "render": "direct",
-      "checksum": "sha256:79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
+      "checksum": "sha256:d661cfd463385b680fe85fe296d192dcbdb634db2d60722b2e0b6c7b784ca836",
       "pinnedCommit": "3d4fb97066f173e8eb8ab433726dee24577e2cc6"
     },
     {

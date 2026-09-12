@@ -30,6 +30,10 @@
   --faint: var(--muted-foreground);
   --line: var(--border);
   --line-strong: var(--input);
+  --dock-glass-bg: color-mix(in oklch, var(--background) 28%, transparent);
+  --dock-glass-border: color-mix(in oklch, var(--foreground) 18%, transparent);
+  --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 20%);
+  --dock-lens-bg: color-mix(in oklch, var(--secondary) 46%, transparent);
   /* Compatibility aliases for the legacy markup; JolyUI keeps the route zinc-neutral. */
   --mint: var(--foreground);
   --mint-soft: var(--secondary);
@@ -66,6 +70,10 @@
   --mint: var(--foreground);
   --violet: var(--foreground);
   --orange: var(--foreground);
+  --dock-glass-bg: color-mix(in oklch, var(--background) 48%, transparent);
+  --dock-glass-border: oklch(1 0 0 / 22%);
+  --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 38%);
+  --dock-lens-bg: color-mix(in oklch, var(--secondary) 58%, transparent);
 }
 
 html { background: var(--background); color-scheme: light; }
@@ -346,7 +354,7 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 
 /* The geometry and motion model below is a direct React port of the legacy
    bottom-nav. Only material roles are remapped to JolyUI tokens. */
-.liquid-dock-wrap { width: clamp(540px, 52vw, 760px); max-width: calc(100vw - 32px); pointer-events: none; }
+.liquid-dock-wrap { z-index: 60; width: clamp(540px, 52vw, 760px); max-width: calc(100vw - 32px); pointer-events: none; }
 .liquid-dock {
   --dock-slot-count: 5; --liquid-position: 0; --liquid-offset: 0%; --liquid-press: 1;
   position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(var(--dock-slot-count), minmax(0, 1fr));
@@ -355,15 +363,15 @@ main { max-width: none; margin: 0 0 0 240px; padding: 88px 32px 56px; }
 }
 .liquid-dock.is-pressed { cursor: grabbing; }
 .liquid-dock .dock-shell { position: absolute; z-index: -1; inset: -24px 0 0; width: 100%; height: calc(100% + 24px); overflow: visible; filter: drop-shadow(0 12px 24px oklch(0 0 0 / 20%)); pointer-events: none; }
-.liquid-dock .dock-rim { fill: none; stroke: var(--border); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
-.liquid-dock .liquid-surface { position: absolute; z-index: -2; inset: -24px 0 0; overflow: hidden; border: 0; border-radius: 0; background: color-mix(in oklch, var(--card) 88%, transparent); box-shadow: 0 12px 30px oklch(0 0 0 / 16%); backdrop-filter: blur(10px) saturate(1.35) contrast(1.05); pointer-events: none; }
-.liquid-dock .liquid-lens { position: absolute; z-index: 0; top: 12px; left: 5px; width: calc((100% - 10px) / var(--dock-slot-count)); height: 56px; overflow: hidden; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in oklch, var(--secondary) 78%, transparent); box-shadow: inset 0 1px 1px oklch(1 0 0 / 28%), inset 0 -6px 16px oklch(0 0 0 / 8%), 0 7px 18px oklch(0 0 0 / 12%); backdrop-filter: blur(10px) saturate(1.4); transform: translate3d(var(--liquid-offset), 0, 0) scale(var(--liquid-press)); transform-origin: center; will-change: transform; pointer-events: none; opacity: 1; transition: opacity .18s ease, box-shadow .24s cubic-bezier(.22,1,.36,1); }
+.liquid-dock .dock-rim { fill: none; stroke: var(--dock-glass-border); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
+.liquid-dock .liquid-surface { position: absolute; z-index: -2; inset: -24px 0 0; overflow: hidden; border: 0; border-radius: 0; background: var(--dock-glass-bg); box-shadow: var(--dock-glass-shadow); -webkit-backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); pointer-events: none; }
+.liquid-dock .liquid-lens { position: absolute; z-index: 0; top: 12px; left: 5px; width: calc((100% - 10px) / var(--dock-slot-count)); height: 56px; overflow: hidden; border: 1px solid var(--dock-glass-border); border-radius: 999px; background: var(--dock-lens-bg); box-shadow: inset 0 1px 1px oklch(1 0 0 / 32%), inset 0 -6px 16px oklch(0 0 0 / 8%), 0 7px 18px oklch(0 0 0 / 12%); -webkit-backdrop-filter: blur(10px) saturate(1.58) contrast(1.08); backdrop-filter: blur(10px) saturate(1.58) contrast(1.08); transform: translate3d(var(--liquid-offset), 0, 0) scale(var(--liquid-press)); transform-origin: center; will-change: transform; pointer-events: none; opacity: 1; transition: opacity .18s ease, box-shadow .24s cubic-bezier(.22,1,.36,1); }
 .liquid-dock .liquid-lens::before, .liquid-dock .liquid-lens::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; }
 .liquid-dock .liquid-lens::before { opacity: .45; box-shadow: inset 1px 0 0 color-mix(in oklch, var(--foreground) 18%, transparent), inset 0 1px 0 oklch(1 0 0 / 42%); }
 .liquid-dock .liquid-lens::after { opacity: .35; box-shadow: inset -1px 0 0 color-mix(in oklch, var(--muted-foreground) 20%, transparent); }
 .liquid-dock .liquid-lens > span { position: absolute; inset: 2px 20% 66%; border-radius: 999px; background: oklch(1 0 0 / 14%); filter: blur(7px); }
 .liquid-dock.profile-active:not(.profile-dragging) .liquid-lens { opacity: 0; }
-.liquid-dock.is-pressed .liquid-surface { backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); }
+.liquid-dock.is-pressed .liquid-surface { -webkit-backdrop-filter: blur(10px) saturate(1.62) contrast(1.1); backdrop-filter: blur(10px) saturate(1.62) contrast(1.1); }
 .liquid-dock.is-pressed .liquid-lens { filter: saturate(1.12); box-shadow: inset 0 2px 3px oklch(1 0 0 / 48%), inset 0 -9px 18px oklch(0 0 0 / 12%), 0 11px 26px oklch(0 0 0 / 17%); }
 .liquid-dock > button { position: relative; z-index: 1; display: flex; min-width: 0; min-height: 56px; align-items: center; justify-content: center; flex-direction: column; gap: 3px; padding: 5px 1px; border: 0; border-radius: 999px; color: inherit; background: transparent; transition: color .2s cubic-bezier(.22,1,.36,1), transform .2s cubic-bezier(.22,1,.36,1); -webkit-tap-highlight-color: transparent; user-select: none; }
 .liquid-dock > button:not(.dock-profile) { top: 7px; height: 56px; align-self: start; }
