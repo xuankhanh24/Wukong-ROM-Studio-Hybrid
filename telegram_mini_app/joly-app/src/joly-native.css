@@ -700,3 +700,138 @@ main { padding-bottom: var(--dock-safe-height); }
 
 html[data-keyboard="true"] .liquid-dock { visibility: hidden; pointer-events: none; }
 html[data-keyboard="true"] main { padding-bottom: 32px; }
+
+/* Information-hierarchy pass. Color is assigned by meaning: blue for the
+   next action/current state, green for verified state, amber for attention,
+   and neutral surfaces for supporting information. */
+:root {
+  --surface-quiet: color-mix(in oklch, var(--secondary) 52%, var(--card));
+  --surface-current: color-mix(in oklch, var(--brand-soft) 38%, var(--card));
+  --text-secondary: color-mix(in oklch, var(--foreground) 68%, var(--background));
+}
+
+.app-shell { background: color-mix(in oklch, var(--brand-soft) 6%, var(--background)); }
+.topbar { background: color-mix(in oklch, var(--background) 91%, transparent); }
+.topbar-context {
+  max-width: 160px; padding: 5px 8px; overflow: hidden; border: 0; border-radius: 6px;
+  background: var(--brand-soft); color: var(--brand-hover); text-overflow: ellipsis;
+}
+.screen-heading { min-height: 56px; align-items: flex-start; }
+.screen-heading > div:first-child { min-width: 0; }
+.screen-heading p { color: var(--text-secondary); }
+
+.j-button:disabled {
+  cursor: not-allowed; border-color: var(--border); background: var(--secondary);
+  color: var(--muted-foreground); box-shadow: none; opacity: .64;
+}
+.j-button-default:disabled { border-color: var(--border); background: var(--secondary); color: var(--muted-foreground); }
+
+.panel { border-color: color-mix(in oklch, var(--foreground) 11%, transparent); }
+.section-title h2, .panel-head h2, .review-header h2, .active-job-top h2 { font-weight: 650; }
+.section-title p, .panel-head p, .active-job-top p { color: var(--text-secondary); line-height: 1.5; }
+
+.source-panel {
+  border-color: color-mix(in oklch, var(--brand) 24%, var(--border));
+  background: color-mix(in oklch, var(--brand-soft) 13%, var(--card));
+}
+.source-panel .prompt-box { background: var(--card); }
+.source-result.idle { border-style: solid; border-color: var(--border); background: var(--surface-quiet); }
+.source-result strong { margin-top: 5px; color: var(--foreground); font-size: 14px; font-weight: 620; }
+.source-result p { color: var(--text-secondary); font-size: 11px; }
+.recipe-panel { background: var(--card); }
+.review-panel {
+  border-color: color-mix(in oklch, var(--brand) 20%, var(--border));
+  background: var(--surface-current);
+}
+.review-note { color: var(--text-secondary); }
+.readiness strong { color: var(--brand-hover); font-weight: 650; }
+
+.job-metrics, .catalog-summary, .system-grid { border-color: color-mix(in oklch, var(--foreground) 13%, transparent); }
+.stat-readout, .catalog-summary > div, .health-metric { min-height: 104px; padding: 18px 20px; }
+.stat-readout strong, .catalog-summary strong, .health-metric strong {
+  font-size: 28px; font-weight: 620; letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+}
+.stat-readout > strong > span, .stat-readout > strong > span > span {
+  font: inherit !important; line-height: 1 !important; letter-spacing: inherit !important;
+}
+.stat-readout span, .catalog-summary span, .health-metric span {
+  margin-top: 9px; color: var(--text-secondary); font-size: 11px; line-height: 1.35;
+}
+.catalog-summary small, .health-metric small { color: var(--muted-foreground); font-size: 10px; }
+.job-metrics .stat-readout:first-child { background: var(--surface-current); }
+
+.tabs { border: 1px solid var(--border); }
+.tabs button { color: var(--text-secondary); }
+.tabs button.active { color: var(--brand-hover); }
+.toolbar-button, .search-field, .catalog-version-filter { color: var(--text-secondary); }
+.jobs-table-wrap, .catalog-table { border-color: color-mix(in oklch, var(--foreground) 13%, transparent); }
+.jobs-table th, .catalog-head { color: var(--text-secondary); }
+.jobs-table td, .catalog-row { border-color: color-mix(in oklch, var(--foreground) 8%, transparent); }
+.active-job-panel {
+  border-color: color-mix(in oklch, var(--brand) 34%, var(--border));
+  background: color-mix(in oklch, var(--brand-soft) 12%, var(--card));
+}
+.job-progress-readout strong { font-weight: 680; }
+.log-strip [data-slot="code-block"] { color: oklch(.88 .008 286); }
+.log-strip [data-slot="code-block"] pre { line-height: 1.72; }
+.log-strip [data-slot="code-block"] pre,
+.log-strip [data-slot="code-block"] pre code,
+.log-strip [data-slot="code-block"] pre code span { color: oklch(.78 .01 286) !important; }
+
+.catalog-screen .rom-library { border-color: color-mix(in oklch, var(--brand) 18%, var(--border)); }
+.catalog-summary > div { background: var(--surface-quiet); }
+.catalog-row:hover { background: var(--surface-current); }
+.row-more:hover { border-color: color-mix(in oklch, var(--brand) 34%, var(--border)); color: var(--brand-hover); background: var(--brand-soft); }
+
+.system-grid { background: color-mix(in oklch, var(--foreground) 10%, transparent); }
+.health-hero { background: color-mix(in oklch, var(--status-success) 5%, var(--card)); }
+.health-orbit { color: var(--status-success); background: color-mix(in oklch, var(--status-success) 10%, var(--card)); }
+.service-row { color: var(--text-secondary); }
+.service-row > span:first-child { color: var(--foreground); font-weight: 550; }
+.system-tools > button { min-height: 62px; }
+.system-tools > button strong { color: var(--foreground); font-weight: 600; }
+.system-tools > button small { color: var(--text-secondary); }
+
+.profile-grid-compact { grid-template-columns: minmax(0, 820px); }
+.profile-card { border-color: color-mix(in oklch, var(--brand) 18%, var(--border)); }
+.profile-card-top { background: color-mix(in oklch, var(--brand-soft) 8%, var(--card)); }
+.profile-card-top p { color: var(--text-secondary); }
+.profile-facts div { min-height: 82px; padding: 15px; background: var(--surface-quiet); }
+.profile-facts span { color: var(--text-secondary); font-size: 11px; }
+.profile-facts strong { margin-top: 9px; color: var(--foreground); font-size: 11px; }
+.profile-actions { padding-top: 2px; }
+
+@media (min-width: 1001px) {
+  .studio-grid { grid-template-columns: minmax(0, 1.36fr) minmax(360px, .84fr); gap: 16px; }
+}
+
+@media (max-width: 650px) {
+  :root { --dock-safe-height: 124px; }
+  main { padding: 76px 13px var(--dock-safe-height); }
+  .screen-heading { min-height: 0; gap: 12px; margin-bottom: 20px; }
+  .screen-heading h1 { font-size: 28px; line-height: 1.08; }
+  .screen-heading p { max-width: 42ch; font-size: 12.5px; line-height: 1.55; }
+  .heading-actions { gap: 8px; }
+  .heading-actions .status-pill { flex: 0 0 auto; }
+  .source-panel, .recipe-panel, .review-panel, .profile-card, .service-status, .system-tools { padding: 17px 15px; }
+  .bento-grid { gap: 12px; }
+  .section-title h2, .panel-head h2, .review-header h2, .active-job-top h2 { font-size: 18px; }
+  .section-title p, .panel-head p, .active-job-top p { font-size: 12px; }
+  .prompt-box { margin-top: 18px; }
+  .source-result { padding: 15px 13px; }
+  .job-metrics { margin-bottom: 22px; }
+  .stat-readout { min-height: 92px; padding: 15px; }
+  .stat-readout strong { font-size: 25px; }
+  .stat-readout > strong > span, .stat-readout > strong > span > span { font-size: 25px !important; }
+  .stat-readout span { font-size: 10.5px; }
+  .catalog-summary > div { min-height: 92px; padding: 14px 11px; }
+  .catalog-summary strong { font-size: 22px; }
+  .catalog-summary span { font-size: 9px; }
+  .catalog-summary small { font-size: 9px; }
+  .active-job-panel { padding: 18px; }
+  .job-progress-readout { margin-top: 26px; }
+  .job-progress-readout strong { font-size: 36px; }
+  .profile-facts div { min-height: 80px; padding: 13px; }
+  .profile-facts span, .profile-facts strong { font-size: 10.5px; }
+  .topbar-context { max-width: 104px; padding-inline: 6px; background: transparent; }
+}

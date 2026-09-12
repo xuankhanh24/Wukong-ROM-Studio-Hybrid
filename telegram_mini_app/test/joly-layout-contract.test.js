@@ -93,3 +93,13 @@ test("responsive layout includes hard overflow and safe-area guards", () => {
   assert.match(css, /min-height:\s*44px/);
   assert.match(css, /\.studio-grid\s*\{[^}]*align-items:\s*start/);
 });
+
+test("visual hierarchy distinguishes action, support, and disabled states", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /--surface-current:\s*color-mix\(/);
+  assert.match(css, /--text-secondary:\s*color-mix\(/);
+  assert.match(css, /\.j-button:disabled\s*\{[^}]*background:\s*var\(--secondary\)[^}]*box-shadow:\s*none/);
+  assert.match(css, /\.source-panel\s*\{[^}]*border-color:\s*color-mix\([^}]*var\(--brand\)/);
+  assert.match(css, /\.active-job-panel\s*\{[^}]*background:\s*color-mix\([^}]*var\(--brand-soft\)/);
+  assert.match(css, /\.health-hero\s*\{[^}]*var\(--status-success\)/);
+});
