@@ -30,7 +30,7 @@
   --faint: var(--muted-foreground);
   --line: var(--border);
   --line-strong: var(--input);
-  --dock-glass-bg: color-mix(in oklch, var(--background) 28%, transparent);
+  --dock-glass-bg: color-mix(in oklch, var(--foreground) 10%, transparent);
   --dock-glass-border: color-mix(in oklch, var(--foreground) 18%, transparent);
   --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 20%);
   --dock-lens-bg: color-mix(in oklch, var(--secondary) 46%, transparent);
@@ -70,7 +70,7 @@
   --mint: var(--foreground);
   --violet: var(--foreground);
   --orange: var(--foreground);
-  --dock-glass-bg: color-mix(in oklch, var(--background) 48%, transparent);
+  --dock-glass-bg: color-mix(in oklch, var(--foreground) 12%, transparent);
   --dock-glass-border: oklch(1 0 0 / 22%);
   --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 38%);
   --dock-lens-bg: color-mix(in oklch, var(--secondary) 58%, transparent);
