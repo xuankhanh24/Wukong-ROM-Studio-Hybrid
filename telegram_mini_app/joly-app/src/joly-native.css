@@ -22,11 +22,11 @@
   --sidebar: oklch(.985 0 0);
   --sidebar-foreground: oklch(.141 .005 285.823);
   --sidebar-accent: oklch(.967 .001 286.375);
-  --brand: oklch(.52 .16 244);
-  --brand-hover: oklch(.46 .17 244);
-  --brand-soft: oklch(.94 .04 238);
+  --brand: oklch(.5 .12 248);
+  --brand-hover: oklch(.44 .13 248);
+  --brand-soft: oklch(.96 .018 248);
   --brand-foreground: oklch(.99 0 0);
-  --dock-active: oklch(.48 .17 244);
+  --dock-active: oklch(.46 .13 248);
   --canvas: var(--background);
   --surface: var(--card);
   --raised: var(--card);
@@ -76,11 +76,11 @@
   --sidebar: oklch(.17 .005 285.823);
   --sidebar-foreground: oklch(.985 0 0);
   --sidebar-accent: oklch(.274 .006 286.033);
-  --brand: oklch(.72 .14 232);
-  --brand-hover: oklch(.78 .13 232);
-  --brand-soft: oklch(.25 .055 242);
+  --brand: oklch(.7 .11 242);
+  --brand-hover: oklch(.77 .1 242);
+  --brand-soft: oklch(.245 .035 248);
   --brand-foreground: oklch(.13 .018 245);
-  --dock-active: oklch(.78 .13 232);
+  --dock-active: oklch(.77 .1 242);
   --status-success: oklch(.74 .13 158);
   --status-warning: oklch(.8 .14 80);
   --status-info: oklch(.76 .12 250);
@@ -108,7 +108,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   outline-offset: 2px;
 }
 
-.app-shell { min-height: var(--tg-viewport-height, 100vh); padding: 0; background: color-mix(in oklch, var(--brand-soft) 18%, var(--background)); }
+.app-shell { min-height: var(--tg-viewport-height, 100vh); padding: 0; background: color-mix(in oklch, var(--brand-soft) 10%, var(--background)); }
 .topbar {
   position: fixed; inset: 0 0 auto 0; z-index: 40; display: grid; grid-template-columns: 220px minmax(0, 1fr) auto; align-items: center; height: 56px; padding: 0 18px;
   border-bottom: 1px solid var(--border); background: color-mix(in oklch, var(--background) 94%, transparent);
@@ -314,7 +314,21 @@ main { max-width: none; margin: 0; padding: 88px 32px 56px; }
 .lab-ribbon { width: 100%; color: var(--muted-foreground); font-size: 11px; }
 .shape, .shape-1, .shape-2, .shape-3 { border-color: var(--input); background: var(--secondary); filter: grayscale(1); }
 
-.toast { right: 18px; bottom: 18px; border-color: var(--border); border-radius: 10px; background: var(--popover); color: var(--popover-foreground); box-shadow: 0 18px 45px oklch(0 0 0 / 24%); }
+/* JolyUI toast viewport: top-right, clear of the fixed masthead and Telegram safe area. */
+#root > .pointer-events-none.fixed.z-50 {
+  top: calc(68px + var(--tg-safe-top, 0px));
+  right: max(16px, var(--tg-safe-right, 0px));
+  width: min(380px, calc(100vw - 32px));
+  align-items: stretch;
+}
+#root > .pointer-events-none.fixed.z-50 > div {
+  width: 100%; min-width: 0; max-width: none; overflow: hidden;
+  border-width: 1px; border-color: var(--border); border-radius: 10px;
+  background: color-mix(in oklch, var(--popover) 94%, transparent);
+  color: var(--popover-foreground);
+  box-shadow: 0 14px 36px oklch(0 0 0 / 18%);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
 .command-backdrop { background: oklch(0 0 0 / 55%); backdrop-filter: blur(3px); }
 .command-dialog { border-color: var(--border); border-radius: 12px; background: var(--popover); box-shadow: 0 24px 80px oklch(0 0 0 / 35%); }
 .command-search, .command-foot { border-color: var(--border); }
@@ -363,7 +377,7 @@ main { max-width: none; margin: 0; padding: 88px 32px 56px; }
   .lab-grid { grid-template-columns: 1fr; }
   .lab-filters { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
   .lab-filters button { flex: 0 0 auto; }
-  .toast { right: 12px; bottom: 82px; left: 12px; }
+  #root > .pointer-events-none.fixed.z-50 { top: calc(64px + var(--tg-safe-top, 0px)); right: 12px; width: calc(100vw - 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -628,7 +642,6 @@ main { padding-bottom: var(--dock-safe-height); }
   .system-two-col { grid-template-columns: 1fr; }
   .system-grid > .health-metric:last-child { grid-column: 1 / -1; }
   .service-status, .system-tools { padding: 16px; }
-  .toast { bottom: calc(var(--dock-safe-height) - 12px); }
   .joly-confirm-dialog { width: calc(100vw - 28px); max-width: none; }
 }
 

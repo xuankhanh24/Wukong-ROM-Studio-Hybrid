@@ -9,7 +9,7 @@ import { ThemeProvider } from "next-themes";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider attribute="class" storageKey="wukong-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <AnimatedToastProvider position="bottom-center" maxToasts={3}>
+      <AnimatedToastProvider position="top-right" maxToasts={3}>
         <App />
       </AnimatedToastProvider>
     </ThemeProvider>

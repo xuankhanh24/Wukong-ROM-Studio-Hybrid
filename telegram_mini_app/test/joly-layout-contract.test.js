@@ -53,8 +53,18 @@ test("operational color roles and refined Dock icons remain explicit", () => {
   assert.match(css, /--brand-soft:\s*oklch\(/);
   assert.match(css, /\.j-button-default\s*\{[^}]*background:\s*var\(--brand\)/);
   assert.match(css, /\.liquid-dock > button\.active:not\(\.dock-profile\)\s*\{[^}]*color:\s*var\(--dock-active\)/);
-  for (const icon of ["PackagePlus", "ListChecks", "LibraryBig", "Gauge"]) assert.match(dock, new RegExp(icon));
+  for (const icon of ["PackagePlus", "ListChecks", "LibraryBig", "Cog"]) assert.match(dock, new RegExp(icon));
+  assert.doesNotMatch(dock, /\bGauge\b/);
   assert.doesNotMatch(dock, /LegacyDockIcon/);
+});
+
+test("notifications stack at the top-right instead of near the Dock", () => {
+  const main = read("joly-app/src/main.tsx");
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(main, /AnimatedToastProvider position="top-right"/);
+  assert.doesNotMatch(main, /AnimatedToastProvider position="bottom-/);
+  assert.match(css, /#root > \.pointer-events-none\.fixed\.z-50\s*\{[^}]*top:\s*calc\(68px/);
+  assert.match(css, /#root > \.pointer-events-none\.fixed\.z-50\s*\{[^}]*right:\s*max\(16px/);
 });
 
 test("Catalog keeps a responsive ROM list instead of forcing the desktop table on mobile", () => {

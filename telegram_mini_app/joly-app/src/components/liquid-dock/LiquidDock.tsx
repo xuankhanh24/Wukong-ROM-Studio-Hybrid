@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { Gauge, LibraryBig, ListChecks, PackagePlus, type LucideIcon } from "lucide-react";
+import { Cog, LibraryBig, ListChecks, PackagePlus, type LucideIcon } from "lucide-react";
 import type { AccountProfile, Language } from "../../api/types";
 import type { View } from "../../state/app-state";
 import { hapticSelection } from "../../telegram/adapter";
@@ -13,7 +13,7 @@ const items: DockItem[] = [
   { view: "jobs", icon: ListChecks },
   { view: "profile" },
   { view: "catalog", icon: LibraryBig },
-  { view: "system", icon: Gauge },
+  { view: "system", icon: Cog },
 ];
 
 export function nearestLiquidSlot(value: number): number {
