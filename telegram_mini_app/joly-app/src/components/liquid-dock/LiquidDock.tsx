@@ -1,27 +1,20 @@
 import { useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { Gauge, LibraryBig, ListChecks, PackagePlus, type LucideIcon } from "lucide-react";
 import type { AccountProfile, Language } from "../../api/types";
 import type { View } from "../../state/app-state";
 import { hapticSelection } from "../../telegram/adapter";
 import { accountHue, accountInitials } from "../account-avatar";
 
-type DockIconName = "studio" | "jobs" | "catalog" | "system";
 type DockView = Exclude<View, "lab">;
-type DockItem = { view: DockView; icon: DockIconName };
+type DockItem = { view: DockView; icon?: LucideIcon };
 
 const items: DockItem[] = [
-  { view: "studio", icon: "studio" },
-  { view: "jobs", icon: "jobs" },
-  { view: "profile", icon: "studio" },
-  { view: "catalog", icon: "catalog" },
-  { view: "system", icon: "system" },
+  { view: "studio", icon: PackagePlus },
+  { view: "jobs", icon: ListChecks },
+  { view: "profile" },
+  { view: "catalog", icon: LibraryBig },
+  { view: "system", icon: Gauge },
 ];
-
-function LegacyDockIcon({ name }: { name: DockIconName }) {
-  if (name === "studio") return <><path d="M3.5 11.5 12 4l8.5 7.5M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6" /></>;
-  if (name === "jobs") return <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>;
-  if (name === "catalog") return <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z" />;
-  return <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.1 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.3V9.55h.1A1.7 1.7 0 0 0 4.1 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.56 3.7l.06.06A1.7 1.7 0 0 0 8.5 4.1a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1v-.1h4.05v.1A1.7 1.7 0 0 0 15 4.1a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.5c.2.4.5.75.9 1 .32.2.7.3 1.1.3h.1v4.05h-.1a1.7 1.7 0 0 0-2 1.15Z" />;</>;
-}
 
 export function nearestLiquidSlot(value: number): number {
   return [0, 1, 2, 3, 4].reduce((best, slot) => Math.abs(slot - value) < Math.abs(best - value) ? slot : best, 0);
@@ -217,13 +210,14 @@ export function LiquidDock({ view, onNavigate, account, language = "vi" }: { vie
         {items.map((item, index) => {
           const label = labels[item.view];
           const isProfile = item.view === "profile";
+          const Icon = item.icon;
           const navName = item.view === "studio" ? "build" : item.view;
           const profileStyle = {
             "--avatar-hue": accountHue(account),
             "--avatar-image": account?.photoUrl ? `url(${JSON.stringify(String(account.photoUrl))})` : "none",
           } as CSSProperties;
           return <button key={item.view} id={isProfile ? "dock-profile" : undefined} type="button" data-nav={navName} data-slot={index} className={`${view === item.view ? "active" : ""} ${isProfile ? "dock-profile" : ""}`} style={isProfile ? profileStyle : undefined} aria-label={label} aria-current={view === item.view ? "page" : undefined}>
-            {isProfile ? <>{account?.photoUrl ? <img src={String(account.photoUrl)} alt="" referrerPolicy="no-referrer" onError={(event) => event.currentTarget.remove()} /> : null}<span>{accountInitials(account)}</span></> : <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><LegacyDockIcon name={item.icon} /></svg>}
+            {isProfile ? <>{account?.photoUrl ? <img src={String(account.photoUrl)} alt="" referrerPolicy="no-referrer" onError={(event) => event.currentTarget.remove()} /> : null}<span>{accountInitials(account)}</span></> : Icon ? <Icon className="nav-icon" aria-hidden="true" strokeWidth={1.8} /> : null}
             {!isProfile ? <span>{label}</span> : null}
           </button>;
         })}

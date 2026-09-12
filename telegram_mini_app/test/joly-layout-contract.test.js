@@ -46,6 +46,17 @@ test("Liquid Dock keeps the legacy mobile footprint and avatar-photo glow", () =
   assert.match(dock, /"--avatar-image":\s*account\?\.photoUrl\s*\?/);
 });
 
+test("operational color roles and refined Dock icons remain explicit", () => {
+  const css = read("joly-app/src/joly-native.css");
+  const dock = read("joly-app/src/components/liquid-dock/LiquidDock.tsx");
+  assert.match(css, /--brand:\s*oklch\(/);
+  assert.match(css, /--brand-soft:\s*oklch\(/);
+  assert.match(css, /\.j-button-default\s*\{[^}]*background:\s*var\(--brand\)/);
+  assert.match(css, /\.liquid-dock > button\.active:not\(\.dock-profile\)\s*\{[^}]*color:\s*var\(--dock-active\)/);
+  for (const icon of ["PackagePlus", "ListChecks", "LibraryBig", "Gauge"]) assert.match(dock, new RegExp(icon));
+  assert.doesNotMatch(dock, /LegacyDockIcon/);
+});
+
 test("Catalog keeps a responsive ROM list instead of forcing the desktop table on mobile", () => {
   const catalog = read("joly-app/src/features/catalog/RomLibrary.tsx");
   const css = read("joly-app/src/joly-native.css");
