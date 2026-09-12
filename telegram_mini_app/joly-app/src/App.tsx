@@ -26,6 +26,7 @@ import { AnimatedThemeToggle as JolyAnimatedThemeToggle } from "./components/ui/
 import { VercelTabs } from "./components/ui/vercel-tabs";
 import { RomLibrary, type RomLibraryFallbackDevice } from "./features/catalog/RomLibrary";
 import { LiquidDock } from "./components/liquid-dock/LiquidDock";
+import { AccountAvatar } from "./components/account-avatar";
 import {
   Activity,
   AlertCircle,
@@ -190,12 +191,12 @@ function TopBar({ view, theme, onTheme, onNavigate, onCommand, language, onLangu
       <button className="brand" onClick={() => onNavigate("studio")} aria-label="Về Studio">
         <img src="/WukongStudio.svg" alt="" /><span><b>WUKONG</b><small>ROM STUDIO</small></span>
       </button>
-      <div className="topbar-center"><span className="live-dot" /> <span>{t("greeting")}, <b>{displayName}</b></span><span className="topbar-context">/ {t(view)}</span></div>
+      <div className="topbar-center"><span className="live-dot" /><span className="topbar-greeting">{t("greeting")}, <b>{displayName}</b></span><span className="topbar-context">{t(view)}</span></div>
       <div className="topbar-actions">
         <button className="command-trigger" onClick={onCommand} aria-label={t("quickActions")}><Command size={15} /><span>{t("quickActions")}</span><kbd>⌘ K</kbd></button>
         <Mark id="animated-theme-toggle"><JolyAnimatedThemeToggle className="icon-button" /></Mark>
         <button className="language-toggle" onClick={onLanguage} aria-label="Đổi ngôn ngữ">{t("switchLanguage")}</button>
-        <button className="avatar" onClick={() => onNavigate("profile")} aria-label="Mở profile">WK</button>
+        <button className="avatar" onClick={() => onNavigate("profile")} aria-label="Mở profile"><AccountAvatar account={account} /></button>
       </div>
     </header>
   );
@@ -229,12 +230,12 @@ function Studio({ source, setSource, sourceState, setSourceState, mods, setMods,
   const togglePipelineStep = (id: string) => setPipelineSteps(pipelineSteps.includes(id) ? pipelineSteps.filter((item) => item !== id) : [...pipelineSteps, id]);
   return (
     <div className="screen studio-screen">
-      <div className="screen-heading"><div><span className="eyebrow">BUILD CONTROL LEDGER</span><h1>{t("studioTitle")}</h1><p>{t("studioDescription")}</p></div><div className="heading-actions"><StatusPill tone="success">{live ? "API connected" : "Preview local-only"}</StatusPill><Button variant="outline" onClick={useSample}><Sparkles size={15} /> {t("useSample")}</Button></div></div>
+      <div className="screen-heading"><div><span className="eyebrow">BUILD CONTROL LEDGER</span><h1>{t("studioTitle")}</h1><p>{t("studioDescription")}</p></div><div className="heading-actions"><StatusPill tone="success">{live ? "API connected" : "Preview local-only"}</StatusPill><Button variant="outline" onClick={useSample}><FileArchive size={15} /> {t("useSample")}</Button></div></div>
       <div className="bento-grid studio-grid">
         <section className="panel source-panel bento-large">
           <SectionTitle eyebrow="01 / SOURCE" title={t("sourceTitle")} detail={t("sourceDescription")} action={<StatusPill tone={ready ? "success" : "neutral"}>{ready ? "Ready" : "Chờ nguồn"}</StatusPill>} />
           <div className="prompt-box">
-            <div className="prompt-head"><label htmlFor="source-url">Smart Source</label><span><Mark id="animated-tooltip"><JolyAnimatedTooltip content="Dùng URL fixture cục bộ, không gửi request thật."><span className="tooltip-help" aria-label="Thông tin fixture"><CircleHelp size={14} /></span></JolyAnimatedTooltip></Mark><button className="inline-action" onClick={useSample}><Sparkles size={13} /> Fixture</button><button className="inline-action" onClick={() => { navigator.clipboard?.writeText(source); onToast("Đã sao chép URL fixture."); }}><Copy size={13} /> Sao chép</button></span></div>
+            <div className="prompt-head"><label htmlFor="source-url">ROM source</label><span><Mark id="animated-tooltip"><JolyAnimatedTooltip content="Dùng URL fixture cục bộ, không gửi request thật."><span className="tooltip-help" aria-label="Thông tin fixture"><CircleHelp size={14} /></span></JolyAnimatedTooltip></Mark><button className="inline-action" onClick={useSample}><FileArchive size={13} /> ROM mẫu</button><button className="inline-action" onClick={() => { navigator.clipboard?.writeText(source); onToast("Đã sao chép URL fixture."); }}><Copy size={13} /> Sao chép</button></span></div>
             <textarea id="source-url" value={source} onChange={(event) => { setSource(event.target.value); if (sourceState === "invalid") setSourceState("idle"); }} placeholder="https://component-ota-cn.allawntech.com/downloadCheck?..." rows={3} spellCheck={false} />
             <div className="prompt-foot"><span>URL tạm thời không xuất hiện trong log.</span><Button onClick={analyze} disabled={sourceState === "analyzing"}>{sourceState === "analyzing" ? <><RefreshCw size={15} className="spin" /> {t("analyzing")}</> : <><Zap size={15} /> {t("analyzeRom")}</>}</Button></div>
           </div>
@@ -411,7 +412,7 @@ function Profile({ onToast, onTheme, onReconnect, onClose, account, t }: { onToa
   const role = String(account?.role || "user");
   const platform = [account?.platform, account?.appVersion].filter(Boolean).join(" · ") || "Telegram WebApp";
   return (
-    <div className="screen profile-screen"><div className="screen-heading"><div><span className="eyebrow">ACCOUNT / PREFERENCES</span><h1>{t("profileTitle")}</h1><p>{t("profileDescription")}</p></div><div className="profile-big-avatar">WK</div></div><div className="profile-grid profile-grid-compact"><section className="panel profile-card"><div className="profile-card-top"><div className="profile-avatar-large">WK</div><div><h2>{name}</h2><p>{username} · Telegram ID {String(account?.telegramId || account?.userId || "—")}</p><StatusPill tone="success">{account?.role === "admin" ? "Admin" : "Approved user"}</StatusPill></div></div><div className="profile-facts"><div><span>Build allowance</span><strong>{credits}</strong></div><div><span>Jobs created</span><strong>{jobCount}</strong></div><div><span>Role / access</span><strong>{role}</strong></div><div><span>Client</span><strong>{platform}</strong></div><div><span>Language</span><strong>Tiếng Việt <small>/ English</small></strong></div><div><span>Last seen</span><strong>{String(account?.lastSeenAt || "—")}</strong></div></div><div className="profile-actions"><Button variant="outline" onClick={onTheme}><Moon size={15} /> Toggle theme</Button><Button variant="outline" onClick={() => onToast("Thông tin quyền được tải từ Telegram session.")}><KeyRound size={15} /> Access details</Button>{onReconnect && <Button variant="outline" onClick={onReconnect}><RefreshCw size={15} /> Reconnect</Button>}{onClose && <Button variant="ghost" onClick={onClose}>Close</Button>}</div></section></div></div>
+    <div className="screen profile-screen"><div className="screen-heading"><div><span className="eyebrow">ACCOUNT / PREFERENCES</span><h1>{t("profileTitle")}</h1><p>{t("profileDescription")}</p></div></div><div className="profile-grid profile-grid-compact"><section className="panel profile-card"><div className="profile-card-top"><AccountAvatar account={account} className="profile-avatar-large" /><div><h2>{name}</h2><p>{username} · Telegram ID {String(account?.telegramId || account?.userId || "—")}</p><StatusPill tone="success">{account?.role === "admin" ? "Admin" : "Approved user"}</StatusPill></div></div><div className="profile-facts"><div><span>Build allowance</span><strong>{credits}</strong></div><div><span>Jobs created</span><strong>{jobCount}</strong></div><div><span>Role / access</span><strong>{role}</strong></div><div><span>Client</span><strong>{platform}</strong></div><div><span>Language</span><strong>Tiếng Việt <small>/ English</small></strong></div><div><span>Last seen</span><strong>{String(account?.lastSeenAt || "—")}</strong></div></div><div className="profile-actions"><Button variant="outline" onClick={onTheme}><Moon size={15} /> Toggle theme</Button><Button variant="outline" onClick={() => onToast("Thông tin quyền được tải từ Telegram session.")}><KeyRound size={15} /> Access details</Button>{onReconnect && <Button variant="outline" onClick={onReconnect}><RefreshCw size={15} /> Reconnect</Button>}{onClose && <Button variant="ghost" onClick={onClose}>Close</Button>}</div></section></div></div>
   );
 }
 

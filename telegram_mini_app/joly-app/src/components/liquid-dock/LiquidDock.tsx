@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEve
 import type { AccountProfile, Language } from "../../api/types";
 import type { View } from "../../state/app-state";
 import { hapticSelection } from "../../telegram/adapter";
+import { accountHue, accountInitials } from "../account-avatar";
 
 type DockIconName = "studio" | "jobs" | "catalog" | "system";
 type DockView = Exclude<View, "lab">;
@@ -20,16 +21,6 @@ function LegacyDockIcon({ name }: { name: DockIconName }) {
   if (name === "jobs") return <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>;
   if (name === "catalog") return <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z" />;
   return <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.55v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.1 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.3V9.55h.1A1.7 1.7 0 0 0 4.1 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.56 3.7l.06.06A1.7 1.7 0 0 0 8.5 4.1a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1v-.1h4.05v.1A1.7 1.7 0 0 0 15 4.1a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.5c.2.4.5.75.9 1 .32.2.7.3 1.1.3h.1v4.05h-.1a1.7 1.7 0 0 0-2 1.15Z" />;</>;
-}
-
-function profileInitials(profile?: AccountProfile | null): string {
-  const label = String(profile?.displayName || profile?.username || profile?.telegramId || "WK").trim();
-  const parts = label.split(/\s+/).filter(Boolean);
-  return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)?.[0] || ""}` : label.slice(0, 2)).toUpperCase();
-}
-
-function profileHue(profile?: AccountProfile | null): number {
-  return [...String(profile?.telegramId || "wukong")].reduce((total, char) => total + char.charCodeAt(0), 0) % 360;
 }
 
 export function nearestLiquidSlot(value: number): number {
@@ -228,11 +219,11 @@ export function LiquidDock({ view, onNavigate, account, language = "vi" }: { vie
           const isProfile = item.view === "profile";
           const navName = item.view === "studio" ? "build" : item.view;
           const profileStyle = {
-            "--avatar-hue": profileHue(account),
+            "--avatar-hue": accountHue(account),
             "--avatar-image": account?.photoUrl ? `url(${JSON.stringify(String(account.photoUrl))})` : "none",
           } as CSSProperties;
           return <button key={item.view} id={isProfile ? "dock-profile" : undefined} type="button" data-nav={navName} data-slot={index} className={`${view === item.view ? "active" : ""} ${isProfile ? "dock-profile" : ""}`} style={isProfile ? profileStyle : undefined} aria-label={label} aria-current={view === item.view ? "page" : undefined}>
-            {isProfile ? <>{account?.photoUrl ? <img src={String(account.photoUrl)} alt="" referrerPolicy="no-referrer" onError={(event) => event.currentTarget.remove()} /> : null}<span>{profileInitials(account)}</span></> : <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><LegacyDockIcon name={item.icon} /></svg>}
+            {isProfile ? <>{account?.photoUrl ? <img src={String(account.photoUrl)} alt="" referrerPolicy="no-referrer" onError={(event) => event.currentTarget.remove()} /> : null}<span>{accountInitials(account)}</span></> : <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><LegacyDockIcon name={item.icon} /></svg>}
             {!isProfile ? <span>{label}</span> : null}
           </button>;
         })}

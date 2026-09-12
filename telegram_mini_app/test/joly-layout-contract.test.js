@@ -36,6 +36,16 @@ test("Liquid Dock uses a translucent frosted-glass material", () => {
   assert.match(css, /\.liquid-dock \.liquid-lens\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
 });
 
+test("Liquid Dock keeps the legacy mobile footprint and avatar-photo glow", () => {
+  const css = read("joly-app/src/joly-native.css");
+  const dock = read("joly-app/src/components/liquid-dock/LiquidDock.tsx");
+  assert.match(css, /@media \(max-width:\s*860px\)[\s\S]*?\.liquid-dock\s*\{[^}]*right:\s*10px;[^}]*left:\s*10px;[^}]*width:\s*auto;[^}]*max-width:\s*none;[^}]*transform:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*390px\)[\s\S]*?\.liquid-dock\s*\{[^}]*right:\s*7px;[^}]*left:\s*7px;/);
+  assert.match(css, /\.liquid-dock > button\.dock-profile::before\s*\{[^}]*background-image:\s*var\(--avatar-image,\s*none\)[^}]*filter:\s*blur\(5px\)\s+saturate\(1\.45\)/);
+  assert.match(css, /\.liquid-dock\.is-pressed > button\.active:not\(\.dock-profile\)\s*\{[^}]*transform:\s*scale\(1\.12\)/);
+  assert.match(dock, /"--avatar-image":\s*account\?\.photoUrl\s*\?/);
+});
+
 test("Catalog keeps a responsive ROM list instead of forcing the desktop table on mobile", () => {
   const catalog = read("joly-app/src/features/catalog/RomLibrary.tsx");
   const css = read("joly-app/src/joly-native.css");
