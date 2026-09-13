@@ -131,3 +131,30 @@ test("compact and landscape layouts keep controls readable above the original Do
   assert.match(css, /@media \(max-width:\s*650px\)[\s\S]*?\.control-stack select[^}]*min-height:\s*44px/);
   assert.match(css, /@media \(max-width:\s*650px\)[\s\S]*?\.beam-node\s*\{[^}]*font-size:\s*10px/);
 });
+
+test("desktop Studio keeps a compact review below Source without crossing Configuration", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /@media \(min-width:\s*1001px\)[\s\S]*?\.studio-grid \.recipe-panel\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1\s*\/\s*span\s*2;/);
+  assert.match(css, /@media \(min-width:\s*1001px\)[\s\S]*?\.studio-grid \.review-panel\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*2;[^}]*grid-template-columns:\s*150px\s+minmax\(0,\s*1fr\)/);
+  assert.match(css, /grid-template-areas:\s*"review-head review-route"\s*"review-note review-note"\s*"review-action review-action"/);
+});
+
+test("desktop Profile uses a purposeful identity and account-detail split", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /\.profile-card\s*\{[^}]*grid-template-areas:\s*"identity facts"\s*"identity actions"/);
+  assert.match(css, /\.profile-card-top\s*\{[^}]*grid-area:\s*identity/);
+  assert.match(css, /\.profile-facts\s*\{[^}]*grid-area:\s*facts/);
+  assert.match(css, /\.profile-actions\s*\{[^}]*grid-area:\s*actions/);
+});
+
+test("Joly animated tables receive semantic surface and divider tokens", () => {
+  const css = read("joly-app/src/styles.css");
+  for (const token of ["table-border", "table-header", "table-row-hover", "table-row-selected", "table-row-stripe"]) {
+    assert.match(css, new RegExp(`--color-${token}:\\s*var\\(`));
+  }
+});
+
+test("Telegram haptics are gated by runtime version support", () => {
+  const adapter = read("joly-app/src/telegram/adapter.ts");
+  assert.match(adapter, /function hapticSelection[\s\S]*supportsTelegramVersion\("6\.1"\)/);
+});

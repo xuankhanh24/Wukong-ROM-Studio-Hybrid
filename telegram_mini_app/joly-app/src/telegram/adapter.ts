@@ -130,7 +130,8 @@ export function initializeTelegram(): void {
 }
 
 export function hapticSelection(): void {
-  try { telegramWebApp()?.HapticFeedback?.selectionChanged?.(); } catch { /* optional */ }
+  const app = supportsTelegramVersion("6.1") ? telegramWebApp() : null;
+  try { app?.HapticFeedback?.selectionChanged?.(); } catch { /* optional */ }
 }
 
 export function closeTelegram(): void {
