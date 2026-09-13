@@ -35,10 +35,10 @@
   --faint: var(--muted-foreground);
   --line: var(--border);
   --line-strong: var(--input);
-  --dock-glass-bg: color-mix(in oklch, var(--card) 68%, transparent);
+  --dock-glass-bg: color-mix(in oklch, var(--card) 54%, transparent);
   --dock-glass-border: color-mix(in oklch, var(--foreground) 20%, transparent);
   --dock-glass-shadow: 0 18px 42px oklch(0 0 0 / 18%), inset 0 1px 0 oklch(1 0 0 / 42%);
-  --dock-lens-bg: color-mix(in oklch, var(--brand-soft) 62%, transparent);
+  --dock-lens-bg: color-mix(in oklch, var(--brand-soft) 52%, transparent);
   /* JolyUI remains the surface authority; these restrained semantic accents
      only make success, warning and informational states scannable. */
   --status-success: oklch(.48 .14 158);
@@ -88,10 +88,10 @@
   --mint-soft: color-mix(in oklch, var(--status-success) 16%, var(--card));
   --violet: var(--status-info);
   --orange: var(--status-warning);
-  --dock-glass-bg: color-mix(in oklch, var(--card) 62%, transparent);
+  --dock-glass-bg: color-mix(in oklch, var(--card) 50%, transparent);
   --dock-glass-border: oklch(1 0 0 / 22%);
   --dock-glass-shadow: 0 20px 46px oklch(0 0 0 / 38%);
-  --dock-lens-bg: color-mix(in oklch, var(--brand-soft) 64%, transparent);
+  --dock-lens-bg: color-mix(in oklch, var(--brand-soft) 54%, transparent);
 }
 
 html { background: var(--background); color-scheme: light; }
@@ -397,14 +397,14 @@ main { max-width: none; margin: 0; padding: 88px 32px 56px; }
 .liquid-dock.is-pressed { cursor: grabbing; }
 .liquid-dock .dock-shell { position: absolute; z-index: -1; inset: -24px 0 0; width: 100%; height: calc(100% + 24px); overflow: visible; filter: drop-shadow(0 12px 24px oklch(0 0 0 / 20%)); pointer-events: none; }
 .liquid-dock .dock-rim { fill: none; stroke: var(--dock-glass-border); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
-.liquid-dock .liquid-surface { position: absolute; z-index: -2; inset: -24px 0 0; overflow: hidden; border: 0; border-radius: 0; background: var(--dock-glass-bg); box-shadow: var(--dock-glass-shadow); -webkit-backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); pointer-events: none; }
-.liquid-dock .liquid-lens { position: absolute; z-index: 0; top: 12px; left: 5px; width: calc((100% - 10px) / var(--dock-slot-count)); height: 56px; overflow: hidden; border: 1px solid var(--dock-glass-border); border-radius: 999px; background: var(--dock-lens-bg); box-shadow: inset 0 1px 1px oklch(1 0 0 / 32%), inset 0 -6px 16px oklch(0 0 0 / 8%), 0 7px 18px oklch(0 0 0 / 12%); -webkit-backdrop-filter: blur(10px) saturate(1.58) contrast(1.08); backdrop-filter: blur(10px) saturate(1.58) contrast(1.08); transform: translate3d(var(--liquid-offset), 0, 0) scale(var(--liquid-press)); transform-origin: center; will-change: transform; pointer-events: none; opacity: 1; transition: opacity .18s ease, box-shadow .24s cubic-bezier(.22,1,.36,1); }
+.liquid-dock .liquid-surface { position: absolute; z-index: -2; inset: -24px 0 0; overflow: hidden; border: 0; border-radius: 0; background: var(--dock-glass-bg); box-shadow: var(--dock-glass-shadow); -webkit-backdrop-filter: blur(20px) saturate(1.42) contrast(1.06); backdrop-filter: blur(20px) saturate(1.42) contrast(1.06); pointer-events: none; }
+.liquid-dock .liquid-lens { position: absolute; z-index: 0; top: 12px; left: 5px; width: calc((100% - 10px) / var(--dock-slot-count)); height: 56px; overflow: hidden; border: 1px solid var(--dock-glass-border); border-radius: 999px; background: var(--dock-lens-bg); box-shadow: inset 0 1px 1px oklch(1 0 0 / 34%), inset 0 -6px 16px oklch(0 0 0 / 8%), 0 7px 18px oklch(0 0 0 / 12%); -webkit-backdrop-filter: blur(16px) saturate(1.5) contrast(1.08); backdrop-filter: blur(16px) saturate(1.5) contrast(1.08); transform: translate3d(var(--liquid-offset), 0, 0) scale(var(--liquid-press)); transform-origin: center; will-change: transform; pointer-events: none; opacity: 1; transition: opacity .18s ease, box-shadow .24s cubic-bezier(.22,1,.36,1); }
 .liquid-dock .liquid-lens::before, .liquid-dock .liquid-lens::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; }
 .liquid-dock .liquid-lens::before { opacity: .45; box-shadow: inset 1px 0 0 color-mix(in oklch, var(--foreground) 18%, transparent), inset 0 1px 0 oklch(1 0 0 / 42%); }
 .liquid-dock .liquid-lens::after { opacity: .35; box-shadow: inset -1px 0 0 color-mix(in oklch, var(--muted-foreground) 20%, transparent); }
 .liquid-dock .liquid-lens > span { position: absolute; inset: 2px 20% 66%; border-radius: 999px; background: oklch(1 0 0 / 14%); filter: blur(7px); }
 .liquid-dock.profile-active:not(.profile-dragging) .liquid-lens { opacity: 0; }
-.liquid-dock.is-pressed .liquid-surface { -webkit-backdrop-filter: blur(10px) saturate(1.62) contrast(1.1); backdrop-filter: blur(10px) saturate(1.62) contrast(1.1); }
+.liquid-dock.is-pressed .liquid-surface { -webkit-backdrop-filter: blur(22px) saturate(1.56) contrast(1.08); backdrop-filter: blur(22px) saturate(1.56) contrast(1.08); }
 .liquid-dock.is-pressed .liquid-lens { filter: saturate(1.12); box-shadow: inset 0 2px 3px oklch(1 0 0 / 48%), inset 0 -9px 18px oklch(0 0 0 / 12%), 0 11px 26px oklch(0 0 0 / 17%); }
 .liquid-dock > button { position: relative; z-index: 1; display: flex; min-width: 0; min-height: 56px; align-items: center; justify-content: center; flex-direction: column; gap: 3px; padding: 5px 1px; border: 0; border-radius: 999px; color: inherit; background: transparent; transition: color .2s cubic-bezier(.22,1,.36,1), transform .2s cubic-bezier(.22,1,.36,1); -webkit-tap-highlight-color: transparent; user-select: none; }
 .liquid-dock > button:not(.dock-profile) { top: 7px; height: 56px; align-self: start; }
@@ -834,4 +834,78 @@ html[data-keyboard="true"] main { padding-bottom: 32px; }
   .profile-facts div { min-height: 80px; padding: 13px; }
   .profile-facts span, .profile-facts strong { font-size: 10.5px; }
   .topbar-context { max-width: 104px; padding-inline: 6px; background: transparent; }
+}
+
+/* Accessibility and responsive hardening. The legacy Liquid Dock geometry is
+   preserved; these rules only improve its surrounding hit areas and clearance. */
+.skip-link {
+  position: fixed; top: 8px; left: 12px; z-index: 100; padding: 10px 14px;
+  border: 1px solid var(--ring); border-radius: 8px; color: var(--foreground);
+  background: var(--card); box-shadow: 0 12px 32px oklch(0 0 0 / 18%);
+  transform: translateY(-160%); transition: transform .16s ease-out;
+}
+.skip-link:focus { transform: translateY(0); }
+#main-content:focus { outline: none; }
+
+.brand { min-width: 44px; min-height: 44px; touch-action: manipulation; }
+.command-trigger, .icon-button, .language-toggle, .avatar, .j-button, .toolbar-button,
+.tabs button, .row-more, .release-row button, .tree-head button, .system-tools > button {
+  touch-action: manipulation;
+}
+.tabs button { min-height: 44px; padding-inline: 14px; font-size: 12px; }
+.tabs b, .status-pill, .prompt-foot span, .source-result p, .metadata-grid span,
+.metadata-grid b, .control-stack label, .segmented > span, .release-row span,
+.mod-list-head span, .mod-list strong, .mod-list small, .mini-tree, .tree-head,
+.route-node span, .route-node small, .review-note, .stat-readout span,
+.catalog-summary span, .catalog-summary small, .health-metric span, .health-metric small,
+.stage-text, .muted-cell, .table-progress span, .job-progress-readout span,
+.catalog-name strong, .catalog-name small, .type-label, .health-hero p,
+.system-tools > button small, .profile-facts span, .profile-facts strong,
+.rom-library-controls label, .rom-library-status, .rom-mobile-row p,
+.rom-mobile-row > code, .rom-library-detail {
+  font-size: max(11px, .72rem);
+  line-height: 1.45;
+}
+.beam-node { font-size: 10px; }
+.log-head, .log-strip pre, .job-id { font-size: 11px; }
+.control-stack select, .rom-library-controls select, .rom-library-controls input,
+.catalog-version-filter, .search-field { min-height: 40px; font-size: 12px; }
+.segmented button { min-height: 40px; font-size: 12px; }
+.profile-grid-compact { grid-template-columns: minmax(0, 900px); }
+.profile-actions .j-button-ghost { margin-left: auto; }
+.j-button > .pointer-events-none { display: none; }
+#root > .pointer-events-none.fixed.z-50 { pointer-events: none; }
+#root > .pointer-events-none.fixed.z-50 > * { position: relative; }
+
+@media (max-width: 650px) {
+  body { font-size: 14px; }
+  .brand { width: 44px; justify-content: flex-start; }
+  .brand img { width: 32px; height: 32px; }
+  .screen-heading p, .section-title p, .panel-head p { font-size: 13px; }
+  .control-stack select, .rom-library-controls select, .rom-library-controls input,
+  .catalog-version-filter, .search-field, .segmented button, .date-clear { min-height: 44px; }
+  .mod-list label { min-height: 48px; padding-block: 10px; }
+  .tooltip-help, .log-head button, [data-slot="code-block"] button, .release-row button, .row-more { min-width: 44px !important; min-height: 44px !important; }
+  #root > .pointer-events-none.fixed.z-50 > * { min-width: 0; width: 100%; max-width: 100%; }
+  .catalog-summary span, .catalog-summary small, .stat-readout span,
+  .profile-facts span, .profile-facts strong { font-size: 11px; }
+  .beam-node { font-size: 10px; }
+  .liquid-dock > button > span { font-size: 10px; }
+  .profile-actions .j-button-ghost { margin-left: 0; margin-top: 4px; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  :root { --dock-safe-height: 108px; }
+  .topbar { height: 52px; padding-inline: max(12px, var(--tg-safe-left, 0px)); }
+  .brand { width: 48px; }
+  .brand span, .topbar-greeting, .command-trigger span, .command-trigger kbd,
+  .language-toggle, .topbar-actions > .avatar { display: none; }
+  .topbar-center { justify-content: flex-start; }
+  .command-trigger { min-width: 44px; width: 44px; justify-content: center; padding: 0; }
+  main { padding: 66px 20px var(--dock-safe-height); }
+  .screen-heading { min-height: 0; margin-bottom: 14px; }
+  .screen-heading h1 { font-size: 27px; }
+  .screen-heading p { margin-top: 4px; font-size: 12px; }
+  .liquid-dock { right: 12px; bottom: max(6px, env(safe-area-inset-bottom)); left: 12px; width: auto; max-width: none; transform: none; }
+  .liquid-dock > button > span { font-size: 10px; }
 }

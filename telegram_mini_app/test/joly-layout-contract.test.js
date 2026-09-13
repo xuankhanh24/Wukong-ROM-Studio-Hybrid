@@ -31,9 +31,9 @@ test("Liquid Dock uses a translucent frosted-glass material", () => {
   assert.match(css, /--dock-glass-bg:\s*color-mix\([^;]+transparent\)/);
   assert.match(css, /\.liquid-dock\s*\{[^}]*z-index:\s*60/);
   assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*background:\s*var\(--dock-glass-bg\)/);
-  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
-  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*backdrop-filter:\s*blur\(10px\)/);
-  assert.match(css, /\.liquid-dock \.liquid-lens\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(10px\)/);
+  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(20px\)/);
+  assert.match(css, /\.liquid-dock \.liquid-surface\s*\{[^}]*backdrop-filter:\s*blur\(20px\)/);
+  assert.match(css, /\.liquid-dock \.liquid-lens\s*\{[^}]*-webkit-backdrop-filter:\s*blur\(16px\)/);
 });
 
 test("Liquid Dock keeps the legacy mobile footprint and avatar-photo glow", () => {
@@ -102,4 +102,32 @@ test("visual hierarchy distinguishes action, support, and disabled states", () =
   assert.match(css, /\.source-panel\s*\{[^}]*border-color:\s*color-mix\([^}]*var\(--brand\)/);
   assert.match(css, /\.active-job-panel\s*\{[^}]*background:\s*color-mix\([^}]*var\(--brand-soft\)/);
   assert.match(css, /\.health-hero\s*\{[^}]*var\(--status-success\)/);
+});
+
+test("app shell is motion-safe and does not inject theme scripts into the React root", () => {
+  const main = read("joly-app/src/main.tsx");
+  const app = read("joly-app/src/App.tsx");
+  assert.doesNotMatch(main, /next-themes|ThemeProvider/);
+  assert.match(main, /MotionConfig reducedMotion="user"/);
+  assert.match(app, /useReducedMotion/);
+  assert.doesNotMatch(app, /AnimatePresence mode="wait"/);
+});
+
+test("route navigation and Jobs tabs expose accessible semantics", () => {
+  const app = read("joly-app/src/App.tsx");
+  assert.match(app, /id="main-content"/);
+  assert.match(app, /tabIndex=\{-1\}/);
+  assert.match(app, /role="tablist"/);
+  assert.match(app, /role="tab"/);
+  assert.match(app, /aria-selected=/);
+  assert.match(app, /aria-controls="jobs-panel"/);
+});
+
+test("compact and landscape layouts keep controls readable above the original Dock", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /\.brand\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px/);
+  assert.match(css, /\.tabs button\s*\{[^}]*min-height:\s*44px/);
+  assert.match(css, /@media \(max-height:\s*520px\) and \(orientation:\s*landscape\)/);
+  assert.match(css, /@media \(max-width:\s*650px\)[\s\S]*?\.control-stack select[^}]*min-height:\s*44px/);
+  assert.match(css, /@media \(max-width:\s*650px\)[\s\S]*?\.beam-node\s*\{[^}]*font-size:\s*10px/);
 });

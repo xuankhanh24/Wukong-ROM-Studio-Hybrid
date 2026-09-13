@@ -61,7 +61,7 @@
       "dependency": "JolyUI registry source + declared imports",
       "usage": "core",
       "render": "direct",
-      "checksum": "sha256:4862fdfbc522d4b4a9c3d81e1b40dbbd413d95c5489a16af6bec268ba236a259",
+      "checksum": "sha256:d1f1e9ea388b048eac218cf233de7e0f85ef81c12d9772add53aafa79f6ef4bf",
       "pinnedCommit": "3d4fb97066f173e8eb8ab433726dee24577e2cc6"
     },
     {
@@ -193,7 +193,7 @@
       "dependency": "JolyUI registry source + declared imports",
       "usage": "core",
       "render": "direct",
-      "checksum": "sha256:4f83c4620154115f67a77a9eb42ff513c515f8a8e3d1b339cc72280373f444e1",
+      "checksum": "sha256:8e7b567e75041860008d144f82d472503f53266fabb7c761de92ee8f27de84c8",
       "pinnedCommit": "3d4fb97066f173e8eb8ab433726dee24577e2cc6"
     },
     {
@@ -217,7 +217,7 @@
       "dependency": "JolyUI registry source + declared imports",
       "usage": "core",
       "render": "direct",
-      "checksum": "sha256:83ec7cd88ded8bc7f00f446e142ec7edfb5b13241cf493b6507aeb2062b46622",
+      "checksum": "sha256:2c8e9a9954d3b83bb47f8d630ab51d9b2f30a0fbd22f0c4cc65454d60dd1fc2b",
       "pinnedCommit": "3d4fb97066f173e8eb8ab433726dee24577e2cc6"
     },
     {

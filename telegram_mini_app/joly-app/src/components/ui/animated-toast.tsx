@@ -90,6 +90,9 @@ export function AnimatedToastProvider({
     <ToastContext.Provider value={{ toasts, addToast, removeToast, clearAll }}>
       {children}
       <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="false"
         className={cn(
           "pointer-events-none fixed z-50 flex flex-col gap-2",
           positionClasses[position],
@@ -189,6 +192,7 @@ function ToastItem({ toast, index, onRemove, isTop }: ToastItemProps) {
         </div>
         <button
           onClick={onRemove}
+          aria-label="Dismiss notification"
           className="flex-shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />

@@ -453,6 +453,7 @@ const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
     return (
       <motion.div
         ref={ref}
+        data-slot="code-block"
         className={cn(
           "overflow-hidden rounded-lg",
           variantStyles[variant],

@@ -45,7 +45,7 @@ export default function AdminConsole({ live, health, onToast }: { live: boolean;
 
   useEffect(() => {
     if (!confirm && !createOpen && !cacheClearOpen) return;
-    const dialog = document.querySelector<HTMLDialogElement>(".joly-confirm-dialog[open]");
+    const dialog = document.querySelector<HTMLDialogElement>(".joly-confirm-dialog");
     if (!dialog) return;
     const previous = document.activeElement as HTMLElement | null;
     const focusable = () => [...dialog.querySelectorAll<HTMLElement>("button, input, textarea, select, [tabindex]:not([tabindex='-1'])")].filter((node) => !node.hasAttribute("disabled"));
@@ -59,9 +59,9 @@ export default function AdminConsole({ live, health, onToast }: { live: boolean;
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
-    window.requestAnimationFrame(focusFirst);
+    const frame = window.requestAnimationFrame(() => { if (dialog.open) dialog.close(); dialog.showModal(); focusFirst(); });
     dialog.addEventListener("keydown", onKeyDown);
-    return () => { dialog.removeEventListener("keydown", onKeyDown); previous?.focus(); };
+    return () => { window.cancelAnimationFrame(frame); dialog.removeEventListener("keydown", onKeyDown); if (dialog.open) dialog.close(); previous?.focus(); };
   }, [confirm, createOpen, cacheClearOpen]);
 
   const reloadUsers = async (nextOffset = offset) => {

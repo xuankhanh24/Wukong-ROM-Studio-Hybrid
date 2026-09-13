@@ -23,6 +23,25 @@ export function telegramWebApp(): TelegramWebApp | null {
   return (window as Window & { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp || null;
 }
 
+export function isTelegramRuntime(): boolean {
+  const app = telegramWebApp();
+  return Boolean(app?.initData);
+}
+
+export function supportsTelegramVersion(minimum: string): boolean {
+  const app = telegramWebApp();
+  if (!app?.version || !isTelegramRuntime()) return false;
+  const current = app.version.split(".").map((part) => Number(part) || 0);
+  const required = minimum.split(".").map((part) => Number(part) || 0);
+  const length = Math.max(current.length, required.length);
+  for (let index = 0; index < length; index += 1) {
+    const left = current[index] || 0;
+    const right = required[index] || 0;
+    if (left !== right) return left > right;
+  }
+  return true;
+}
+
 export function readLaunchToken(): string {
   try {
     const url = new URL(window.location.href);
@@ -78,7 +97,7 @@ export function hasTelegramIdentity(): boolean {
 
 export function resolvedTheme(preference: ThemePreference): "light" | "dark" {
   if (preference !== "system") return preference;
-  const telegramScheme = telegramWebApp()?.colorScheme?.toLowerCase();
+  const telegramScheme = isTelegramRuntime() ? telegramWebApp()?.colorScheme?.toLowerCase() : undefined;
   if (telegramScheme === "light" || telegramScheme === "dark") return telegramScheme;
   return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
@@ -90,7 +109,7 @@ export function applyTelegramTheme(preference: ThemePreference): "light" | "dark
   root.dataset.colorScheme = resolved;
   root.classList.toggle("dark", resolved === "dark");
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "dark" ? "#09090b" : "#ffffff");
-  const app = telegramWebApp();
+  const app = supportsTelegramVersion("6.1") ? telegramWebApp() : null;
   try {
     app?.setHeaderColor?.(resolved === "dark" ? "#09090b" : "#ffffff");
     app?.setBackgroundColor?.(resolved === "dark" ? "#09090b" : "#ffffff");
@@ -101,7 +120,7 @@ export function applyTelegramTheme(preference: ThemePreference): "light" | "dark
 }
 
 export function initializeTelegram(): void {
-  const app = telegramWebApp();
+  const app = isTelegramRuntime() ? telegramWebApp() : null;
   try {
     app?.ready?.();
     app?.expand?.();

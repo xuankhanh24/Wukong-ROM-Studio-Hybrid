@@ -1,41 +1,17 @@
 "use client";
 
-import { motion, useMotionValue, useTransform } from "motion/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { cn } from "src/lib/utils";
 import { Button } from "./button";
 
-export const AnimatedThemeToggle = ({ className }: { className?: string }) => {
-  const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted ? resolvedTheme === "dark" : false;
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
-
-  // Show a placeholder during SSR to avoid hydration mismatch
-  if (!mounted) {
-    return (
-      <Button className={cn("px-2.5", className)} variant="outline" disabled>
-        <div className="h-5 w-5" />
-      </Button>
-    );
-  }
-
+export const AnimatedThemeToggle = ({ className, isDark = false, onToggle, lightLabel = "Switch to light mode", darkLabel = "Switch to dark mode" }: { className?: string; isDark?: boolean; onToggle?: () => void; lightLabel?: string; darkLabel?: string }) => {
   return (
     <Button
-      onClick={toggleTheme}
+      onClick={onToggle}
       className={cn("px-2.5", className)}
       variant="outline"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? lightLabel : darkLabel}
+      aria-pressed={isDark}
     >
       <SolarSwitch isDark={isDark} />
     </Button>
@@ -43,7 +19,8 @@ export const AnimatedThemeToggle = ({ className }: { className?: string }) => {
 };
 
 const SolarSwitch = ({ isDark }: { isDark: boolean }) => {
-  const duration = 0.7;
+  const reduceMotion = useReducedMotion();
+  const duration = reduceMotion ? 0 : 0.24;
 
   const moonVariants = {
     checked: {

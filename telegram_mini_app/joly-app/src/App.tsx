@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { useTheme } from "next-themes";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { miniApi, MiniAppApiError } from "./api/client";
 import { serializeRecipePayload } from "./api/recipe";
 import type { AccountProfile, CatalogPayload, Job, JobsPayload, SessionPayload, SourceProbeResult, SystemHealth, ThemePreference } from "./api/types";
@@ -9,7 +8,7 @@ import type { MessageKey } from "./i18n/messages";
 import { initialAppState, appReducer, type View } from "./state/app-state";
 import { navigate as navigateAction, setLanguage as setLanguageAction, setTheme as setThemeAction } from "./state/actions";
 import { parseView } from "./state/selectors";
-import { applyTelegramTheme, closeTelegram, hasTelegramIdentity, initializeTelegram, openTelegramLink, storeLaunchToken, telegramWebApp } from "./telegram/adapter";
+import { applyTelegramTheme, closeTelegram, hasTelegramIdentity, initializeTelegram, openTelegramLink, storeLaunchToken, supportsTelegramVersion, telegramWebApp } from "./telegram/adapter";
 import { bindTelegramViewport } from "./telegram/viewport";
 import { Button as JolyButton } from "./components/ui/button";
 import { AnimatedTable as JolyAnimatedTable, type ColumnDef } from "./components/ui/animated-table";
@@ -194,7 +193,7 @@ function TopBar({ view, theme, onTheme, onNavigate, onCommand, language, onLangu
       <div className="topbar-center"><span className="live-dot" /><span className="topbar-greeting">{t("greeting")}, <b>{displayName}</b></span><span className="topbar-context">{t(view)}</span></div>
       <div className="topbar-actions">
         <button className="command-trigger" onClick={onCommand} aria-label={t("quickActions")}><Command size={15} /><span>{t("quickActions")}</span><kbd>⌘ K</kbd></button>
-        <Mark id="animated-theme-toggle"><JolyAnimatedThemeToggle className="icon-button" /></Mark>
+        <Mark id="animated-theme-toggle"><JolyAnimatedThemeToggle className="icon-button" isDark={theme === "dark"} onToggle={onTheme} lightLabel={t("switchToLight")} darkLabel={t("switchToDark")} /></Mark>
         <button className="language-toggle" onClick={onLanguage} aria-label="Đổi ngôn ngữ">{t("switchLanguage")}</button>
         <button className="avatar" onClick={() => onNavigate("profile")} aria-label="Mở profile"><AccountAvatar account={account} /></button>
       </div>
@@ -209,6 +208,22 @@ function SectionTitle({ eyebrow, title, detail, action }: { eyebrow?: string; ti
 function Studio({ source, setSource, sourceState, setSourceState, mods, setMods, preset, setPreset, onToast, onCreateJob, jobState, live = false, sourceInfo, onAnalyze, catalog, device, setDevice, execution, setExecution, modVersion, setModVersion, releaseLabel, setReleaseLabel, customEditionLabel, setCustomEditionLabel, debloatPaths, setDebloatPaths, pipelineSteps, setPipelineSteps, packageArtifact, setPackageArtifact, publishArtifact, setPublishArtifact, notifyTelegram, setNotifyTelegram, submitBusy = false, submitUncertain = false, onConfirmSubmission, t }: { source: string; setSource: (value: string) => void; sourceState: SourceState; setSourceState: (value: SourceState) => void; mods: string[]; setMods: (value: string[]) => void; preset: string; setPreset: (value: string) => void; onToast: (message: string) => void; onCreateJob: () => void; jobState: JobState; live?: boolean; sourceInfo?: SourceProbeResult | null; onAnalyze?: (uri: string) => Promise<void>; catalog?: CatalogModel | null; device: string; setDevice: (value: string) => void; execution: string; setExecution: (value: string) => void; modVersion: string; setModVersion: (value: string) => void; releaseLabel: string; setReleaseLabel: (value: string) => void; customEditionLabel: string; setCustomEditionLabel: (value: string) => void; debloatPaths: string; setDebloatPaths: (value: string) => void; pipelineSteps: string[]; setPipelineSteps: (value: string[]) => void; packageArtifact: boolean; setPackageArtifact: (value: boolean) => void; publishArtifact: boolean; setPublishArtifact: (value: boolean) => void; notifyTelegram: boolean; setNotifyTelegram: (value: boolean) => void; submitBusy?: boolean; submitUncertain?: boolean; onConfirmSubmission?: () => void; t: (key: MessageKey) => string }) {
   const [modQuery, setModQuery] = useState("");
   const [releaseEditorOpen, setReleaseEditorOpen] = useState(false);
+  const releaseDialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!releaseEditorOpen) return;
+    const dialog = releaseDialogRef.current;
+    if (!dialog) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const frame = window.requestAnimationFrame(() => { if (!dialog.open) dialog.showModal(); });
+    const onCancel = (event: Event) => { event.preventDefault(); setReleaseEditorOpen(false); };
+    dialog.addEventListener("cancel", onCancel);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      dialog.removeEventListener("cancel", onCancel);
+      if (dialog.open) dialog.close();
+      previous?.focus();
+    };
+  }, [releaseEditorOpen]);
   const ready = sourceState === "ready";
   const analyze = () => {
     if (!source.trim()) { setSourceState("invalid"); onToast("Hãy dán link ROM hoặc dùng ROM mẫu."); return; }
@@ -239,7 +254,7 @@ function Studio({ source, setSource, sourceState, setSourceState, mods, setMods,
             <textarea id="source-url" value={source} onChange={(event) => { setSource(event.target.value); if (sourceState === "invalid") setSourceState("idle"); }} placeholder="https://component-ota-cn.allawntech.com/downloadCheck?..." rows={3} spellCheck={false} />
             <div className="prompt-foot"><span>URL tạm thời không xuất hiện trong log.</span><Button onClick={analyze} disabled={sourceState === "analyzing"}>{sourceState === "analyzing" ? <><RefreshCw size={15} className="spin" /> {t("analyzing")}</> : <><Zap size={15} /> {t("analyzeRom")}</>}</Button></div>
           </div>
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false} mode="sync">
             {sourceState === "analyzing" && <motion.div key="analyzing" className="source-result analyzing" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}><div className="result-icon"><RefreshCw className="spin" size={19} /></div><div><span>TYPEWRITER SOURCE CHECK</span><strong>Đang đọc metadata ROM…</strong><p>Kiểm tra host và nhận diện gói fixture.</p></div></motion.div>}
             {sourceState === "idle" && <motion.div key="idle" className="source-result idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><div className="result-icon"><Link2 size={19} /></div><div><span>WAITING FOR INPUT</span><strong>Dán link để nhận diện</strong><p>Thiết bị, phiên bản và dung lượng sẽ xuất hiện ở đây.</p></div></motion.div>}
             {sourceState === "invalid" && <motion.div key="invalid" className="source-result invalid" initial={{ opacity: 0 }} animate={{ opacity: 1 }}><div className="result-icon"><AlertCircle size={19} /></div><div><span>URL NOT READY</span><strong>Chưa có URL hợp lệ</strong><p>Dùng link fixture để tiếp tục bản demo.</p></div></motion.div>}
@@ -269,7 +284,7 @@ function Studio({ source, setSource, sourceState, setSourceState, mods, setMods,
            <div className="dispatch-button-wrap"><Button className="dispatch-button" disabled={!ready || jobState !== "none" || submitBusy} onClick={onCreateJob}>{submitBusy ? "Đang gửi…" : jobState !== "none" ? "Đã tạo job demo" : t("createBuild")}<ArrowRight size={17} /></Button>{submitUncertain && <div className="submit-recovery" role="alert"><span>Submit chưa xác định; dùng cùng idempotency key để kiểm tra lại.</span><Button variant="outline" disabled={submitBusy} onClick={onConfirmSubmission}>Xác nhận lại</Button></div>}</div>
         </section>
       </div>
-      {releaseEditorOpen && <dialog open className="joly-confirm-dialog" aria-labelledby="release-label-title"><form onSubmit={(event) => { event.preventDefault(); setReleaseEditorOpen(false); }}><h2 id="release-label-title">Chỉnh release label</h2><label>Release label<input autoFocus value={releaseLabel} onChange={(event) => setReleaseLabel(event.target.value)} placeholder={catalog?.modReleaseVersions?.[modVersion] || "V5.1"} maxLength={64} /></label><div className="profile-actions"><Button variant="ghost" onClick={() => setReleaseEditorOpen(false)}>Hủy</Button><Button type="submit">Lưu</Button></div></form></dialog>}
+      {releaseEditorOpen && <dialog ref={releaseDialogRef} className="joly-confirm-dialog" aria-labelledby="release-label-title"><form onSubmit={(event) => { event.preventDefault(); setReleaseEditorOpen(false); }}><h2 id="release-label-title">Chỉnh release label</h2><label>Release label<input autoFocus value={releaseLabel} onChange={(event) => setReleaseLabel(event.target.value)} placeholder={catalog?.modReleaseVersions?.[modVersion] || "V5.1"} maxLength={64} /></label><div className="profile-actions"><Button variant="ghost" onClick={() => setReleaseEditorOpen(false)}>Hủy</Button><Button type="submit">Lưu</Button></div></form></dialog>}
       <div className="screen-footer"><span>Preview build-control-ledger</span><span>Last sync just now</span></div>
     </div>
   );
@@ -290,7 +305,8 @@ function sanitizeEventText(value: unknown): string {
 type JobRow = { id: string; name: string; status: string; stage: string; progress: number; time: string; owner: string };
 
 function Jobs({ jobState, stage, onAdvance, onToast, onNavigate, realJobs = [], selectedJob, selectedJobId, jobsLoading = false, onSelectJob, onRefresh, onAction, onLoadMoreEvents, jobEvents = [], eventsHasMore = false, onArtifact, onMirrorRepair, t }: { jobState: JobState; stage: number; onAdvance: () => void; onToast: (message: string) => void; onNavigate: (view: View) => void; realJobs?: Job[]; selectedJob?: Job | null; selectedJobId?: string; jobsLoading?: boolean; onSelectJob?: (id: string) => void; onRefresh?: () => void; onAction?: (action: "cancel" | "resume", id: string) => void; onLoadMoreEvents?: () => void; jobEvents?: Array<Record<string, unknown>>; eventsHasMore?: boolean; onArtifact?: (id: string, index: number) => void; onMirrorRepair?: (id: string) => void; t: (key: MessageKey) => string }) {
-  const [tab, setTab] = useState("Active");
+  const jobTabs = ["Active", "History", "Saved"] as const;
+  const [tab, setTab] = useState<(typeof jobTabs)[number]>("Active");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | null>(null);
   const [dateOpen, setDateOpen] = useState(false);
@@ -317,12 +333,17 @@ function Jobs({ jobState, stage, onAdvance, onToast, onNavigate, realJobs = [], 
   const detailName = selectedJob ? `${selectedJob.device || selectedJob.product || "PKG110"} · ${selectedJob.preset || "Plus"}` : activeRow?.name || "PKG110 · Plus";
   const detailProgress = Number(selectedJob?.progress ?? activeRow?.progress ?? progress);
   const detailStage = String(selectedJob?.stage || activeRow?.stage || (jobState === "completed" ? "Artifact ready" : jobStages[stage]?.label ?? "Queued"));
+  const moveTab = (current: (typeof jobTabs)[number], direction: -1 | 1) => {
+    const next = jobTabs[(jobTabs.indexOf(current) + direction + jobTabs.length) % jobTabs.length];
+    setTab(next);
+    window.requestAnimationFrame(() => document.getElementById(`jobs-tab-${next.toLowerCase()}`)?.focus());
+  };
   return (
     <div className="screen jobs-screen">
       <div className="screen-heading"><div><span className="eyebrow">OBSERVABILITY / JOBS</span><h1>{t("jobsTitle")}</h1><p>{t("jobsDescription")}</p></div><Button variant="outline" onClick={() => onNavigate("studio")}><ArrowRight size={15} className="rotate-180" /> {t("createAnotherJob")}</Button></div>
       <div className="job-metrics"><NumberCounter value="03" label="lượt build còn lại" /><NumberCounter value="02" label="đã dùng hôm nay" tone="green" /><NumberCounter value="01" label="đang chạy" tone="violet" /><NumberCounter value="99.2%" label="runner uptime" tone="orange" /></div>
-      <div className="jobs-toolbar"><div className="tabs"><button className={tab === "Active" ? "active" : ""} onClick={() => setTab("Active")}>Active <b>{realJobs.length ? realJobs.filter((job) => !["succeeded", "failed", "cancelled"].includes(String(job.status).toLowerCase())).length : 1}</b></button><button className={tab === "History" ? "active" : ""} onClick={() => setTab("History")}>History <b>{realJobs.length ? realJobs.filter((job) => ["succeeded", "failed", "cancelled"].includes(String(job.status).toLowerCase())).length : 3}</b></button><button className={tab === "Saved" ? "active" : ""} onClick={() => setTab("Saved")}>Saved recipes <b>4</b></button></div><div className="toolbar-right"><div className="date-filter"><button className="toolbar-button" aria-expanded={dateOpen} onClick={() => setDateOpen((open) => !open)}><CalendarDays size={15} /> {dateFilter ? dateFilter.toLocaleDateString("vi-VN") : "Chọn ngày"}</button>{dateOpen && <div className="date-wheel-popover"><DateWheelPicker value={dateFilter || new Date()} onChange={(next) => { setDateFilter(next); setDateOpen(false); }} size="sm" locale="vi-VN" aria-label="Ngày lọc job" /><button className="date-clear" onClick={() => { setDateFilter(null); setDateOpen(false); }}>Xóa bộ lọc</button></div>}</div><label className="search-field"><Search size={15} /><input aria-label="Tìm job" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm job…" /></label><button className="toolbar-button" onClick={onRefresh}><RefreshCw size={15} /> Refresh</button></div></div>
-      <div className="job-layout">
+      <div className="jobs-toolbar"><div className="tabs" role="tablist" aria-label={t("jobsViewLabel")}>{jobTabs.map((item) => { const count = item === "Active" ? (realJobs.length ? realJobs.filter((job) => !["succeeded", "failed", "cancelled"].includes(String(job.status).toLowerCase())).length : 1) : item === "History" ? (realJobs.length ? realJobs.filter((job) => ["succeeded", "failed", "cancelled"].includes(String(job.status).toLowerCase())).length : 3) : 4; const label = item === "Active" ? t("jobsActive") : item === "History" ? t("jobsHistory") : t("jobsSaved"); return <button key={item} id={`jobs-tab-${item.toLowerCase()}`} role="tab" aria-selected={tab === item} aria-controls="jobs-panel" tabIndex={tab === item ? 0 : -1} className={tab === item ? "active" : ""} onClick={() => setTab(item)} onKeyDown={(event) => { if (event.key === "ArrowLeft") moveTab(item, -1); if (event.key === "ArrowRight") moveTab(item, 1); }}>{label} <b>{count}</b></button>; })}</div><div className="toolbar-right"><div className="date-filter"><button className="toolbar-button" aria-expanded={dateOpen} onClick={() => setDateOpen((open) => !open)}><CalendarDays size={15} /> {dateFilter ? dateFilter.toLocaleDateString("vi-VN") : t("chooseDate")}</button>{dateOpen && <div className="date-wheel-popover"><DateWheelPicker value={dateFilter || new Date()} onChange={(next) => { setDateFilter(next); setDateOpen(false); }} size="sm" locale={t("dateLocale")} aria-label={t("jobDateLabel")} /><button className="date-clear" onClick={() => { setDateFilter(null); setDateOpen(false); }}>{t("clearFilter")}</button></div>}</div><label className="search-field"><Search size={15} /><input aria-label={t("searchJobs")} value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`${t("searchJobs")}…`} /></label><button className="toolbar-button" onClick={onRefresh}><RefreshCw size={15} /> {t("refresh")}</button></div></div>
+      <div className="job-layout" id="jobs-panel" role="tabpanel" aria-labelledby={`jobs-tab-${tab.toLowerCase()}`}>
         <Mark id="animated-table" className="jobs-table-wrap"><JolyAnimatedTable data={visibleRows} columns={columns} loading={jobsLoading} loadingRows={4} stickyHeader onRowClick={(row) => onSelectJob?.(row.id)} emptyMessage="Không có job phù hợp." /></Mark>
         <section className="panel active-job-panel"><div className="active-job-top"><div><span className="eyebrow">{selectedId ? "SELECTED JOB" : "LIVE PREVIEW"}</span><h2>{detailName}</h2><p><span className="mono">{selectedId || "wk-demo-8f21"}</span> · {String(selectedJob?.runner || "GitHub Auto")}</p></div><JobStatus status={detailStatus} /></div><div className="job-progress-readout"><strong>{detailProgress}%</strong><span><TextMorph>{detailStage}</TextMorph></span></div><div className="big-progress"><i style={{ transform: `scaleX(${Math.max(0, Math.min(100, detailProgress)) / 100})` }} /></div><div className="beam-line"><div className="beam-track" />{jobStages.map((item, index) => { const Icon = item.icon; const done = ["succeeded", "completed"].includes(detailStatus.toLowerCase()) || index < stage; const current = index === stage && !done; return <div key={item.label} className={`beam-node ${done ? "done" : ""} ${current ? "current" : ""}`}><div><Icon size={16} /></div><span>{item.label}</span></div>; })}</div><div className="job-detail-actions">{selectedId && onAction && !["succeeded", "completed", "failed", "cancelled"].includes(detailStatus.toLowerCase()) ? <Button variant="outline" onClick={() => onAction("cancel", selectedId)}><Pause size={15} /> Cancel</Button> : <Button onClick={selectedId ? () => onArtifact?.(selectedId, 0) : jobState === "completed" ? () => onToast("Artifact đã sẵn sàng tải xuống.") : onAdvance}>{selectedId ? <><Download size={15} /> Artifact</> : jobState === "completed" ? <><Download size={15} /> Download artifact</> : <><Play size={15} /> Advance fixture</>}</Button>}{selectedId && ["failed", "cancelled"].includes(detailStatus.toLowerCase()) && onAction ? <Button variant="outline" onClick={() => onAction("resume", selectedId)}><RefreshCw size={15} /> Resume</Button> : null}{selectedId && onMirrorRepair ? <Button variant="outline" onClick={() => onMirrorRepair(selectedId)}><RefreshCw size={15} /> Repair mirror</Button> : null}<Button variant="outline" onClick={() => onToast("Log sanitized đã mở trong panel bên dưới.")}><Terminal size={15} /> View log</Button></div>{selectedId && <div className="job-events"><div className="panel-head"><span className="eyebrow">EVENTS</span><span className="mono">{jobEvents.length} loaded · max 500/page</span></div>{jobEvents.length ? jobEvents.map((event, index) => <article key={String(event.sequence || index)}><time className="mono">{String(event.timestamp || "—")}</time><span>{sanitizeEventText(event.message || event.error || event.warning || event.type || event.stage || "event")}</span></article>) : <p className="muted-cell">Chưa có event.</p>}{eventsHasMore && <Button variant="ghost" onClick={onLoadMoreEvents}>Load more events</Button>}</div>}</section>
       </div>
@@ -397,8 +418,8 @@ function System({ onToast, onNavigate, live = false, account, t }: { onToast: (m
   return (
     <div className="screen system-screen">
       <div className="screen-heading"><div><span className="eyebrow">RUNTIME / HEALTH</span><h1>{t("systemTitle")}</h1><p>{t("systemDescription")}</p></div><Button variant="outline" onClick={refreshHealth}><RefreshCw size={15} /> {t("refresh")}</Button></div>
-      <div className="system-grid"><div className="health-hero"><div className="health-orbit"><HeartPulse size={22} /></div><div><h2>Control plane {health ? "đã xác minh" : live ? "đang kết nối" : "preview"}</h2><p>{health ? "Đã nhận diagnostics từ orchestration core" : live ? "Đang chờ diagnostics" : "Không gửi request trong preview"}</p></div><StatusPill tone={health || !live ? "success" : "warning"}>{health ? "Operational" : live ? "Checking" : "Local"}</StatusPill></div><div className="health-metric"><span>Queue depth</span><strong>{String(health?.queueDepth ?? "—")}</strong><small>Giá trị từ diagnostics</small></div><div className="health-metric"><span>Runner load</span><strong>{String(health?.runnerLoad ?? "—")}</strong><small>Giá trị từ diagnostics</small></div><div className="health-metric"><span>API latency</span><strong>{String(health?.apiLatency ?? "—")}</strong><small>Giá trị từ diagnostics</small></div></div>
-      <div className="system-two-col"><section className="panel service-status"><div className="panel-head"><h2>Kết nối dịch vụ</h2></div><div className="service-row"><span>Telegram session</span><StatusPill tone={account ? "success" : "neutral"}>{account ? "Authenticated" : "Preview"}</StatusPill></div><div className="service-row"><span>Wukong API</span><StatusPill tone={health ? "success" : live ? "warning" : "neutral"}>{health ? "Connected" : live ? "Checking" : "Local"}</StatusPill></div><div className="service-row"><span>Quyền truy cập</span><strong>{account?.role || "demo"}</strong></div></section><section className="panel system-tools"><div className="panel-head"><h2>Công cụ vận hành</h2><Settings2 size={18} /></div><button onClick={refreshHealth}><RefreshCw size={17} /><span><strong>Tải lại diagnostics</strong><small>Đọc trạng thái mới nhất từ server</small></span><ChevronRight size={16} /></button><button onClick={() => onToast("Quyền truy cập luôn được kiểm tra lại ở server.")}><LockKeyhole size={17} /><span><strong>Access policy</strong><small>{account?.role === "admin" ? "Admin server-gated" : "Owned jobs only"}</small></span><ChevronRight size={16} /></button>{(import.meta.env.DEV || account?.role === "admin") && <button onClick={() => onNavigate("lab")}><WandSparkles size={17} /><span><strong>Component Lab</strong><small>Chỉ dành cho development và admin</small></span><ArrowRight size={16} /></button>}</section></div>
+      <div className="system-grid"><div className="health-hero"><div className="health-orbit"><HeartPulse size={22} /></div><div><h2>{health ? t("controlPlaneVerified") : live ? t("controlPlaneConnecting") : t("controlPlanePreview")}</h2><p>{health ? "Đã nhận diagnostics từ orchestration core" : live ? "Đang chờ diagnostics" : "Không gửi request trong preview"}</p></div><StatusPill tone={health || !live ? "success" : "warning"}>{health ? "Operational" : live ? "Checking" : "Local"}</StatusPill></div><div className="health-metric"><span>{t("queueDepth")}</span><strong>{String(health?.queueDepth ?? "—")}</strong><small>{t("diagnosticsValue")}</small></div><div className="health-metric"><span>{t("runnerLoad")}</span><strong>{String(health?.runnerLoad ?? "—")}</strong><small>{t("diagnosticsValue")}</small></div><div className="health-metric"><span>{t("apiLatency")}</span><strong>{String(health?.apiLatency ?? "—")}</strong><small>{t("diagnosticsValue")}</small></div></div>
+      <div className="system-two-col"><section className="panel service-status"><div className="panel-head"><h2>{t("serviceConnections")}</h2></div><div className="service-row"><span>Telegram session</span><StatusPill tone={account ? "success" : "neutral"}>{account ? "Authenticated" : "Preview"}</StatusPill></div><div className="service-row"><span>Wukong API</span><StatusPill tone={health ? "success" : live ? "warning" : "neutral"}>{health ? "Connected" : live ? "Checking" : "Local"}</StatusPill></div><div className="service-row"><span>{t("accessPermission")}</span><strong>{account?.role || "demo"}</strong></div></section><section className="panel system-tools"><div className="panel-head"><h2>{t("operationTools")}</h2><Settings2 size={18} /></div><button onClick={refreshHealth}><RefreshCw size={17} /><span><strong>{t("reloadDiagnostics")}</strong><small>{t("latestServerState")}</small></span><ChevronRight size={16} /></button><button onClick={() => onToast("Quyền truy cập luôn được kiểm tra lại ở server.")}><LockKeyhole size={17} /><span><strong>{t("accessPolicy")}</strong><small>{account?.role === "admin" ? "Admin server-gated" : "Owned jobs only"}</small></span><ChevronRight size={16} /></button>{(import.meta.env.DEV || account?.role === "admin") && <button onClick={() => onNavigate("lab")}><WandSparkles size={17} /><span><strong>Component Lab</strong><small>Chỉ dành cho development và admin</small></span><ArrowRight size={16} /></button>}</section></div>
       {account?.role === "admin" && <Suspense fallback={<section className="panel admin-console"><span className="mono">Loading admin controls…</span></section>}><LazyAdminConsole live={live} health={health} onToast={onToast} /></Suspense>}
     </div>
   );
@@ -406,13 +427,13 @@ function System({ onToast, onNavigate, live = false, account, t }: { onToast: (m
 
 function Profile({ onToast, onTheme, onReconnect, onClose, account, t }: { onToast: (message: string) => void; onTheme: () => void; onReconnect?: () => void; onClose?: () => void; account?: AccountProfile | null; t: (key: MessageKey) => string }) {
   const name = String(account?.displayName || account?.username || "Wukong User");
-  const username = account?.username ? `@${account.username}` : "Telegram account";
-  const credits = account?.unlimited ? "Unlimited" : `${Number(account?.buildCredits || 0)} remaining`;
+  const username = account?.username ? `@${account.username}` : t("telegramAccount");
+  const credits = account?.unlimited ? t("unlimited") : `${Number(account?.buildCredits || 0)} ${t("remaining")}`;
   const jobCount = Number(account?.jobCount || 0);
   const role = String(account?.role || "user");
   const platform = [account?.platform, account?.appVersion].filter(Boolean).join(" · ") || "Telegram WebApp";
   return (
-    <div className="screen profile-screen"><div className="screen-heading"><div><span className="eyebrow">ACCOUNT / PREFERENCES</span><h1>{t("profileTitle")}</h1><p>{t("profileDescription")}</p></div></div><div className="profile-grid profile-grid-compact"><section className="panel profile-card"><div className="profile-card-top"><AccountAvatar account={account} className="profile-avatar-large" /><div><h2>{name}</h2><p>{username} · Telegram ID {String(account?.telegramId || account?.userId || "—")}</p><StatusPill tone="success">{account?.role === "admin" ? "Admin" : "Approved user"}</StatusPill></div></div><div className="profile-facts"><div><span>Build allowance</span><strong>{credits}</strong></div><div><span>Jobs created</span><strong>{jobCount}</strong></div><div><span>Role / access</span><strong>{role}</strong></div><div><span>Client</span><strong>{platform}</strong></div><div><span>Language</span><strong>Tiếng Việt <small>/ English</small></strong></div><div><span>Last seen</span><strong>{String(account?.lastSeenAt || "—")}</strong></div></div><div className="profile-actions"><Button variant="outline" onClick={onTheme}><Moon size={15} /> Toggle theme</Button><Button variant="outline" onClick={() => onToast("Thông tin quyền được tải từ Telegram session.")}><KeyRound size={15} /> Access details</Button>{onReconnect && <Button variant="outline" onClick={onReconnect}><RefreshCw size={15} /> Reconnect</Button>}{onClose && <Button variant="ghost" onClick={onClose}>Close</Button>}</div></section></div></div>
+    <div className="screen profile-screen"><div className="screen-heading"><div><span className="eyebrow">ACCOUNT / PREFERENCES</span><h1>{t("profileTitle")}</h1><p>{t("profileDescription")}</p></div></div><div className="profile-grid profile-grid-compact"><section className="panel profile-card"><div className="profile-card-top"><AccountAvatar account={account} className="profile-avatar-large" /><div><h2>{name}</h2><p>{username} · Telegram ID {String(account?.telegramId || account?.userId || "—")}</p><StatusPill tone="success">{account?.role === "admin" ? "Admin" : t("approvedUser")}</StatusPill></div></div><div className="profile-facts"><div><span>{t("buildAllowance")}</span><strong>{credits}</strong></div><div><span>{t("jobsCreated")}</span><strong>{jobCount}</strong></div><div><span>{t("roleAccess")}</span><strong>{role}</strong></div><div><span>{t("client")}</span><strong>{platform}</strong></div><div><span>{t("language")}</span><strong>Tiếng Việt <small>/ English</small></strong></div><div><span>{t("lastSeen")}</span><strong>{String(account?.lastSeenAt || "—")}</strong></div></div><div className="profile-actions"><Button variant="outline" onClick={onTheme}><Moon size={15} /> {t("toggleTheme")}</Button><Button variant="outline" onClick={() => onToast("Thông tin quyền được tải từ Telegram session.")}><KeyRound size={15} /> {t("accessDetails")}</Button>{onReconnect && <Button variant="outline" onClick={onReconnect}><RefreshCw size={15} /> {t("reconnect")}</Button>}{onClose && <Button variant="ghost" onClick={onClose}>{t("close")}</Button>}</div></section></div></div>
   );
 }
 
@@ -449,7 +470,8 @@ function LabFallback() {
 
 export function App() {
   const { addToast } = useAnimatedToast();
-  const nextTheme = useTheme();
+  const reduceMotion = useReducedMotion();
+  const mainRef = useRef<HTMLElement>(null);
   const [ui, dispatch] = useReducer(appReducer, undefined, () => initialAppState(parseView(window.location.hash), (localStorage.getItem("wukong-language") as "vi" | "en") || "vi", (localStorage.getItem("wukong-theme") as ThemePreference) || "system"));
   const { view, language, themePreference } = ui;
   const [theme, setTheme] = useState<"light" | "dark">(() => applyTelegramTheme(themePreference));
@@ -493,7 +515,7 @@ export function App() {
   const t = translator(language);
   const setNav = (next: View) => { dispatch(navigateAction(next)); window.location.hash = next === "studio" ? "build" : next; window.scrollTo({ top: 0, behavior: "auto" }); };
   const notify = (message: string) => { addToast({ message, type: "default", duration: 2800 }); };
-  const toggleTheme = () => { const next = themePreference === "dark" ? "light" : themePreference === "light" ? "system" : "dark"; dispatch(setThemeAction(next)); nextTheme.setTheme(next); };
+  const toggleTheme = () => { const next = themePreference === "dark" ? "light" : themePreference === "light" ? "system" : "dark"; dispatch(setThemeAction(next)); };
   const toggleLanguage = () => dispatch(setLanguageAction(language === "vi" ? "en" : "vi"));
 
   useEffect(() => {
@@ -582,7 +604,7 @@ export function App() {
   useEffect(() => { if (sessionLoadStarted.current) return; sessionLoadStarted.current = true; if (!window.location.hash || !["#build", "#studio", "#jobs", "#catalog", "#system", "#profile", "#lab"].includes(window.location.hash)) window.location.hash = "build"; initializeTelegram(); void loadSession(); }, []);
   useEffect(() => bindTelegramViewport(), []);
   useEffect(() => {
-    const app = telegramWebApp();
+    const app = supportsTelegramVersion("6.1") ? telegramWebApp() : null;
     const back = app?.BackButton;
     if (!back) return;
     const goBack = () => setNav("studio");
@@ -601,10 +623,9 @@ export function App() {
     return () => { app?.offEvent?.("themeChanged", syncTheme); media?.removeEventListener?.("change", syncTheme); };
   }, [themePreference]);
   useEffect(() => {
-    if (nextTheme.theme === "system" || nextTheme.theme === "light" || nextTheme.theme === "dark") {
-      if (nextTheme.theme !== themePreference) dispatch(setThemeAction(nextTheme.theme));
-    }
-  }, [nextTheme.theme, themePreference]);
+    const frame = window.requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [view]);
   useEffect(() => { localStorage.setItem("wukong-language", language); document.documentElement.lang = language; }, [language]);
   useEffect(() => { const syncHash = () => dispatch(navigateAction(parseView(window.location.hash))); window.addEventListener("hashchange", syncHash); return () => window.removeEventListener("hashchange", syncHash); }, []);
   useEffect(() => { const key = (event: KeyboardEvent) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setCommandOpen(true); } if (event.key === "Escape") setCommandOpen(false); }; window.addEventListener("keydown", key); return () => window.removeEventListener("keydown", key); }, []);
@@ -733,5 +754,5 @@ export function App() {
   if (live && sessionState !== "ready") return <AccessGate loading={sessionState === "loading"} pairing={pairing} error={sessionError} reason={sessionState === "unauthenticated" ? "unauthenticated" : "error"} onRetry={() => void loadSession()} onPair={() => void startPairing()} />;
   if (live && account && account.accessStatus && account.accessStatus !== "approved") return <AccessGate loading={false} pairing={null} error={sessionError} reason={account.accessStatus === "revoked" ? "revoked" : "pending"} onRetry={() => void loadSession()} onPair={() => void startPairing()} />;
   if (live && maintenance?.enabled && account?.role !== "admin") return <AccessGate loading={false} pairing={null} error={maintenance.message || ""} reason="maintenance" onRetry={() => void loadSession()} onPair={() => void startPairing()} />;
-  return <div className="app-shell"><TopBar view={view} theme={theme} onTheme={toggleTheme} onNavigate={setNav} onCommand={() => setCommandOpen(true)} language={language} onLanguage={toggleLanguage} account={account} t={t} /><main><AnimatePresence mode="wait"><motion.div key={view} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.22 }}>{screen}</motion.div></AnimatePresence></main><LiquidDock view={view} onNavigate={setNav} account={account} language={language} /><CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} onNavigate={setNav} onTheme={toggleTheme} onToast={notify} allowLab={allowLab} /></div>;
+  return <div className="app-shell"><a className="skip-link" href="#main-content">{t("skipToContent")}</a><TopBar view={view} theme={theme} onTheme={toggleTheme} onNavigate={setNav} onCommand={() => setCommandOpen(true)} language={language} onLanguage={toggleLanguage} account={account} t={t} /><main id="main-content" ref={mainRef} tabIndex={-1}><AnimatePresence initial={false} mode="sync"><motion.div key={view} initial={reduceMotion ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -3 }} transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}>{screen}</motion.div></AnimatePresence></main><LiquidDock view={view} onNavigate={setNav} account={account} language={language} /><CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} onNavigate={setNav} onTheme={toggleTheme} onToast={notify} allowLab={allowLab} /></div>;
 }
