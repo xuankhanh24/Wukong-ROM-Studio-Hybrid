@@ -26,7 +26,7 @@ class MiniAppCatalogConsistencyTests(unittest.TestCase):
             for version in expected
         }
 
-        self.assertEqual(set(expected), actual_versions.intersection(expected))
+        self.assertEqual(set(expected), actual_versions)
         self.assertEqual(expected, actual_labels)
 
 
