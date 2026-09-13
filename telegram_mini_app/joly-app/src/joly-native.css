@@ -16,6 +16,7 @@
   --accent: oklch(.967 .001 286.375);
   --accent-foreground: oklch(.21 .006 285.885);
   --destructive: oklch(.577 .245 27.325);
+  --destructive-foreground: oklch(.985 0 0);
   --border: oklch(.92 .004 286.32);
   --input: oklch(.92 .004 286.32);
   --ring: oklch(.705 .015 286.067);
@@ -70,6 +71,7 @@
   --accent: oklch(.274 .006 286.033);
   --accent-foreground: oklch(.985 0 0);
   --destructive: oklch(.704 .191 22.216);
+  --destructive-foreground: oklch(.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(.552 .016 285.938);
@@ -994,4 +996,45 @@ html { scroll-padding-bottom: var(--dock-safe-height); }
   :root { --dock-safe-height: 136px; }
   .profile-card-top { padding: 16px; }
   .profile-actions { padding: 14px; }
+}
+
+/* Contrast bridge for Joly registry components. Tailwind utilities now resolve
+   through the production tokens above; these selectors only define the three
+   app-specific colored surfaces shown in Studio and Jobs. */
+:root {
+  --terminal-background: oklch(.115 .004 285.823);
+  --terminal-foreground: oklch(.88 .008 286);
+  --terminal-muted: oklch(.68 .012 286);
+}
+
+.j-button-default:not(:disabled) { color: var(--brand-foreground); }
+.j-button-default:not(:disabled) > span { color: var(--brand-foreground); }
+
+.edition-segmented {
+  height: 44px;
+  min-height: 44px;
+  overflow: hidden;
+}
+.edition-segmented > div:first-child,
+.edition-segmented > div:nth-child(2) {
+  top: 3px;
+  height: 38px;
+  border-radius: 8px;
+}
+.edition-segmented > button { height: 38px; min-height: 38px; }
+.edition-segmented > button > span { color: var(--muted-foreground) !important; text-shadow: none !important; }
+.edition-segmented .text-black { color: var(--brand-foreground) !important; text-shadow: none !important; }
+
+.log-strip { background: var(--terminal-background); }
+.log-strip [data-slot="code-block"] {
+  --foreground: var(--terminal-foreground);
+  --muted-foreground: var(--terminal-muted);
+  color: var(--terminal-foreground);
+  background: transparent !important;
+}
+.log-strip [data-slot="code-block"] pre,
+.log-strip [data-slot="code-block"] pre code,
+.log-strip [data-slot="code-block"] pre * {
+  color: var(--terminal-foreground) !important;
+  opacity: 1;
 }

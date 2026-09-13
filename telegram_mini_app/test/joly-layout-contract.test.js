@@ -158,3 +158,22 @@ test("Telegram haptics are gated by runtime version support", () => {
   const adapter = read("joly-app/src/telegram/adapter.ts");
   assert.match(adapter, /function hapticSelection[\s\S]*supportsTelegramVersion\("6\.1"\)/);
 });
+
+test("Joly components receive the complete semantic color bridge", () => {
+  const css = read("joly-app/src/styles.css");
+  for (const token of [
+    "background", "foreground", "card", "card-foreground", "primary",
+    "primary-foreground", "secondary", "secondary-foreground", "muted",
+    "muted-foreground", "accent", "accent-foreground", "destructive",
+    "border", "input", "ring",
+  ]) {
+    assert.match(css, new RegExp(`--color-${token}:\\s*var\\(--${token}`));
+  }
+});
+
+test("high-risk colored controls and terminal text keep explicit contrast", () => {
+  const css = read("joly-app/src/joly-native.css");
+  assert.match(css, /\.edition-segmented \.text-black\s*\{[^}]*color:\s*var\(--brand-foreground\)\s*!important/);
+  assert.match(css, /\.j-button-default:not\(:disabled\)\s*\{[^}]*color:\s*var\(--brand-foreground\)/);
+  assert.match(css, /\.log-strip \[data-slot="code-block"\] pre \*\s*\{[^}]*color:\s*var\(--terminal-foreground\)\s*!important/);
+});
