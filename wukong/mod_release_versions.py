@@ -20,6 +20,7 @@ DEFAULT_MOD_RELEASE_VERSIONS = {
     "ColorOS_16.0.10": "V6.0",
     "ColorOS_16.0.5": "V3.4",
     "ColorOS_16.0.7": "V3.4",
+    "ColorOS_16.0.7.1001": "V3.5",
     "ColorOS_16.0.8": "V4.1",
     "ColorOS_16.0.9": "V5.0",
     "RealmeUI_16.0.7": "V3.4",
