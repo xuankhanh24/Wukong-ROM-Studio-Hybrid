@@ -63,6 +63,17 @@ function selectionMark() {
 function renderMods(reset = true) {
   const list = $("#mod-list");
   if (!list || !state.catalog) return;
+  const oxygen = selectedModVersion().startsWith("OxygenOS_");
+  const superStep = $("#steps input[value='repack_super']");
+  if (superStep) {
+    if (oxygen) superStep.checked = false;
+    else if (superStep.disabled) superStep.checked = true;
+    superStep.disabled = oxygen;
+  }
+  if (!state.debloatPathsCustomized) {
+    state.debloatPaths = [...defaultDebloatPathsForRom()];
+    renderDebloatSummary();
+  }
   const current = new Set(reset ? defaultMods() : selectedMods());
   if ([...EXCLUSIVE_MODS].every((name) => current.has(name))) current.delete("Disable_flag_secure");
   const names = state.catalog.modsByVersion[selectedModVersion()] || [];
@@ -438,11 +449,18 @@ function closeDebloatEditor() {
   $("#edit-debloat-paths").hidden = false;
 }
 
+function defaultDebloatPathsForRom() {
+  if (selectedModVersion().startsWith("OxygenOS_") && state.catalog?.defaultDebloatPathsByFamily?.OxygenOS) {
+    return state.catalog.defaultDebloatPathsByFamily.OxygenOS;
+  }
+  return state.catalog?.defaultDebloatPaths || [];
+}
+
 function saveDebloatPaths() {
   state.debloatPaths = normalizedDebloatPaths($("#debloat-paths").value);
   state.debloatPathsCustomized = !sameStringList(
     state.debloatPaths,
-    state.catalog?.defaultDebloatPaths || []
+    defaultDebloatPathsForRom()
   );
   closeDebloatEditor();
   renderDebloatSummary();
@@ -459,7 +477,7 @@ function resetJobDraft() {
   if (size) size.value = "";
   state.customPresetLabelOverride = "";
   state.releaseVersionOverrides = {};
-  state.debloatPaths = [...(state.catalog?.defaultDebloatPaths || [])];
+  state.debloatPaths = [...defaultDebloatPathsForRom()];
   state.debloatPathsCustomized = false;
   closeDebloatEditor();
   renderDebloatSummary();
@@ -478,13 +496,14 @@ function buildRecipe() {
   recipe.build = {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
-      enabledSteps: $$("#steps input:checked").map((input) => input.value),
+      enabledSteps: $$("#steps input:checked").map((input) => input.value)
+        .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),
       package: $("#package").checked, notifyTelegram: $("#notify").checked
     };
     // The shared default list is intentionally visible/editable in the Mini App.
     // Omitting an unchanged list is lossless: every runner resolves a missing
     // debloatPaths field from the same versioned config/debloat.json catalog.
-    if (!sameStringList(state.debloatPaths, state.catalog.defaultDebloatPaths)) {
+    if (!sameStringList(state.debloatPaths, defaultDebloatPathsForRom())) {
       recipe.build.debloatPaths = [...state.debloatPaths];
     }
   return recipe;

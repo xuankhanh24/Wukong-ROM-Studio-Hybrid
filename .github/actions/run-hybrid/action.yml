@@ -107,6 +107,7 @@ runs:
         fi
         task="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['task'])")"
         if [ "$task" = build ]; then
+          python3 -c "import json; from wukong.models import BuildRecipe; p='.wkstudio/recipe.json'; r=BuildRecipe.from_dict(json.load(open(p))); open(p, 'w').write(json.dumps(r.to_dict()))"
           mod_version="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['build']['modVersion'])")"
           mkdir -p .wkstudio/bundled-shared
           rm -rf .wkstudio/bundled-shared/Fake_lock
@@ -121,7 +122,7 @@ runs:
             fi
           }
           install_pack "MOD/$mod_version"
-          for pack in STARK/common Flash_script/common copy-image/v1 OFX/v1 TWRP/v1; do
+          for pack in $(python3 -c "from wukong.rom_family import required_content_packs; import sys; print(' '.join(required_content_packs(sys.argv[1])[1:]))" "$mod_version"); do
             install_pack "$pack"
           done
           # The current remote STARK archive predates the shared Fake_lock.

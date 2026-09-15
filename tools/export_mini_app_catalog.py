@@ -97,6 +97,9 @@ def export_catalog(
         "presetLabels": {"lite": "Lite", "plus": "Plus", "custom": "Custom"},
         "devices": devices,
         "defaultDebloatPaths": default_debloat_paths,
+        "defaultDebloatPathsByFamily": {
+            "OxygenOS": json.loads((DEFAULT_DEBLOAT_PATH.parent / "debloat_oxygenos.json").read_text(encoding="utf-8"))["default"],
+        },
         "modVersions": sorted(mods_by_version, key=str.casefold),
         "modReleaseVersions": {
             version: default_mod_release_version(version)

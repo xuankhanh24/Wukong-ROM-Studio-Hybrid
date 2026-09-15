@@ -12,6 +12,7 @@ from urllib.parse import parse_qsl, urlparse
 
 from .pipeline import PIPELINE_STEP_NAMES
 from .mod_release_versions import SAFE_RELEASE_LABEL, default_mod_release_version
+from .rom_family import is_oxygen_product, oxygen_mod_version
 
 
 SCHEMA_VERSION = 1
@@ -438,11 +439,26 @@ class BuildRecipe:
         source_payload = payload.get("source")
         if not isinstance(source_payload, Mapping):
             raise RecipeValidationError("ROM source is required")
+        source = SourceSpec.from_dict(source_payload)
+        raw_build = payload.get("build")
+        build_payload = dict(raw_build) if isinstance(raw_build, Mapping) else {}
+        BuildOptions.from_dict(build_payload)
+        product = source.metadata.get("productName") or device
+        if task == "build" and is_oxygen_product(product):
+            try:
+                build_payload["modVersion"] = oxygen_mod_version(
+                    {**source.metadata, "productName": product},
+                    build_payload.get("modVersion") or "ColorOS_16.0.7",
+                )
+            except ValueError as exc:
+                raise RecipeValidationError(str(exc)) from exc
+            if isinstance(build_payload.get("enabledSteps"), list):
+                build_payload["enabledSteps"] = [step for step in build_payload["enabledSteps"] if step != "repack_super"]
         return cls(
             task=task,
             device=device,
-            source=SourceSpec.from_dict(source_payload),
-            build=BuildOptions.from_dict(payload.get("build") if isinstance(payload.get("build"), Mapping) else None),
+            source=source,
+            build=BuildOptions.from_dict(build_payload),
             execution=ExecutionOptions.from_dict(
                 payload.get("execution") if isinstance(payload.get("execution"), Mapping) else None
             ),

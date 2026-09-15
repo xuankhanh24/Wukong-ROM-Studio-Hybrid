@@ -302,6 +302,7 @@ function normalizeDevice(value) {
 }
 
 function matchCatalogDevice(result, detected, inferred, filename) {
+  if (/CPH/i.test(String(result?.productName || ""))) return result.productName;
   const versionProduct = String(result?.version || "").split("_", 1)[0];
   const candidates = [result?.productName, versionProduct, filename, result?.device, detected?.device, inferred?.device]
     .map(normalizeDevice).filter(Boolean);
@@ -311,10 +312,11 @@ function matchCatalogDevice(result, detected, inferred, filename) {
   })?.product || "";
 }
 
-function selectModPackForVersion(version) {
+function selectModPackForVersion(version, product = "") {
   const match = String(version || "").match(/_(\d+\.\d+\.\d+)/);
   if (!match) return;
-  const preferred = `ColorOS_${match[1]}`;
+  const family = /CPH/i.test(String(product || version)) ? "OxygenOS" : "ColorOS";
+  const preferred = `${family}_${match[1]}`;
   if (state.catalog?.modVersions?.includes(preferred) && $("#mod-version").value !== preferred) {
     $("#mod-version").value = preferred;
     renderMods();
@@ -358,12 +360,15 @@ function applyProbeResult(result, uri, { announce = true } = {}) {
   setSourceFact("source-last-modified", result?.lastModified);
   setSourceFact("source-deep-inspection", result?.deepInspected ? t("deepInspected") : t("headersOnly"));
   if (Number.isSafeInteger(size) && size > 0) $("#source-size").value = String(size);
+  if (/CPH/i.test(String(product)) && device && ![...$("#device").options].some((option) => option.value === device)) {
+    $("#device").add(new Option(device, device));
+  }
   if (device && [...$("#device").options].some((option) => option.value === device)) {
     $("#device").value = device;
     state.sourceAutoDevice = device;
     if (announce) toast(t("autoSelected", { device }));
   }
-  selectModPackForVersion(version);
+  selectModPackForVersion(version, product);
   state.sourceProbeUri = uri;
   const completeness = updateMetadataCompleteness();
   state.sourceProbe = { status: result?.cloudBuildReady === false ? "preview-only" : completeness.requiredComplete === completeness.requiredTotal ? "analyzed" : "partial", result };
