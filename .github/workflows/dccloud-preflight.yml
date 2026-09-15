@@ -48,6 +48,35 @@ jobs:
           umask 077
           printf '%s' "$RCLONE_CONFIG_B64" | base64 --decode > "$WUKONG_RCLONE_CONFIG"
 
+      - name: Diagnose native authentication without exposing credentials
+        if: ${{ vars.WUKONG_DCCLOUD_UPLOAD_MODE == 'native' }}
+        run: |
+          python3 - <<'PY'
+          import base64, datetime, json, os, urllib.request, urllib.error
+          token = os.environ['WUKONG_DCCLOUD_REFRESH_TOKEN']
+          try:
+              part = token.split('.')[1]
+              claims = json.loads(base64.urlsafe_b64decode(part + '=' * (-len(part) % 4)))
+              expiry = claims.get('exp')
+              if isinstance(expiry, (int, float)):
+                  print('Refresh token expiry (UTC):', datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc).isoformat())
+                  print('Refresh token expired:', expiry <= datetime.datetime.now(datetime.timezone.utc).timestamp())
+          except Exception:
+              print('Refresh token metadata unavailable.')
+          req = urllib.request.Request(os.environ['WUKONG_DCCLOUD_API_URL'].rstrip('/') + '/api/v4/session/token/refresh',
+              data=json.dumps({'refresh_token': token}).encode(), headers={'Content-Type': 'application/json'}, method='POST')
+          try:
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  result = json.load(response)
+                  code = result.get('code')
+                  print('Refresh API numeric code:', code if isinstance(code, int) else 'unavailable')
+                  print('Refresh API success:', code == 0)
+          except urllib.error.HTTPError as exc:
+              print('Refresh API HTTP status:', exc.code)
+          except Exception:
+              print('Refresh API transport failed.')
+          PY
+
       - name: Verify scoped WebDAV and anonymous share
         run: |
           args=(--write-test --multipart-canary-mib "${{ inputs.canary_mib }}")
