@@ -193,6 +193,15 @@ jobs:
             python -m tools.materialize_workflow_recipe --output .wkstudio/recipe.json
             effective_recipe_ref="workflow://${WUKONG_JOB_ID}"
           fi
+          python - <<'PY'
+          import json
+          from wukong.models import BuildRecipe
+          path = '.wkstudio/recipe.json'
+          with open(path, encoding='utf-8') as handle:
+              recipe = BuildRecipe.from_dict(json.load(handle))
+          with open(path, 'w', encoding='utf-8') as handle:
+              json.dump(recipe.to_dict(), handle)
+          PY
           if ! python wukong_cli.py validate --recipe .wkstudio/recipe.json > .wkstudio/route.json; then
             cat .wkstudio/route.json
             exit 2

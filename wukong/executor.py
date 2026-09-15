@@ -287,6 +287,7 @@ class LocalJobExecutor:
                 sizeBytes=source.size_bytes,
             )
             if recipe.task == "build":
+                local_metadata = {}
                 try:
                     from .source_probe import inspect_local_rom_metadata
 
@@ -355,6 +356,12 @@ class LocalJobExecutor:
                 )
                 return self._succeed(job_id, [record])
 
+            if local_metadata:
+                routed = recipe.to_dict()
+                routed["source"].setdefault("metadata", {}).update(local_metadata)
+                recipe = BuildRecipe.from_dict(routed)
+                self.store.replace_recipe(job_id, recipe)
+                self.store.update(job_id, recipe_digest=recipe.digest)
             self._ensure_content_packs(recipe)
             recipe = self._reconcile_recipe_mods(job_id, recipe)
             self.store.update(job_id, status=JobStatus.RUNNING, stage="build", progress=0.1)
@@ -805,14 +812,8 @@ class LocalJobExecutor:
 
         index = json.loads(self.content_index.read_text(encoding="utf-8"))
         validate_content_index(index)
-        required = [
-            f"MOD/{recipe.build.mod_version}",
-            "STARK/common",
-            "Flash_script/common",
-            "copy-image/v1",
-            "OFX/v1",
-            "TWRP/v1",
-        ]
+        from .rom_family import required_content_packs
+        required = required_content_packs(recipe.build.mod_version)
         manager = ContentPackManager(
             self.content_root,
             rclone_config=self.rclone_config,

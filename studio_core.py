@@ -58,6 +58,7 @@ from wukong.catalog import (
     SHARED_MOD_NAMES,
 )
 from wukong.pipeline import DEFAULT_PIPELINE_STEPS, PIPELINE_STEP_DEFINITIONS
+from wukong.rom_family import is_oxygen_product, oxygen_mod_version
 from wukong.mod_release_versions import (
     DEFAULT_MOD_RELEASE_VERSION,
     DEFAULT_MOD_RELEASE_VERSIONS,
@@ -89,7 +90,7 @@ APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
 WORKSPACE_MARKER_KIND = "wukong-rom-studio-workspace"
-WORKSPACE_PIPELINE_VERSION = 22
+WORKSPACE_PIPELINE_VERSION = 23
 ROM_STUDIO_VERSION = DEFAULT_MOD_RELEASE_VERSION
 MOD_VERSION_STUDIO_VERSIONS = DEFAULT_MOD_RELEASE_VERSIONS
 # A release label is presentation metadata, not a directory or a semantic
@@ -314,7 +315,11 @@ class BuildSpec:
         preset = str(payload.get("preset", "lite")).lower()
         if preset == "standard":
             preset = "lite"
-        mod_version = normalize_mod_version(payload.get("modVersion"), mod_root=mod_root)
+        rom_path = Path(str(payload.get("romPath") or ""))
+        metadata = read_rom_metadata(rom_path) if rom_path.is_file() and zipfile.is_zipfile(rom_path) else {}
+        mod_version = normalize_mod_version(
+            oxygen_mod_version(metadata, payload.get("modVersion")), mod_root=mod_root
+        )
         raw_mod_names = payload.get("modNames")
         if raw_mod_names is None:
             raw_mod_names = (
@@ -324,6 +329,14 @@ class BuildSpec:
             )
         if not isinstance(raw_mod_names, list):
             raw_mod_names = [raw_mod_names]
+        requested_version = str(payload.get("modVersion") or DEFAULT_MOD_VERSION)
+        if is_oxygen_product(metadata.get("product_name")) and requested_version != mod_version and preset != "custom":
+            try:
+                previous_defaults = preset_default_mods(preset, requested_version, mod_root=mod_root)
+            except StudioError:
+                previous_defaults = None
+            if previous_defaults is not None and set(raw_mod_names) == set(previous_defaults):
+                raw_mod_names = preset_default_mods(preset, mod_version, mod_root=mod_root)
         # Empty MOD lists for Plus/Lite presets mean "use preset defaults", not
         # "skip every MOD". Custom builds may still pass an explicit empty list
         # only when apply_mod is intentionally omitted from enabledSteps.
@@ -340,6 +353,10 @@ class BuildSpec:
         raw_debloat_paths = payload.get("debloatPaths")
         if raw_debloat_paths is not None and not isinstance(raw_debloat_paths, list):
             raw_debloat_paths = []
+        if is_oxygen_product(metadata.get("product_name")) and (
+            raw_debloat_paths is None or raw_debloat_paths == default_debloat_paths()
+        ):
+            raw_debloat_paths = default_debloat_paths("OxygenOS")
         raw_mod_release_version = str(payload.get("modReleaseVersion") or "").strip()
         raw_edition_labels = payload.get("editionLabels")
         edition_labels: dict[str, str] = {}
@@ -911,6 +928,9 @@ def analyze_partition_layout(
 def find_device(product_name: str | None) -> dict[str, Any] | None:
     if not product_name:
         return None
+    if is_oxygen_product(product_name):
+        return {"product_name": product_name, "name": product_name,
+                "romFamily": "OxygenOS", "Partitions": list(PARTITIONS)}
     return next((device for device in load_devices() if device.get("product_name") == product_name), None)
 
 
@@ -1502,11 +1522,13 @@ def preset_default_mods(
     return []
 
 
-def default_debloat_paths() -> list[str]:
+def default_debloat_paths(rom_family: str = "ColorOS") -> list[str]:
+    config_path = (DEBLOAT_CONFIG_PATH.parent / "debloat_oxygenos.json"
+                   if rom_family == "OxygenOS" else DEBLOAT_CONFIG_PATH)
     try:
-        payload = json.loads(DEBLOAT_CONFIG_PATH.read_text(encoding="utf-8"))
+        payload = json.loads(config_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise StudioError(f"Cannot load debloat config: {DEBLOAT_CONFIG_PATH}") from exc
+        raise StudioError(f"Cannot load debloat config: {config_path}") from exc
     values = payload.get("default") if isinstance(payload, dict) else payload
     if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
         raise StudioError("Debloat config must contain a string list")
@@ -1564,11 +1586,6 @@ def inspect_rom(
     selected_mod_version = DEFAULT_MOD_VERSION
     requested_steps = set(required_steps or [])
     selected_mod_names = list(dict.fromkeys(mod_names or ([mod_name] if mod_name else [])))
-    try:
-        selected_mod_version = normalize_mod_version(mod_version)
-    except StudioError as exc:
-        errors.append(str(exc))
-
     if not path.is_file():
         errors.append("ROM ZIP does not exist")
     elif path.suffix.lower() != ".zip":
@@ -1583,6 +1600,11 @@ def inspect_rom(
                 errors.append(f"Unsupported product: {metadata.get('product_name') or 'unknown'}")
         except (OSError, StudioError) as exc:
             errors.append(str(exc))
+
+    try:
+        selected_mod_version = normalize_mod_version(oxygen_mod_version(metadata, mod_version))
+    except (StudioError, ValueError) as exc:
+        errors.append(str(exc))
 
     try:
         mods = validate_mods(
@@ -1621,7 +1643,9 @@ def inspect_rom(
             if not required.is_file():
                 errors.append(f"Missing WK_Manager system-power asset: {required}")
 
-    missing_bins = [str(path) for path in _required_binary_paths() if not path.is_file()]
+    oxygen = is_oxygen_product(metadata.get("product_name"))
+    missing_bins = [str(path) for path in _required_binary_paths()
+                    if not path.is_file() and not (oxygen and path == platform_tool_path("lpmake", BIN_ROOT))]
     if missing_bins:
         errors.append("Missing required build binaries")
     ROM_BUILD_DONE.mkdir(parents=True, exist_ok=True)
@@ -1890,6 +1914,8 @@ def validate_final_zip(
     if not zip_path.is_file():
         raise StudioError("Output ZIP was not created")
     validation_mode = normalize_zip_validation_mode(mode)
+    oxygen = is_oxygen_product((device or {}).get("product_name"))
+    artifact_folders = ("images/", "firmware-update/", "system/") if oxygen else ("images/", "firmware-update/")
     try:
         with zipfile.ZipFile(zip_path, "r") as archive:
             infos = archive.infolist()
@@ -1902,11 +1928,19 @@ def validate_final_zip(
             artifacts = {
                 Path(name).name
                 for name in names
-                if name.startswith(("images/", "firmware-update/")) and not name.endswith("/")
+                if name.startswith(artifact_folders) and not name.endswith("/")
             }
-            missing = sorted(REQUIRED_IMAGES - images)
+            required_images = REQUIRED_IMAGES - {"super.img"} if oxygen else REQUIRED_IMAGES
+            missing = sorted(required_images - images)
             if missing:
                 raise StudioError(f"Output ZIP is missing images: {', '.join(missing)}")
+            if oxygen:
+                forbidden = {"images/super.img", "images/TWRP.img", "images/OrangeFox.img"} & names
+                if forbidden:
+                    raise StudioError(f"OxygenOS ZIP contains unsupported images: {', '.join(sorted(forbidden))}")
+                missing_logical = {f"system/{name}.img" for name in PARTITIONS} - names
+                if missing_logical:
+                    raise StudioError(f"OxygenOS ZIP is missing partitions: {', '.join(sorted(missing_logical))}")
             try:
                 manifest = archive.read("wukong_md5_hashes.txt").decode(
                     "utf-8", errors="replace"
@@ -1935,7 +1969,7 @@ def validate_final_zip(
             artifact_infos: dict[str, zipfile.ZipInfo] = {}
             for info in infos:
                 normalized = info.filename.replace("\\", "/")
-                if info.is_dir() or not normalized.startswith(("images/", "firmware-update/")):
+                if info.is_dir() or not normalized.startswith(artifact_folders):
                     continue
                 name = Path(normalized).name
                 if name in artifact_infos:
@@ -1960,15 +1994,18 @@ def validate_final_zip(
                         name = Path(info.filename.replace("\\", "/")).name
                         if digest.hexdigest() != listed[name]:
                             raise StudioError(f"Artifact hash mismatch: {name}")
-            with archive.open("images/super.img") as stream:
-                partitions = _partition_names_from_sparse_stream(stream)
+            if oxygen:
+                partitions = set(PARTITIONS)
+            else:
+                with archive.open("images/super.img") as stream:
+                    partitions = _partition_names_from_sparse_stream(stream)
     except StudioError:
         raise
     except (OSError, RuntimeError, zipfile.BadZipFile) as exc:
         raise StudioError("Output ZIP is corrupt") from exc
 
-    expected = {f"{name}_a" for name in PARTITIONS}
-    if device:
+    expected = set(PARTITIONS) if oxygen else {f"{name}_a" for name in PARTITIONS}
+    if device and not oxygen:
         expected.update(f"{name}_a" for name in device.get("Partitions", []))
     missing_partitions = sorted(expected - partitions)
     if missing_partitions:
@@ -2044,6 +2081,12 @@ def plan_steps(spec: BuildSpec, workspace: Path | None = None) -> list[str]:
         selected.add("notify_telegram")
     if "notify_telegram" in selected:
         selected.add("package_zip")
+    rom_path = Path(spec.romPath)
+    oxygen = spec.modVersion.startswith("OxygenOS_")
+    if rom_path.is_file() and zipfile.is_zipfile(rom_path):
+        oxygen = is_oxygen_product(read_rom_metadata(rom_path).get("product_name"))
+    if oxygen:
+        selected.discard("repack_super")
 
     if workspace and resume_requested:
         validators: dict[str, Callable[[], bool]] = {
@@ -3246,6 +3289,12 @@ def apply_selected_mods(
             theme_cr_removed += int(result["deleted"])
             patched += int(result["deleted"])
             modified_partitions.update(result["modifiedPartitions"])
+        if mod["name"] == "WK_Installer":
+            result = delete_bloatware(rom_unpack, [
+                "my_product\\non_overlay\\priv-app\\GooglePackageInstaller"
+            ])
+            patched += int(result["deleted"])
+            modified_partitions.update(result["modifiedPartitions"])
         applied.append(mod["name"])
 
     jar_progress = 35
@@ -3691,7 +3740,10 @@ def _stage_unpack(context: BuildContext) -> dict[str, Any]:
 
 
 def _stage_debloat(context: BuildContext) -> dict[str, Any]:
-    report = delete_bloatware(context.rom_unpack, context.spec.debloatPaths)
+    paths = context.spec.debloatPaths
+    if paths is None and is_oxygen_product(context.metadata.get("product_name")):
+        paths = default_debloat_paths("OxygenOS")
+    report = delete_bloatware(context.rom_unpack, paths)
     if report["requested"] and not report["effective"]:
         raise StudioError(str(report["warning"]))
     context.modified_partitions.update(report.get("modifiedPartitions") or [])
@@ -4148,6 +4200,7 @@ def _populate_shared_package_assets(context: BuildContext, target_root: Path) ->
         "Wukong_Flashing_Tool_Windows.bat",
         "Wukong_Flashing_Tool_Linux.sh",
         "Wukong_Flashing_Tool_MacOS.sh",
+        "tao_md5.bat",
         "META-INF",
         "bin",
     ]:
@@ -4167,6 +4220,8 @@ def _populate_shared_package_assets(context: BuildContext, target_root: Path) ->
     dynamic_images = {
         f"{name}.img" for name in source_dynamic_partition_names(context.source_rom)
     }
+    if is_oxygen_product(context.metadata.get("product_name")):
+        dynamic_images.update(f"{name}.img" for name in PARTITIONS)
     for source in context.source_rom.glob("*.img"):
         if source.name not in EXCLUDED_FIRMWARE and source.name not in dynamic_images:
             method = _link_or_copy_required(source, firmware_cache / source.name, "firmware image")
@@ -4451,20 +4506,32 @@ def _stage_package(context: BuildContext) -> dict[str, Any]:
             image_dir / "vendor_boot.img",
             "vendor_boot image",
         )
-    placed_images["super.img"] = _stage_generated_image(
-        context,
-        context.build_dir / "super.img",
-        image_dir / "super.img",
-        "super image",
-    )
-
-    soc = context.device.get("soc", "86xx")
-    twrp = TWRP_ROOT / f"TWRP-{soc}.img"
-    orangefox = OFX_ROOT / f"OrangeFox-{soc}.img"
-    if twrp.is_file():
-        placed_images["TWRP.img"] = _link_or_copy_required(twrp, image_dir / "TWRP.img", "TWRP image")
-    elif orangefox.is_file():
-        placed_images["OrangeFox.img"] = _link_or_copy_required(orangefox, image_dir / "OrangeFox.img", "OrangeFox image")
+    oxygen = is_oxygen_product(context.metadata.get("product_name"))
+    system_dir = package_root / "system"
+    if oxygen:
+        system_dir.mkdir(parents=True, exist_ok=True)
+        for partition in PARTITIONS:
+            name = f"{partition}.img"
+            if partition in {"my_company", "my_preload"}:
+                source = CONTENT_ROOT / "copy-image" / name
+            elif partition in MUTABLE_PARTITIONS and (
+                partition in context.modified_partitions or (context.rom_repack / name).is_file()
+            ):
+                source = context.rom_repack / name
+            else:
+                source = context.source_rom / name
+            placed_images[name] = _link_or_copy_required(source, system_dir / name, "logical partition image")
+    else:
+        placed_images["super.img"] = _stage_generated_image(
+            context, context.build_dir / "super.img", image_dir / "super.img", "super image"
+        )
+        soc = context.device.get("soc", "86xx")
+        twrp = TWRP_ROOT / f"TWRP-{soc}.img"
+        orangefox = OFX_ROOT / f"OrangeFox-{soc}.img"
+        if twrp.is_file():
+            placed_images["TWRP.img"] = _link_or_copy_required(twrp, image_dir / "TWRP.img", "TWRP image")
+        elif orangefox.is_file():
+            placed_images["OrangeFox.img"] = _link_or_copy_required(orangefox, image_dir / "OrangeFox.img", "OrangeFox image")
 
     info = package_root / "info.txt"
     template_info = FLASH_ROOT / "info.txt"
@@ -4479,6 +4546,8 @@ def _stage_package(context: BuildContext) -> dict[str, Any]:
         lines.append("")
     lines[0] = context.device.get("name", "Unknown Device")
     lines[1] = context.metadata["version_name"]
+    if oxygen:
+        lines[2] = "Global Mod (OxygenOS)"
     lines[3] = build_edition_name(context.spec)
     lines[4] = studio_version_name(context.spec)
     with info.open("w", encoding="utf-8", newline="\n") as handle:
@@ -4491,7 +4560,7 @@ def _stage_package(context: BuildContext) -> dict[str, Any]:
     manifest_hash_hits = manifest_hash_misses = 0
     manifest = package_root / "wukong_md5_hashes.txt"
     with manifest.open("w", encoding="utf-8", newline="\n") as handle:
-        for folder in (image_dir, firmware_dir):
+        for folder in ((image_dir, firmware_dir, system_dir) if oxygen else (image_dir, firmware_dir)):
             for file in sorted(folder.iterdir(), key=lambda path: path.name.lower()):
                 if file.is_file():
                     digest, cache_hit = _cached_md5(context, file)
@@ -4499,8 +4568,10 @@ def _stage_package(context: BuildContext) -> dict[str, Any]:
                     manifest_hash_misses += int(not cache_hit)
                     handle.write(f"{digest}  {file.name}\n")
 
-    validate_super(image_dir / "super.img", context.device)
-    missing_images = sorted(REQUIRED_IMAGES - {path.name for path in image_dir.iterdir() if path.is_file()})
+    if not oxygen:
+        validate_super(image_dir / "super.img", context.device)
+    required_images = REQUIRED_IMAGES - {"super.img"} if oxygen else REQUIRED_IMAGES
+    missing_images = sorted(required_images - {path.name for path in image_dir.iterdir() if path.is_file()})
     if missing_images:
         raise StudioError(f"Cannot package ZIP, missing images: {', '.join(missing_images)}")
 
@@ -5107,6 +5178,9 @@ def execute_build(
     workspace: Path,
     event_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
+    rom_path = Path(spec.romPath)
+    if rom_path.is_file() and zipfile.is_zipfile(rom_path) and is_oxygen_product(read_rom_metadata(rom_path).get("product_name")):
+        spec = BuildSpec.from_dict(asdict(spec))
     workspace.mkdir(parents=True, exist_ok=True)
     callback = event_callback or (lambda payload: None)
     effective_preset = "lite" if spec.preset == "standard" else spec.preset

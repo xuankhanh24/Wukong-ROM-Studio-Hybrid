@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from wukong.rom_family import required_content_packs
 from pathlib import Path
 from typing import Any
 
@@ -11,7 +12,7 @@ SHARED_PACKS = ("STARK/common", "Flash_script/common", "copy-image/v1", "OFX/v1"
 
 
 def content_cache_key(index: dict[str, Any], mod_version: str, toolchain: bytes) -> str:
-    required = {f"MOD/{mod_version}", *SHARED_PACKS}
+    required = set(required_content_packs(mod_version))
     packs = {pack["id"]: pack for pack in index["packs"] if pack["id"] in required}
     if set(packs) != required:
         raise ValueError("Missing required content packs: " + ", ".join(sorted(required - packs.keys())))
