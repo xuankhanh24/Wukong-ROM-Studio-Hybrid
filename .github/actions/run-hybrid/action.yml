@@ -58,6 +58,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=system-tools' >> "$GITHUB_ENV"
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends cpio p7zip-full brotli zstd rclone e2fsprogs lz4 zip unzip
         python3 -m pip install --user -r requirements.txt
@@ -68,6 +69,7 @@ runs:
       run: |
         set -euo pipefail
         mkdir -p .wkstudio/secrets
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=drive-access' >> "$GITHUB_ENV"
         umask 077
         printf '%s' "$RCLONE_CONFIG_B64" | base64 --decode > .wkstudio/secrets/rclone.conf
     - name: "B1 · Preflight DC Cloud mirror"
@@ -84,7 +86,7 @@ runs:
         WUKONG_DCCLOUD_CLOUDREVE_VERSION: ${{ inputs.dccloud_cloudreve_version }}
       run: |
         set -euo pipefail
-        python3 -m tools.dccloud_preflight --config .wkstudio/secrets/rclone.conf --write-test
+        python3 -m tools.dccloud_preflight --config .wkstudio/secrets/rclone.conf --write-test --optional
     - name: "B2 · Thư mục job dùng chung / Shared job store"
       shell: bash
       run: |
@@ -97,6 +99,7 @@ runs:
         WUKONG_RCLONE_CONFIG: ${{ github.workspace }}/.wkstudio/secrets/rclone.conf
       run: |
         set -euo pipefail
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=content-preflight' >> "$GITHUB_ENV"
         if [ -n "$RECIPE_B64" ]; then
           printf '%s' "$RECIPE_B64" | base64 --decode > .wkstudio/recipe.json
         else
@@ -140,6 +143,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=source-probe' >> "$GITHUB_ENV"
         source_uri="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['source']['uri'])")"
         case "$source_uri" in
           http://*|https://*)
@@ -176,6 +180,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=toolchain' >> "$GITHUB_ENV"
         python3 -m tools.bootstrap_linux
         python3 -m tools.smoke_linux
     - name: "E · Pipeline 05–19 / Execute staged ROM build"
@@ -195,7 +200,7 @@ runs:
         WUKONG_TELEGRAM_BOT_TOKEN: ""
         WUKONG_TELEGRAM_CHAT_ID: ""
         WUKONG_DROP_MISSING_MODS: "0"
-        WUKONG_DCCLOUD_MIRROR_ENABLED: ${{ inputs.dccloud_mirror_enabled }}
+        WUKONG_DCCLOUD_MIRROR_ENABLED: ${{ env.WUKONG_DCCLOUD_PREFLIGHT_FAILED == '1' && 'false' || inputs.dccloud_mirror_enabled }}
         WUKONG_DCCLOUD_REMOTE: ${{ inputs.dccloud_remote }}
         WUKONG_DCCLOUD_ROOT: ${{ inputs.dccloud_root }}
         WUKONG_DCCLOUD_SHARE_URL: ${{ inputs.dccloud_share_url }}
@@ -206,6 +211,7 @@ runs:
         WUKONG_DCCLOUD_CLOUDREVE_VERSION: ${{ inputs.dccloud_cloudreve_version }}
       run: |
         set -euo pipefail
+        printf '%s\n' 'WUKONG_PREPARATION_STAGE=submit' >> "$GITHUB_ENV"
         job_json="$(python3 wukong_cli.py --jobs-root "$WUKONG_ACTIONS_JOBS_ROOT" submit --recipe .wkstudio/recipe.json --job-id "$WUKONG_JOB_ID" --channel actions --subject "$GITHUB_ACTOR_ID" --role user)"
         job_id="$(printf '%s' "$job_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["job_id"])')"
         # Best-effort resume only; a missing/expired checkpoint must not fail the step.
@@ -240,9 +246,13 @@ runs:
       shell: bash
       env:
         WUKONG_JOB_ID: ${{ inputs.job_id }}
+        WUKONG_PREPARATION_FAILED: ${{ job.status == 'failure' && steps.execute.outputs.executor_started != 'true' }}
         WUKONG_RCLONE_CONFIG: ${{ github.workspace }}/.wkstudio/secrets/rclone.conf
       run: |
         set +e
+        if [[ "$WUKONG_PREPARATION_FAILED" == true ]]; then
+          python3 -m tools.actions_failure_manifest --jobs-root "${WUKONG_ACTIONS_JOBS_ROOT:-.wkstudio/Jobs/hybrid}" --job-id "$WUKONG_JOB_ID" --stage "${WUKONG_PREPARATION_STAGE:-}"
+        fi
         python3 -m tools.sync_job "$WUKONG_JOB_ID" --config "$WUKONG_RCLONE_CONFIG" --jobs-root "$WUKONG_ACTIONS_JOBS_ROOT"
         # Pre-execute failures have no local job store yet; do not fail the workflow twice.
         exit 0

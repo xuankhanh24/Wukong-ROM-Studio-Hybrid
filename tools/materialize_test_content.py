@@ -116,8 +116,22 @@ def main() -> int:
         )
     payload = json.loads(INDEX.read_text(encoding="utf-8"))
     count = 0
+    installer = STARK_ROOT / "WK_Installer"
+    installer_marker = installer / ".wukong-test-fixture"
+    materialize_installer = not installer.exists() or installer_marker.is_file()
+    if materialize_installer:
+        installer.mkdir(parents=True, exist_ok=True)
+        installer_marker.write_text("Generated placeholders only; never use for ROM builds.\n", encoding="utf-8")
     for pack in payload["packs"]:
         target = str(pack["target"])
+        if target == "STARK" and materialize_installer:
+            for entry in pack["files"]:
+                relative = str(entry["path"])
+                if relative.startswith("WK_Installer/"):
+                    path = STARK_ROOT / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(b"fixture\n")
+                    count += 1
         if not target.startswith("MOD/"):
             continue
         version = target.split("/", 1)[1]
@@ -134,7 +148,11 @@ def main() -> int:
                 path.write_text(text, encoding="utf-8", newline="\n")
             count += 1
     shared = SHARED_WK_ROOT
-    for relative, text in SHARED_WK_POWER_TEXT_FIXTURES.items():
+    shared_text = dict(SHARED_WK_POWER_TEXT_FIXTURES)
+    shared_text["system/system/etc/selinux/stark_plat_sepolicy.cil"] = (
+        ROOT / "Config/wk_manager_system_policy.cil"
+    ).read_text(encoding="utf-8")
+    for relative, text in shared_text.items():
         path = shared / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")

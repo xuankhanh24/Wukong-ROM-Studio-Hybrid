@@ -54,6 +54,10 @@ class MaterializeTestContentSafetyTests(unittest.TestCase):
             fake_lock.mkdir()
             real_file = fake_lock / "real.bin"
             real_file.write_bytes(b"real-fake-lock")
+            installer = root / "STARK" / "WK_Installer"
+            installer.mkdir()
+            real_installer = installer / "real.apk"
+            real_installer.write_bytes(b"real-installer")
             index = root / "index.json"
             index.write_text(json.dumps({"packs": []}), encoding="utf-8")
 
@@ -71,6 +75,8 @@ class MaterializeTestContentSafetyTests(unittest.TestCase):
             self.assertEqual(0, result)
             self.assertEqual(b"real-fake-lock", real_file.read_bytes())
             self.assertFalse((fake_lock / ".wukong-test-fixture").exists())
+            self.assertEqual(b"real-installer", real_installer.read_bytes())
+            self.assertFalse((installer / ".wukong-test-fixture").exists())
 
 
 if __name__ == "__main__":

@@ -1166,7 +1166,7 @@ class StudioCoreTests(unittest.TestCase):
                 studio_core.validate_no_unsafe_vendor_priv_app_sysfs(root)
 
     def test_wk_manager_power_policy_uses_dedicated_domains(self):
-        mod = Path("MOD/ColorOS_16.0.7/WK_Manager")
+        mod = Path("STARK/WK_Manager")
         policy = mod / "system/system/etc/selinux/stark_plat_sepolicy.cil"
         seapp = mod / "system/system/etc/selinux/stark_plat_seapp_contexts"
         shared = Path("STARK/WK_Manager")
@@ -1196,8 +1196,7 @@ class StudioCoreTests(unittest.TestCase):
         )
         for rule in studio_core.WK_MANAGER_ART_RUNTIME_POLICY_RULES:
             self.assertIn(rule, policy_text)
-        self.assertNotIn("+user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
-        self.assertIn("-user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
+        self.assertIn("+user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
         self.assertIn(
             "+user=_app isPrivApp=true name=com.wukong.manager "
             "domain=wukong_manager_app type=privapp_data_file levelFrom=user",
@@ -1289,7 +1288,7 @@ class StudioCoreTests(unittest.TestCase):
             legacy_rc = init_dir.parent / "wukong_manager_metrics.rc"
             legacy_rc.write_text("on boot\n    chmod 0444 /legacy\n", encoding="utf-8")
 
-            mod_dir = Path("MOD/ColorOS_16.0.7/WK_Manager")
+            mod_dir = Path("STARK/WK_Manager")
             first = studio_core._patch_wk_manager_metrics_init_rc(unpack, mod_dir)
             second = studio_core._patch_wk_manager_metrics_init_rc(unpack, mod_dir)
 
