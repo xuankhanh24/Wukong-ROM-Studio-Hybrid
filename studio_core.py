@@ -137,7 +137,7 @@ PROTECTED_DEBLOAT_PATHS = {
     r"system_ext\priv-app\OplusLauncher".lower(),
 }
 PATCH_ONLY_MODS = {
-    "Block_ota": "Remove lines containing ota, update or com.oplusos.sau from my_stock app-features.xml",
+    "Block_ota": "Remove ota, update or com.oplusos.sau lines from app-features.xml (OxygenOS: my_region; other ROMs: my_stock)",
     "Disable_flag_secure": "Patch services.jar and oplus-services.jar to disable FLAG_SECURE screen-capture blocking",
 }
 MUTUALLY_EXCLUSIVE_MODS = frozenset({"Disable_flag_secure", "WK_Manager"})
@@ -2344,11 +2344,12 @@ def _patch_product_display_version(path: Path, edition: str, studio_version: str
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     changed = 0
     key = "ro.build.version.oplusrom.display"
+    display_version = re.sub(r"^[vV]+(?=\d)", "", studio_version)
     for index, line in enumerate(lines):
         if not line.startswith(f"{key}="):
             continue
         value = line.split("=", 1)[1].split("|", 1)[0].strip()
-        replacement = f"{key}={value} | {edition} | {studio_version}"
+        replacement = f"{key}={value} | {edition} | {display_version}"
         if line != replacement:
             lines[index] = replacement
             changed += 1
@@ -2368,13 +2369,15 @@ def _replace_oneplus_brand(path: Path) -> int:
     return content.count("一加")
 
 
-def remove_stock_ota_feature_lines(rom_unpack: Path) -> int:
+def remove_stock_ota_feature_lines(rom_unpack: Path, partition: str = "my_stock") -> int:
     removed = 0
-    for unpack_dir_name in MY_STOCK_UNPACK_DIR_NAMES:
+    unpack_dirs = (MY_STOCK_UNPACK_DIR_NAMES if partition == "my_stock"
+                   else (f"{partition}_unpacked", f"{partition}_a", f"{partition}_b"))
+    for unpack_dir_name in unpack_dirs:
         feature_xml = (
             rom_unpack
             / unpack_dir_name
-            / "my_stock"
+            / partition
             / "etc"
             / "extension"
             / "com.oplus.app-features.xml"
@@ -3274,11 +3277,12 @@ def apply_selected_mods(
             _sync_fake_lock_repack_configs(rom_unpack)
             modified_partitions.add("system")
         if mod["name"] == "Block_ota":
-            removed = remove_stock_ota_feature_lines(rom_unpack)
+            ota_partition = "my_region" if version.startswith("OxygenOS_") else "my_stock"
+            removed = remove_stock_ota_feature_lines(rom_unpack, ota_partition)
             stock_ota_feature_lines += removed
             patched += removed
             if removed:
-                modified_partitions.add("my_stock")
+                modified_partitions.add(ota_partition)
         if mod["name"] == "Ai_global" and version == "ColorOS_16.0.5":
             result = delete_bloatware(rom_unpack, AI_GLOBAL_COLOROS_1605_REMOVE_PATHS)
             ai_global_aiunit_removed += int(result["deleted"])
