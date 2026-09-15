@@ -125,6 +125,8 @@ class OxygenOSBuildTests(unittest.TestCase):
             recovery = root / 'custom-recovery'
             recovery.mkdir()
             (recovery / 'TWRP-86xx.img').write_bytes(b'must not be packaged')
+            (root / 'flash').mkdir()
+            (root / 'flash' / 'tao_md5.bat').write_bytes(b'operator-only checksum helper')
             with mock.patch.multiple(studio_core, CONTENT_ROOT=content,
                                      MOD_DIR=content / 'MOD', BIN_ROOT=binaries,
                                      ROOT_DIR=root, WORKSPACE_ROOT=root,
@@ -139,6 +141,7 @@ class OxygenOSBuildTests(unittest.TestCase):
                 self.assertEqual(archive.read('system/my_preload.img'), b'copy-image override')
                 self.assertNotIn('images/TWRP.img', archive.namelist())
                 self.assertNotIn('images/super.img', archive.namelist())
+                self.assertNotIn('tao_md5.bat', archive.namelist())
                 self.assertIn('Global Mod (OxygenOS)', archive.read('info.txt').decode())
 
     def test_cloud_recipe_targets_oxygen_pack_from_cph_metadata(self):
