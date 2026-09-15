@@ -4200,7 +4200,6 @@ def _populate_shared_package_assets(context: BuildContext, target_root: Path) ->
         "Wukong_Flashing_Tool_Windows.bat",
         "Wukong_Flashing_Tool_Linux.sh",
         "Wukong_Flashing_Tool_MacOS.sh",
-        "tao_md5.bat",
         "META-INF",
         "bin",
     ]:
@@ -4279,7 +4278,7 @@ def _stage_shared_package_assets(context: BuildContext, rom_build: Path) -> dict
         }
     details = _ensure_shared_package_assets(context)
     shared = context.package_cache / "shared"
-    result = _link_or_copy_tree(shared, rom_build, skip_names={".ready"})
+    result = _link_or_copy_tree(shared, rom_build, skip_names={".ready", "tao_md5.bat"})
     return {
         "cacheReused": bool(details["reused"]),
         "cacheLinked": int(details["linked"]),
