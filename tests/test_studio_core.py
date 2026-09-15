@@ -756,7 +756,7 @@ class StudioCoreTests(unittest.TestCase):
 
             self.assertEqual(
                 manifest_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=16.0.7 | Plus | V9.2\n",
+                "ro.build.version.oplusrom.display=16.0.7 | Plus | 9.2\n",
             )
             with zipfile.ZipFile(result["outputZip"], "r") as archive:
                 info = archive.read("info.txt").decode("utf-8").splitlines()
@@ -1898,12 +1898,12 @@ class StudioCoreTests(unittest.TestCase):
             )
             self.assertEqual(
                 manifest_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=16.0.7 | Plus | V3.4\n"
+                "ro.build.version.oplusrom.display=16.0.7 | Plus | 3.4\n"
                 "ro.vendor.oplus.market.name=OnePlus Ace 5\n",
             )
             self.assertEqual(
                 product_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=15.0 | Plus | V3.4\n"
+                "ro.build.version.oplusrom.display=15.0 | Plus | 3.4\n"
                 "ro.vendor.oplus.market.name=OnePlus Ace 5\n",
             )
 
@@ -1923,7 +1923,7 @@ class StudioCoreTests(unittest.TestCase):
             self.assertEqual(result["manifestDisplayVersion"], 1)
             self.assertEqual(
                 manifest_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=16.0.7 | Custom | V3.4\n",
+                "ro.build.version.oplusrom.display=16.0.7 | Custom | 3.4\n",
             )
 
     def test_repack_brands_mutable_manifest_for_each_edition(self):
@@ -1958,14 +1958,14 @@ class StudioCoreTests(unittest.TestCase):
                 lite = studio_core._stage_repack(context)
                 self.assertEqual(
                     manifest_prop.read_text(encoding="utf-8"),
-                    "ro.build.version.oplusrom.display=16.0.7 | Lite | V3.4\n",
+                    "ro.build.version.oplusrom.display=16.0.7 | Lite | 3.4\n",
                 )
                 context.spec = studio_core.BuildSpec(romPath="rom.zip", preset="resume")
                 plus = studio_core._stage_repack(context)
 
             self.assertEqual(
                 manifest_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=16.0.7 | Plus | V3.4\n",
+                "ro.build.version.oplusrom.display=16.0.7 | Plus | 3.4\n",
             )
             self.assertEqual(lite["buildBranding"]["manifestDisplayVersion"], 1)
             self.assertEqual(plus["buildBranding"]["manifestDisplayVersion"], 1)
@@ -2002,7 +2002,7 @@ class StudioCoreTests(unittest.TestCase):
 
             self.assertEqual(
                 manifest_prop.read_text(encoding="utf-8"),
-                "ro.build.version.oplusrom.display=16.0.7 | Lite | V4.1\n",
+                "ro.build.version.oplusrom.display=16.0.7 | Lite | 4.1\n",
             )
 
     def test_stage_repack_copies_passthrough_source_images(self):

@@ -9,6 +9,36 @@ import studio_core
 
 
 class OxygenOSBuildTests(unittest.TestCase):
+    def test_display_version_has_no_v_prefix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            prop = root / 'my_product_unpacked' / 'my_product' / 'build.prop'
+            prop.parent.mkdir(parents=True)
+            for version in ('V3.4', 'v3.4', '3.4'):
+                prop.write_text('ro.build.version.oplusrom.display=16.1 | Plus | V2.0\n')
+                studio_core.patch_build_branding(root, 'Lite', version)
+                self.assertEqual(prop.read_text(), 'ro.build.version.oplusrom.display=16.1 | Lite | 3.4\n')
+
+    def test_oxygen_block_ota_targets_region_and_preserves_stock(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            unpack = root / 'unpack'
+            files = {}
+            for partition in ('my_region', 'my_stock'):
+                path = unpack / f'{partition}_unpacked' / partition / 'etc' / 'extension' / 'com.oplus.app-features.xml'
+                path.parent.mkdir(parents=True)
+                path.write_text('<oplus-config>\n<oplus-feature name="com.oplus.ota.service"/>\n<oplus-feature name="com.oplus.keep"/>\n</oplus-config>\n')
+                files[partition] = path
+            mods = root / 'MOD'
+            (mods / 'OxygenOS_16.0.10').mkdir(parents=True)
+            with mock.patch.multiple(studio_core, MOD_DIR=mods, STARK_ROOT=root / 'STARK'):
+                result = studio_core.apply_selected_mods(['Block_ota'], unpack,
+                    studio_core.find_device('CPH2691IN'), root, 'OxygenOS_16.0.10')
+            self.assertNotIn('ota.service', files['my_region'].read_text())
+            self.assertIn('com.oplus.keep', files['my_region'].read_text())
+            self.assertIn('ota.service', files['my_stock'].read_text())
+            self.assertEqual(result['modifiedPartitions'], ['my_region'])
+
     def test_incomplete_cph_metadata_returns_preflight_errors(self):
         with tempfile.TemporaryDirectory() as temporary:
             rom = Path(temporary) / 'incomplete.zip'
@@ -66,10 +96,16 @@ class OxygenOSBuildTests(unittest.TestCase):
             (product / 'app' / 'Maps').mkdir(parents=True)
             installer = product / 'non_overlay' / 'priv-app' / 'GooglePackageInstaller'
             installer.mkdir(parents=True)
+            stock = root / 'my_stock_unpacked' / 'my_stock' / 'del-app'
+            for name in ('INOnePlusStore', 'OplusDocumentsReader'):
+                (stock / name).mkdir(parents=True)
             report = studio_core.delete_bloatware(root, studio_core.default_debloat_paths('OxygenOS'))
             self.assertFalse((product / 'app' / 'Maps').exists())
             self.assertTrue(installer.exists())
-            self.assertEqual(report['modifiedPartitions'], ['my_product'])
+            for name in ('INOnePlusStore', 'OplusDocumentsReader'):
+                self.assertFalse((stock / name).exists())
+                self.assertNotIn(f'my_stock\\del-app\\{name}', studio_core.default_debloat_paths())
+            self.assertEqual(report['modifiedPartitions'], ['my_product', 'my_stock'])
 
     def test_wk_installer_removes_stock_google_installer(self):
         with tempfile.TemporaryDirectory() as temporary:
