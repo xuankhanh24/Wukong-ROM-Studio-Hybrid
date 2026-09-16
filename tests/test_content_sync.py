@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -90,6 +91,37 @@ class ContentSyncTests(unittest.TestCase):
 
             self.assertEqual([], changed)
             self.assertEqual("a" * 64, refreshed["packs"][0]["archive"]["sha256"])
+
+    def test_full_refresh_preserves_verified_pack_missing_from_local_content(self) -> None:
+        with tempfile.TemporaryDirectory() as root:
+            install = Path(root)
+            oxygen = install / "Content" / "MOD" / "OxygenOS_16.0.10"
+            oxygen.mkdir(parents=True)
+            (oxygen / "launcher.apk").write_bytes(b"oxygen")
+            index_path = install / "index.json"
+            index, _ = refresh_content_index(install, index_path, remote="drive:content-packs")
+            index["packs"][0]["archive"] = {
+                "uri": "drive:content-packs/MOD/OxygenOS_16.0.10.tar.zst",
+                "sha256": "a" * 64,
+                "md5": "b" * 32,
+                "sizeBytes": 7,
+            }
+            index_path.write_text(json.dumps(index), encoding="utf-8")
+            shutil.rmtree(install / "Content" / "MOD")
+            stark = install / "Content" / "STARK"
+            stark.mkdir(parents=True)
+            (stark / "manager.apk").write_bytes(b"stark")
+
+            refreshed, changed = refresh_content_index(
+                install,
+                index_path,
+                remote="drive:content-packs",
+            )
+
+            by_id = {pack["id"]: pack for pack in refreshed["packs"]}
+            self.assertEqual(["STARK/common"], changed)
+            self.assertIn("MOD/OxygenOS_16.0.10", by_id)
+            self.assertEqual("a" * 64, by_id["MOD/OxygenOS_16.0.10"]["archive"]["sha256"])
 
     def test_refresh_marks_unchanged_pack_without_archive_for_upload(self) -> None:
         with tempfile.TemporaryDirectory() as root:

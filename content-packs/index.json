@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T16:53:05.184486Z",
+  "generatedAt": "2026-09-16T17:20:01.249224Z",
   "packs": [
     {
       "archive": {
@@ -3767,6 +3767,90 @@
       "remote": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.9",
       "sizeBytes": 2801006436,
       "target": "MOD/ColorOS_16.0.9"
+    },
+    {
+      "archive": {
+        "md5": "95ee4f93dbbcd160986ba7e69712e9c5",
+        "sha256": "e6e7e3747bba2828baf4fe308e67f36650ad27883b59c58f5549b2134f5b1dc8",
+        "sizeBytes": 123051578,
+        "uri": "wukong-gdrive:WukongROM/content-packs/MOD/OxygenOS_16.0.10.tar.zst"
+      },
+      "files": [
+        {
+          "path": "Calendar_global/my_stock/del-app/Calendar/Calendar.apk",
+          "sha256": "b35ad4a97b3144cab384d54d779d8d2586a1d1f443744e4442aced4bd7a052b4",
+          "sizeBytes": 103473257
+        },
+        {
+          "path": "Call_mms_contacts/my_product/etc/extension/US/appfeature.country.dynamic_features.xml",
+          "sha256": "4dcc55e8dc44239a9c36c58530512b240475dc10ad182bf72d78d64e3119f287",
+          "sizeBytes": 852
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/etc/config/stark_app_v2.xml",
+          "sha256": "e4de864576ed2a138ef1b36abd388f4c67e45b6483e7e87db3886ded43f3a39f",
+          "sizeBytes": 160
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/priv-app/Mms/Mms.apk",
+          "sha256": "05d2e9c4fba418d348d26540d2b96521062f35b741df1f73ab60e0463f014a9c",
+          "sizeBytes": 79683195
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/priv-app/Mms/Mms.apk.prof",
+          "sha256": "47642c14e1090b1311550c0cbeb17f8c7c03ff55014896449a38792cc4979e33",
+          "sizeBytes": 17336
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/priv-app/Mms/oat/arm64/Mms.art",
+          "sha256": "54a6a6cfc341944d2c3c1f6f998f39631e3cdfd541ab986244cbc2868b132c3f",
+          "sizeBytes": 451536
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/priv-app/Mms/oat/arm64/Mms.odex",
+          "sha256": "1ef13032116952187b6dfd71d9f5c3225e937a5f33814424960ef0614b0949d8",
+          "sizeBytes": 4370328
+        },
+        {
+          "path": "Call_mms_contacts/my_stock/priv-app/Mms/oat/arm64/Mms.vdex",
+          "sha256": "8dd9b26ce3c171286dc273667151283cce60de580a409d542bfadf85ddb5895c",
+          "sizeBytes": 704384
+        },
+        {
+          "path": "Launcher_mod/my_region/etc/extension/stark_com.oplus.app-features.xml",
+          "sha256": "a7336567c8a579fb85c49c6342546dcf2bb28bf5129bd669e53e81340bd79138",
+          "sizeBytes": 130
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/OplusLauncher.apk",
+          "sha256": "fed83ae9653025ebcace427181362750b17b8d10c164433f5e0bcf8e33ffcd80",
+          "sizeBytes": 77599987
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/OplusLauncher.apk.prof",
+          "sha256": "81f3778fc96eed2b50c427ed47b76d17646cc6fd7d248406dae198256bc15a80",
+          "sizeBytes": 25493
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.art",
+          "sha256": "a83efd1a8e7ad7a7bfab21065d8d44b22d8ef566d3973ecec6f1e71f6280c623",
+          "sizeBytes": 484512
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.odex",
+          "sha256": "c9fa2f8f8bb3de47dcd596b391c2b4b459e2e252c5e229e6e8c2d550ac70cf28",
+          "sizeBytes": 10460248
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.vdex",
+          "sha256": "c4eda6f561ec528ed96c4a724b26e52d36e7226416dd736c2c60d0f9a457ef1f",
+          "sizeBytes": 920488
+        }
+      ],
+      "id": "MOD/OxygenOS_16.0.10",
+      "remote": "wukong-gdrive:WukongROM/content-packs/MOD/OxygenOS_16.0.10",
+      "sizeBytes": 278191906,
+      "target": "MOD/OxygenOS_16.0.10"
     },
     {
       "archive": {

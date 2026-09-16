@@ -313,6 +313,15 @@ def refresh_content_index(
         packs.extend(dict(pack) for pack in existing["packs"] if str(pack["id"]) not in selected)
         source_items = ((pack_id, sources[pack_id]) for pack_id in sorted(selected, key=str.casefold))
     else:
+        # A full refresh may run from an incomplete Content tree (for example,
+        # after updating only the platform packs present on one workstation).
+        # Keep previously verified records that are not available locally so a
+        # successful sync cannot silently remove packs required by cloud jobs.
+        packs.extend(
+            dict(pack)
+            for pack in existing["packs"]
+            if str(pack["id"]) not in sources
+        )
         source_items = sources.items()
     for pack_id, source_root in source_items:
         generated = build_content_pack_record(source_root, remote=remote, pack_id=pack_id)
