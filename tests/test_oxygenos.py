@@ -170,6 +170,8 @@ class OxygenOSBuildTests(unittest.TestCase):
                                      TWRP_ROOT=recovery, OFX_ROOT=recovery), \
                     mock.patch.dict('os.environ', {'WUKONG_STUDIO_ASYNC_PACKAGE': '0'}):
                 result = studio_core.execute_build('cph-test', spec, workspace)
+            self.assertIn('_Global_Stable_', Path(result['outputZip']).name)
+            self.assertNotIn('_China_Stable_', Path(result['outputZip']).name)
             with zipfile.ZipFile(result['outputZip']) as archive:
                 self.assertEqual(archive.read('system/my_product.img'), b'rebuilt product')
                 self.assertEqual(archive.read('system/vendor.img'), b'stock logical')

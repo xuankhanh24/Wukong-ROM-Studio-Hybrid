@@ -509,11 +509,19 @@ def studio_version_name(spec: "BuildSpec") -> str:
     )
 
 
-def output_zip_name(version_name: str, spec: "BuildSpec", suffix: str = "") -> str:
+def output_zip_name(
+    version_name: str,
+    spec: "BuildSpec",
+    suffix: str = "",
+    *,
+    product_name: str | None = None,
+) -> str:
     version = sanitize_version_name(version_name)
     edition = build_edition_name(spec)
     studio_version = studio_version_name(spec)
-    return f"Wukong_{edition}_{studio_version}_{version}_China_Stable{suffix}.zip"
+    oxygen = spec.modVersion.startswith("OxygenOS_") or is_oxygen_product(product_name)
+    channel = "Global_Stable" if oxygen else "China_Stable"
+    return f"Wukong_{edition}_{studio_version}_{version}_{channel}{suffix}.zip"
 
 
 def _load_legacy() -> Any:
@@ -4583,6 +4591,7 @@ def _stage_package(context: BuildContext) -> dict[str, Any]:
         context.metadata["version_name"],
         context.spec,
         f"_{context.job_id[:8]}",
+        product_name=context.metadata.get("product_name"),
     )
     context.output_zip = zip_path
     if zip_path not in context.output_zips:

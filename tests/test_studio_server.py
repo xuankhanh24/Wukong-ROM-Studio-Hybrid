@@ -644,6 +644,19 @@ class StudioServerTests(unittest.TestCase):
         self.assertEqual(len(payload["artifacts"]), 1)
         self.assertFalse(payload["artifacts"][0]["artifactExists"])
 
+    def test_artifact_version_inference_accepts_global_stable_filename(self):
+        inferred = studio_server._infer_job_version_name(
+            "oxygen-job",
+            "{}",
+            str(self.root / "workspace"),
+            str(
+                self.output
+                / "Wukong_Lite_V6.0_CPH2645_16.0.10_Global_Stable_deadbeef.zip"
+            ),
+        )
+
+        self.assertEqual("CPH2645_16.0.10", inferred)
+
     def test_artifact_history_keeps_validated_output_from_failed_notification(self):
         with mock.patch.object(
             studio_server, "inspect_rom", return_value={"ok": True, "errors": []}

@@ -126,7 +126,7 @@ PROCESS_LOG_FLUSH_BYTES = 64 * 1024
 PROCESS_LOG_FLUSH_INTERVAL = 0.1
 ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 ARTIFACT_VERSION_RE = re.compile(
-    r"^Wukong_(?:Lite|Plus|Custom)_V[0-9]+(?:\.[0-9]+){1,3}_(?P<version>.+)_China_Stable_[0-9a-f]{8}\.zip$",
+    r"^Wukong_(?:Lite|Plus|Custom)_V[0-9]+(?:\.[0-9]+){1,3}_(?P<version>.+)_(?:China|Global)_Stable_[0-9a-f]{8}\.zip$",
     re.IGNORECASE,
 )
 

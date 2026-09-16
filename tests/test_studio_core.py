@@ -561,6 +561,19 @@ class StudioCoreTests(unittest.TestCase):
             "Wukong_Custom_V3.4_fixture_China_Stable.zip",
         )
 
+    def test_output_zip_name_uses_global_stable_for_oxygenos(self):
+        spec = studio_core.BuildSpec(
+            romPath="rom.zip",
+            preset="lite",
+            modVersion="OxygenOS_16.0.10",
+            modReleaseVersion="V6.0",
+        )
+
+        self.assertEqual(
+            studio_core.output_zip_name("fixture", spec),
+            "Wukong_Lite_V6.0_fixture_Global_Stable.zip",
+        )
+
     def test_preset_label_is_used_for_filename_and_branding(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
