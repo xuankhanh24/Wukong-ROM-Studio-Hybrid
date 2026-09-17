@@ -144,6 +144,46 @@ class WkManagerPatcherTests(unittest.TestCase):
                     "missing-marker",
                 )
 
+    def test_optional_directive_patch_accepts_removed_method(self):
+        with tempfile.TemporaryDirectory() as temp:
+            decoded = Path(temp)
+            smali = decoded / "smali" / "fixture" / "Target.smali"
+            smali.parent.mkdir(parents=True)
+            smali.write_text(
+                ".class public Lfixture/Target;\n"
+                ".method public retained()V\n"
+                "    .registers 1\n"
+                "    return-void\n"
+                ".end method\n",
+                encoding="utf-8",
+            )
+            self.assertFalse(
+                wk_manager_patcher._patch_after_directive_if_present(
+                    decoded,
+                    "fixture.Target",
+                    "removed()Z",
+                    r"^[ \t]*\.registers [0-9]+[ \t]*$",
+                    "    return-void",
+                    "fixture-marker",
+                )
+            )
+
+    def test_variant_directive_patch_selects_the_present_signature(self):
+        with tempfile.TemporaryDirectory() as temp:
+            decoded = Path(temp)
+            self._write_method(decoded, "fixture.Target", "new(I)Z", '.param p1, "value"  # I')
+            changed = wk_manager_patcher._patch_after_directive_first_present(
+                decoded,
+                "fixture.Target",
+                (
+                    ("old()Z", r"^[ \t]*\.registers [0-9]+[ \t]*$"),
+                    ("new(I)Z", r'^[ \t]*\.param p1, "value".*$'),
+                ),
+                "    const/4 v0, 0x0",
+                "variant-marker",
+            )
+            self.assertTrue(changed)
+
     def test_copy_stark_smali_targets_classes6(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

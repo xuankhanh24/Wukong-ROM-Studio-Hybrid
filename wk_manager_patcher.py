@@ -307,6 +307,68 @@ def _patch_after_directive(
     )
 
 
+def _patch_after_directive_if_present(
+    decoded: Path,
+    class_name: str,
+    signature: str,
+    directive_pattern: str,
+    snippet: str,
+    marker: str,
+) -> bool:
+    """Patch an API that newer framework releases may remove entirely.
+
+    This remains fail-fast when the class is missing or the signature is
+    ambiguous.  A cleanly absent method is the only accepted no-op.
+    """
+    path = _find_smali(decoded, class_name)
+    content = path.read_text(encoding="utf-8")
+    matches = list(_method_pattern(signature).finditer(content))
+    if not matches:
+        return False
+    if len(matches) != 1:
+        raise WkManagerPatchError(
+            f"{class_name}.{signature}: expected at most one method, found {len(matches)}"
+        )
+    return _patch_after_directive(
+        decoded,
+        class_name,
+        signature,
+        directive_pattern,
+        snippet,
+        marker,
+    )
+
+
+def _patch_after_directive_first_present(
+    decoded: Path,
+    class_name: str,
+    candidates: tuple[tuple[str, str], ...],
+    snippet: str,
+    marker: str,
+) -> bool:
+    """Patch exactly one known signature variant of a framework method."""
+    path = _find_smali(decoded, class_name)
+    content = path.read_text(encoding="utf-8")
+    present = [
+        (signature, directive)
+        for signature, directive in candidates
+        if _method_pattern(signature).search(content)
+    ]
+    if len(present) != 1:
+        raise WkManagerPatchError(
+            f"{class_name}: expected one known method variant, found {len(present)}"
+        )
+    signature, directive = present[0]
+    return _patch_after_directive(
+        decoded,
+        class_name,
+        signature,
+        directive,
+        snippet,
+        marker,
+    )
+
+
 def _replace_method_after_directive(
     decoded: Path,
     class_name: str,
@@ -1211,10 +1273,31 @@ def patch_services_decoded(decoded: Path) -> dict[str, int | str]:
             """,
             "disable_flag_secure",
         ),
+    ]
+    for class_name, signature, directive, snippet, marker in simple_directive_patches:
+        patcher = (
+            _patch_after_directive_if_present
+            if (class_name, signature)
+            == ("com.android.server.wm.DisplayContent", "hasSecureWindowOnScreen()Z")
+            else _patch_after_directive
+        )
+        report.patchedMethods += patcher(
+            decoded, class_name, signature, directive, _code(snippet), marker
+        )
+    report.patchedMethods += _patch_after_directive_first_present(
+        decoded,
+        "com.android.server.audio.MediaFocusControl",
         (
-            "com.android.server.audio.MediaFocusControl",
-            "requestAudioFocus(Landroid/media/AudioAttributes;ILandroid/os/IBinder;Landroid/media/IAudioFocusDispatcher;Ljava/lang/String;Ljava/lang/String;IIZIZ)I",
-            r'^[ \t]*\.param p11, "permissionOverridesCheck".*$',
+            (
+                "requestAudioFocus(Landroid/media/AudioAttributes;ILandroid/os/IBinder;Landroid/media/IAudioFocusDispatcher;Ljava/lang/String;Ljava/lang/String;IIZIZ)I",
+                r'^[ \t]*\.param p11, "permissionOverridesCheck".*$',
+            ),
+            (
+                "requestAudioFocus(ILandroid/media/AudioAttributes;ILandroid/os/IBinder;Landroid/media/IAudioFocusDispatcher;Ljava/lang/String;Ljava/lang/String;IIZIZ)I",
+                r'^[ \t]*\.param p12, "isForCall".*$',
+            ),
+        ),
+        _code(
             """
                 const-string/jumbo v0, "multi_audio"
 
@@ -1229,14 +1312,10 @@ def patch_services_decoded(decoded: Path) -> dict[str, int | str]:
                 return v0
 
                 :cond_wk
-            """,
-            "multi_audio",
+            """
         ),
-    ]
-    for class_name, signature, directive, snippet, marker in simple_directive_patches:
-        report.patchedMethods += _patch_after_directive(
-            decoded, class_name, signature, directive, _code(snippet), marker
-        )
+        "multi_audio",
+    )
     return asdict(report)
 
 

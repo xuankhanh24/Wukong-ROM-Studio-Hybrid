@@ -2248,7 +2248,12 @@ def _partition_destination(
     return (target_partition, destination) if destination.is_dir() else None
 
 
-def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
+def apply_stark_patch(
+    source: Path,
+    destination: Path,
+    *,
+    skip_symbols: Iterable[str] = (),
+) -> dict[str, int]:
     if not source.is_file():
         raise StudioError(f"Stark patch file is missing: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -2256,6 +2261,9 @@ def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
     lines = original.splitlines()
     added = removed = replaced = 0
 
+    skipped_symbols = tuple(
+        symbol for symbol in skip_symbols if re.fullmatch(r"[A-Za-z0-9_]+", str(symbol))
+    )
     for instruction in source.read_text(encoding="utf-8", errors="replace").splitlines():
         if not instruction.strip():
             continue
@@ -2263,6 +2271,11 @@ def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
         payload = instruction[1:] if operation in {"+", "-", "!"} else instruction
         normalized = payload.strip()
         if not normalized:
+            continue
+        if any(
+            re.search(rf"(?<![A-Za-z0-9_]){re.escape(symbol)}(?![A-Za-z0-9_])", normalized)
+            for symbol in skipped_symbols
+        ):
             continue
         if (
             source.name == "stark_vendor_sepolicy.cil"
@@ -2997,7 +3010,8 @@ def _validate_wk_manager_power_policy_types(
     patch: Path,
     *,
     additional_policies: Iterable[Path] = (),
-) -> None:
+    allowed_missing_symbols: Iterable[str] = (),
+) -> set[str]:
     if not policy.is_file():
         raise StudioError(f"WK_Manager platform SELinux policy is missing: {policy}")
     policy_paths = (policy, *tuple(additional_policies))
@@ -3025,18 +3039,25 @@ def _validate_wk_manager_power_policy_types(
             flags=re.MULTILINE,
         )
     )
-    if missing_types or missing_attributes or missing_symbols:
+    missing = set(missing_types) | set(missing_attributes) | set(missing_symbols)
+    allowed = {str(symbol) for symbol in allowed_missing_symbols}
+    unresolved = missing - allowed
+    if unresolved:
         details = []
-        if missing_types:
-            details.append(f"types: {', '.join(missing_types)}")
-        if missing_attributes:
-            details.append(f"attributes: {', '.join(missing_attributes)}")
-        if missing_symbols:
-            details.append(f"types/attributes: {', '.join(missing_symbols)}")
+        unresolved_types = sorted(set(missing_types) & unresolved)
+        unresolved_attributes = sorted(set(missing_attributes) & unresolved)
+        unresolved_symbols = sorted(set(missing_symbols) & unresolved)
+        if unresolved_types:
+            details.append(f"types: {', '.join(unresolved_types)}")
+        if unresolved_attributes:
+            details.append(f"attributes: {', '.join(unresolved_attributes)}")
+        if unresolved_symbols:
+            details.append(f"types/attributes: {', '.join(unresolved_symbols)}")
         raise StudioError(
             "WK_Manager system-power policy is incompatible with this ROM; "
             f"missing SELinux {'; '.join(details)}"
         )
+    return missing
 
 
 def _stock_vendor_sepolicy_for_validation(
@@ -3121,10 +3142,11 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         and fallback_policy.resolve() != policy_patch.resolve()
     )
     try:
-        _validate_wk_manager_power_policy_types(
+        skipped_policy_symbols = _validate_wk_manager_power_policy_types(
             policy,
             policy_patch,
             additional_policies=(vendor_policy,) if vendor_policy else (),
+            allowed_missing_symbols=("virtualizationmanager",),
         )
     finally:
         if vendor_policy_probe is not None:
@@ -3144,7 +3166,13 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         source = source_selinux / name
         if not source.is_file():
             raise StudioError(f"WK_Manager system-power SELinux patch is missing: {source}")
-        patched += sum(apply_stark_patch(source, target).values())
+        patched += sum(
+            apply_stark_patch(
+                source,
+                target,
+                skip_symbols=skipped_policy_symbols,
+            ).values()
+        )
     if has_distinct_fallback:
         patched += sum(apply_stark_patch(fallback_policy, policy).values())
     patched += _ensure_wk_manager_art_runtime_policy(policy)
@@ -3167,6 +3195,7 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         "metadata": metadata,
         "daemon": str(system / WK_MANAGER_POWER_DAEMON_RELATIVE),
         "service": str(system / WK_MANAGER_POWER_RC_RELATIVE),
+        "skippedPolicySymbols": sorted(skipped_policy_symbols),
     }
 
 

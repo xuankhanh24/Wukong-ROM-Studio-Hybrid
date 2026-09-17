@@ -1166,7 +1166,7 @@ class StudioCoreTests(unittest.TestCase):
                 studio_core.validate_no_unsafe_vendor_priv_app_sysfs(root)
 
     def test_wk_manager_power_policy_uses_dedicated_domains(self):
-        mod = Path("MOD/ColorOS_16.0.7/WK_Manager")
+        mod = Path("STARK/WK_Manager")
         policy = mod / "system/system/etc/selinux/stark_plat_sepolicy.cil"
         seapp = mod / "system/system/etc/selinux/stark_plat_seapp_contexts"
         shared = Path("STARK/WK_Manager")
@@ -1196,8 +1196,7 @@ class StudioCoreTests(unittest.TestCase):
         )
         for rule in studio_core.WK_MANAGER_ART_RUNTIME_POLICY_RULES:
             self.assertIn(rule, policy_text)
-        self.assertNotIn("+user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
-        self.assertIn("-user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
+        self.assertIn("+user=_app isPrivApp=true name=com.wukong.manager domain=wukong_manager_app", seapp_text)
         self.assertIn(
             "+user=_app isPrivApp=true name=com.wukong.manager "
             "domain=wukong_manager_app type=privapp_data_file levelFrom=user",
@@ -1289,7 +1288,7 @@ class StudioCoreTests(unittest.TestCase):
             legacy_rc = init_dir.parent / "wukong_manager_metrics.rc"
             legacy_rc.write_text("on boot\n    chmod 0444 /legacy\n", encoding="utf-8")
 
-            mod_dir = Path("MOD/ColorOS_16.0.7/WK_Manager")
+            mod_dir = Path("STARK/WK_Manager")
             first = studio_core._patch_wk_manager_metrics_init_rc(unpack, mod_dir)
             second = studio_core._patch_wk_manager_metrics_init_rc(unpack, mod_dir)
 
@@ -1478,6 +1477,39 @@ class StudioCoreTests(unittest.TestCase):
 
             with self.assertRaisesRegex(studio_core.StudioError, "gpu_service"):
                 studio_core._validate_wk_manager_power_policy_types(policy, patch)
+
+    def test_wk_manager_power_policy_allows_and_reports_optional_missing_symbol(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            policy = root / "plat_sepolicy.cil"
+            patch = root / "stark_plat_sepolicy.cil"
+            policy.write_text(
+                "(type present)\n"
+                "(type wukong_manager_app)\n"
+                "(type privapp_data_file)\n"
+                "(type system_file)\n",
+                encoding="utf-8",
+            )
+            patch.write_text(
+                "+(allow present virtualizationmanager (process (transition)))\n",
+                encoding="utf-8",
+            )
+            missing = studio_core._validate_wk_manager_power_policy_types(
+                policy,
+                patch,
+                allowed_missing_symbols=("virtualizationmanager",),
+            )
+            self.assertEqual(missing, {"virtualizationmanager"})
+            target = root / "target.cil"
+            target.write_text("(type present)\n", encoding="utf-8")
+            self.assertEqual(
+                studio_core.apply_stark_patch(
+                    patch,
+                    target,
+                    skip_symbols=missing,
+                ),
+                {"added": 0, "removed": 0, "replaced": 0},
+            )
 
     def test_wk_manager_power_policy_accepts_allow_target_typeattribute(self):
         with tempfile.TemporaryDirectory() as temp:
