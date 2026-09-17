@@ -184,6 +184,14 @@ class WkManagerPatcherTests(unittest.TestCase):
             )
             self.assertTrue(changed)
 
+    def test_framework_get_key_entry_uses_single_descriptor_lambda(self):
+        source = Path(wk_manager_patcher.__file__).read_text(encoding="utf-8")
+        start = source.index('"getKeyEntry(Landroid/system/keystore2/KeyDescriptor;)')
+        end = source.index('report.importedSmali = _copy_stark_smali', start)
+        block = source[start:end]
+        self.assertIn("KeyStore2$$ExternalSyntheticLambda9", block)
+        self.assertNotIn("KeyStore2$$ExternalSyntheticLambda8", block)
+
     def test_copy_stark_smali_targets_classes6(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

@@ -776,9 +776,9 @@ def patch_framework_decoded(decoded: Path, stark_dir: Path = DEFAULT_STARK_DIR) 
 
                     if-nez v0, :cond_0
 
-                    new-instance v0, Landroid/security/KeyStore2$$ExternalSyntheticLambda8;
+                    new-instance v0, Landroid/security/KeyStore2$$ExternalSyntheticLambda9;
 
-                    invoke-direct {v0, p1}, Landroid/security/KeyStore2$$ExternalSyntheticLambda8;-><init>(Landroid/system/keystore2/KeyDescriptor;)V
+                    invoke-direct {v0, p1}, Landroid/security/KeyStore2$$ExternalSyntheticLambda9;-><init>(Landroid/system/keystore2/KeyDescriptor;)V
 
                     invoke-virtual {p0, v0}, Landroid/security/KeyStore2;->handleRemoteExceptionWithRetry(Landroid/security/KeyStore2$CheckedRemoteRequest;)Ljava/lang/Object;
 
