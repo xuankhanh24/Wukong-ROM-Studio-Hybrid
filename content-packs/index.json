@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T17:20:01.249224Z",
+  "generatedAt": "2026-09-20T16:41:58.016407Z",
   "packs": [
     {
       "archive": {
@@ -1109,9 +1109,9 @@
     },
     {
       "archive": {
-        "md5": "08420079bf5e3b638fa62096805a9c40",
-        "sha256": "d802bb8829b394be38dd9ed6aa59f359f80e7f8f43cb6036e83a5f8d837a06cc",
-        "sizeBytes": 1206605692,
+        "md5": "92fa2e1e46f62ce670383618e1843e69",
+        "sha256": "464522e60e52d0207d9a7e165cbbe7bee14ad23f32d7f71bfa5f0ce4abc21d50",
+        "sizeBytes": 1196699081,
         "uri": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.5.tar.zst"
       },
       "files": [
@@ -1324,26 +1324,6 @@
           "path": "Cts_Gemini/system_ext/priv-app/SystemUI/SystemUI.apk",
           "sha256": "96fde8e9e8b781835eb004a640eb9036ee6bd9cc5d6066d2d35b9d0de5ef17d0",
           "sizeBytes": 107607037
-        },
-        {
-          "path": "Fake_lock/system/system/bin/wk",
-          "sha256": "779eb01c1227adbeff9d0713e0fba5191e939c83833e0c422723fb5b46cf0f94",
-          "sizeBytes": 74720
-        },
-        {
-          "path": "Fake_lock/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "b6e17da8c39f24d303b92852dc9c24c5932bf1f3b39da13b570e6551e392003a",
-          "sizeBytes": 2581
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_file_contexts",
-          "sha256": "622598cf3902a0263d516dcf358ecfe5151151ad685ed904cb851f444db9b5e6",
-          "sizeBytes": 83
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "5303ed7adf10ad85f8ba6aabf3586eb9abc3189face020247be7bbb0cd1e7572",
-          "sizeBytes": 261
         },
         {
           "path": "Fix_Metis/my_stock/priv-app/Metis/Metis.apk",
@@ -1619,58 +1599,18 @@
           "path": "Theme_cr/my_stock/priv-app/KeKeThemeSpace/lib/arm64/libvipfont.so",
           "sha256": "8a12484848b1f9a59d2f1c8421511a15015ae4f3b46d3347bfd0cb0fb6a48f78",
           "sizeBytes": 1200544
-        },
-        {
-          "path": "WK_Installer/system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk",
-          "sha256": "a46163d14b75133d9f0211330a1bfe7f13da962add7fffd35933be9dde2a8f5d",
-          "sizeBytes": 5148923
-        },
-        {
-          "path": "WK_Manager/my_region/etc/extension/stark_com.oplus.oplus-feature.xml",
-          "sha256": "baf2053bc6361ed3ce6c35bf1dd39a81fadc9a0af5832a571e40c2a2015cea16",
-          "sizeBytes": 66
-        },
-        {
-          "path": "WK_Manager/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "ca6ef56067a406c22e0f1475d9800570c90889c326e1b3b74e09078106b2e66b",
-          "sizeBytes": 1881
-        },
-        {
-          "path": "WK_Manager/system/system/etc/permissions/privapp-permissions-wukong-manager.xml",
-          "sha256": "a533c7fc48d2ade5d11b4912813390fe255eefac765f3a943770eb9ae9f40b70",
-          "sizeBytes": 8386
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_seapp_contexts",
-          "sha256": "a75ad8e86601dff36b8035a357d321f8e5741ed4c85007db68bd10c8d8cb3650",
-          "sizeBytes": 113
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "330d40e4761ac663ced3b41c819d04b8fc247aa0d76bf70d884675f42ab649e0",
-          "sizeBytes": 12402
-        },
-        {
-          "path": "WK_Manager/system/system/priv-app/WukongManager/WukongManager.apk",
-          "sha256": "7b56f029e0858b10658b2c9c538430decd94d2481857d7c723eea0e3892ed5ae",
-          "sizeBytes": 9426791
-        },
-        {
-          "path": "WK_Manager/system/system/stark_build.prop",
-          "sha256": "ab821871c0a1e152b84caf5d96e6a8e24db5588e823e265f0fb6d4ce47667711",
-          "sizeBytes": 25
         }
       ],
       "id": "MOD/ColorOS_16.0.5",
       "remote": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.5",
-      "sizeBytes": 2360572766,
+      "sizeBytes": 2345896534,
       "target": "MOD/ColorOS_16.0.5"
     },
     {
       "archive": {
-        "md5": "544b9624d0ebe863200f30bb9ef5756a",
-        "sha256": "d11ae7eabb815ada512acaaa582c5c73038d99a866da0f10bdc478c3c7e62ed9",
-        "sizeBytes": 1370471087,
+        "md5": "334a8bd468578e6f31b7a8a9575e4d11",
+        "sha256": "5b3c36ce888a1c2f4e91d2d0b732335ecfa3602316306b2177755d502179329d",
+        "sizeBytes": 1360424594,
         "uri": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.7.tar.zst"
       },
       "files": [
@@ -1958,26 +1898,6 @@
           "path": "Cts_Gemini/system_ext/priv-app/SystemUI/SystemUI.apk",
           "sha256": "7631060cff39cd799959372828663589ee89eda2afd4039357b5956c6aab7750",
           "sizeBytes": 107097147
-        },
-        {
-          "path": "Fake_lock/system/system/bin/wk",
-          "sha256": "779eb01c1227adbeff9d0713e0fba5191e939c83833e0c422723fb5b46cf0f94",
-          "sizeBytes": 74720
-        },
-        {
-          "path": "Fake_lock/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "b6e17da8c39f24d303b92852dc9c24c5932bf1f3b39da13b570e6551e392003a",
-          "sizeBytes": 2581
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_file_contexts",
-          "sha256": "622598cf3902a0263d516dcf358ecfe5151151ad685ed904cb851f444db9b5e6",
-          "sizeBytes": 83
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "5303ed7adf10ad85f8ba6aabf3586eb9abc3189face020247be7bbb0cd1e7572",
-          "sizeBytes": 261
         },
         {
           "path": "Fix_Metis/my_stock/priv-app/Metis/Metis.apk",
@@ -2298,58 +2218,18 @@
           "path": "Theme_cr/my_stock/priv-app/KeKeThemeSpace/lib/arm64/libvipfont.so",
           "sha256": "8a12484848b1f9a59d2f1c8421511a15015ae4f3b46d3347bfd0cb0fb6a48f78",
           "sizeBytes": 1200544
-        },
-        {
-          "path": "WK_Installer/system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk",
-          "sha256": "a46163d14b75133d9f0211330a1bfe7f13da962add7fffd35933be9dde2a8f5d",
-          "sizeBytes": 5148923
-        },
-        {
-          "path": "WK_Manager/my_region/etc/extension/stark_com.oplus.oplus-feature.xml",
-          "sha256": "baf2053bc6361ed3ce6c35bf1dd39a81fadc9a0af5832a571e40c2a2015cea16",
-          "sizeBytes": 66
-        },
-        {
-          "path": "WK_Manager/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "ca6ef56067a406c22e0f1475d9800570c90889c326e1b3b74e09078106b2e66b",
-          "sizeBytes": 1881
-        },
-        {
-          "path": "WK_Manager/system/system/etc/permissions/privapp-permissions-wukong-manager.xml",
-          "sha256": "a533c7fc48d2ade5d11b4912813390fe255eefac765f3a943770eb9ae9f40b70",
-          "sizeBytes": 8386
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_seapp_contexts",
-          "sha256": "a75ad8e86601dff36b8035a357d321f8e5741ed4c85007db68bd10c8d8cb3650",
-          "sizeBytes": 113
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "3a76318a61158345edee1b527e34733f3cf8c699a4855331a84a9ca3ef12cae5",
-          "sizeBytes": 6412
-        },
-        {
-          "path": "WK_Manager/system/system/priv-app/WukongManager/WukongManager.apk",
-          "sha256": "d0d248713a3f5c9efac62c6295062493fa4e4ba064acd4741c23664b05201121",
-          "sizeBytes": 9410413
-        },
-        {
-          "path": "WK_Manager/system/system/stark_build.prop",
-          "sha256": "ab821871c0a1e152b84caf5d96e6a8e24db5588e823e265f0fb6d4ce47667711",
-          "sizeBytes": 25
         }
       ],
       "id": "MOD/ColorOS_16.0.7",
       "remote": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.7",
-      "sizeBytes": 2748867295,
+      "sizeBytes": 2734213431,
       "target": "MOD/ColorOS_16.0.7"
     },
     {
       "archive": {
-        "md5": "093f44cc7b47f51abbddbe3cff6e74ac",
-        "sha256": "317333a21ccda2eacd7cd05337e03ec25aef861fc6ed851c3cbfb076b1e60494",
-        "sizeBytes": 1420178630,
+        "md5": "2d1c6032891c1f98bf4b404d623ddd25",
+        "sha256": "7ee50fd28449379b172bb89e14d3651daea02ffa8900ee8e7bd2013f74c8e7a9",
+        "sizeBytes": 1410002305,
         "uri": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.8.tar.zst"
       },
       "files": [
@@ -2597,26 +2477,6 @@
           "path": "Cts_Gemini/system_ext/priv-app/SystemUI/SystemUI.apk",
           "sha256": "b3792743102516e99a0590132cd4e1c30d37132693d88a0ce8a81b0792d15bc0",
           "sizeBytes": 109604167
-        },
-        {
-          "path": "Fake_lock/system/system/bin/wk",
-          "sha256": "779eb01c1227adbeff9d0713e0fba5191e939c83833e0c422723fb5b46cf0f94",
-          "sizeBytes": 74720
-        },
-        {
-          "path": "Fake_lock/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "b6e17da8c39f24d303b92852dc9c24c5932bf1f3b39da13b570e6551e392003a",
-          "sizeBytes": 2581
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_file_contexts",
-          "sha256": "622598cf3902a0263d516dcf358ecfe5151151ad685ed904cb851f444db9b5e6",
-          "sizeBytes": 83
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "5303ed7adf10ad85f8ba6aabf3586eb9abc3189face020247be7bbb0cd1e7572",
-          "sizeBytes": 261
         },
         {
           "path": "Fix_Metis/my_stock/priv-app/Metis/Metis.apk",
@@ -3022,58 +2882,18 @@
           "path": "Theme_cr/my_stock/priv-app/KeKeThemeSpace/lib/arm64/libvipfont.so",
           "sha256": "8a12484848b1f9a59d2f1c8421511a15015ae4f3b46d3347bfd0cb0fb6a48f78",
           "sizeBytes": 1200544
-        },
-        {
-          "path": "WK_Installer/system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk",
-          "sha256": "a46163d14b75133d9f0211330a1bfe7f13da962add7fffd35933be9dde2a8f5d",
-          "sizeBytes": 5148923
-        },
-        {
-          "path": "WK_Manager/my_region/etc/extension/stark_com.oplus.oplus-feature.xml",
-          "sha256": "baf2053bc6361ed3ce6c35bf1dd39a81fadc9a0af5832a571e40c2a2015cea16",
-          "sizeBytes": 66
-        },
-        {
-          "path": "WK_Manager/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "ca6ef56067a406c22e0f1475d9800570c90889c326e1b3b74e09078106b2e66b",
-          "sizeBytes": 1881
-        },
-        {
-          "path": "WK_Manager/system/system/etc/permissions/privapp-permissions-wukong-manager.xml",
-          "sha256": "a533c7fc48d2ade5d11b4912813390fe255eefac765f3a943770eb9ae9f40b70",
-          "sizeBytes": 8386
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_seapp_contexts",
-          "sha256": "a75ad8e86601dff36b8035a357d321f8e5741ed4c85007db68bd10c8d8cb3650",
-          "sizeBytes": 113
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "3a76318a61158345edee1b527e34733f3cf8c699a4855331a84a9ca3ef12cae5",
-          "sizeBytes": 6412
-        },
-        {
-          "path": "WK_Manager/system/system/priv-app/WukongManager/WukongManager.apk",
-          "sha256": "e791a7cc7594d057e72e02aa6f2e1525394b44f2a005b3472ecc6d79a8911adf",
-          "sizeBytes": 9477580
-        },
-        {
-          "path": "WK_Manager/system/system/stark_build.prop",
-          "sha256": "ab821871c0a1e152b84caf5d96e6a8e24db5588e823e265f0fb6d4ce47667711",
-          "sizeBytes": 25
         }
       ],
       "id": "MOD/ColorOS_16.0.8",
       "remote": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.8",
-      "sizeBytes": 2849355394,
+      "sizeBytes": 2834634363,
       "target": "MOD/ColorOS_16.0.8"
     },
     {
       "archive": {
-        "md5": "150568b70bd368f617febc4a61ecc075",
-        "sha256": "316bd487498c87c93e8995b3388d2f7acf71a28d56fd00725e6b9c8aab2b2ccf",
-        "sizeBytes": 1404959753,
+        "md5": "e2bcbaea416d0d86461686d9645e0f11",
+        "sha256": "756ddde8c2fa50c3840ecc71de699fa471cae223816340cb8bcb8b178482d7d4",
+        "sizeBytes": 1394467983,
         "uri": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.9.tar.zst"
       },
       "files": [
@@ -3321,26 +3141,6 @@
           "path": "Cts_Gemini/system_ext/priv-app/SystemUI/SystemUI.apk",
           "sha256": "2aebd9570da9b3a314c14506a3d2a76a3a952219311c8994080bec7cfbf58632",
           "sizeBytes": 109755221
-        },
-        {
-          "path": "Fake_lock/system/system/bin/wk",
-          "sha256": "779eb01c1227adbeff9d0713e0fba5191e939c83833e0c422723fb5b46cf0f94",
-          "sizeBytes": 74720
-        },
-        {
-          "path": "Fake_lock/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "b6e17da8c39f24d303b92852dc9c24c5932bf1f3b39da13b570e6551e392003a",
-          "sizeBytes": 2581
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_file_contexts",
-          "sha256": "622598cf3902a0263d516dcf358ecfe5151151ad685ed904cb851f444db9b5e6",
-          "sizeBytes": 83
-        },
-        {
-          "path": "Fake_lock/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "5303ed7adf10ad85f8ba6aabf3586eb9abc3189face020247be7bbb0cd1e7572",
-          "sizeBytes": 261
         },
         {
           "path": "Fix_noti/my_region/etc/battery/sys_deviceidle_whitelist.xml",
@@ -3721,51 +3521,11 @@
           "path": "Theme_cr/my_stock/priv-app/KeKeThemeSpace/lib/arm64/libvipfont.so",
           "sha256": "8a12484848b1f9a59d2f1c8421511a15015ae4f3b46d3347bfd0cb0fb6a48f78",
           "sizeBytes": 1200544
-        },
-        {
-          "path": "WK_Installer/system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk",
-          "sha256": "a46163d14b75133d9f0211330a1bfe7f13da962add7fffd35933be9dde2a8f5d",
-          "sizeBytes": 5148923
-        },
-        {
-          "path": "WK_Manager/my_region/etc/extension/stark_com.oplus.oplus-feature.xml",
-          "sha256": "baf2053bc6361ed3ce6c35bf1dd39a81fadc9a0af5832a571e40c2a2015cea16",
-          "sizeBytes": 66
-        },
-        {
-          "path": "WK_Manager/system/system/etc/init/hw/stark_init.rc",
-          "sha256": "ca6ef56067a406c22e0f1475d9800570c90889c326e1b3b74e09078106b2e66b",
-          "sizeBytes": 1881
-        },
-        {
-          "path": "WK_Manager/system/system/etc/permissions/privapp-permissions-wukong-manager.xml",
-          "sha256": "a533c7fc48d2ade5d11b4912813390fe255eefac765f3a943770eb9ae9f40b70",
-          "sizeBytes": 8386
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_seapp_contexts",
-          "sha256": "a75ad8e86601dff36b8035a357d321f8e5741ed4c85007db68bd10c8d8cb3650",
-          "sizeBytes": 113
-        },
-        {
-          "path": "WK_Manager/system/system/etc/selinux/stark_plat_sepolicy.cil",
-          "sha256": "3a76318a61158345edee1b527e34733f3cf8c699a4855331a84a9ca3ef12cae5",
-          "sizeBytes": 6412
-        },
-        {
-          "path": "WK_Manager/system/system/priv-app/WukongManager/WukongManager.apk",
-          "sha256": "4a6962b841492d5dc5d3714d78ac1ecb0e0cf8b02e42cd78a75202bc54c6b736",
-          "sizeBytes": 10805015
-        },
-        {
-          "path": "WK_Manager/system/system/stark_build.prop",
-          "sha256": "ab821871c0a1e152b84caf5d96e6a8e24db5588e823e265f0fb6d4ce47667711",
-          "sizeBytes": 25
         }
       ],
       "id": "MOD/ColorOS_16.0.9",
       "remote": "wukong-gdrive:WukongROM/content-packs/MOD/ColorOS_16.0.9",
-      "sizeBytes": 2801006436,
+      "sizeBytes": 2784957970,
       "target": "MOD/ColorOS_16.0.9"
     },
     {
