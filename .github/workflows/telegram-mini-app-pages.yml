@@ -19,12 +19,6 @@ on:
         required: false
         type: string
         default: ""
-      ui_variant:
-        description: "Mini App UI build variant"
-        required: false
-        type: choice
-        options: [joly, legacy]
-        default: joly
 
 permissions:
   contents: read
@@ -37,7 +31,6 @@ env:
   TARGET: ${{ inputs.target || 'preview' }}
   WUKONG_TELEGRAM_MINI_APP_API_URL: ${{ inputs.api_url || (inputs.target == 'preview' && vars.WUKONG_CLOUDFLARE_STAGING_URL) || vars.WUKONG_TELEGRAM_MINI_APP_API_URL || 'https://wukong-control-plane.wukong-rom-studio-api.workers.dev' }}
   WUKONG_RELEASE_SHA: ${{ inputs.release_sha || github.sha }}
-  WUKONG_MINI_APP_UI: ${{ inputs.ui_variant || (inputs.target == 'preview' && 'joly') || 'legacy' }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
@@ -79,14 +72,11 @@ jobs:
       - name: Build production bundle locally
         env:
           WUKONG_RELEASE_SHA: ${{ inputs.release_sha || github.sha }}
-          WUKONG_MINI_APP_UI: ${{ inputs.ui_variant || (inputs.target == 'preview' && 'joly') || 'legacy' }}
         shell: bash
         run: |
           set -euo pipefail
           npm ci --prefix telegram_mini_app
           npm test --prefix telegram_mini_app
-          npm run typecheck:joly --prefix telegram_mini_app
-          npm run coverage:joly --prefix telegram_mini_app
           python -m tools.build_vercel_mini_app
           grep -Fq "${WUKONG_TELEGRAM_MINI_APP_API_URL%/}" .vercel-static/index.html
           grep -Fq "<meta name=\"wukong-release\" content=\"${WUKONG_RELEASE_SHA}\"" .vercel-static/index.html
@@ -111,7 +101,6 @@ jobs:
           deployment_url="$("${args[@]}" \
             --build-env "WUKONG_TELEGRAM_MINI_APP_API_URL=$WUKONG_TELEGRAM_MINI_APP_API_URL" \
             --build-env "WUKONG_RELEASE_SHA=$WUKONG_RELEASE_SHA" \
-            --build-env "WUKONG_MINI_APP_UI=$WUKONG_MINI_APP_UI" \
             --token "$VERCEL_TOKEN")"
           [[ "$deployment_url" == https://* ]]
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"

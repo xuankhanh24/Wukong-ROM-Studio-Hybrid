@@ -1622,9 +1622,9 @@ class TelegramMiniAppTests(unittest.TestCase):
         )
 
         self.assertIn('data-batch-launch-color="rgb(255, 255, 255)"', dom)
-        self.assertIn('data-batch-launch-background="rgb(52, 92, 168)"', dom)
+        self.assertIn('data-batch-launch-background="rgb(49, 95, 158)"', dom)
         self.assertIn('data-admin-action-confirm-color="rgb(255, 255, 255)"', dom)
-        self.assertIn('data-admin-action-confirm-background="rgb(52, 92, 168)"', dom)
+        self.assertIn('data-admin-action-confirm-background="rgb(49, 95, 158)"', dom)
 
     def test_mobile_surface_is_distilled_and_maintenance_is_admin_only(self) -> None:
         html = (ROOT / "telegram_mini_app" / "index.html").read_text(encoding="utf-8")
@@ -1694,7 +1694,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-selected-theme-mode="system"', dom)
         self.assertIn('data-system-theme-after-telegram-change="dark"', dom)
         self.assertRegex(dom, r'<html[^>]*data-theme="system"[^>]*data-color-scheme="dark"')
-        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="#111318"')
+        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="#1d2025"')
 
     def test_cache_clear_requires_dialog_confirmation_and_submits_once(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(

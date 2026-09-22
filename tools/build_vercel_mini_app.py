@@ -48,14 +48,12 @@ def build_site(
     destination = output.resolve()
     destination.mkdir(parents=True, exist_ok=True)
     source = root / "telegram_mini_app"
+    for name in ASSET_NAMES:
+        shutil.copyfile(source / name, destination / name)
     node = shutil.which("node")
     if not node:
         raise RuntimeError("Node.js is required to build the Mini App")
     subprocess.run([node, str(source / "build.mjs"), str(destination)], cwd=root, check=True)
-    # Vite empties its output directory; copy product assets after either
-    # Node build so the selected variant cannot remove the shared logo.
-    for name in ASSET_NAMES:
-        shutil.copyfile(source / name, destination / name)
     # Build metadata contains source paths and is a local measurement artifact.
     (destination / "bundle-meta.json").unlink(missing_ok=True)
     licenses = destination / "licenses"
