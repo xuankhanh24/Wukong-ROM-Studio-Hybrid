@@ -1694,7 +1694,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-selected-theme-mode="system"', dom)
         self.assertIn('data-system-theme-after-telegram-change="dark"', dom)
         self.assertRegex(dom, r'<html[^>]*data-theme="system"[^>]*data-color-scheme="dark"')
-        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="#111318"')
+        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="#1d2025"')
 
     def test_cache_clear_requires_dialog_confirmation_and_submits_once(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
