@@ -1,0 +1,186 @@
+/* Material Design 3 roles for the existing Mini App. Navigation keeps its
+   original Liquid Dock geometry and glass treatment in dock.css. */
+:root {
+  --md-sys-color-primary: #315f9e;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d8e3ff;
+  --md-sys-color-on-primary-container: #001b3c;
+  --md-sys-color-surface: #faf8ff;
+  --md-sys-color-surface-container: #efeff7;
+  --md-sys-color-surface-container-high: #e8e9f1;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-on-surface: #191b20;
+  --md-sys-color-on-surface-variant: #454750;
+  --md-sys-color-outline: #747780;
+  --md-sys-color-outline-variant: #c4c6d0;
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-shape-corner-small: 12px;
+  --md-sys-shape-corner-medium: 16px;
+  --md-sys-shape-corner-large: 24px;
+  --md-sys-shape-corner-full: 999px;
+  --canvas: var(--md-sys-color-surface);
+  --surface: var(--md-sys-color-surface-container);
+  --surface-raised: var(--md-sys-color-surface-container-lowest);
+  --surface-soft: var(--md-sys-color-surface-container-high);
+  --ink: var(--md-sys-color-on-surface);
+  --muted: var(--md-sys-color-on-surface-variant);
+  --line: var(--md-sys-color-outline-variant);
+  --line-strong: var(--md-sys-color-outline);
+  --accent: var(--md-sys-color-primary);
+  --accent-strong: var(--md-sys-color-primary);
+  --accent-soft: var(--md-sys-color-primary-container);
+  --danger: var(--tg-theme-destructive-text-color, var(--md-sys-color-error));
+  --danger-soft: var(--md-sys-color-error-container);
+  --focus: var(--md-sys-color-primary);
+  --radius-sm: var(--md-sys-shape-corner-small);
+  --radius-md: var(--md-sys-shape-corner-medium);
+  --radius-lg: var(--md-sys-shape-corner-large);
+}
+
+:root[data-color-scheme="dark"] {
+  --md-sys-color-primary: #acc7ff;
+  --md-sys-color-on-primary: #002f66;
+  --md-sys-color-primary-container: #19477f;
+  --md-sys-color-on-primary-container: #d8e3ff;
+  --md-sys-color-surface: #111318;
+  --md-sys-color-surface-container: #1d2026;
+  --md-sys-color-surface-container-high: #282a31;
+  --md-sys-color-surface-container-lowest: #0b0e13;
+  --md-sys-color-on-surface: #e2e2e9;
+  --md-sys-color-on-surface-variant: #c4c6d0;
+  --md-sys-color-outline: #8e9099;
+  --md-sys-color-outline-variant: #44474f;
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-error-container: #93000a;
+  --canvas: var(--md-sys-color-surface);
+  --surface: var(--md-sys-color-surface-container);
+  --surface-raised: var(--md-sys-color-surface-container-high);
+  --surface-soft: var(--md-sys-color-surface-container);
+  --ink: var(--md-sys-color-on-surface);
+  --muted: var(--md-sys-color-on-surface-variant);
+  --line: var(--md-sys-color-outline-variant);
+  --line-strong: var(--md-sys-color-outline);
+  --accent: var(--md-sys-color-primary);
+  --accent-strong: var(--md-sys-color-primary);
+  --accent-soft: var(--md-sys-color-primary-container);
+  --danger: var(--tg-theme-destructive-text-color, var(--md-sys-color-error));
+  --danger-soft: var(--md-sys-color-error-container);
+  --focus: var(--md-sys-color-primary);
+}
+
+/* Telegram colors are used only while following the Telegram theme. */
+:root[data-theme="system"] {
+  --md-sys-color-primary: var(--tg-theme-button-color, #315f9e);
+  --md-sys-color-on-primary: var(--tg-theme-button-text-color, #ffffff);
+  --md-sys-color-surface: var(--tg-theme-bg-color, #faf8ff);
+  --md-sys-color-surface-container: var(--tg-theme-secondary-bg-color, #efeff7);
+  --md-sys-color-primary-container: color-mix(in srgb, var(--md-sys-color-primary) 15%, var(--md-sys-color-surface));
+  --md-sys-color-on-primary-container: var(--tg-theme-text-color, #001b3c);
+}
+:root[data-theme="system"][data-color-scheme="dark"] {
+  --md-sys-color-primary: var(--tg-theme-button-color, #acc7ff);
+  --md-sys-color-on-primary: var(--tg-theme-button-text-color, #002f66);
+  --md-sys-color-surface: var(--tg-theme-bg-color, #111318);
+  --md-sys-color-surface-container: var(--tg-theme-secondary-bg-color, #1d2026);
+  --md-sys-color-on-primary-container: var(--tg-theme-text-color, #d8e3ff);
+}
+
+/* Keep the dock's existing light and dark color inputs unchanged. */
+.bottom-nav {
+  --accent: #315f9e;
+  --accent-soft: #e8edf4;
+  --ink: #252830;
+  --muted: #656861;
+  --line: #d8d5cc;
+  --line-strong: #aaa79d;
+  --surface: #f8f7f2;
+  --surface-raised: #ffffff;
+  --surface-soft: #eeece6;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+:root[data-color-scheme="dark"] .bottom-nav {
+  --accent: #6f92bd;
+  --accent-soft: #293746;
+  --ink: #f1efe9;
+  --muted: #b9b6ae;
+  --line: #3b3e43;
+  --line-strong: #5c5f63;
+  --surface: #1d2025;
+  --surface-raised: #23272d;
+  --surface-soft: #2b2f35;
+}
+
+/* MD3 filled actions, outlined inputs, tonal selections and soft surfaces. */
+body .primary,
+:root[data-color-scheme="dark"] body .primary {
+  border-color: transparent;
+  border-radius: var(--md-sys-shape-corner-full);
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
+  box-shadow: 0 1px 3px rgb(25 27 32 / 12%);
+}
+body .primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, var(--md-sys-color-on-primary));
+  box-shadow: 0 2px 6px rgb(25 27 32 / 16%);
+}
+body .source-input-head #paste-source,
+body .probe-button,
+body .release-version-editor button,
+body .rom-release-actions [data-rom-action="analyze"],
+body .rom-release button:hover {
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
+}
+body .secondary,
+body .ghost,
+body .language-button { border-radius: var(--md-sys-shape-corner-full); }
+body .field input,
+body .field select,
+body .field textarea,
+body .source-input-head input,
+body .source-input-head textarea {
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-lowest);
+}
+body .field input:focus,
+body .field select:focus,
+body .field textarea:focus {
+  border-color: var(--md-sys-color-primary);
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 1px;
+}
+main .dossier-section,
+main .delivery-section,
+body .access-card,
+body .maintenance-card {
+  border-color: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container);
+  box-shadow: none;
+}
+main .runtime-strip,
+main .dispatch-docket,
+main .catalog-controls,
+main .job-history-card,
+body .confirm-dialog {
+  border-color: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container-lowest);
+}
+body .theme-selector,
+main .task-tabs { border-radius: var(--md-sys-shape-corner-full); }
+body .theme-selector button,
+main .task-tabs span { border-radius: var(--md-sys-shape-corner-full); }
+body .theme-selector button.active,
+main .task-tabs input:checked + span,
+:root[data-color-scheme="dark"] body .task-tabs input:checked + span,
+body .contents-rail button.active {
+  color: var(--md-sys-color-on-primary-container);
+  background: var(--md-sys-color-primary-container);
+  box-shadow: none;
+}
