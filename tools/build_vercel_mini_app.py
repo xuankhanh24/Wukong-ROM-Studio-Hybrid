@@ -61,9 +61,6 @@ def build_site(
     for license_path in (source / "assets" / "fonts").glob("*.LICENSE.txt"):
         shutil.copyfile(license_path, licenses / license_path.name)
     shutil.copyfile(source / "fflate.LICENSE.txt", licenses / "fflate.LICENSE.txt")
-    morphicons_license = source / "node_modules" / "morphicons" / "LICENSE"
-    if morphicons_license.is_file():
-        shutil.copyfile(morphicons_license, licenses / "morphicons.MIT.txt")
     index_path = destination / "index.html"
     index = index_path.read_text(encoding="utf-8")
     index = index.replace("__WUKONG_TELEGRAM_MINI_APP_API_URL__", _api_origin(api_url))
