@@ -3,6 +3,7 @@ import type { ThemePreference } from "../api/types";
 type TelegramWebApp = {
   platform?: string;
   colorScheme?: string;
+  themeParams?: { bg_color?: string; header_bg_color?: string };
   initData?: string;
   initDataUnsafe?: unknown;
   version?: string;
@@ -108,11 +109,14 @@ export function applyTelegramTheme(preference: ThemePreference): "light" | "dark
   root.dataset.theme = preference;
   root.dataset.colorScheme = resolved;
   root.classList.toggle("dark", resolved === "dark");
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "dark" ? "#09090b" : "#ffffff");
   const app = supportsTelegramVersion("6.1") ? telegramWebApp() : null;
+  const telegramColors = preference === "system" ? app?.themeParams : null;
+  const background = telegramColors?.bg_color || (resolved === "dark" ? "#111318" : "#faf8ff");
+  const header = telegramColors?.header_bg_color || background;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", background);
   try {
-    app?.setHeaderColor?.(resolved === "dark" ? "#09090b" : "#ffffff");
-    app?.setBackgroundColor?.(resolved === "dark" ? "#09090b" : "#ffffff");
+    app?.setHeaderColor?.(header);
+    app?.setBackgroundColor?.(background);
   } catch {
     // Browser preview and old Telegram bridges do not implement these methods.
   }

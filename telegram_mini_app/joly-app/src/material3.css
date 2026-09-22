@@ -1,0 +1,127 @@
+/* Material 3 roles for the React Mini App. The Liquid Dock is isolated below. */
+:root {
+  --md-sys-color-primary: #345ca8;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d9e2ff;
+  --md-sys-color-on-primary-container: #001a42;
+  --md-sys-color-surface: #faf8ff;
+  --md-sys-color-surface-container: #f0f1f8;
+  --md-sys-color-surface-container-high: #e9eaf2;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-on-surface: #191b20;
+  --md-sys-color-on-surface-variant: #44474f;
+  --md-sys-color-outline: #74777f;
+  --md-sys-color-outline-variant: #c4c6d0;
+  --md-sys-color-error: #ba1a1a;
+  --background: var(--md-sys-color-surface);
+  --foreground: var(--md-sys-color-on-surface);
+  --card: var(--md-sys-color-surface-container);
+  --card-foreground: var(--md-sys-color-on-surface);
+  --popover: var(--md-sys-color-surface-container-lowest);
+  --popover-foreground: var(--md-sys-color-on-surface);
+  --primary: var(--md-sys-color-primary);
+  --primary-foreground: var(--md-sys-color-on-primary);
+  --secondary: var(--md-sys-color-surface-container-high);
+  --secondary-foreground: var(--md-sys-color-on-surface);
+  --muted: var(--md-sys-color-surface-container);
+  --muted-foreground: var(--md-sys-color-on-surface-variant);
+  --accent: var(--md-sys-color-primary-container);
+  --accent-foreground: var(--md-sys-color-on-primary-container);
+  --destructive: var(--md-sys-color-error);
+  --border: var(--md-sys-color-outline-variant);
+  --input: var(--md-sys-color-outline);
+  --ring: var(--md-sys-color-primary);
+  --brand: var(--md-sys-color-primary);
+  --brand-hover: color-mix(in srgb, var(--md-sys-color-primary) 88%, var(--md-sys-color-on-primary));
+  --brand-soft: var(--md-sys-color-primary-container);
+  --brand-foreground: var(--md-sys-color-on-primary);
+  --canvas: var(--md-sys-color-surface);
+  --surface: var(--md-sys-color-surface-container);
+  --raised: var(--md-sys-color-surface-container-lowest);
+  --soft: var(--md-sys-color-surface-container-high);
+  --ink: var(--md-sys-color-on-surface);
+  --faint: var(--md-sys-color-on-surface-variant);
+  --line: var(--md-sys-color-outline-variant);
+  --line-strong: var(--md-sys-color-outline);
+  --radius: 1rem;
+}
+
+:root[data-color-scheme="dark"] {
+  --md-sys-color-primary: #aac7ff;
+  --md-sys-color-on-primary: #002f65;
+  --md-sys-color-primary-container: #16457f;
+  --md-sys-color-on-primary-container: #d9e2ff;
+  --md-sys-color-surface: #111318;
+  --md-sys-color-surface-container: #1d2027;
+  --md-sys-color-surface-container-high: #282a31;
+  --md-sys-color-surface-container-lowest: #0b0e13;
+  --md-sys-color-on-surface: #e2e2e9;
+  --md-sys-color-on-surface-variant: #c4c6d0;
+  --md-sys-color-outline: #8e9099;
+  --md-sys-color-outline-variant: #44474f;
+  --md-sys-color-error: #ffb4ab;
+}
+
+:root[data-theme="system"] {
+  --md-sys-color-primary: var(--tg-theme-button-color, #345ca8);
+  --md-sys-color-on-primary: var(--tg-theme-button-text-color, #ffffff);
+  --md-sys-color-primary-container: color-mix(in srgb, var(--md-sys-color-primary) 16%, var(--md-sys-color-surface));
+  --md-sys-color-on-primary-container: var(--tg-theme-text-color, #001a42);
+  --md-sys-color-surface: var(--tg-theme-bg-color, #faf8ff);
+  --md-sys-color-surface-container: var(--tg-theme-secondary-bg-color, #f0f1f8);
+  --md-sys-color-surface-container-high: color-mix(in srgb, var(--md-sys-color-surface-container) 80%, var(--md-sys-color-primary));
+  --md-sys-color-surface-container-lowest: var(--tg-theme-section-bg-color, #ffffff);
+}
+:root[data-theme="system"][data-color-scheme="dark"] {
+  --md-sys-color-primary: var(--tg-theme-button-color, #aac7ff);
+  --md-sys-color-on-primary: var(--tg-theme-button-text-color, #002f65);
+  --md-sys-color-surface: var(--tg-theme-bg-color, #111318);
+  --md-sys-color-surface-container: var(--tg-theme-secondary-bg-color, #1d2027);
+  --md-sys-color-surface-container-lowest: var(--tg-theme-section-bg-color, #0b0e13);
+}
+
+/* Elevated surfaces, filled actions, outlined fields and pill selection. */
+.app-shell .panel,
+.app-shell .j-card,
+.app-shell .recipe-panel,
+.app-shell .source-panel {
+  border-color: var(--md-sys-color-outline-variant);
+  border-radius: 24px;
+  background: var(--md-sys-color-surface-container);
+}
+.app-shell .j-button-default {
+  border-radius: 999px;
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
+  box-shadow: 0 1px 3px rgb(25 27 32 / 10%);
+}
+.app-shell .j-button-outline,
+.app-shell .j-button-ghost { border-radius: 999px; }
+.app-shell input:not([type="checkbox"]):not([type="radio"]),
+.app-shell textarea,
+.app-shell select {
+  border-color: var(--md-sys-color-outline);
+  border-radius: 12px;
+}
+.app-shell input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.app-shell textarea:focus-visible,
+.app-shell select:focus-visible { outline-color: var(--md-sys-color-primary); }
+.app-shell .status-pill { border-radius: 999px; }
+
+/* Preserve Liquid Dock colors, glass and active state independently of MD3. */
+.liquid-dock {
+  --foreground: oklch(.141 .005 285.823);
+  --muted-foreground: oklch(.552 .016 285.938);
+  --brand-soft: oklch(.96 .018 248);
+  --dock-glass-bg: color-mix(in oklch, oklch(1 0 0) 54%, transparent);
+  --dock-glass-border: color-mix(in oklch, oklch(.141 .005 285.823) 20%, transparent);
+  --dock-lens-bg: color-mix(in oklch, oklch(.96 .018 248) 52%, transparent);
+}
+:root[data-color-scheme="dark"] .liquid-dock {
+  --foreground: oklch(.985 0 0);
+  --muted-foreground: oklch(.705 .015 286.067);
+  --brand-soft: oklch(.245 .035 248);
+  --dock-glass-bg: color-mix(in oklch, oklch(.21 .006 285.885) 50%, transparent);
+  --dock-glass-border: oklch(1 0 0 / 22%);
+  --dock-lens-bg: color-mix(in oklch, oklch(.245 .035 248) 54%, transparent);
+}

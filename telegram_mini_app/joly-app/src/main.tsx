@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { MotionConfig } from "motion/react";
 import "./styles.css";
 import "./joly-native.css";
+import "./material3.css";
 import { App } from "./App";
 import { AnimatedToastProvider } from "./components/ui/animated-toast";
 
