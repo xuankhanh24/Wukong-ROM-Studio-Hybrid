@@ -5,6 +5,9 @@ import { restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
 import { restorePendingSubmission, updateTelegramState } from "./build.js";
 import { scheduleSourceProbe } from "./catalog.js";
 import { initializeApprovedWorkspace, loadSession, miniApiAvailable, renderAccessGate } from "./session.js";
+import { initializeDockEffects } from "./dock-effects.js";
+
+initializeDockEffects().catch(() => {});
 
 if (runtime.TelegramApp) {
   activateTelegramApp();
