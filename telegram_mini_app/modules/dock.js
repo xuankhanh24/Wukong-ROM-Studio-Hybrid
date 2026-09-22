@@ -3,7 +3,6 @@ import { closeAdminUserPage, renderProfileView } from "./profile.js";
 import { loadJobs } from "./jobs.js";
 import { loadRomDevices } from "./rom-catalog.js";
 import { loadAdminUsers, loadLatestBatch } from "./admin.js";
-import { markDockGlassChanged, updateDockMorphIcons } from "./dock-effects.js";
 
 function telegramColorScheme() {
   const scheme = String(runtime.TelegramApp?.colorScheme || "").toLowerCase();
@@ -41,7 +40,6 @@ function applyTheme(theme = state.theme, persist = false) {
     runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
     runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
   } catch (_) {}
-  markDockGlassChanged();
 }
 
 function greetingName() {
@@ -219,7 +217,6 @@ function navigate(name, smooth = true) {
   const activeSlot = Number(activeButton?.dataset.slot || 0);
   bottomNav?.style.setProperty("--active-index", String(activeSlot));
   bottomNav?.classList.toggle("profile-active", name === "profile");
-  updateDockMorphIcons(name);
   if (smooth) animateLiquidPosition(activeSlot); else setLiquidPosition(activeSlot);
   if (smooth) runtime.TelegramApp?.HapticFeedback?.selectionChanged?.();
   bottomNav?.classList.remove("is-shifting");
