@@ -1,6 +1,6 @@
 import { bindViewport } from "./viewport.js";
 import { $, $$, miniApiEndpoint, runtime, state, t, themeMedia } from "./state.js";
-import { initM3PresetSelector, initM3RunnerSelector, initModCategoryChips, applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
+import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
 import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
@@ -58,9 +58,7 @@ function bindEvents() {
   $("#language").addEventListener("click", () => { state.language = state.language === "vi" ? "en" : "vi"; localStorage.setItem("wukong-language", state.language); applyLanguage(); });
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => navigate(button.dataset.nav)));
   bindLiquidBottomTabs();
-  initM3PresetSelector();
-  initM3RunnerSelector();
-  initModCategoryChips();
+
   if (runtime.TelegramApp?.MainButton) {
     runtime.TelegramApp.MainButton.onClick(() => {
       const submitBtn = $("#submit-recipe");

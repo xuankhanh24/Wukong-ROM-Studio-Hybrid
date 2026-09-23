@@ -31,8 +31,6 @@ if (runtime.TelegramApp) {
     renderSessionDiagnostics();
     autoVerifySession();
 
-
-
   });
   bridge.addEventListener("error", renderSessionDiagnostics);
   document.head.append(bridge);

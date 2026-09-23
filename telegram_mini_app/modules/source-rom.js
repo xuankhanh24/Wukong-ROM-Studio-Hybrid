@@ -64,54 +64,6 @@ function updateMetadataCompleteness() {
   };
 }
 
-export function updateHeroRomCard() {
-  const card = document.getElementById("rom-hero-card");
-  if (!card) return;
-  const currentUri = document.getElementById("source-uri")?.value?.trim() || "";
-  const detection = state.sourceDetection;
-  if (!currentUri || !detection?.valid) {
-    card.hidden = true;
-    return;
-  }
-  card.hidden = false;
-  const device = document.getElementById("source-device-detected")?.textContent?.trim() || document.getElementById("source-product-detected")?.textContent?.trim() || detection.device || document.getElementById("device")?.value || "Android";
-  const version = document.getElementById("source-version-detected")?.textContent?.trim() || detection.version || "ROM Image";
-  const rawSize = document.getElementById("source-size-detected")?.textContent?.trim() || "";
-  const size = rawSize.split("·")[0]?.trim() || rawSize;
-  const android = document.getElementById("source-android-version")?.textContent?.trim() || "";
-  const patch = document.getElementById("source-security-patch")?.textContent?.trim() || "";
-  const otaType = document.getElementById("source-ota-type")?.textContent?.trim() || detection.type || "OTA";
-  const provider = document.getElementById("source-provider")?.textContent?.trim() || detection.provider || "OTA";
-
-  const heroDev = document.getElementById("hero-rom-device");
-  if (heroDev) heroDev.textContent = (!device || device === "—" || device === "···") ? "Android Device" : device;
-  const heroVer = document.getElementById("hero-rom-version");
-  if (heroVer) heroVer.textContent = (!version || version === "···" || version === "—") ? "OTA Image" : version;
-  const heroSize = document.getElementById("hero-rom-size");
-  if (heroSize) {
-    heroSize.textContent = size && size !== "—" ? size : "";
-    heroSize.hidden = !size || size === "—";
-  }
-
-  const chipOs = document.getElementById("hero-chip-os");
-  if (chipOs) {
-    chipOs.textContent = android && android !== "—" ? "Android " + android : "Android";
-  }
-  const chipBrand = document.getElementById("hero-chip-brand");
-  if (chipBrand) {
-    chipBrand.textContent = provider && provider !== "···" ? provider : "ColorOS / OOS";
-  }
-  const chipOta = document.getElementById("hero-chip-ota");
-  if (chipOta) {
-    chipOta.textContent = otaType && otaType !== "—" ? otaType : "OTA";
-  }
-  const chipPatch = document.getElementById("hero-chip-patch");
-  if (chipPatch) {
-    chipPatch.textContent = patch && patch !== "—" ? "Patch " + patch : "Patch OK";
-    chipPatch.hidden = !patch || patch === "—";
-  }
-}
-
 function resetSourceFacts(detection, uri) {
   sourceFactDefinitions.forEach(([id]) => setSourceFact(id, ""));
   if (!detection?.valid) { updateMetadataCompleteness(); return; }
@@ -120,7 +72,6 @@ function resetSourceFacts(detection, uri) {
   setSourceFact("source-version-detected", detection.version);
   setSourceFact("source-host", detection.kind === "rclone" ? "Google Drive" : new URL(uri).hostname);
   updateMetadataCompleteness();
-  updateHeroRomCard();
 }
 
 function sourceMetadataText() {

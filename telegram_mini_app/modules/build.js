@@ -1,81 +1,7 @@
-
-export function syncM3PresetVisual() {
-  const presetSelect = document.getElementById("preset");
-  if (!presetSelect) return;
-  const current = presetSelect.value;
-  document.querySelectorAll("#m3-preset-selector [data-preset]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.preset === current);
-  });
-}
-
-export function initM3PresetSelector() {
-  const container = document.getElementById("m3-preset-selector");
-  const presetSelect = document.getElementById("preset");
-  if (!container || !presetSelect) return;
-  container.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-preset]");
-    if (!btn) return;
-    const value = btn.dataset.preset;
-    if (presetSelect.value !== value) {
-      presetSelect.value = value;
-      presetSelect.dispatchEvent(new Event("change", { bubbles: true }));
-      try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
-    }
-  });
-}
-
-export function syncM3RunnerVisual() {
-  const execSelect = document.getElementById("execution");
-  if (!execSelect) return;
-  const current = execSelect.value;
-  document.querySelectorAll("#m3-runner-selector [data-runner]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.runner === current);
-  });
-}
-
-export function initM3RunnerSelector() {
-  const container = document.getElementById("m3-runner-selector");
-  const execSelect = document.getElementById("execution");
-  if (!container || !execSelect) return;
-  container.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-runner]");
-    if (!btn) return;
-    const value = btn.dataset.runner;
-    if (execSelect.value !== value) {
-      execSelect.value = value;
-      execSelect.dispatchEvent(new Event("change", { bubbles: true }));
-      try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
-    }
-  });
-}
-
-export function filterModsByCategory(category = "all") {
-  const groups = document.querySelectorAll("#mod-list .mod-group");
-  groups.forEach((group) => {
-    if (category === "all" || group.dataset.category === category) {
-      group.classList.remove("chip-hidden");
-    } else {
-      group.classList.add("chip-hidden");
-    }
-  });
-}
-
-export function initModCategoryChips() {
-  const container = document.getElementById("mod-category-chips");
-  if (!container) return;
-  container.addEventListener("click", (e) => {
-    const chip = e.target.closest("[data-mod-category]");
-    if (!chip) return;
-    container.querySelectorAll(".m3-filter-chip").forEach((c) => c.classList.remove("active"));
-    chip.classList.add("active");
-    filterModsByCategory(chip.dataset.modCategory);
-    try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
-  });
-}
 import { $, $$, miniApiEndpoint, pipelineLabels, state, t } from "./state.js";
 import { renderAdminPresetLabels, renderAdminReleaseEditor } from "./admin.js";
 import { activeSignedLaunchToken, apiRequest, effectiveInitData, loadSession, miniApiAvailable, miniApiUnavailableMessageKey, telegramTransportAvailable } from "./session.js";
-import { classifySource, updateHeroRomCard } from "./source-rom.js";
+import { classifySource } from "./source-rom.js";
 import { options, toast } from "./shell.js";
 import { navigate } from "./dock.js";
 import { loadJobs } from "./jobs.js";
@@ -310,9 +236,6 @@ function updateSummary() {
   const runner = runnerLabel($("#execution")?.value || "github-auto");
   const release = selectedReleaseVersion();
   $("#route-label").textContent = runner;
-  syncM3PresetVisual();
-  syncM3RunnerVisual();
-  updateHeroRomCard();
   const summary = `${device} · ${release} / ${presetLabel(preset)} / ${runner}`;
   $("#launch-summary").textContent = summary;
   if ($("#mobile-launch-summary")) $("#mobile-launch-summary").textContent = summary;
