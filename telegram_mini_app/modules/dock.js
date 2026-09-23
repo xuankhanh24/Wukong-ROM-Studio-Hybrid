@@ -225,6 +225,13 @@ function navigate(name, smooth = true) {
     bottomNav?.classList.add("is-shifting");
     setTimeout(() => bottomNav?.classList.remove("is-shifting"), 520);
   }
+  if (runtime.TelegramApp?.BackButton) {
+    if (name !== "build") {
+      runtime.TelegramApp.BackButton.show();
+    } else {
+      runtime.TelegramApp.BackButton.hide();
+    }
+  }
   history.replaceState(null, "", `#${name}`);
   window.scrollTo({ top: 0, behavior: smooth && !prefersReducedMotion() ? "smooth" : "auto" });
   updateDispatchFab();

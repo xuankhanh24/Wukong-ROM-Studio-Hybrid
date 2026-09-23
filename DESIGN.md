@@ -5,30 +5,29 @@ description: Warm, quiet technical workbench for identifying ROMs, composing bui
 
 # Wukong ROM Studio design system
 
-The Mini App is an operate surface: one page leads through **ROM source → configuration → review and build**. The interface serves everyday builders and administrators, with advanced controls collapsed until needed. The Wukong logo, warm neutral canvas, graphite text, cobalt action color, and five position dock with a centered avatar are shared on mobile and desktop.
+The Mini App is an operate surface designed under the **Telegram Native HIG (Human Interface Guidelines)**: one page leads through **ROM source → configuration → review and build**. The interface serves everyday builders and administrators, with advanced controls collapsed until needed. It leverages dynamic Telegram client theming, translucent glassmorphism surfaces, rounded inset grouped lists, and a unified Floating Island Dock (Liquid Glass) with a centered avatar across mobile and desktop.
 
 ## Tokens
 
 ```css
---canvas: #f3f1eb;
---surface: #f8f7f2;
---surface-raised: #ffffff;
---surface-soft: #eeece6;
---ink: #252830;
---muted: #656861;
---line: #d8d5cc;
---line-strong: #aaa79d;
---accent: #315f9e;
---accent-strong: #244a7c;
---success: #2f765b;
---danger: #c94f56;
---focus: #4f76a6;
---font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
---font-data: "JetBrains Mono", ui-monospace, monospace;
+--canvas: var(--tg-theme-secondary-bg-color, #efeff4);
+--surface: var(--tg-theme-bg-color, #ffffff);
+--surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #ffffff));
+--surface-soft: color-mix(in srgb, var(--canvas) 65%, var(--surface));
+--ink: var(--tg-theme-text-color, #000000);
+--muted: var(--tg-theme-hint-color, #8e8e93);
+--line: var(--tg-theme-section-separator-color, rgba(60, 60, 67, 0.12));
+--line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
+--accent: var(--tg-theme-button-color, #2481cc);
+--accent-text: var(--tg-theme-button-text-color, #ffffff);
+--success: #34c759;
+--danger: var(--tg-theme-destructive-text-color, #ff3b30);
+--font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+--font-mono: "Geist Mono", ui-monospace, monospace;
 --target-size: 44px;
 ```
 
-Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. IBM Plex Sans carries prose and controls; JetBrains Mono is reserved for IDs, paths, versions, and measurements. Cobalt is the only chromatic accent, while focus rings use `--focus` and status colors communicate state rather than decoration. Both color schemes keep the same semantic roles and readable contrast.
+Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
 
 ## Surface rules
 

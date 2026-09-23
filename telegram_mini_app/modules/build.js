@@ -286,6 +286,40 @@ function updateSummary() {
     node.textContent = t(ready ? "launch" : "finishSource");
   });
   $("#dispatch-fab")?.setAttribute("aria-label", t("fabBuild"));
+  syncTelegramMainButton(ready);
+}
+
+function syncTelegramMainButton(ready) {
+  const tg = runtime.TelegramApp;
+  if (!tg?.MainButton) return;
+  const isBuild = !document.body.dataset.view || document.body.dataset.view === "build";
+  if (!isBuild) {
+    try { tg.MainButton.hide(); } catch (_) {}
+    return;
+  }
+  const isMobile = window.innerWidth <= 860;
+  if (!isMobile) {
+    try { tg.MainButton.hide(); } catch (_) {}
+    return;
+  }
+  if (ready) {
+    try {
+      tg.MainButton.setText(`🚀 ${t("launch") || "BẮT ĐẦU TẠO ROM"}`);
+      tg.MainButton.enable();
+      tg.MainButton.show();
+    } catch (_) {}
+  } else {
+    const currentUri = $("#source-uri")?.value?.trim() || "";
+    if (currentUri) {
+      try {
+        tg.MainButton.setText(t("finishSource") || "Chờ hoàn tất cấu hình");
+        tg.MainButton.disable();
+        tg.MainButton.show();
+      } catch (_) {}
+    } else {
+      try { tg.MainButton.hide(); } catch (_) {}
+    }
+  }
 }
 
 function positiveInteger(input, errorKey) {
@@ -591,4 +625,4 @@ async function submitRecipe() {
   }
 }
 
-export { selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, enforceExclusiveMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };
+export { syncTelegramMainButton, selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, enforceExclusiveMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };

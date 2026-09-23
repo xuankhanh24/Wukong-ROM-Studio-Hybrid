@@ -58,6 +58,21 @@ function bindEvents() {
   $("#language").addEventListener("click", () => { state.language = state.language === "vi" ? "en" : "vi"; localStorage.setItem("wukong-language", state.language); applyLanguage(); });
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => navigate(button.dataset.nav)));
   bindLiquidBottomTabs();
+  if (runtime.TelegramApp?.MainButton) {
+    runtime.TelegramApp.MainButton.onClick(() => {
+      const submitBtn = $("#submit-recipe");
+      if (submitBtn && !submitBtn.disabled) submitBtn.click();
+    });
+  }
+  if (runtime.TelegramApp?.BackButton) {
+    runtime.TelegramApp.BackButton.onClick(() => {
+      const system = $("#system");
+      if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
+      if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
+      if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
+      if (document.body.dataset.view !== "build") navigate("build");
+    });
+  }
   $("#cache-clear-confirm")?.addEventListener("click", () => performCacheClear());
   $$("[data-theme-value]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.themeValue, true)));
   themeMedia?.addEventListener?.("change", handleSystemThemeChange);
@@ -160,6 +175,7 @@ function bindEvents() {
       }
       $("#preset").value = "custom";
       renderCustomPresetLabelEditor();
+      try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
     }
     updateSummary();
   });
