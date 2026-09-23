@@ -4,7 +4,7 @@ import { applyTheme, bindTelegramThemeEvents } from "./dock.js";
 import { restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
 import { restorePendingSubmission, updateTelegramState } from "./build.js";
 import { scheduleSourceProbe } from "./catalog.js";
-import { initializeApprovedWorkspace, loadSession, miniApiAvailable, renderAccessGate } from "./session.js";
+import { autoVerifySession } from "./session.js";
 
 if (runtime.TelegramApp) {
   activateTelegramApp();
@@ -29,10 +29,10 @@ if (runtime.TelegramApp) {
     updateSourceDetection();
     scheduleSourceProbe();
     renderSessionDiagnostics();
-    ensureAutomaticTelegramConnection();
-    if (miniApiAvailable()) {
-      loadSession({ countOpen: false }).then(() => initializeApprovedWorkspace()).catch(() => {});
-    } else renderAccessGate();
+    autoVerifySession();
+
+
+
   });
   bridge.addEventListener("error", renderSessionDiagnostics);
   document.head.append(bridge);

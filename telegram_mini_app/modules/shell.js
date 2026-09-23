@@ -2,7 +2,7 @@ import { bindViewport } from "./viewport.js";
 import { $, $$, miniApiEndpoint, runtime, state, t, themeMedia } from "./state.js";
 import { initM3PresetSelector, initM3RunnerSelector, initModCategoryChips, applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
-import { runQuickAction, activeSignedLaunchToken, apiRequest, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
+import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
 import { closeBatchBuildPage, loadAdminUsers, loadBatch, openBatchBuildPage, performCacheClear, renderAdminUsers, savePermanentPresetLabels, savePermanentReleaseVersion, setBatchSelections, startBatchBuild, updateBatchSummary, updateMaintenance } from "./admin.js";
 import { clearSource, copySourceMetadata, pasteSourceFromClipboard, probeSourceInPlace, restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
@@ -331,12 +331,7 @@ function startMiniApp() {
   applyLanguage();
   history.scrollRestoration = "manual";
   renderSessionDiagnostics();
-  ensureAutomaticTelegramConnection();
-  if (miniApiAvailable()) {
-    loadSession().then(() => {
-      initializeApprovedWorkspace();
-    }).catch((error) => toast(error.message, true));
-  } else renderAccessGate();
+  autoVerifySession();
 }
 
-export { applyLanguage, toast, options, bindEvents, renderSessionDiagnostics, activateTelegramApp, ensureAutomaticTelegramConnection, startMiniApp };
+export { applyLanguage, toast, options, bindEvents, renderSessionDiagnostics, activateTelegramApp, ensureAutomaticTelegramConnection, autoVerifySession, startMiniApp };

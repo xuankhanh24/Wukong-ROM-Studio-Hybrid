@@ -71,7 +71,13 @@ function parseInitDataFromHash() {
 // Preserve Telegram's signed launch payload before the app replaces the
 // initial URL fragment with the active view (for example #build). Some
 // Telegram Android builds expose this fragment before WebApp.initData.
-runtime.cachedTelegramInitData = parseInitDataFromHash();
+const fromHash = parseInitDataFromHash();
+runtime.cachedTelegramInitData = fromHash || (() => {
+  try { return sessionStorage.getItem("wukong-cached-init-data") || ""; } catch (_) { return ""; }
+})();
+if (fromHash) {
+  try { sessionStorage.setItem("wukong-cached-init-data", fromHash); } catch (_) {}
+}
 
 const translations = {
   vi: {

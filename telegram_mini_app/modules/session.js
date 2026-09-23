@@ -32,11 +32,24 @@ function effectiveInitData() {
   const direct = String(runtime.TelegramApp?.initData || "");
   if (direct) {
     runtime.cachedTelegramInitData = direct;
+    try { sessionStorage.setItem("wukong-cached-init-data", direct); } catch (_) {}
     return direct;
   }
   if (runtime.cachedTelegramInitData) return runtime.cachedTelegramInitData;
-  runtime.cachedTelegramInitData = parseInitDataFromHash();
-  return runtime.cachedTelegramInitData;
+  const fromHash = parseInitDataFromHash();
+  if (fromHash) {
+    runtime.cachedTelegramInitData = fromHash;
+    try { sessionStorage.setItem("wukong-cached-init-data", fromHash); } catch (_) {}
+    return fromHash;
+  }
+  try {
+    const stored = sessionStorage.getItem("wukong-cached-init-data") || "";
+    if (stored) {
+      runtime.cachedTelegramInitData = stored;
+      return stored;
+    }
+  } catch (_) {}
+  return "";
 }
 
 function effectiveInitDataUnsafe() {
@@ -247,6 +260,8 @@ function closeTelegramApp() {
 }
 
 function pauseWorkspacePolling() {
+  clearTimeout(autoVerifyTimer);
+  autoVerifyTimer = null;
   clearTimeout(workspaceReconnectTimer);
   workspaceReconnectTimer = null;
   for (const name of ["adminUsersPollTimer", "adminUserPollTimer", "jobsPollTimer", "maintenancePollTimer", "batchPollTimer", "pairingPollTimer"]) {
@@ -406,9 +421,18 @@ function renderAccount() {
 
 async function loadSession({ countOpen = true } = {}) {
   if (!miniApiAvailable()) return null;
-  const payload = await apiRequest(countOpen ? "/v1/session/open" : "/v1/me", {
-    method: countOpen ? "POST" : "GET"
-  });
+  let payload;
+  try {
+    payload = await apiRequest(countOpen ? "/v1/session/open" : "/v1/me", {
+      method: countOpen ? "POST" : "GET"
+    });
+  } catch (error) {
+    if (countOpen && (error.connectionFailed || error.code === "request_timeout" || error.retryable)) {
+      payload = await apiRequest("/v1/me", { method: "GET" });
+    } else {
+      throw error;
+    }
+  }
   const previousSubject = state.me?.telegramId;
   if (previousSubject && previousSubject !== payload.user?.telegramId) {
     pauseWorkspacePolling(); state.jobs = []; state.activeEvents = []; state.activeJobId = "";
@@ -424,7 +448,37 @@ async function loadSession({ countOpen = true } = {}) {
   return state.me;
 }
 
-export { setSignedTelegramLaunchToken, activeSignedLaunchToken, effectiveInitData, effectiveInitDataUnsafe, miniApiAvailable, privateApiAvailable, getMiniSessionId, miniApiState, miniApiUnavailableMessageKey, apiRequest, publicApiRequest, telegramTransportAvailable, presentMissingApi, telegramBotLink, openTelegramBot, storedPairing, pollTelegramPairing, connectTelegramSession, closeTelegramApp, pauseWorkspacePolling, resumeWorkspacePolling, reconnectWorkspace, scheduleWorkspaceReconnect, initializeApprovedWorkspace, renderAccessGate, renderAccount, loadSession };
+let autoVerifyTimer = null;
+
+async function autoVerifySession(attempt = 1, maxAttempts = 6) {
+  clearTimeout(autoVerifyTimer);
+  ensureAutomaticTelegramConnection();
+  if (miniApiAvailable()) {
+    try {
+      await loadSession();
+      initializeApprovedWorkspace();
+      return;
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        const delayMs = Math.min(1500, 200 * attempt);
+        autoVerifyTimer = setTimeout(() => autoVerifySession(attempt + 1, maxAttempts), delayMs);
+        return;
+      }
+      toast(error.message, true);
+      renderAccessGate();
+      return;
+    }
+  }
+  const insideTelegram = Boolean(runtime.TelegramApp?.platform && runtime.TelegramApp.platform !== "unknown");
+  if (insideTelegram && attempt < maxAttempts) {
+    const delayMs = Math.min(1000, 150 * attempt);
+    autoVerifyTimer = setTimeout(() => autoVerifySession(attempt + 1, maxAttempts), delayMs);
+    return;
+  }
+  renderAccessGate();
+}
+
+export { setSignedTelegramLaunchToken, activeSignedLaunchToken, effectiveInitData, effectiveInitDataUnsafe, miniApiAvailable, privateApiAvailable, getMiniSessionId, miniApiState, miniApiUnavailableMessageKey, apiRequest, publicApiRequest, telegramTransportAvailable, presentMissingApi, telegramBotLink, openTelegramBot, storedPairing, pollTelegramPairing, connectTelegramSession, closeTelegramApp, pauseWorkspacePolling, resumeWorkspacePolling, reconnectWorkspace, scheduleWorkspaceReconnect, initializeApprovedWorkspace, renderAccessGate, renderAccount, loadSession, autoVerifySession };
 
 async function runQuickAction(action) {
   if (action === "diagnostics") {
