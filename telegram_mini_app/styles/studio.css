@@ -1039,3 +1039,509 @@ main {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   10. Material 3 Expressive UI Components & Redesigned Workbench
+   ========================================================================== */
+
+/* Step Badges */
+.m3-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font: 700 13px/1 var(--font-mono);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.m3-subhead {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Source Action Buttons */
+.source-action-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.m3-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.18s ease;
+}
+
+.m3-btn-subtle:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+}
+
+.m3-btn-tonal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.18s ease;
+}
+
+.m3-btn-tonal:hover {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.m3-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.m3-btn-icon:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Hero ROM Spec Card */
+.rom-hero-card {
+  position: relative;
+  overflow: hidden;
+  margin: 12px 0 14px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: var(--radius-card);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-soft) 40%, var(--surface-raised)), var(--surface-raised));
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  animation: hero-fade-in 0.28s var(--ease) both;
+}
+
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.rom-hero-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.rom-hero-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rom-hero-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.rom-hero-title-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.rom-hero-title-box h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rom-hero-title-box p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font: 500 11.5px/1.3 var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rom-hero-size-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font: 700 11px/1 var(--font-mono);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.rom-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.m3-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font: 600 10.5px/1.2 var(--font-mono);
+}
+
+.m3-badge-chip.primary {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.m3-badge-chip.surface {
+  background: var(--surface-soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.m3-badge-chip.outline {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--line-strong);
+}
+
+.m3-badge-chip.security {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+}
+
+/* Section Tag & Headers */
+.m3-selection-section {
+  margin-bottom: 18px;
+}
+
+.m3-section-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.m3-section-tag {
+  color: var(--muted);
+  font: 700 10.5px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.m3-section-hint {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* Material 3 Preset Cards */
+.m3-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.m3-preset-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s var(--ease);
+}
+
+.m3-preset-card:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.m3-preset-card.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface-raised));
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 16px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.m3-preset-pill-badge {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #ffffff;
+  font: 700 8.5px/1 var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.m3-preset-icon {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.m3-preset-content strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.m3-preset-content small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.m3-preset-card.active .m3-preset-content strong {
+  color: var(--accent-strong);
+}
+
+/* Dual Config Row: Runner + Mod Pack */
+.m3-config-dual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+
+.m3-config-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Runner Pills */
+.m3-runner-pills {
+  display: flex;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  gap: 2px;
+}
+
+.m3-runner-pill {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.m3-runner-pill i {
+  font-style: normal;
+  font-size: 11px;
+}
+
+.m3-runner-pill:hover {
+  color: var(--ink);
+}
+
+.m3-runner-pill.active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Mod Pack Select */
+.m3-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.m3-select-wrapper select {
+  width: 100%;
+  min-height: 38px;
+  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.m3-select-wrapper small {
+  position: absolute;
+  right: 28px;
+  pointer-events: none;
+  color: var(--accent);
+  font: 700 9px/1 var(--font-mono);
+}
+
+/* MOD Matrix Section */
+.m3-mod-section {
+  margin-top: 18px;
+}
+
+.m3-batch-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.m3-batch-actions button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.m3-batch-actions button:hover {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: var(--accent);
+}
+
+/* Filter Chips Bar */
+.m3-filter-chips-container {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 10px 0 8px;
+  padding-bottom: 2px;
+}
+
+.m3-filter-chips-container::-webkit-scrollbar {
+  display: none;
+}
+
+.m3-filter-chips {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.m3-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.m3-filter-chip:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.m3-filter-chip.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.mod-group.chip-hidden {
+  display: none !important;
+}
+
+/* Flight-Ready Docket Enhancements */
+.docket-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.docket-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sun);
+}
+
+.dispatch-docket:not(.incomplete) .docket-pulse-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+@media (max-width: 860px) {
+  .m3-preset-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .m3-config-dual-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+}

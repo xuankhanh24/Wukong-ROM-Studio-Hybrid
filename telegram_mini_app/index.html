@@ -83,18 +83,65 @@
         <div><i class="status-dot neutral" aria-hidden="true"></i><span><small data-i18n="runtimeAllowance">LƯỢT BUILD · JOBS</small><button class="runtime-jobs-link" id="runtime-build-allowance" type="button" data-nav="jobs">—</button></span></div>
       </section>
       <form id="recipe-form">
+        <!-- 01 NGUỒN ROM -->
         <section class="dossier-section source-section">
-          <header class="section-heading"><span>01</span><div><h2 data-i18n="sourceTitle">Nguồn ROM</h2></div></header>
+          <header class="section-heading">
+            <span class="m3-step-badge">1</span>
+            <div>
+              <h2 data-i18n="sourceTitle">Nguồn ROM</h2>
+              <p class="m3-subhead">Dán URL trực tiếp, link OTA hoặc chọn nhanh từ Thư viện</p>
+            </div>
+          </header>
+
           <div class="smart-source">
             <div class="field field-wide source-input-field">
-              <div class="source-input-head"><label for="source-uri" data-i18n="sourceUrl">Dán link ROM</label><div><button id="open-rom-catalog" type="button" data-i18n="findRom">Tìm ROM</button><button id="paste-source" type="button" data-i18n="pasteLink">Dán</button><button id="clear-source" type="button" data-i18n="clearLink">Xóa</button></div></div>
-              <textarea id="source-uri" rows="3" required spellcheck="false" aria-describedby="source-state source-facts" placeholder="https://component-ota-cn.allawntech.com/downloadCheck?…"></textarea><small data-i18n="sourceSecure">Chấp nhận link trực tiếp và OPlus chưa resolve. URL ký tạm thời không xuất hiện trong log.</small>
+              <div class="source-input-head">
+                <label for="source-uri" data-i18n="sourceUrl">Link ROM nguồn</label>
+                <div class="source-action-group">
+                  <button id="open-rom-catalog" type="button" class="m3-btn-subtle" data-i18n="findRom">
+                    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+                    <span>Tìm ROM</span>
+                  </button>
+                  <button id="paste-source" type="button" class="m3-btn-tonal" data-i18n="pasteLink">
+                    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>Dán</span>
+                  </button>
+                  <button id="clear-source" type="button" class="m3-btn-icon" data-i18n="clearLink" aria-label="Xóa">✕</button>
+                </div>
+              </div>
+              <textarea id="source-uri" rows="2" required spellcheck="false" aria-describedby="source-state source-facts" placeholder="https://component-ota-cn.allawntech.com/downloadCheck?…"></textarea>
+              <small data-i18n="sourceSecure">Chấp nhận link trực tiếp và OPlus chưa resolve. URL ký tạm thời không xuất hiện trong log.</small>
             </div>
+
+            <!-- Modern Hero ROM Spec Card (Rendered when ROM is detected) -->
+            <div class="rom-hero-card" id="rom-hero-card" hidden>
+              <div class="rom-hero-glow" aria-hidden="true"></div>
+              <div class="rom-hero-content">
+                <div class="rom-hero-header">
+                  <div class="rom-hero-badge-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg>
+                  </div>
+                  <div class="rom-hero-title-box">
+                    <h3 id="hero-rom-device">—</h3>
+                    <p id="hero-rom-version">···</p>
+                  </div>
+                  <div class="rom-hero-size-pill" id="hero-rom-size">—</div>
+                </div>
+                <div class="rom-hero-chips">
+                  <span class="m3-badge-chip primary" id="hero-chip-os">Android —</span>
+                  <span class="m3-badge-chip surface" id="hero-chip-brand">ColorOS</span>
+                  <span class="m3-badge-chip outline" id="hero-chip-ota">OTA</span>
+                  <span class="m3-badge-chip security" id="hero-chip-patch">Patch —</span>
+                </div>
+              </div>
+            </div>
+
             <div class="source-state idle" id="source-state" aria-live="polite">
               <div class="source-state-mark" aria-hidden="true"><span>URL</span></div>
               <div class="source-state-copy"><small id="source-kicker" data-i18n="sourceIdleKicker">SMART SOURCE</small><strong id="source-state-title" data-i18n="sourceIdleTitle">Dán link để nhận diện</strong><p id="source-state-message" data-i18n="sourceIdleMessage">Loại nguồn được nhận ra ngay; metadata sâu được bot kiểm tra mà không tải cả ROM.</p></div>
               <button id="probe-source" type="button" class="probe-button" hidden data-i18n="analyzeSource">Phân tích ROM</button>
             </div>
+
             <div id="source-facts" hidden>
               <!-- Kept as a four-fact accessibility summary for callers that already query it. The legacy visual layout below is authoritative. -->
               <dl class="source-facts source-summary" aria-hidden="true"><div><dt data-i18n="detectedDevice">Mã thiết bị</dt><dd>—</dd></div><div><dt data-i18n="detectedVersion">Phiên bản</dt><dd>···</dd></div><div><dt data-i18n="androidVersion">Android</dt><dd>—</dd></div><div><dt data-i18n="sourceSizeDetected">Dung lượng</dt><dd>—</dd></div></dl>
@@ -124,22 +171,157 @@
           <details class="advanced source-manual"><summary><span data-i18n="editSourceManual">Chỉnh thông tin thủ công</span><b>+</b></summary><div class="advanced-body"><div class="field-grid"><label class="field"><span data-i18n="device">Thiết bị</span><select id="device"></select></label><label class="field"><span data-i18n="sourceSize">Dung lượng ROM (byte)</span><input id="source-size" inputmode="numeric" placeholder="Tự nhận diện nếu có"></label></div></div></details>
         </section>
 
+        <!-- 02 CẤU HÌNH BẢN ROM -->
         <section class="dossier-section build-options" id="build-options">
-          <header class="section-heading"><span>02</span><div><h2 data-i18n="recipeTitle">Cấu hình bản ROM</h2><p data-i18n="recipeHint">Preset là điểm bắt đầu; từng MOD và giai đoạn vẫn có thể chỉnh riêng.</p></div></header>
-          <div class="field-grid three"><label class="field"><span data-i18n="runner">Nơi chạy</span><select id="execution"><option value="github-auto">GitHub Auto</option><option value="github-hosted">GitHub Hosted</option><option value="self-hosted-linux">Self-hosted Linux</option></select></label><label class="field"><span data-i18n="edition">Phiên bản</span><select id="preset"><option value="lite">Lite</option><option value="plus" selected>Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select></label><label class="field"><span data-i18n="modPack">Nền MOD</span><select id="mod-version"></select><small id="mod-release-version">—</small></label></div>
+          <header class="section-heading">
+            <span class="m3-step-badge">2</span>
+            <div>
+              <h2 data-i18n="recipeTitle">Cấu hình bản ROM</h2>
+              <p data-i18n="recipeHint">Preset là điểm bắt đầu; từng MOD và giai đoạn vẫn có thể chỉnh riêng.</p>
+            </div>
+          </header>
+
+          <!-- M3 Expressive Segmented Cards: Edition / Preset -->
+          <div class="m3-selection-section">
+            <div class="m3-section-title-row">
+              <span class="m3-section-tag" data-i18n="edition">Phiên bản ROM</span>
+              <small class="m3-section-hint">Chọn preset phù hợp nhu cầu sử dụng</small>
+            </div>
+            <div class="m3-preset-grid" id="m3-preset-selector">
+              <button type="button" class="m3-preset-card" data-preset="plus">
+                <span class="m3-preset-pill-badge">Khuyên dùng</span>
+                <div class="m3-preset-icon">⭐</div>
+                <div class="m3-preset-content">
+                  <strong>Plus</strong>
+                  <small>Full MODs, ColorOS apps & Google tối ưu</small>
+                </div>
+              </button>
+              <button type="button" class="m3-preset-card" data-preset="lite">
+                <div class="m3-preset-icon">⚡</div>
+                <div class="m3-preset-content">
+                  <strong>Lite</strong>
+                  <small>Siêu nhẹ, sạch app rác, giữ nguyên gốc</small>
+                </div>
+              </button>
+              <button type="button" class="m3-preset-card" data-preset="custom">
+                <div class="m3-preset-icon">🛠️</div>
+                <div class="m3-preset-content">
+                  <strong>Custom</strong>
+                  <small>Tùy biến từng MOD & đường dẫn debloat</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- M3 Expressive Runner Chips & Mod Pack Row -->
+          <div class="m3-config-dual-row">
+            <div class="m3-config-block">
+              <span class="m3-section-tag" data-i18n="runner">Tuyến chạy</span>
+              <div class="m3-runner-pills" id="m3-runner-selector">
+                <button type="button" class="m3-runner-pill active" data-runner="github-auto">
+                  <i>⚡</i><span>Auto</span>
+                </button>
+                <button type="button" class="m3-runner-pill" data-runner="self-hosted-linux">
+                  <i>🏢</i><span>Linux</span>
+                </button>
+                <button type="button" class="m3-runner-pill" data-runner="github-hosted">
+                  <i>☁️</i><span>Hosted</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="m3-config-block">
+              <span class="m3-section-tag" data-i18n="modPack">Nền MOD</span>
+              <div class="m3-select-wrapper">
+                <select id="mod-version"></select>
+                <small id="mod-release-version">—</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden Native Selects for backward compatibility -->
+          <div class="legacy-hidden-controls" hidden aria-hidden="true">
+            <select id="execution"><option value="github-auto">GitHub Auto</option><option value="github-hosted">GitHub Hosted</option><option value="self-hosted-linux">Self-hosted Linux</option></select>
+            <select id="preset"><option value="lite">Lite</option><option value="plus" selected>Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select>
+          </div>
+
           <div class="release-version-editor"><div><strong id="release-version-title" data-i18n="releaseVersion">Phiên bản phát hành</strong><small id="release-version-hint" data-i18n="releaseVersionHint">Mặc định cố định theo MOD pack; thay đổi chỉ áp dụng cho job hiện tại.</small></div><div class="release-version-controls"><label class="sr-only" for="mod-release-version-input" data-i18n="releaseVersion">Phiên bản phát hành</label><input id="mod-release-version-input" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="release-version-hint"><button id="save-mod-release-version" type="button" data-i18n="saveReleaseVersion">Áp dụng cho job</button></div></div>
           <div class="release-version-editor custom-release-active" id="custom-preset-label-editor" hidden><div><strong data-i18n="customPresetJobTitle">Tên bản Custom</strong><small id="custom-preset-label-hint" data-i18n="customPresetJobHint">Đổi Custom thành tên riêng như Limited; chỉ áp dụng cho job hiện tại.</small></div><div class="release-version-controls"><label class="sr-only" for="custom-preset-label-input" data-i18n="customPresetJobTitle">Tên bản Custom</label><input id="custom-preset-label-input" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="custom-preset-label-hint" placeholder="Limited"><button id="apply-custom-preset-label" type="button" data-i18n="applyCustomPresetJob">Áp dụng cho job</button></div></div>
-          <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details><div class="selection-bar"><div><strong data-i18n="mods">MOD áp dụng</strong><small id="mod-count">0 đã chọn</small></div><div><button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button><button id="select-all" type="button" data-i18n="selectAll">Tất cả</button><button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button></div></div>
-          <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
-          <div class="mod-list" id="mod-list" aria-live="polite"></div>
+          <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details>
+
+          <!-- MOD Matrix with M3 Filter Chips -->
+          <div class="m3-mod-section">
+            <div class="selection-bar">
+              <div>
+                <strong data-i18n="mods">MOD áp dụng</strong>
+                <small id="mod-count">0 đã chọn</small>
+              </div>
+              <div class="m3-batch-actions">
+                <button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button>
+                <button id="select-all" type="button" data-i18n="selectAll">Tất cả</button>
+                <button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button>
+              </div>
+            </div>
+
+            <!-- M3 Category Filter Chips -->
+            <div class="m3-filter-chips-container">
+              <div class="m3-filter-chips" id="mod-category-chips">
+                <button type="button" class="m3-filter-chip active" data-mod-category="all">✨ Tất cả</button>
+                <button type="button" class="m3-filter-chip" data-mod-category="core">⚙️ Hệ thống</button>
+                <button type="button" class="m3-filter-chip" data-mod-category="interface">🎨 Giao diện</button>
+                <button type="button" class="m3-filter-chip" data-mod-category="google">🌐 Google</button>
+                <button type="button" class="m3-filter-chip" data-mod-category="camera">📷 Camera</button>
+                <button type="button" class="m3-filter-chip" data-mod-category="security">🔒 Bảo mật</button>
+              </div>
+            </div>
+
+            <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
+            <div class="mod-list" id="mod-list" aria-live="polite"></div>
+          </div>
+
           <details class="advanced"><summary><span data-i18n="advanced">Pipeline nâng cao</span><b id="pipeline-count">0/0</b></summary><div class="advanced-body"><div class="steps" id="steps"></div><section class="debloat-control"><header><div><strong data-i18n="debloatPaths">Đường dẫn cần xóa</strong><small data-i18n="debloatPathsHint">Danh sách tùy chỉnh chỉ dùng cho job hiện tại và tự khôi phục sau khi gửi build.</small></div><button id="edit-debloat-paths" type="button" data-i18n="editDebloatPaths">Tùy chỉnh</button></header><div class="debloat-summary" id="debloat-summary"><strong id="debloat-path-count">0 đường dẫn</strong><small id="debloat-path-state" data-i18n="debloatDefaultState">Đang dùng danh sách mặc định</small></div><div class="debloat-editor" id="debloat-editor" hidden><label class="field field-wide"><span data-i18n="debloatEditorHint">Mỗi dòng là một đường dẫn tương đối</span><textarea id="debloat-paths" rows="10" spellcheck="false" placeholder="my_stock\app\Browser"></textarea></label><footer><button id="cancel-debloat-paths" type="button" data-i18n="cancelDialog">Hủy</button><button class="primary compact" id="save-debloat-paths" type="button" data-i18n="saveDebloatPaths">Lưu cho job này</button></footer></div></section></div></details>
+        </section>
+
+        <!-- 03 KẾT QUẢ BUILD -->
         <section class="dossier-section delivery-section">
-          <header class="section-heading"><span>03</span><div><h2 data-i18n="deliveryTitle">Kết quả build</h2><p data-i18n="deliveryHint">Đóng gói ZIP, tải lên Drive và gửi link qua Telegram.</p></div></header>
-          <div class="switches"><label data-state="pending"><input id="package" type="checkbox" checked><i aria-hidden="true"></i><span><strong data-i18n="packageZip">ZIP flashable</strong><small data-i18n="packageHint">Đóng gói sau repack</small></span><em data-i18n="pipelinePending">Chưa chạy</em></label><label data-state="pending"><input id="publish" type="checkbox" checked><i aria-hidden="true"></i><span><strong data-i18n="publish">Upload Drive</strong><small data-i18n="publishHint">Tạo link tải khi thành công</small></span><em data-i18n="pipelinePending">Chưa chạy</em></label><label data-state="pending"><input id="notify" type="checkbox" checked><i aria-hidden="true"></i><span><strong data-i18n="notify">Báo qua Telegram</strong><small data-i18n="notifyHint">Trạng thái và link trong chat</small></span><em data-i18n="pipelinePending">Chưa chạy</em></label></div>
+          <header class="section-heading">
+            <span class="m3-step-badge">3</span>
+            <div>
+              <h2 data-i18n="deliveryTitle">Kết quả build</h2>
+              <p data-i18n="deliveryHint">Đóng gói ZIP, tải lên Drive và gửi link qua Telegram.</p>
+            </div>
+          </header>
+          <div class="switches">
+            <label data-state="pending">
+              <input id="package" type="checkbox" checked>
+              <i aria-hidden="true"></i>
+              <span><strong data-i18n="packageZip">ZIP flashable</strong><small data-i18n="packageHint">Đóng gói sau repack</small></span>
+              <em data-i18n="pipelinePending">Chưa chạy</em>
+            </label>
+            <label data-state="pending">
+              <input id="publish" type="checkbox" checked>
+              <i aria-hidden="true"></i>
+              <span><strong data-i18n="publish">Upload Drive</strong><small data-i18n="publishHint">Tạo link tải khi thành công</small></span>
+              <em data-i18n="pipelinePending">Chưa chạy</em>
+            </label>
+            <label data-state="pending">
+              <input id="notify" type="checkbox" checked>
+              <i aria-hidden="true"></i>
+              <span><strong data-i18n="notify">Báo qua Telegram</strong><small data-i18n="notifyHint">Trạng thái và link trong chat</small></span>
+              <em data-i18n="pipelinePending">Chưa chạy</em>
+            </label>
+          </div>
         </section>
-        </section>
+
+        <!-- FLIGHT-READY CONTROL DOCKET -->
         <aside class="dispatch-docket incomplete">
-          <header><small id="readiness-label" data-i18n="incompleteLabel">HỒ SƠ CHƯA ĐỦ</small><span id="readiness-count">1/4 điều kiện</span></header>
+          <header>
+            <div class="docket-status-badge">
+              <span class="docket-pulse-dot" aria-hidden="true"></span>
+              <small id="readiness-label" data-i18n="incompleteLabel">HỒ SƠ CHƯA ĐỦ</small>
+            </div>
+            <span id="readiness-count">1/4 điều kiện</span>
+          </header>
           <strong id="launch-summary">— / PLUS / GITHUB AUTO</strong>
           <ol class="readiness-checklist">
             <li id="check-source"><i aria-hidden="true"></i><span><b data-i18n="checklistSource">Nguồn ROM</b><small data-i18n="checklistSourcePending">Chưa có URL hợp lệ</small></span></li>
