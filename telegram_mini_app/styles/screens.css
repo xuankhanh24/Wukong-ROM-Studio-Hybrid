@@ -16,29 +16,23 @@
   .page-head::before, .page-head::after { display: none; }
   h1 { font-size: 30px; }
   .page-head p { font-size: 12px; }
-  .runtime-strip { grid-template-columns: 1fr; margin: 0 0 16px; }
-  .runtime-strip > div { min-height: 52px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .runtime-strip > div:last-child { border-bottom: 0; }
+  .runtime-strip { grid-template-columns: 1fr; gap: 8px; margin: 0 0 16px; }
+  .runtime-strip > div { min-height: 56px; border: 1px solid var(--line); border-radius: 12px; }
   #recipe-form { display: block; }
-  .dossier-section { margin-bottom: 12px; padding: 15px; }
-  .section-heading { grid-template-columns: 30px 1fr; gap: 9px; }
-  .section-heading > span { width: 28px; height: 28px; }
+  .dossier-section { margin-bottom: 14px; padding: 16px; }
+  .section-heading { display: flex; align-items: center; gap: 10px; }
   .field-grid, .field-grid.three { grid-template-columns: 1fr; }
   .task-tabs span { min-height: 46px; padding: 7px 5px; font-size: 10px; }
   .source-state { grid-template-columns: 34px minmax(0,1fr); }
   .source-input-head { align-items: flex-start; }
   .probe-button { grid-column: 1 / -1; width: 100%; }
-  .source-facts { grid-template-columns: repeat(2,1fr); }
-  .source-facts div:nth-child(3n) { border-right: 1px solid var(--line); }
-  .source-facts div:nth-child(2n) { border-right: 0; }
-  .source-facts div:nth-last-child(-n+3) { border-bottom: 1px solid var(--line); }
-  .source-facts div:last-child { border-bottom: 0; }
+  .source-facts { grid-template-columns: repeat(2,1fr); gap: 6px; }
+  .source-facts div { border: 1px solid var(--line); border-radius: 8px; }
   .selection-bar { align-items: flex-start; flex-direction: column; }
   .selection-bar > div:last-child { flex-wrap: wrap; }
   .mod-group-items, .steps { grid-template-columns: 1fr; }
-  .switches label { grid-template-columns: 26px minmax(0,1fr); }
-  .switches em { grid-column: 2; }
-  .dispatch-docket { position: static; margin-top: 12px; }
+  .switches label { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .dispatch-docket { position: static; margin-top: 14px; }
   .operator-sheet { grid-template-columns: 1fr; gap: 16px; }
   .active-job, .job-history-sheet { padding: 15px; }
   .active-job > header { align-items: flex-start; }
