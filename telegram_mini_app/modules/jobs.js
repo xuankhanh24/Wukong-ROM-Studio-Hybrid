@@ -648,7 +648,9 @@ function renderJobParameters(job, root, reader) {
   const previous = root.querySelector(":scope > .job-config");
   const details = previous?.dataset.jobId === id ? previous : document.createElement("details");
   details.className = "job-config"; details.dataset.jobId = id;
-  details.open = reader.expandedConfigJobId === id;
+  const isExpanded = previous?.dataset.jobId === id ? (previous.open || reader.expandedConfigJobId === id) : reader.expandedConfigJobId === id;
+  details.open = isExpanded;
+  if (isExpanded) reader.expandedConfigJobId = id;
   if (!details.children.length) {
     details.append(document.createElement("summary"), document.createElement("p"), document.createElement("button"));
     details.addEventListener("toggle", () => { if (details.isConnected) reader.expandedConfigJobId = details.open ? id : ""; });
