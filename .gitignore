@@ -30,8 +30,6 @@ venv/
 # Local editor/agent state
 .agents/
 .codex/
-.codegraph/
-.impeccable/
 .idea/
 .vscode/
 
@@ -47,15 +45,6 @@ venv/
 # Temporary files
 *.tmp
 *.temp
-/.tmp-*
-/.rollback-artifacts-*/
-/.rollback-test-*/
-/.font-artifacts-*/
-/.review_*.txt
-/work/
-/current-bundle-*.png
-/telegram_mini_app/.tmp-*
-/telegram_mini_app/ui-demo-*/
 Thumbs.db
 Desktop.ini
 
