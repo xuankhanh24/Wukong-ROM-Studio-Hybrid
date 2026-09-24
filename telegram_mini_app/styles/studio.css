@@ -1,654 +1,118 @@
-/* Studio: Telegram BotFather Native UI/UX Design System */
+/* Studio: source → configuration → review. Wukong identity stays shared. */
 :root {
   --font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
   --font-data: "Geist Mono", ui-monospace, monospace;
-  --text-body: 15px;
+  --text-body: 16px;
   --text-label: 12px;
   --target-size: 44px;
   --safe-bottom: max(10px, env(safe-area-inset-bottom, 0px), var(--telegram-safe-bottom, 0px));
   --safe-top: max(env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px));
-  --dock-reserve: 76px;
+  --dock-reserve: 124px;
   --action-reserve: 0px;
 }
-
-html {
-  scroll-padding-top: calc(70px + var(--safe-top));
-  scroll-padding-bottom: calc(var(--dock-reserve) + var(--safe-bottom));
-  background: var(--canvas);
-}
-
-body {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  min-height: var(--viewport-height, 100dvh);
-  background: var(--canvas);
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-}
-
-body, button, input, select, textarea {
-  font-family: var(--font-body);
-}
-
-main {
-  width: 100%;
-  max-width: 620px;
-  margin: 0 auto;
-  padding: 16px 14px calc(var(--dock-reserve) + var(--safe-bottom) + 20px);
-}
-
-/* Telegram Native Masthead */
+html { scroll-padding-top: calc(90px + var(--safe-top)); scroll-padding-bottom: calc(var(--dock-reserve) + var(--safe-bottom)); }
+body { font-size: var(--text-body); min-height: var(--viewport-height, 100dvh); }
+body, button, input, select, textarea { font-family: var(--font-body); }
+button, summary, select, .source-input-head button, .selection-bar button, .job-controls button, .release-version-controls button, .theme-picker button, .language-switch button { min-height: var(--target-size); }
+button, .bottom-nav button { min-width: var(--target-size); }
+input, textarea, select { font-size: 16px; }
+small, .field > span, .field > small, .source-facts dt, .source-facts dd, .readiness-checklist small, .bottom-nav button span, .runtime-strip small, .dispatch-docket header, .job-history-card small { font-size: var(--text-label); }
+button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .masthead {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: max(10px, var(--safe-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--line);
-}
-
-.wordmark {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--ink);
-}
-
-.wordmark img {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-}
-
-.wordmark strong {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.wordmark small {
-  display: block;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-.masthead-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.connection {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.connection i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-}
-
-.connection.preview i {
-  background: #8e8e93;
-}
-
-.language-button {
-  min-height: 30px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-/* Hide legacy rail navigation on mobile/standard TMA (dock handles it) */
-.contents-rail {
-  display: none !important;
-}
-
-/* Telegram Native Page Head */
-.page-head {
-  padding: 12px 4px 16px;
-  border-bottom: none;
-  margin: 0;
-  min-height: auto;
-}
-
-.page-head h1 {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.page-head p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* Runtime Strip (Clean 3-item Card) */
-.runtime-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 0 0 16px;
-  padding: 8px 12px;
-  border-radius: var(--radius-card, 14px);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  gap: 8px;
-}
-
-.runtime-strip > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  padding: 4px 0;
-}
-
-.runtime-strip small {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.runtime-strip strong {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
-
-/* Form Layout (BotFather Single-column Settings Feed) */
-#recipe-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Inset Grouped Section (BotFather / iOS Settings style) */
-.dossier-section {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card, 14px);
-  padding: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 2px;
-  padding: 0 2px;
-}
-
-.section-heading > span {
-  display: none !important; /* Hide old '01' number badge */
-}
-
-.section-heading h2 {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  margin: 0;
-}
-
-.section-heading p {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 0;
-}
-
-/* Form Fields & Controls */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field > span {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.field input, .field select, .field textarea {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface-soft);
-  color: var(--ink);
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.18s ease, background-color 0.18s ease;
-}
-
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--accent);
-  background: var(--surface);
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.field-grid.three {
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-@media (max-width: 600px) {
-  .field-grid.three {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Smart Source Container */
-.smart-source {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface-soft);
-}
-
-.smart-source > .field {
-  padding: 12px;
-  background: var(--surface);
-}
-
-.smart-source textarea {
-  min-height: 78px;
-  font-family: var(--font-data);
-  font-size: 13px;
-  line-height: 1.5;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.source-input-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.source-input-head > label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.source-input-head > div {
-  display: flex;
-  gap: 6px;
-}
-
-.source-input-head button {
-  min-height: 28px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface-soft);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.source-input-head #paste-source {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.source-input-head #open-rom-catalog {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-color: transparent;
-}
-
-.source-state {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: var(--surface-soft);
-  border-top: 1px solid var(--line);
-}
-
-.source-state-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 9px;
-  color: var(--muted);
-  flex: 0 0 auto;
-}
-
-.source-state-copy strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.source-state-copy p {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* ROM Metadata Display */
-.source-facts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border-top: 1px solid var(--line);
-  margin: 0;
-}
-
-.source-facts div {
-  padding: 10px 12px;
-  background: var(--surface);
-}
-
-.source-facts dt {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--muted);
-  letter-spacing: 0.03em;
-}
-
-.source-facts dd {
-  margin: 4px 0 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
-  font-family: var(--font-data);
-}
-
-/* Telegram Native Toggle Switches (BotFather Signature) */
-.switches {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card, 14px);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.switches label {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 52px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
-  cursor: pointer;
-  background: transparent;
-  transition: background-color 0.15s ease;
-}
-
-.switches label:last-child {
-  border-bottom: 0;
-}
-
-.switches label:active {
-  background: var(--surface-hover);
-}
-
-.switches input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.switches span {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.switches strong {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.switches small {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.switches em {
-  display: none !important;
-}
-
-.switches i {
-  position: relative;
-  flex: 0 0 51px;
-  width: 51px;
-  height: 31px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
-  border: none;
-  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.switches i::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.switches input:checked ~ i {
-  background: var(--accent);
-}
-
-.switches input:checked ~ i::after {
-  transform: translateX(20px);
-}
-
-/* Dispatch Docket (BotFather Live Recipe Preview Card) */
-.dispatch-docket {
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
-  border-radius: var(--radius-card, 14px);
-  padding: 16px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%, var(--surface) 100%);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.dispatch-docket > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding-top: max(8px, var(--safe-top));
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-raised) var(--masthead-surface-mix), transparent);
+  -webkit-backdrop-filter: blur(var(--masthead-backdrop-blur)) saturate(calc(1.08 + var(--masthead-scroll) * .28));
+  backdrop-filter: blur(var(--masthead-backdrop-blur)) saturate(calc(1.08 + var(--masthead-scroll) * .28));
 }
-
-.dispatch-docket > header small {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--success-soft);
-  color: var(--success);
+main { padding-bottom: 128px; }
+.view-heading { margin-bottom: 20px; }
+.view-heading h1 { letter-spacing: -.025em; text-wrap: balance; }
+.runtime-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); }
+.runtime-strip > div { padding: 11px 15px; border-right: 1px solid var(--line); }
+.runtime-strip > div:last-child { border-right: 0; }
+.runtime-strip strong { font-size: 12px; }
+.runtime-strip small { font-size: 9px; line-height: 1; }
+.dossier-section { border: 1px solid var(--line); box-shadow: var(--shadow-sm); border-radius: var(--radius-card, 16px); padding: 22px; background: var(--surface); }
+.section-heading { margin-bottom: 17px; }
+.section-heading h2, .dispatch-docket h2 { font-size: 18px; letter-spacing: -.015em; }
+.section-heading p { font-size: 12px; max-width: 65ch; color: var(--muted); }
+.source-input-head { align-items: center; gap: 8px; }
+.source-state { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 74px; padding: 12px 15px; background: var(--surface-soft); border-top: 1px solid var(--line); border-radius: 0; }
+.source-state-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); color: var(--muted); background: var(--surface-raised); }
+.source-state-copy strong { font-size: 13px; }
+.source-state-copy p { font-size: 11px; line-height: 1.4; }
+.source-facts { margin: 0; border: 0; }
+.source-summary { display: none !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0; padding: 0; border-top: 1px solid var(--line); }
+.source-summary > div { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 11px 13px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: none; }
+.source-summary > div:nth-child(2n) { border-right: 0; }
+.source-summary > div:nth-last-child(-n+2) { border-bottom: 0; }
+.source-summary dt { color: var(--muted); font: 500 12px/1.2 var(--font-body); }
+.source-summary dd { min-height: 28px; margin: 7px 0 0; font-family: var(--font-body); font-size: 14px; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.metadata-details, .build-advanced { border-block: 1px solid var(--line); }
+.metadata-details summary, .build-advanced > summary { display: list-item; padding: 12px 4px; color: var(--ink); font-size: 14px; cursor: pointer; }
+.metadata-details .source-facts { padding-bottom: 16px; }
+.metadata-details .source-facts-head { border: 0; background: transparent; }
+.field-grid.three { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.config-summary { display: none; }
+.advanced-content { display: grid; gap: 20px; padding: 16px 0; }
+.advanced-content > .field { max-width: 380px; }
+.advanced-content .selection-bar { margin: 0; flex-wrap: wrap; }
+.advanced-content .advanced { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.delivery-section { padding: 22px; }
+.dispatch-docket { border: 1px solid var(--line); border-radius: var(--radius-card, 16px); padding: 20px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.dispatch-docket > strong { font-size: 16px; overflow-wrap: anywhere; }
+.dispatch-docket > p, .session-recovery p { font-size: 14px; line-height: 1.55; }
+.session-recovery { padding: 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-md, 12px); background: var(--surface-raised); }
+.session-recovery button { width: 100%; }
+.job-technical { border-block: 1px solid var(--line); margin: 16px 0; }
+.job-technical > summary { cursor: default; padding: 12px 0; font-size: 14px; }
+.job-technical .job-facts, .job-technical .job-context { border: 0; background: transparent; padding-inline: 0; }
+.job-sync-time { display: block; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.job-events { max-height: 540px; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; }
+.job-events article { content-visibility: auto; contain-intrinsic-size: auto 76px; }
+.job-controls { flex-wrap: wrap; }
+.job-status { font-size: 12px; }
+.bottom-nav { bottom: var(--safe-bottom); }
+.dispatch-fab { bottom: calc(var(--dock-reserve) + 4px); right: 15px; width: auto; min-width: 0; height: 44px; padding: 0 14px 0 16px; border: 1px solid var(--dock-glass-border); border-radius: 999px; color: var(--dock-foreground); background: var(--dock-glass-bg); box-shadow: var(--dock-glass-shadow); -webkit-backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); }
+[data-keyboard="true"] .dispatch-fab, [data-keyboard="true"] .bottom-nav { visibility: hidden; pointer-events: none; }
+[data-keyboard="true"] main { padding-bottom: 32px; }
+@media (min-width:861px) {
+  #recipe-form { grid-template-columns: minmax(0,1fr) 340px; gap: 0 20px; }
+  .dispatch-docket { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: 96px; box-shadow: var(--shadow-md); }
+  .dispatch-fab { display: none !important; }
+  main { padding-bottom: 128px; }
+  .bottom-nav { bottom: max(14px, env(safe-area-inset-bottom)); }
 }
-
-.dispatch-docket.incomplete > header small {
-  background: var(--sun-soft);
-  color: #b45309;
+@media (max-width:860px) {
+  main { padding-left: max(14px, var(--telegram-safe-left, 0px)); padding-right: max(14px, var(--telegram-safe-right, 0px)); padding-bottom: calc(124px + env(safe-area-inset-bottom)); }
+  .masthead { padding-top: max(7px, var(--safe-top)); padding-bottom: 7px; }
+  .dossier-section { margin-bottom: 12px; padding: 15px; }
+  /* The three build selectors become a thumb-friendly vertical stack on phones. */
+  .build-options .field-grid,
+  .build-options .field-grid.three { grid-template-columns: 1fr; gap: 13px; }
+  .build-options .field-grid.three .field > span { margin-bottom: 6px; font-size: 9px; }
+  .runtime-strip { grid-template-columns: 1fr; margin-bottom: 16px; }
+  .runtime-strip > div { min-height: 52px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .runtime-strip > div:last-child { border-bottom: 0; }
+  .runtime-strip small { display: block; }
+  .dispatch-docket { padding: 20px; }
+  .source-state { grid-template-columns: 34px minmax(0, 1fr); }
+  .source-state .probe-button { grid-column: 1 / -1; width: 100%; }
+  .release-version-controls { flex-wrap: wrap; }
+  .release-version-controls input { min-width: 100px; width: 100%; }
+  .release-version-controls button { width: 100%; }
 }
-
-.dispatch-docket > strong {
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
-  padding: 0;
+@media (max-width:390px) {
+  main { padding-left: 10px; padding-right: 10px; }
+  .dossier-section { padding: 12px; }
+  .source-input-head { flex-wrap: wrap; }
+  .field-grid.three { grid-template-columns: 1fr; }
 }
-
-.readiness-checklist {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.readiness-checklist li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--line);
-  min-height: auto;
-}
-
-.readiness-checklist li:last-child {
-  border-bottom: none;
-}
-
-.readiness-checklist i {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--line-strong);
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
-
-.readiness-checklist .complete i {
-  border-color: var(--success);
-  background: var(--success);
-  color: #fff;
-}
-
-.readiness-checklist .complete i::after {
-  content: "✓";
-  font-size: 10px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.readiness-checklist b {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.readiness-checklist small {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-/* Primary Action Button (#submit-recipe) */
-#submit-recipe {
-  width: 100%;
-  min-height: 48px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  background: var(--accent);
-  color: var(--accent-text, #ffffff);
-  border: none;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-#submit-recipe:active {
-  transform: scale(0.98);
-}
-
-#submit-recipe:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.dispatch-fab {
-  display: none !important;
+@media (max-width:360px) {
+  .source-input-head > div { width: 100%; justify-content: space-between; }
 }
 
 @media (prefers-reduced-motion:reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }

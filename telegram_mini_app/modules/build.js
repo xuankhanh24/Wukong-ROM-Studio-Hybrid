@@ -297,6 +297,11 @@ function syncTelegramMainButton(ready) {
     try { tg.MainButton.hide(); } catch (_) {}
     return;
   }
+  const isMobile = window.innerWidth <= 860;
+  if (!isMobile) {
+    try { tg.MainButton.hide(); } catch (_) {}
+    return;
+  }
   if (ready) {
     try {
       tg.MainButton.setText(`🚀 ${t("launch") || "BẮT ĐẦU TẠO ROM"}`);
@@ -605,7 +610,6 @@ async function submitRecipe() {
     // draft deletion failure must never hide a successful submission.
     state.submitUncertain = false;
     renderSubmitRecovery();
-    try { runtime.TelegramApp?.HapticFeedback?.notificationOccurred?.("success"); } catch (_) {}
     toast(t("buildCreated"));
     navigate("jobs");
     await loadJobs({ force: true }).catch(() => {});
