@@ -27,6 +27,20 @@ The Mini App is an operate surface designed under the **Telegram Native HIG (Hum
 --target-size: 44px;
 ```
 
+Dark Mode adopts the Keybox Tech Geek aesthetic:
+```css
+--canvas: var(--tg-theme-secondary-bg-color, #0c1013);
+--surface: var(--tg-theme-bg-color, #101619);
+--surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #141b1f));
+--line: #202a30;
+--line-strong: #283238;
+--accent: var(--tg-theme-button-color, #72e4b5);
+--accent-text: #0c1013;
+--success: #72e4b5;
+--danger: #f28c98;
+--coral: #edc67b;
+```
+
 Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
 
 ## Surface rules
