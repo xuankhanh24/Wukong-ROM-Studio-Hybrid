@@ -192,9 +192,9 @@ class MiniAppUpgradeTests(unittest.TestCase):
         def exercise(page):
             result = page.evaluate("""() => {
                 const selectors = [
-                    '#language', '#source-uri', '#paste-source', '#clear-source',
+                    '#app-menu-toggle', '#source-uri', '#paste-source', '#clear-source',
                     '#probe-source', '#device', '#preset', '#submit-recipe',
-                    '.bottom-nav button'
+                    '.bf-build-navigation button'
                 ];
                 return selectors.flatMap((selector) => [...document.querySelectorAll(selector)])
                     .filter((node) => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden')
@@ -206,121 +206,79 @@ class MiniAppUpgradeTests(unittest.TestCase):
 
         _render_mini_app_in_chrome(api_enabled=True, jobs_fixture=True, page_action=exercise)
 
-    def test_exact_responsive_viewports_keep_dock_and_collapsed_options(self):
+    def test_exact_responsive_viewports_keep_grouped_navigation_and_collapsed_options(self):
         for width, height in [(320, 740), (390, 844), (768, 1024), (1280, 900), (844, 390)]:
             with self.subTest(width=width, height=height):
                 def exercise(page):
                     result = page.evaluate("""() => ({
                         width:innerWidth, documentWidth:document.documentElement.scrollWidth,
-                        dock:getComputedStyle(document.querySelector('.bottom-nav')).display,
-                        positions:document.querySelectorAll('.bottom-nav [data-nav]').length,
-                        advanced:document.querySelector('#build-advanced').open,
+                        oldDock:document.querySelector('.bottom-nav') === null,
+                        positions:document.querySelectorAll('.bf-build-navigation [data-nav]').length,
+                        advanced:document.querySelector('.build-options details.advanced').open,
                         facts:document.querySelectorAll('.source-summary dd').length,
                         form:document.querySelector('#recipe-form').contains(document.querySelector('#submit-recipe'))
                     })""")
                     self.assertEqual(result["width"], width)
                     self.assertLessEqual(result["documentWidth"], width)
-                    self.assertNotEqual(result["dock"], "none")
-                    self.assertEqual(result["positions"], 5)
+                    self.assertTrue(result["oldDock"])
+                    self.assertEqual(result["positions"], 4)
                     self.assertEqual(result["facts"], 4)
                     self.assertFalse(result["advanced"])
                     self.assertTrue(result["form"])
 
                 _render_mini_app_in_chrome(api_enabled=True, window_width=width, window_height=height, page_action=exercise)
 
-    def test_restored_studio_geometry_matches_reference_card_layout(self):
-        def exercise_mobile(page):
-            result = page.evaluate("""() => {
-                const main = document.querySelector('main');
-                const runtime = document.querySelector('.runtime-strip');
-                const source = document.querySelector('.source-section');
-                return {
-                    mainPaddingLeft: getComputedStyle(main).paddingLeft,
-                    runtimeWidth: runtime.getBoundingClientRect().width,
-                    runtimeHeight: runtime.getBoundingClientRect().height,
-                    runtimeRows: runtime.children.length,
-                    sourceX: source.getBoundingClientRect().x,
-                };
-            }""")
-            self.assertEqual(result, {
-                "mainPaddingLeft": "10px",
-                "runtimeWidth": 370,
-                "runtimeHeight": 186,
-                "runtimeRows": 3,
-                "sourceX": 10,
-            })
+    def test_botfather_grouped_geometry_keeps_build_in_single_readable_column(self):
+        for width, height in [(390, 844), (1280, 900)]:
+            with self.subTest(width=width):
+                def exercise(page):
+                    result = page.evaluate("""() => {
+                        const main = document.querySelector('main').getBoundingClientRect();
+                        const hero = document.querySelector('.build-hero').getBoundingClientRect();
+                        const source = document.querySelector('.source-section').getBoundingClientRect();
+                        const review = document.querySelector('.build-review').getBoundingClientRect();
+                        return {
+                            mainWidth: main.width, mainCenter: main.x + main.width / 2,
+                            heroCenter: hero.x + hero.width / 2,
+                            sourceWidth: source.width, sourceX: source.x,
+                            reviewBelowSource: review.y > source.y,
+                            formDisplay: getComputedStyle(document.querySelector('#recipe-form')).display,
+                            oldDocketAbsent: document.querySelector('.dispatch-docket') === null,
+                        };
+                    }""")
+                    self.assertLessEqual(result["mainWidth"], 560)
+                    self.assertAlmostEqual(result["mainCenter"], width / 2, delta=1)
+                    self.assertAlmostEqual(result["heroCenter"], width / 2, delta=1)
+                    self.assertGreater(result["sourceX"], 0)
+                    self.assertLessEqual(result["sourceWidth"], result["mainWidth"])
+                    self.assertTrue(result["reviewBelowSource"])
+                    self.assertEqual(result["formDisplay"], "block")
+                    self.assertTrue(result["oldDocketAbsent"])
 
-        _render_mini_app_in_chrome(api_enabled=True, window_width=390, window_height=844, page_action=exercise_mobile)
+                _render_mini_app_in_chrome(api_enabled=True, window_width=width, window_height=height, page_action=exercise)
 
-        def exercise_desktop(page):
-            result = page.evaluate("""() => {
-                const form = document.querySelector('#recipe-form');
-                const source = document.querySelector('.source-section');
-                const docket = document.querySelector('.dispatch-docket');
-                const style = getComputedStyle(form);
-                return {
-                    columns: style.gridTemplateColumns,
-                    columnGap: style.columnGap,
-                    sourceWidth: source.getBoundingClientRect().width,
-                    docketX: docket.getBoundingClientRect().x,
-                };
-            }""")
-            self.assertEqual(result, {
-                "columns": "888px 320px",
-                "columnGap": "16px",
-                "sourceWidth": 888,
-                "docketX": 932,
-            })
+    def test_telegram_owns_header_and_wukong_uses_grouped_navigation(self):
+        for width in (390, 1280):
+            with self.subTest(width=width):
+                def exercise(page):
+                    result = page.evaluate("""() => ({
+                        telegramHosted: document.body.classList.contains('telegram-hosted'),
+                        fallbackHeader: getComputedStyle(document.querySelector('.app-header')).display,
+                        oldDockAbsent: document.querySelector('.bottom-nav') === null,
+                        navigationVisible: getComputedStyle(document.querySelector('.bf-build-navigation')).display !== 'none',
+                        navigationRows: document.querySelectorAll('.bf-build-navigation .bf-row').length,
+                        deliveryHeading: Boolean(document.querySelector('.delivery-section > .bf-section-head')),
+                        sourceFacts: document.querySelectorAll('.source-summary dd').length,
+                    })""")
+                    self.assertTrue(result["telegramHosted"])
+                    self.assertEqual(result["fallbackHeader"], "none")
+                    self.assertTrue(result["oldDockAbsent"])
+                    self.assertTrue(result["navigationVisible"])
+                    self.assertEqual(result["navigationRows"], 4)
+                    self.assertTrue(result["deliveryHeading"])
+                    self.assertEqual(result["sourceFacts"], 4)
 
-        _render_mini_app_in_chrome(api_enabled=True, window_width=1280, window_height=900, page_action=exercise_desktop)
-
-    def test_restored_header_dock_and_studio_structure(self):
-        def exercise_mobile(page):
-            result = page.evaluate("""() => {
-                const masthead = document.querySelector('.masthead');
-                const dock = document.querySelector('.bottom-nav');
-                const sourceFacts = document.querySelectorAll('#source-facts > dl.source-facts:not(.source-summary) > div').length;
-                return {
-                    mastheadPaddingTop: getComputedStyle(masthead).paddingTop,
-                    mastheadPaddingBottom: getComputedStyle(masthead).paddingBottom,
-                    dockBottom: getComputedStyle(dock).bottom,
-                    dockSlots: dock.querySelectorAll('[data-slot]').length,
-                    profileSlot: dock.querySelector('#dock-profile')?.dataset.slot,
-                    sourceFacts,
-                    sourceSummaryHidden: getComputedStyle(document.querySelector('.source-summary')).display,
-                    deliveryHeading: Boolean(document.querySelector('.delivery-section > .section-heading')),
-                    buildAdvancedHidden: document.querySelector('#build-advanced')?.hidden,
-                };
-            }""")
-            self.assertEqual(result["mastheadPaddingTop"], "7px")
-            self.assertEqual(result["mastheadPaddingBottom"], "7px")
-            self.assertEqual(result["dockBottom"], "10px")
-            self.assertEqual(result["dockSlots"], 5)
-            self.assertEqual(result["profileSlot"], "2")
-            self.assertEqual(result["sourceFacts"], 15)
-            self.assertEqual(result["sourceSummaryHidden"], "none")
-            self.assertTrue(result["deliveryHeading"])
-            self.assertTrue(result["buildAdvancedHidden"])
-
-        _render_mini_app_in_chrome(api_enabled=True, window_width=390, window_height=844, page_action=exercise_mobile)
-
-        def exercise_desktop(page):
-            result = page.evaluate("""() => {
-                const masthead = document.querySelector('.masthead');
-                const dock = document.querySelector('.bottom-nav');
-                return {
-                    mastheadPaddingTop: getComputedStyle(masthead).paddingTop,
-                    mastheadPaddingBottom: getComputedStyle(masthead).paddingBottom,
-                    dockBottom: getComputedStyle(dock).bottom,
-                    buildColumns: getComputedStyle(document.querySelector('#build-options .field-grid.three')).gridTemplateColumns,
-                };
-            }""")
-            self.assertEqual(result["mastheadPaddingTop"], "8px")
-            self.assertEqual(result["mastheadPaddingBottom"], "8px")
-            self.assertEqual(result["dockBottom"], "14px")
-            self.assertEqual(len(result["buildColumns"].split()), 3)
-
-        _render_mini_app_in_chrome(api_enabled=True, window_width=1280, window_height=900, page_action=exercise_desktop)
+                _render_mini_app_in_chrome(api_enabled=True, window_width=width, window_height=844, page_action=exercise)
 
     def test_mobile_build_configuration_fields_stack_without_excess_density(self):
         for width in (390, 768):
@@ -336,7 +294,7 @@ class MiniAppUpgradeTests(unittest.TestCase):
                         return {columns: getComputedStyle(grid).gridTemplateColumns.split(' ').length, gap: getComputedStyle(grid).rowGap, fields};
                     }""")
                     self.assertEqual(result["columns"], 1)
-                    self.assertEqual(result["gap"], "13px")
+                    self.assertEqual(result["gap"], "0px")
                     self.assertEqual(len({field["x"] for field in result["fields"]}), 1)
                     self.assertGreaterEqual(min(field["height"] for field in result["fields"]), 44)
                     self.assertLessEqual(max(field["height"] for field in result["fields"]), 48)

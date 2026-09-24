@@ -12,9 +12,9 @@ body.telegram-hosted main { min-height: var(--viewport-height, 100dvh); padding-
 .app-header-copy { position: absolute; left: 50%; display: flex; align-items: center; gap: 7px; width: max-content; max-width: 53%; margin: 0; padding: 5px 11px 5px 6px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 5%, var(--canvas)); transform: translateX(-50%); }
 .app-header-copy strong { font-size: 14px; }
 .app-mark { width: 25px; height: 25px; }
-.browser-back { display: flex; align-items: center; gap: 6px; width: auto; min-width: 42px; height: 40px; padding: 0 11px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 5%, var(--canvas)); color: var(--ink); font-weight: 600; }
+.browser-back { display: flex; align-items: center; gap: 6px; width: auto; min-width: 44px; height: 44px; padding: 0 11px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 5%, var(--canvas)); color: var(--ink); font-weight: 600; }
 .browser-back svg { width: 19px; height: 19px; }
-.app-menu-toggle { width: 40px; height: 40px; margin-left: auto; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 5%, var(--canvas)); }
+.app-menu-toggle { width: 44px; height: 44px; margin-left: auto; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 5%, var(--canvas)); }
 .app-menu-toggle svg { width: 20px; height: 20px; stroke-width: 3; fill: currentColor; }
 .app-profile { margin-right: 3px; }
 .app-menu { top: calc(100% - 5px); border: 0; background: var(--surface); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
@@ -37,7 +37,7 @@ body.telegram-hosted main { min-height: var(--viewport-height, 100dvh); padding-
 .bf-section-head h2 { margin: 0; color: var(--ink); font-size: 18px; font-weight: 700; }
 .bf-section-note { margin: 8px 12px 0; color: var(--muted); font-size: 13px; }
 .bf-list { overflow: hidden; border: 0; border-radius: var(--radius-group); background: var(--surface); box-shadow: none; }
-.bf-row, .device-row, .user-row, .profile-fact, .system-ledger > div, .switches > label, .steps > label, .mod-group-items > label, .rom-release, .job-history > * { min-height: 42px; padding: 9px 14px; border-bottom: 1px solid var(--row-separator); background: var(--row-bg); }
+.bf-row, .device-row, .user-row, .profile-fact, .system-ledger > div, .switches > label, .steps > label, .mod-group-items > label, .rom-release, .job-history > * { min-height: 44px; padding: 9px 14px; border-bottom: 1px solid var(--row-separator); background: var(--row-bg); }
 .bf-row { display: flex; align-items: center; gap: 12px; width: 100%; border-left: 0; border-right: 0; border-top: 0; color: var(--ink); text-align: left; font-size: 14px; }
 .bf-row:last-child { border-bottom: 0; }
 .bf-row > span:nth-last-child(2) { flex: 1; }
@@ -63,6 +63,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .source-input-head { margin: 0 12px 9px; }
 .source-input-head label { font-size: 15px; font-weight: 500; }
 .source-input-head button, .selection-bar button, .source-facts-head button, .release-version-controls button { background: transparent; color: var(--accent); font-size: 13px; }
+.source-input-head button, .probe-button { min-width: 44px; min-height: 44px; }
 .source-input-field textarea { min-height: 78px; padding: 15px 16px; background: var(--surface); }
 .source-input-field > small { margin: 7px 12px 0; color: var(--muted); }
 .source-state { min-height: 70px; margin: 15px 0 0; border: 0; border-radius: var(--radius-group); background: var(--surface); }
@@ -78,7 +79,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .build-options > .field-grid > label { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 6px 14px; border-bottom: 1px solid var(--line); }
 .build-options > .field-grid > label:last-child { border-bottom: 0; }
 .build-options > .field-grid > label > span { font-size: 14px; font-weight: 400; }
-.build-options > .field-grid select { width: min(58%, 320px); min-height: 36px; padding: 6px 25px 6px 4px; background: transparent; color: var(--muted); text-align: right; text-align-last: right; }
+.build-options > .field-grid select { width: min(58%, 320px); min-height: 44px; padding: 6px 25px 6px 4px; background: transparent; color: var(--muted); text-align: right; text-align-last: right; }
 .build-options > .field-grid small { display: none; }
 .release-version-editor { padding: 12px 14px; border-top: 0; border-bottom: 1px solid var(--line); background: var(--surface); }
 .release-version-editor:first-of-type { border-radius: var(--radius-group) var(--radius-group) 0 0; }

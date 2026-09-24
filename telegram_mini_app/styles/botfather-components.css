@@ -59,7 +59,7 @@ button.secondary { background: var(--surface); color: var(--accent); border-colo
 button.danger-confirm { background: var(--danger); color: #fff; }
 .primary svg { display: inline-block; width: 18px; height: 18px; vertical-align: middle; }
 .primary.compact, .secondary.compact { min-height: 38px; padding: 7px 12px; font-size: 13px; }
-button:not(.primary):not(.secondary):not(.danger-confirm):not(.app-menu-toggle):not(.app-profile):not(.user-open):not(.dock-profile) { min-height: 36px; }
+button:where(:not(.primary):not(.secondary):not(.danger-confirm):not(.app-menu-toggle):not(.app-profile):not(.user-open):not(.dock-profile)) { min-height: 36px; }
 button:not(:disabled):active { transform: scale(.985); }
 
 /* Grouped surfaces are the reusable BotFather pattern across every screen. */
