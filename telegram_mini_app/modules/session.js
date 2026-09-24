@@ -450,7 +450,7 @@ async function loadSession({ countOpen = true } = {}) {
 
 let autoVerifyTimer = null;
 
-async function autoVerifySession(attempt = 1, maxAttempts = 5) {
+async function autoVerifySession(attempt = 1, maxAttempts = 8) {
   clearTimeout(autoVerifyTimer);
   if (miniApiAvailable()) {
     try {
@@ -459,7 +459,7 @@ async function autoVerifySession(attempt = 1, maxAttempts = 5) {
       return;
     } catch (error) {
       if (attempt < maxAttempts) {
-        const delayMs = Math.min(300, 60 * attempt);
+        const delayMs = Math.min(1500, 200 * attempt);
         autoVerifyTimer = setTimeout(() => autoVerifySession(attempt + 1, maxAttempts), delayMs);
         return;
       }
@@ -471,7 +471,7 @@ async function autoVerifySession(attempt = 1, maxAttempts = 5) {
   // While Telegram WebApp bridge completes asynchronous initialization
   // (client postMessage handshake and initData injection), retry with backoff.
   if (attempt < maxAttempts) {
-    const delayMs = Math.min(180, 40 * attempt);
+    const delayMs = Math.min(800, 100 * attempt);
     autoVerifyTimer = setTimeout(() => autoVerifySession(attempt + 1, maxAttempts), delayMs);
     return;
   }
