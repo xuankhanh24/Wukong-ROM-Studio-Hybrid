@@ -1,50 +1,45 @@
 ---
 name: Wukong ROM Studio
-description: Clean, minimalist technical workbench (Geist / Linear style) for ROM analysis, build configuration, and job tracking.
+description: Warm, quiet technical workbench for identifying ROMs, composing builds, and monitoring jobs.
 ---
 
 # Wukong ROM Studio design system
 
-The Mini App is designed as a **clean, minimalist technical workbench** inspired by modern developer tools (Vercel Geist, Linear, shadcn/ui craftsmanship): zero synthetic AI aesthetic, no micro-labels (7-9px), no nested border soup, and high typographic clarity. The interface guides the user through **ROM source → configuration → review and build**. It features a unified **Floating Island Dock (Liquid Glass)** with a centered profile avatar across mobile and desktop.
-
-## Philosophy & Core Rules
-
-1. **Anti-AI Craftsmanship:** Generative AI UIs often produce "border soup" (nested 3-layer borders, colored outlines on every card), microscopic 7-9px uppercase kickers, noisy radial gradient backgrounds, and cluttered chips. Wukong Studio replaces this with human craftsmanship: clean flat surfaces, single 1px subtle divider lines (`#e4e4e7` / `#27272a`), generous whitespace, and purposeful contrast.
-2. **Typography Hierarchy:**
-   - Body & Inputs: 14–15px Geist Sans (`-0.01em` tracking).
-   - Headings: 18–28px crisp semi-bold (`-0.02em` tracking).
-   - Labels & Mono facts: 11–13px Geist Mono. No text smaller than 11px anywhere in the app.
-   - 44px minimum touch targets for all interactive elements.
-3. **Monochrome Palette with Restrained Focus:**
-   - Pure zinc/slate monochrome foundation: Light mode `#ffffff` surface, `#fafafa` canvas, `#09090b` ink. Dark mode `#09090b` canvas, `#121215` surface, `#f4f4f5` ink.
-   - High contrast solid action buttons (solid black/white pill button with clear hover states).
-4. **Floating Island Dock (Liquid Glass):**
-   - Centered, floating glass dock with physics lens, chromatic dispersion (`--liquid-chromatic`), backdrop-blur, and centered interactive profile avatar.
-   - Remains consistent and responsive across phone and desktop viewports.
+The Mini App is an operate surface designed under the **Telegram Native HIG (Human Interface Guidelines)**: one page leads through **ROM source → configuration → review and build**. The interface serves everyday builders and administrators, with advanced controls collapsed until needed. It leverages dynamic Telegram client theming, translucent glassmorphism surfaces, rounded inset grouped lists, and a unified Floating Island Dock (Liquid Glass) with a centered avatar across mobile and desktop.
 
 ## Tokens
 
 ```css
---canvas: #fafafa;
---surface: #ffffff;
---surface-raised: #f4f4f5;
---surface-soft: #f4f4f5;
---ink: #09090b;
---muted: #71717a;
---line: #e4e4e7;
---line-strong: #d4d4d8;
---accent: #09090b;
---accent-text: #ffffff;
---success: #10b981;
---danger: #ef4444;
+--canvas: var(--tg-theme-secondary-bg-color, #efeff4);
+--surface: var(--tg-theme-bg-color, #ffffff);
+--surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #ffffff));
+--surface-soft: color-mix(in srgb, var(--canvas) 65%, var(--surface));
+--ink: var(--tg-theme-text-color, #000000);
+--muted: var(--tg-theme-hint-color, #8e8e93);
+--line: var(--tg-theme-section-separator-color, rgba(60, 60, 67, 0.12));
+--line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
+--accent: var(--tg-theme-button-color, #2481cc);
+--accent-text: var(--tg-theme-button-text-color, #ffffff);
+--success: #34c759;
+--danger: var(--tg-theme-destructive-text-color, #ff3b30);
 --font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
 --font-mono: "Geist Mono", ui-monospace, monospace;
 --target-size: 44px;
 ```
 
+Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
+
 ## Surface rules
 
-- **Source analysis:** Shows device, version, Android version, and size first. Extended technical facts are cleanly grouped with single 1px divider lines.
-- **Build options:** Clean input groups with vertical stacking on mobile and compact 3-column layout on desktop. Searchable MOD selector with high-contrast active state chips.
-- **Floating Island Dock:** Houses Studio, Jobs, centered avatar, Library, and System. Adapts gracefully to safe areas, keyboards, and viewport shifts.
-- **State transparency:** Loading, pending, success, and error states are communicated through restrained status dots, clear messaging, and inline retry buttons.
+- Source analysis shows device, version, Android version, and size first. Remaining metadata lives in a `Thông tin chi tiết` disclosure.
+- Preset and MOD version remain visible. MOD selection, debloat paths, pipeline steps, publication, and runner controls live in `Tùy chọn nâng cao`; a summary remains visible beside the controls.
+- The desktop review docket stays beside the workbench. Mobile receives the same review content in flow, with reserved space above the dock and a keyboard state that hides floating actions.
+- Jobs foreground status, current step, updated time, and next action. Technical facts are disclosed separately. Event rendering is bounded to 500 items, paged for older history, and only follows the tail when the reader is already there.
+- The dock always contains Studio, Jobs, centered profile avatar, Library, and System. Telegram safe-area values, `visualViewport`, reduced motion, older Telegram bridges, and ordinary browser fallbacks are handled by `modules/viewport.js`.
+- Error, offline, expired session, maintenance, and uncertain submission states preserve the last useful data and provide a nearby recovery action.
+
+## Asset and performance rules
+
+`build.mjs` creates hashed ES module chunks with esbuild. Admin controls and ZIP inflation are lazy chunks. Fonts are bundled under `assets/fonts` with their licenses; the Mini App has no chained external font dependency. CSS is split into fonts, tokens, components, screens, dock, and Studio layout files, then bundled for deployment. Vercel serves hashed assets with immutable caching while the HTML remains revalidated.
+
+The shared transport uses a 15-second default timeout, bounded read retries, `Retry-After`, request scopes, and abort-on-supersede. Artifact metadata is computed once and passed through publishing adapters. Build metrics record stage duration, bytes, cache state, checksum, checkpoint, and upload measurements.
