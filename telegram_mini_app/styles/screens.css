@@ -100,41 +100,36 @@
   .runtime-strip > div { border-right: 1px solid var(--line); border-bottom: 0; }
 }:root[data-color-scheme="dark"] {
   color-scheme: dark;
-  --canvas: var(--tg-theme-secondary-bg-color, #0c1013);
-  --surface: var(--tg-theme-bg-color, #101619);
-  --surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #141b1f));
+  --canvas: var(--tg-theme-secondary-bg-color, #0f0f0f);
+  --surface: var(--tg-theme-bg-color, #1c1c1e);
+  --surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #1c1c1e));
   --surface-soft: color-mix(in srgb, var(--canvas) 60%, var(--surface));
   --surface-hover: color-mix(in srgb, #ffffff 6%, var(--surface));
-  --graphite: #070a0c;
-  --ink: var(--tg-theme-text-color, #ecf2ef);
-  --muted: var(--tg-theme-hint-color, #a3b1b7);
-  --line: var(--tg-theme-section-separator-color, #202a30);
-  --line-strong: #283238;
-  --accent: var(--tg-theme-button-color, #72e4b5);
-  --accent-text: var(--tg-theme-button-text-color, #0c1013);
-  --accent-strong: #8ef7ca;
-  --accent-soft: color-mix(in srgb, var(--accent) 15%, var(--surface));
-  --link: var(--tg-theme-link-color, #72e4b5);
-  --aqua: #72e4b5;
+  --graphite: #0a0a0c;
+  --ink: var(--tg-theme-text-color, #ffffff);
+  --muted: var(--tg-theme-hint-color, #8e8e93);
+  --line: var(--tg-theme-section-separator-color, rgba(255, 255, 255, 0.12));
+  --line-strong: color-mix(in srgb, var(--ink) 25%, transparent);
+  --accent: var(--tg-theme-button-color, #2ea6ff);
+  --accent-strong: color-mix(in srgb, var(--accent) 85%, #ffffff);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  --aqua: #5ac8fa;
   --aqua-soft: color-mix(in srgb, var(--aqua) 16%, var(--surface));
-  --coral: #edc67b;
+  --coral: #ff9f0a;
   --coral-soft: color-mix(in srgb, var(--coral) 16%, var(--surface));
-  --sun: #edc67b;
+  --sun: #ffd60a;
   --sun-soft: color-mix(in srgb, var(--sun) 16%, var(--surface));
-  --success: #72e4b5;
+  --success: #32d74b;
   --success-soft: color-mix(in srgb, var(--success) 16%, var(--surface));
-  --danger: var(--tg-theme-destructive-text-color, #f28c98);
   --danger-soft: color-mix(in srgb, var(--danger) 16%, var(--surface));
-  --focus: #72e4b5;
   --liquid-accent: var(--accent);
-  --dock-glass-bg: color-mix(in srgb, var(--surface) 75%, transparent);
-  --dock-glass-border: rgba(114, 228, 181, 0.22);
-  --dock-glass-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(114, 228, 181, 0.08);
-  --dock-lens-bg: color-mix(in srgb, var(--accent) 20%, var(--surface));
+  --dock-glass-bg: color-mix(in srgb, var(--surface) 68%, transparent);
+  --dock-glass-border: rgba(255, 255, 255, 0.16);
+  --dock-glass-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --dock-lens-bg: color-mix(in srgb, var(--accent) 22%, var(--surface));
   --dock-foreground: var(--ink);
-}
-:root[data-color-scheme="dark"] .masthead,
-:root[data-color-scheme="dark"] .contents-rail { background: var(--surface); }:root[data-color-scheme="dark"] .bottom-nav button.active { color:inherit; }:root[data-color-scheme="dark"] .primary { color:var(--accent-text, #0c1013); }:root[data-color-scheme="dark"] .task-tabs input:checked + span { color:var(--accent-text, #0c1013); background:var(--accent); }:root[data-color-scheme="dark"] .probe-button, :root[data-color-scheme="dark"] .source-input-head #paste-source, :root[data-color-scheme="dark"] .release-version-editor button { color:var(--accent-text, #0c1013); }:root[data-color-scheme="dark"] ::selection { color:#0c1013; background:var(--accent); }:root[data-color-scheme="dark"] .readiness-checklist .complete i,
+}:root[data-color-scheme="dark"] .masthead,
+:root[data-color-scheme="dark"] .contents-rail { background: var(--surface); }:root[data-color-scheme="dark"] .bottom-nav button.active { color:inherit; }:root[data-color-scheme="dark"] .primary { color:#fff; }:root[data-color-scheme="dark"] .task-tabs input:checked + span { color:#fff; background:var(--accent); }:root[data-color-scheme="dark"] .readiness-checklist .complete i,
 :root[data-color-scheme="dark"] .dispatch-docket .readiness-checklist .complete i { box-shadow:inset 0 0 0 3px var(--surface-raised); }@media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
