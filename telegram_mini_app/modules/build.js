@@ -255,7 +255,7 @@ function updateSummary() {
   const runnerReady = Boolean($("#execution")?.value);
   const ready = sourceVerified && Boolean(selectedDevice) && runnerReady && apiReady && quotaReady;
   const completedChecks = [sourceVerified, Boolean(selectedDevice), runnerReady, apiReady && quotaReady].filter(Boolean).length;
-  const docket = $(".dispatch-docket");
+  const docket = $(".build-review");
   docket?.classList.toggle("incomplete", !ready);
   const runtimeState = $("#runtime-pipeline-state");
   const runtimeDot = $("#runtime-pipeline-dot");
@@ -285,40 +285,36 @@ function updateSummary() {
     node.dataset.i18n = ready ? "launch" : "finishSource";
     node.textContent = t(ready ? "launch" : "finishSource");
   });
-  $("#dispatch-fab")?.setAttribute("aria-label", t("fabBuild"));
   syncTelegramMainButton(ready);
 }
 
 function syncTelegramMainButton(ready) {
   const tg = runtime.TelegramApp;
-  if (!tg?.MainButton) return;
+  const insideTelegram = Boolean(tg?.platform && tg.platform !== "unknown");
+  if (!tg?.MainButton || !insideTelegram) {
+    document.body.classList.remove("telegram-main-button");
+    try { tg?.MainButton?.hide(); } catch (_) {}
+    return;
+  }
   const isBuild = !document.body.dataset.view || document.body.dataset.view === "build";
   if (!isBuild) {
     try { tg.MainButton.hide(); } catch (_) {}
+    document.body.classList.remove("telegram-main-button");
     return;
   }
-  const isMobile = window.innerWidth <= 860;
-  if (!isMobile) {
-    try { tg.MainButton.hide(); } catch (_) {}
-    return;
-  }
+  document.body.classList.add("telegram-main-button");
   if (ready) {
     try {
-      tg.MainButton.setText(`🚀 ${t("launch") || "BẮT ĐẦU TẠO ROM"}`);
+      tg.MainButton.setText(t("launch") || "Bắt đầu build");
       tg.MainButton.enable();
       tg.MainButton.show();
     } catch (_) {}
   } else {
-    const currentUri = $("#source-uri")?.value?.trim() || "";
-    if (currentUri) {
-      try {
-        tg.MainButton.setText(t("finishSource") || "Chờ hoàn tất cấu hình");
-        tg.MainButton.disable();
-        tg.MainButton.show();
-      } catch (_) {}
-    } else {
-      try { tg.MainButton.hide(); } catch (_) {}
-    }
+    try {
+      tg.MainButton.setText(t("finishSource") || "Hoàn tất cấu hình");
+      tg.MainButton.disable();
+      tg.MainButton.show();
+    } catch (_) {}
   }
 }
 
@@ -565,6 +561,7 @@ async function submitRecipe() {
   if (state.submitInFlight) return null;
   if (!miniApiAvailable()) throw new Error(t(miniApiUnavailableMessageKey()));
   state.submitInFlight = true;
+  try { runtime.TelegramApp?.MainButton?.showProgress?.(); } catch (_) {}
   $("#submit-recipe")?.setAttribute("aria-busy", "true");
   $("#submit-recipe") && ($("#submit-recipe").disabled = true);
   $("#confirm-submit") && ($("#confirm-submit").disabled = true);
@@ -619,6 +616,7 @@ async function submitRecipe() {
     return job;
   } finally {
     state.submitInFlight = false;
+    try { runtime.TelegramApp?.MainButton?.hideProgress?.(); } catch (_) {}
     $("#submit-recipe")?.removeAttribute("aria-busy");
     renderSubmitRecovery();
     updateSummary();

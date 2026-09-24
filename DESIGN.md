@@ -1,45 +1,37 @@
 ---
 name: Wukong ROM Studio
-description: Warm, quiet technical workbench for identifying ROMs, composing builds, and monitoring jobs.
+description: Wukong interface reconstructed from the observed @BotFather Mini App.
 ---
 
-# Wukong ROM Studio design system
+# Wukong Mini App design system
 
-The Mini App is an operate surface designed under the **Telegram Native HIG (Human Interface Guidelines)**: one page leads through **ROM source → configuration → review and build**. The interface serves everyday builders and administrators, with advanced controls collapsed until needed. It leverages dynamic Telegram client theming, translucent glassmorphism surfaces, rounded inset grouped lists, and a unified Floating Island Dock (Liquid Glass) with a centered avatar across mobile and desktop.
+Wukong reconstructs the visual grammar observed in the authenticated @BotFather Mini App and the ten user-provided screenshots: centered identity/page-purpose hero, flat dark canvas, solid grouped rows, understated explanatory copy, blue links and primary actions, restrained iconography, and Telegram-owned top chrome. Wukong keeps its own name, icon, terminology, and ROM workflows. BotFather's deployed bundle and private design assets are not dependencies. [Source investigation](docs/research/botfather-mini-app-source.md) distinguishes the deployed assets from an open-source repository.
 
-## Tokens
+## Pattern mapping
 
-```css
---canvas: var(--tg-theme-secondary-bg-color, #efeff4);
---surface: var(--tg-theme-bg-color, #ffffff);
---surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #ffffff));
---surface-soft: color-mix(in srgb, var(--canvas) 65%, var(--surface));
---ink: var(--tg-theme-text-color, #000000);
---muted: var(--tg-theme-hint-color, #8e8e93);
---line: var(--tg-theme-section-separator-color, rgba(60, 60, 67, 0.12));
---line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
---accent: var(--tg-theme-button-color, #2481cc);
---accent-text: var(--tg-theme-button-text-color, #ffffff);
---success: #34c759;
---danger: var(--tg-theme-destructive-text-color, #ff3b30);
---font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
---font-mono: "Geist Mono", ui-monospace, monospace;
---target-size: 44px;
-```
+| BotFather pattern | Wukong usage |
+| --- | --- |
+| Centered identity and short introduction | Wukong build, jobs, and library hero |
+| New bot form | Create-build form with source, configuration, delivery, and live review groups |
+| My bots and search | Job history with search and filters |
+| Bot detail | Job progress, event log, artifacts, and contextual actions |
+| Settings lists | ROM library, service settings, account, and admin operations |
+| Telegram bottom action and back | Build submit and contextual navigation in the Telegram WebApp bridge |
 
-Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
+## Source of truth
 
-## Surface rules
+`telegram_mini_app/styles/tokens.css` holds measured dark primitives, Telegram light-theme fallbacks, semantic colors, and component aliases. `botfather-reference.css` composes the new reference-derived shell, heroes, rows, forms, and lists, while `botfather-components.css` and `botfather-screens.css` cover shared and dynamic states across jobs, library, profile, system, and admin. `styles.css` imports these active files.
 
-- Source analysis shows device, version, Android version, and size first. Remaining metadata lives in a `Thông tin chi tiết` disclosure.
-- Preset and MOD version remain visible. MOD selection, debloat paths, pipeline steps, publication, and runner controls live in `Tùy chọn nâng cao`; a summary remains visible beside the controls.
-- The desktop review docket stays beside the workbench. Mobile receives the same review content in flow, with reserved space above the dock and a keyboard state that hides floating actions.
-- Jobs foreground status, current step, updated time, and next action. Technical facts are disclosed separately. Event rendering is bounded to 500 items, paged for older history, and only follows the tail when the reader is already there.
-- The dock always contains Studio, Jobs, centered profile avatar, Library, and System. Telegram safe-area values, `visualViewport`, reduced motion, older Telegram bridges, and ordinary browser fallbacks are handled by `modules/viewport.js`.
-- Error, offline, expired session, maintenance, and uncertain submission states preserve the last useful data and provide a nearby recovery action.
+System mode follows Telegram color-scheme changes. The dark palette matches values measured in the running BotFather Mini App; light mode uses Telegram theme parameters where available because the supplied references are dark. Light and dark overrides remain available under Mini App settings. BotFather declares ProductSans, but Wukong intentionally uses licensed system-font fallbacks rather than importing that deployed font. Screen content respects Telegram's safe-area values, the browser viewport, keyboard resizing, and reduced-motion preference.
 
-## Asset and performance rules
+## Interaction rules
 
-`build.mjs` creates hashed ES module chunks with esbuild. Admin controls and ZIP inflation are lazy chunks. Fonts are bundled under `assets/fonts` with their licenses; the Mini App has no chained external font dependency. CSS is split into fonts, tokens, components, screens, dock, and Studio layout files, then bundled for deployment. Vercel serves hashed assets with immutable caching while the HTML remains revalidated.
+- The first screen is the complete create-build form. Advanced MOD and pipeline controls expand only when relevant. The review group updates as inputs change.
+- Telegram owns its native top bar. In Telegram, Wukong's navigation appears as grouped rows on the build screen; ordinary browsers show a matching fallback title/menu bar. Secondary screens use Telegram BackButton or the browser fallback back control.
+- Telegram MainButton is the create-build action and reflects ready, disabled, and loading states. Ordinary browsers retain the in-form button.
+- Loading, empty, failed, expired-session, maintenance, and uncertain-submission states remain visible with a recovery action. Vietnamese and English labels are maintained together.
+- All actions retain at least a 44px touch target when practical; focus styles, labels, contrast, and announcement regions remain available to assistive technology.
 
-The shared transport uses a 15-second default timeout, bounded read retries, `Retry-After`, request scopes, and abort-on-supersede. Artifact metadata is computed once and passed through publishing adapters. Build metrics record stage duration, bytes, cache state, checksum, checkpoint, and upload measurements.
+## Verification
+
+Run `npm test` and `npm run build` in `telegram_mini_app`. Compare the mobile layout with public BotFather Mini App references at the same viewport, then inspect light/dark, desktop, keyboard, and long-content states. Check build submission, job details, ROM search, and admin flows using authenticated Telegram access.

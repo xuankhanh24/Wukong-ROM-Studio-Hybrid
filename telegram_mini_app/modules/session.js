@@ -4,7 +4,7 @@ import { restorePendingSubmission, updateSummary, updateTelegramState } from "./
 import { formatBytes, updateSourceDetection } from "./source-rom.js";
 import { loadAdminJobDetail, loadJobs, setJobsConnection } from "./jobs.js";
 import { openCacheClearDialog, loadAdminUsers, loadLatestBatch, refreshAdminUserActivity, renderAdminPresetLabels, renderAdminReleaseEditor, renderMaintenanceAdmin } from "./admin.js";
-import { navigate, renderGreeting, scheduleGreeting } from "./dock.js";
+import { navigate } from "./dock.js";
 import { loadCatalog, refreshLiveReleaseVersions } from "./catalog.js";
 import { closeAdminUserPage, profileAvatar, renderProfileTrigger, renderProfileView } from "./profile.js";
 
@@ -274,8 +274,6 @@ function pauseWorkspacePolling() {
   state.jobsLoading = false;
   state.jobHistoryLoading = false;
   state.pairingInFlight = false;
-  clearInterval(state.greetingTimer);
-  cancelAnimationFrame(state.liquidAnimationFrame);
 }
 
 function resumeWorkspacePolling() {
@@ -291,7 +289,6 @@ function resumeWorkspacePolling() {
 
 function reconnectWorkspace() {
   if (!workspacePollingAllowed()) return;
-  scheduleGreeting();
   ensureAutomaticTelegramConnection();
   loadSession({ countOpen: false }).then(() => initializeApprovedWorkspace({ refresh: true })).catch(() => setJobsConnection("jobsOffline", true));
 }
@@ -387,8 +384,6 @@ function renderAccount() {
   const profile = state.me;
   renderProfileTrigger($("#dock-profile"), profile);
   renderProfileView();
-  renderGreeting();
-  scheduleGreeting();
   $("#user-admin").hidden = true;
   $("#admin-maintenance").hidden = true;
   $("#admin-batch-launch").hidden = true;

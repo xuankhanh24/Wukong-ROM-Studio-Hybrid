@@ -355,9 +355,8 @@ window.addEventListener('load', () => {{
       if (!button || button.hidden) {{ setTimeout(openProfile, 50); return; }}
       button.click();
       document.body.dataset.profileOpened = String(document.querySelector('#profile')?.classList.contains('active') === true);
-      document.body.dataset.activeProfileTab = document.querySelector('.bottom-nav [aria-current="page"]')?.dataset.nav || '';
-      document.body.dataset.profileLensSuppressed = String(document.querySelector('.bottom-nav')?.classList.contains('profile-active') === true);
-      document.body.dataset.profileHaloActive = String(button.classList.contains('active') === true);
+      document.body.dataset.activeProfileView = document.body.dataset.view || '';
+      document.body.dataset.legacyDockAbsent = String(document.querySelector('.bottom-nav') === null);
     }};
     setTimeout(openProfile, 250);
   }}
@@ -606,24 +605,20 @@ window.addEventListener('load', () => {{
   }}
   if ({str(self.exercise_dock_header).lower()}) {{
     const exerciseDockHeader = () => {{
-      const greeting = document.querySelector('#greeting-message');
-      const jobs = document.querySelector('.bottom-nav [data-nav="jobs"]');
-      if (!greeting || !jobs || jobs.hidden) {{ setTimeout(exerciseDockHeader, 50); return; }}
-      document.body.dataset.greetingInitial = greeting.textContent;
+      const toggle = document.querySelector('#app-menu-toggle');
+      const menu = document.querySelector('#app-menu');
+      const jobs = menu?.querySelector('[data-nav="jobs"]');
+      if (!toggle || !jobs || document.body.classList.contains('access-checking')) {{ setTimeout(exerciseDockHeader, 50); return; }}
       setTimeout(() => {{
-        document.documentElement.scrollTop = 120;
-        document.body.scrollTop = 120;
-        window.dispatchEvent(new Event('scroll'));
-        setTimeout(() => {{
-          document.body.dataset.mastheadProgress = document.documentElement.style.getPropertyValue('--masthead-scroll');
-          jobs.click();
-        }}, 250);
-      }}, 1800);
+        toggle.click();
+        document.body.dataset.menuOpened = String(!menu.hidden && toggle.getAttribute('aria-expanded') === 'true');
+        jobs.click();
+      }}, 350);
       setTimeout(() => {{
-        document.body.dataset.activeDockTab = document.querySelector('.bottom-nav [aria-current="page"]')?.dataset.nav || '';
-        document.body.dataset.greetingRotated = String(greeting.textContent !== document.body.dataset.greetingInitial);
+        document.body.dataset.activeMenuView = document.body.dataset.view || '';
+        document.body.dataset.menuClosedAfterNavigation = String(menu.hidden && toggle.getAttribute('aria-expanded') === 'false');
         document.body.dataset.brokenAssets = String([...document.images].filter((image) => image.complete && image.naturalWidth === 0).length);
-      }}, 6500);
+      }}, 1200);
     }};
     setTimeout(exerciseDockHeader, 350);
   }}
@@ -1187,6 +1182,7 @@ def _render_mini_app_in_chrome(
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(launch_url, wait_until="networkidle")
+                page.wait_for_function("!document.body.classList.contains('access-checking')", timeout=7000)
                 wait_ms = 7000 if exercise_dock_header else 6000 if admin_job_scenario else 2200
                 page.wait_for_timeout(wait_ms)
                 if page_action:
@@ -1399,10 +1395,10 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-action="cache"', html)
         self.assertIn('data-action="cache_clear"', html)
         self.assertIn("renderCatalog", script)
-        self.assertIn('.contents-rail [data-nav]', script)
+        self.assertIn('$$("#app-menu [data-nav]")', script)
         self.assertIn("incompleteLabel", script)
         self.assertIn("chooseDeviceHint", script)
-        self.assertIn('class="runtime-strip"', html)
+        self.assertIn('class="bf-runtime-status"', html)
         self.assertIn('class="readiness-checklist"', html)
         self.assertIn("modCategory", script)
         self.assertIn("setDeliveryState", script)
@@ -1412,40 +1408,34 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("runtimeReady", script)
         self.assertIn('className = "mod-group"', script)
         self.assertNotIn('class="mobile-dispatch"', html)
-        self.assertIn("backdrop-filter", styles)
-        self.assertIn("liquid-lens", styles)
-        bottom_nav = re.search(r'<nav class="bottom-nav".*?</nav>', html, re.DOTALL)
-        self.assertIsNotNone(bottom_nav)
-        bottom_nav_html = bottom_nav.group(0)
-        self.assertEqual(["build", "jobs", "profile", "catalog", "system"], re.findall(r'data-nav="([^"]+)"', bottom_nav_html))
-        self.assertEqual(4, bottom_nav_html.count('class="nav-icon"'))
-        self.assertNotRegex(bottom_nav_html, r"<b>\d{2}</b>")
-        self.assertNotIn(".bottom-nav button.active::before", styles)
-        self.assertIn("updateDispatchFab", script)
-        self.assertIn('data-i18n="fabBuild">Build', html)
-        self.assertIn("bindLiquidBottomTabs", script)
-        self.assertIn("--liquid-press", styles)
-        self.assertIn("chromatic", (ROOT / "DESIGN.md").read_text(encoding="utf-8"))
+        menu = re.search(r'<nav id="app-menu".*?</nav>', html, re.DOTALL)
+        self.assertIsNotNone(menu)
+        self.assertEqual(["build", "jobs", "catalog", "system"], re.findall(r'data-nav="([^"]+)"', menu.group(0)))
+        self.assertIn('class="bf-hero build-hero"', html)
+        self.assertIn('class="build-review incomplete"', html)
+        self.assertIn('class="bf-page-section bf-build-navigation"', html)
+        self.assertNotIn('class="bottom-nav"', html)
+        self.assertNotIn('id="dispatch-fab"', html)
+        self.assertIn("--bf-night-bg: #1a2026", styles)
+        self.assertIn("--bf-night-group: #212a33", styles)
+        self.assertIn("--bf-blue: #4cb2ff", styles)
         self.assertIn("prefersReducedMotion", script)
-        self.assertIn('"Geist Sans"', styles)
-        self.assertIn('"Geist Mono"', styles)
+        self.assertNotIn('"Geist Sans"', styles)
         self.assertIn("--accent:", styles)
         self.assertIn("--success:", styles)
-        self.assertIn("--radius-sm: 4px", styles)
-        self.assertIn("repeat(var(--dock-slot-count),minmax(0,1fr))", styles)
-        self.assertIn(".source-input-field, .source-input-head { min-width: 0; }", styles)
+        self.assertIn("--radius-group: 8px", styles)
+        self.assertIn(".bf-list", styles)
 
-    def test_mini_app_exposes_branded_liquid_profile_theme_and_cache_safety(self) -> None:
+    def test_mini_app_exposes_botfather_grouped_profile_theme_and_cache_safety(self) -> None:
         html = (ROOT / "telegram_mini_app" / "index.html").read_text(encoding="utf-8")
         styles = _style_source()
         script = _app_source()
 
-        bottom_nav = re.search(r'<nav class="bottom-nav".*?</nav>', html, re.DOTALL)
-        self.assertIsNotNone(bottom_nav)
-        dock = bottom_nav.group(0)
-        self.assertEqual(["0", "1", "2", "3", "4"], re.findall(r'data-slot="([^"]+)"', dock))
-        self.assertIn('id="dock-profile"', dock)
-        self.assertIn('data-nav="profile"', dock)
+        self.assertIn('id="dock-profile"', html)
+        self.assertIn('data-nav="profile"', html)
+        self.assertIn('id="app-menu-toggle"', html)
+        self.assertIn('id="browser-back"', html)
+        self.assertNotIn('class="bottom-nav"', html)
         self.assertNotIn('id="header-profile"', html)
         self.assertIn('src="./WukongStudio.svg"', html)
         self.assertEqual(
@@ -1459,7 +1449,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-theme-value="system"', html)
         self.assertIn('data-theme-value="light"', html)
         self.assertIn('data-theme-value="dark"', html)
-        self.assertIn('href="./assets/fonts/geist-sans-variable.woff2"', html)
+        self.assertNotIn('href="./assets/fonts/geist-sans-variable.woff2"', html)
         self.assertNotIn("./assets/fonts/ibm-plex", html)
         self.assertNotIn("ROM STUDIO / HYBRID", html)
         self.assertIn("wukong-theme", script)
@@ -1467,33 +1457,24 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("openCacheClearDialog", script)
         self.assertIn("miniAppOpenCount", script)
         self.assertIn('!["miniAppOpenCount", "photoUrl"].includes(key)', script)
-        self.assertIn("greetingTimer", script)
-        self.assertIn("updateMastheadScroll", script)
+        self.assertIn("closeAppMenu", script)
+        self.assertIn("handleContextBack", script)
         self.assertIn("HapticFeedback?.selectionChanged", script)
         self.assertIn("Chỉ quản trị viên", html)
         self.assertIn(
             "activateTelegramApp();\n    bindTelegramThemeEvents();\n    applyTheme(state.theme);",
             script,
         )
-        self.assertIn("--dock-slot-count:5", styles)
-        self.assertIn(".profile-scene-backdrop", styles)
-        self.assertIn("backdrop-filter:blur(10px)", styles)
+        self.assertIn("--radius-group: 8px", styles)
+        self.assertIn(".profile-fact-group", styles)
         self.assertIn('data-color-scheme="dark"', styles)
-        self.assertIn('id="greeting-mark"', html)
-        self.assertNotIn('id="greeting-emoji"', html)
+        self.assertNotIn('id="greeting-mark"', html)
         self.assertIn('class="language-button"', html)
-        self.assertNotIn(".wordmark > span { display:none; }", styles)
-        self.assertIn(".bottom-nav.profile-active:not(.profile-dragging) .liquid-lens", styles)
-        self.assertIn(".bottom-nav .dock-profile.active::before", styles)
-        self.assertIn("updateGreetingOverflow", script)
-        self.assertIn('window.addEventListener("resize"', script)
+        self.assertIn("body.telegram-hosted .app-header { display: none; }", styles)
+        self.assertIn("body.telegram-main-button #submit-recipe { display: none; }", styles)
         self.assertIn("--avatar-image", script)
-        self.assertIn("profile-dragging", script)
-        self.assertIn("easeOutQuint", script)
-        self.assertNotIn("velocity = velocity * .72", script)
-        self.assertNotIn('emoji: "🚀"', script)
-        self.assertIn(':root[data-color-scheme="dark"] .masthead', styles)
-        self.assertIn(':root[data-color-scheme="dark"] .bottom-nav', styles)
+        self.assertNotIn("profile-dragging", script)
+        self.assertNotIn(':root[data-color-scheme="dark"] .bottom-nav', styles)
 
     def test_admin_system_surface_renders_user_access_and_quota_ledger(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
@@ -1514,7 +1495,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertNotRegex(dom, r'id="admin-maintenance"[^>]* hidden')
         self.assertIn("New User", dom)
         self.assertIn("@new_user", dom)
-        self.assertIn('id="greeting-carousel"', dom)
+        self.assertIn('class="bf-hero build-hero"', dom)
         self.assertIn("Không giới hạn", dom)
         self.assertIn("Không giới hạn lượt còn lại", dom)
         self.assertGreater(screenshot_size, 10_000)
@@ -1590,8 +1571,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-admin-user-dialog-present="false"', dom)
         self.assertRegex(dom, r'<section class="[^"]*admin-user-open[^"]*" id="system"')
         self.assertIn("New User", dom)
-        self.assertIn(':root[data-color-scheme="dark"] .user-dialog', styles)
-        self.assertIn(':root[data-color-scheme="dark"] .confirm-dialog', styles)
+        self.assertIn('dialog { border: 0; background: var(--surface); }', styles)
         script = _app_source()
         self.assertNotIn("window.prompt", script)
         self.assertNotIn("window.confirm", script)
@@ -1622,9 +1602,9 @@ class TelegramMiniAppTests(unittest.TestCase):
         )
 
         self.assertIn('data-batch-launch-color="rgb(255, 255, 255)"', dom)
-        self.assertIn('data-batch-launch-background="rgb(49, 95, 158)"', dom)
+        self.assertIn('data-batch-launch-background="rgb(36, 139, 218)"', dom)
         self.assertIn('data-admin-action-confirm-color="rgb(255, 255, 255)"', dom)
-        self.assertIn('data-admin-action-confirm-background="rgb(49, 95, 158)"', dom)
+        self.assertIn('data-admin-action-confirm-background="rgb(36, 139, 218)"', dom)
 
     def test_mobile_surface_is_distilled_and_maintenance_is_admin_only(self) -> None:
         html = (ROOT / "telegram_mini_app" / "index.html").read_text(encoding="utf-8")
@@ -1633,34 +1613,19 @@ class TelegramMiniAppTests(unittest.TestCase):
         dom, _ = _render_mini_app_in_chrome(api_enabled=True, initial_view="system")
 
         self.assertNotIn('data-i18n="buildIntro"', html)
-        self.assertNotIn('data-i18n="jobsIntro"', html)
+        self.assertIn('data-i18n="jobsIntro"', html)
         self.assertNotIn('data-i18n="catalogIntro"', html)
         self.assertNotIn('data-i18n="systemIntro"', html)
         self.assertNotIn('class="process-key"', html)
         self.assertIn('id="admin-maintenance" hidden', html)
         self.assertRegex(dom, r'id="admin-maintenance"[^>]* hidden')
-        self.assertIn('data-i18n="fabBuild">Build', html)
+        self.assertNotIn('id="dispatch-fab"', html)
         self.assertIn('mods.className = "job-mod-grid"', script)
         self.assertNotIn('input.focus({ preventScroll: true });\n  toast(t("sourceCleared"))', script)
-        self.assertIn('.bottom-nav .liquid-surface::before { display:none; }', styles)
-        self.assertIn('class="dock-shell"', html)
-        self.assertIn('dock-shell-clip', html)
-        self.assertIn('id="dock-shell-path"', html)
-        self.assertIn('class="dock-rim"', html)
-        self.assertIn("updateDockShellPath", script)
-        self.assertIn('background:var(--dock-glass-bg)', styles)
-        self.assertIn('backdrop-filter:blur(10px) saturate(1.5) contrast(1.08)', styles)
-        self.assertIn('--dock-foreground: #171b22', styles)
-        self.assertIn('--dock-foreground: #f5f7fb', styles)
-        self.assertIn('bottom:calc(132px + env(safe-area-inset-bottom))', styles)
-        self.assertIn('.bottom-nav button:not(.dock-profile) { top:7px; height:56px; min-height:56px;', styles)
-        self.assertIn("const bodyTop = 32;", script)
-        self.assertIn("const capRadius = Math.min(42", script)
-        self.assertIn("const capCenterY = 45;", script)
-        self.assertIn("const capShoulder = capRadius + 10;", script)
-        self.assertIn("const sideRadius = (bodyBottom - bodyTop) / 2;", script)
-        self.assertIn("`A ${sideRadius} ${sideRadius} 0 0 1", script)
-        self.assertIn('.profile-highlight { text-align:center; }', styles)
+        self.assertIn('body.telegram-hosted .app-header { display: none; }', styles)
+        self.assertIn('body:not(.telegram-main-button) #submit-recipe { position: fixed;', styles)
+        self.assertIn('max(16px, env(safe-area-inset-bottom)', styles)
+        self.assertIn('.profile-highlights', styles)
         self.assertIn('$("#admin-maintenance").hidden = true;', script)
         self.assertIn("payload.statusCounts", script)
         self.assertNotIn("Promise.allSettled", script)
@@ -1675,9 +1640,8 @@ class TelegramMiniAppTests(unittest.TestCase):
 
         self.assertIn('data-profile-opened="true"', dom)
         self.assertIn('data-selected-theme="dark"', dom)
-        self.assertIn('data-active-profile-tab="profile"', dom)
-        self.assertIn('data-profile-lens-suppressed="true"', dom)
-        self.assertIn('data-profile-halo-active="true"', dom)
+        self.assertIn('data-active-profile-view="profile"', dom)
+        self.assertIn('data-legacy-dock-absent="true"', dom)
         profile = re.search(r'<section class="view profile-view active" id="profile".*?</section>\s*</main>', dom, re.DOTALL)
         self.assertIsNotNone(profile)
         self.assertIn("Fixture User", profile.group(0))
@@ -1694,7 +1658,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-selected-theme-mode="system"', dom)
         self.assertIn('data-system-theme-after-telegram-change="dark"', dom)
         self.assertRegex(dom, r'<html[^>]*data-theme="system"[^>]*data-color-scheme="dark"')
-        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="#1d2025"')
+        self.assertRegex(dom, r'<body[^>]*data-telegram-header-color="bg_color"')
 
     def test_cache_clear_requires_dialog_confirmation_and_submits_once(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
@@ -1709,23 +1673,17 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-cache-request-count="1"', dom)
         self.assertGreater(screenshot_size, 10_000)
 
-    def test_dock_header_greeting_haptics_and_assets_work_together(self) -> None:
+    def test_menu_navigation_haptics_and_assets_work_together(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
             api_enabled=True,
             exercise_dock_header=True,
         )
         script = _app_source()
 
-        self.assertIn('data-active-dock-tab="jobs"', dom)
-        self.assertIn('data-masthead-progress="', dom)
-        self.assertIn('root.setProperty("--masthead-scroll", progress.toFixed(3))', script)
-        self.assertIn(
-            'window.addEventListener("scroll", updateMastheadScroll, { passive: true })',
-            script,
-        )
-        self.assertIn('data-greeting-initial="', dom)
-        self.assertIn("state.greetingTimer = window.setInterval", script)
-        self.assertIn("}, 6000);", script)
+        self.assertIn('data-menu-opened="true"', dom)
+        self.assertIn('data-active-menu-view="jobs"', dom)
+        self.assertIn('data-menu-closed-after-navigation="true"', dom)
+        self.assertIn('runtime.TelegramApp?.HapticFeedback?.selectionChanged?.()', script)
         self.assertIn('data-haptic-selections="1"', dom)
         self.assertIn('data-broken-assets="0"', dom)
         self.assertGreater(screenshot_size, 10_000)
@@ -1914,7 +1872,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("checklistApiPending", script)
         self.assertIn("state.sourceProbeUri === currentUri", script)
         self.assertNotIn("confirmSource", script)
-        source_fact_rule = styles.split(".source-facts dd", 1)[1].split("}", 1)[0]
+        source_fact_rule = re.search(r"(?m)^\.source-facts dd \{([^}]+)\}", styles).group(1)
         self.assertIn("overflow-wrap: anywhere", source_fact_rule)
         self.assertIn("white-space: normal", source_fact_rule)
         self.assertNotIn("text-overflow: ellipsis", source_fact_rule)
@@ -2048,7 +2006,7 @@ class TelegramMiniAppTests(unittest.TestCase):
     def test_mobile_preview_explains_missing_api_instead_of_claiming_preflight_ready(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(api_enabled=False)
 
-        self.assertIn('class="access-limited"', dom)
+        self.assertRegex(dom, r'<body[^>]*class="[^"]*access-limited')
         self.assertIn("Kết nối tài khoản để tiếp tục", dom)
         self.assertIn('id="refresh-access"', dom)
         self.assertGreater(screenshot_size, 10_000)
@@ -2081,7 +2039,7 @@ class TelegramMiniAppTests(unittest.TestCase):
     def test_unauthenticated_preview_keeps_link_and_offers_bot_jump(self) -> None:
         dom, _ = _render_mini_app_in_chrome(api_enabled=True, telegram_authenticated=False)
 
-        self.assertIn('class="access-limited"', dom)
+        self.assertRegex(dom, r'<body[^>]*class="[^"]*access-limited')
         self.assertIn("Kết nối tài khoản để tiếp tục", dom)
         self.assertNotIn("14/14 thông số", dom)
 
@@ -2138,7 +2096,7 @@ class TelegramMiniAppTests(unittest.TestCase):
     def test_pending_user_only_sees_account_and_approval_waiting_gate(self) -> None:
         dom, _ = _render_mini_app_in_chrome(api_enabled=True, pending_user=True)
 
-        self.assertIn('class="access-limited"', dom)
+        self.assertRegex(dom, r'<body[^>]*class="[^"]*access-limited')
         self.assertIn("Chờ quản trị viên cấp quyền", dom)
         self.assertIn("Fixture User", dom)
         self.assertIn("@fixture", dom)

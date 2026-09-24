@@ -6,7 +6,7 @@ import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession,
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
 import { closeBatchBuildPage, loadAdminUsers, loadBatch, openBatchBuildPage, performCacheClear, renderAdminUsers, savePermanentPresetLabels, savePermanentReleaseVersion, setBatchSelections, startBatchBuild, updateBatchSummary, updateMaintenance } from "./admin.js";
 import { clearSource, copySourceMetadata, pasteSourceFromClipboard, probeSourceInPlace, restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
-import { applyTheme, bindLiquidBottomTabs, bindTelegramThemeEvents, handleSystemThemeChange, navigate, prefersReducedMotion, scheduleGreeting, updateDispatchFab, updateDockShellPath, updateGreetingOverflow, updateMastheadScroll } from "./dock.js";
+import { applyTheme, bindTelegramThemeEvents, closeAppMenu, handleSystemThemeChange, navigate } from "./dock.js";
 import { scheduleSourceProbe } from "./catalog.js";
 import { closeAdminUserPage } from "./profile.js";
 
@@ -15,7 +15,7 @@ function applyLanguage() {
   $$('[data-i18n-placeholder]').forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
   $$('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
   $$("[data-i18n-aria]").forEach((node) => node.setAttribute("aria-label", t(node.dataset.i18nAria)));
-  $("#language").textContent = state.language === "vi" ? "VI / EN" : "EN / VI";
+  $("#language strong").textContent = state.language === "vi" ? "VI / EN" : "EN / VI";
   const devicePlaceholder = $("#device option[value='']");
   if (devicePlaceholder) devicePlaceholder.textContent = t("chooseDevice");
   renderMods(false);
@@ -53,11 +53,34 @@ function options(select, entries, preferred) {
   if (preferred && entries.some((entry) => entry.value === preferred)) select.value = preferred;
 }
 
+function handleContextBack() {
+  if (!$("#app-menu").hidden) { closeAppMenu(); return; }
+  const system = $("#system");
+  if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
+  if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
+  if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
+  if (document.body.dataset.view !== "build") navigate("build");
+}
+
 function bindEvents() {
   $("#confirm-submit")?.addEventListener("click", () => submitRecipe().catch(error => toast(error.message, true)));
   $("#language").addEventListener("click", () => { state.language = state.language === "vi" ? "en" : "vi"; localStorage.setItem("wukong-language", state.language); applyLanguage(); });
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => navigate(button.dataset.nav)));
-  bindLiquidBottomTabs();
+  $("#browser-back").addEventListener("click", handleContextBack);
+  $("#app-menu-toggle").addEventListener("click", () => {
+    const menu = $("#app-menu");
+    menu.hidden = !menu.hidden;
+    $("#app-menu-toggle").setAttribute("aria-expanded", String(!menu.hidden));
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".app-header")) closeAppMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("#app-menu").hidden) {
+      closeAppMenu();
+      $("#app-menu-toggle").focus();
+    }
+  });
 
   if (runtime.TelegramApp?.MainButton) {
     runtime.TelegramApp.MainButton.onClick(() => {
@@ -66,28 +89,12 @@ function bindEvents() {
     });
   }
   if (runtime.TelegramApp?.BackButton) {
-    runtime.TelegramApp.BackButton.onClick(() => {
-      const system = $("#system");
-      if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
-      if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
-      if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
-      if (document.body.dataset.view !== "build") navigate("build");
-    });
+    runtime.TelegramApp.BackButton.onClick(handleContextBack);
   }
   $("#cache-clear-confirm")?.addEventListener("click", () => performCacheClear());
   $$("[data-theme-value]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.themeValue, true)));
   themeMedia?.addEventListener?.("change", handleSystemThemeChange);
   bindTelegramThemeEvents();
-  window.addEventListener("scroll", updateMastheadScroll, { passive: true });
-  let greetingResizeFrame = 0;
-  window.addEventListener("resize", () => {
-    cancelAnimationFrame(greetingResizeFrame);
-    greetingResizeFrame = requestAnimationFrame(() => {
-      updateGreetingOverflow();
-      updateDockShellPath();
-    });
-  }, { passive: true });
-  document.fonts?.ready?.then(updateGreetingOverflow).catch(() => {});
   $$('[data-action]').forEach((button) => button.addEventListener("click", () => {
     runQuickAction(button.dataset.action).catch((error) => toast(error.message, true));
   }));
@@ -264,15 +271,6 @@ function bindEvents() {
   window.addEventListener("offline", () => { pauseWorkspacePolling(); setJobsConnection("jobsOffline", true); });
   window.addEventListener("online", scheduleWorkspaceReconnect);
   $("#copy-source-metadata").addEventListener("click", () => copySourceMetadata().catch((error) => toast(error.message, true)));
-  const docket = $(".dispatch-docket");
-  const fab = $("#dispatch-fab");
-  if (docket && fab && "IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => {
-      state.docketInView = entry.isIntersecting;
-      updateDispatchFab();
-    }, { threshold: .18 }).observe(docket);
-    fab.addEventListener("click", () => docket.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" }));
-  }
 }
 
 function renderSessionDiagnostics() {
@@ -290,6 +288,7 @@ function renderSessionDiagnostics() {
 
 function activateTelegramApp() {
   bindViewport(runtime.TelegramApp);
+  document.body.classList.toggle("telegram-hosted", Boolean(runtime.TelegramApp?.platform && runtime.TelegramApp.platform !== "unknown"));
   try {
     runtime.TelegramApp.ready(); runtime.TelegramApp.expand();
     if (runtime.TelegramApp.isVersionAtLeast?.("7.7")) runtime.TelegramApp.disableVerticalSwipes?.();
@@ -321,8 +320,6 @@ function startMiniApp() {
   bindViewport(runtime.TelegramApp);
   applyTheme(state.theme);
   bindEvents();
-  updateMastheadScroll();
-  scheduleGreeting();
   restoreSourceDraft();
   restorePendingSubmission();
   window.WukongMiniApp = Object.freeze({ setDeliveryState });

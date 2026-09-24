@@ -1,97 +1,88 @@
+/* Reference measured from the running @BotFather Mini App on 2026-09-25.
+   Wukong owns this implementation; no BotFather assets or bundle are imported. */
 :root {
   color-scheme: light;
-
-  /* Typography */
-  --font-body: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
-  font-family: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
-
-  /* Telegram Dynamic Theming (Light fallback) */
-  --canvas: var(--tg-theme-secondary-bg-color, #efeff4);
-  --surface: var(--tg-theme-bg-color, #ffffff);
-  --surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #ffffff));
-  --surface-soft: color-mix(in srgb, var(--canvas) 65%, var(--surface));
-  --surface-hover: color-mix(in srgb, var(--ink) 4%, var(--surface));
-
-  --graphite: #1c1c1e;
-  --ink: var(--tg-theme-text-color, #000000);
-  --muted: var(--tg-theme-hint-color, #8e8e93);
-  --line: var(--tg-theme-section-separator-color, rgba(60, 60, 67, 0.12));
-  --line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
-
-  /* Primary Accent & Action Colors */
-  --accent: var(--tg-theme-button-color, #2481cc);
-  --accent-text: var(--tg-theme-button-text-color, #ffffff);
-  --accent-strong: color-mix(in srgb, var(--accent) 85%, #000000);
-  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  --link: var(--tg-theme-link-color, #2481cc);
-
-  /* Semantic Feedback Colors */
-  --success: #34c759;
-  --success-soft: color-mix(in srgb, var(--success) 12%, var(--surface));
-  --danger: var(--tg-theme-destructive-text-color, #ff3b30);
-  --danger-soft: color-mix(in srgb, var(--danger) 12%, var(--surface));
-  --focus: var(--accent);
-  --aqua: #30b0c7;
-  --aqua-soft: color-mix(in srgb, var(--aqua) 12%, var(--surface));
-  --coral: #ff9500;
-  --coral-soft: color-mix(in srgb, var(--coral) 12%, var(--surface));
-  --sun: #ffcc00;
-  --sun-soft: color-mix(in srgb, var(--sun) 14%, var(--surface));
-
-  /* Floating Island Dock (Liquid Glass) */
-  --liquid-accent: var(--accent);
-  --liquid-chromatic: #ff2d55;
-  --dock-glass-bg: color-mix(in srgb, var(--surface) 74%, transparent);
-  --dock-glass-border: color-mix(in srgb, var(--surface) 85%, rgba(255, 255, 255, 0.5));
-  --dock-glass-shadow: 0 16px 38px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --dock-lens-bg: color-mix(in srgb, var(--accent) 14%, var(--surface));
-  --dock-foreground: var(--ink);
-
-  /* Radiuses (Telegram Rounded Inset Style) */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-card: 16px;
+  /* Primitive scale. */
+  --bf-night-bg: #1a2026;
+  --bf-night-group: #212a33;
+  --bf-night-hover: #293440;
+  --bf-night-muted: #8794a1;
+  --bf-night-subtle: #8c9aa9;
+  --bf-night-border: #1b252e;
+  --bf-blue: #4cb2ff;
+  --bf-button-blue: #248bda;
+  --bf-red: #ff5863;
+  --bf-orange: #ff9953;
+  --bf-green: #7ed176;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --target-size: 44px;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-data: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+  --radius-control: 8px;
+  --radius-group: 8px;
   --radius-pill: 999px;
+  --safe-bottom: max(16px, env(safe-area-inset-bottom), var(--telegram-safe-bottom, 0px));
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08);
-  --shadow-float: 0 14px 40px rgba(0, 0, 0, 0.14);
-
-  --safe-bottom: max(10px, env(safe-area-inset-bottom));
-  --ease: cubic-bezier(.16, 1, .3, 1);
+  /* Semantic palette for Telegram's light appearance (no light reference supplied). */
+  --canvas: var(--tg-theme-secondary-bg-color, #f4f4f5);
+  --surface: var(--tg-theme-bg-color, #fff);
+  --surface-raised: var(--tg-theme-section-bg-color, #fff);
+  --ink: var(--tg-theme-text-color, #111318);
+  --muted: var(--tg-theme-hint-color, #707579);
+  --line: var(--tg-theme-section-separator-color, #e5e8ed);
+  --accent: var(--tg-theme-accent-text-color, #248bda);
+  --accent-text: #fff;
+  --link: var(--tg-theme-link-color, #248bda);
+  --danger: var(--tg-theme-destructive-text-color, #df3f40);
+  --success: #319c61;
+  --warning: #d98228;
+  --group-shadow: none;
 }
 
 :root[data-color-scheme="dark"] {
   color-scheme: dark;
-  --canvas: var(--tg-theme-secondary-bg-color, #0f0f0f);
-  --surface: var(--tg-theme-bg-color, #1c1c1e);
-  --surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #1c1c1e));
-  --surface-soft: color-mix(in srgb, var(--canvas) 60%, var(--surface));
-  --surface-hover: color-mix(in srgb, #ffffff 6%, var(--surface));
+  /* BotFather's own dark palette, not Telegram Web's light themeParams. */
+  --canvas: var(--bf-night-bg);
+  --surface: var(--bf-night-group);
+  --surface-raised: var(--bf-night-group);
+  --ink: #fff;
+  --muted: var(--bf-night-muted);
+  --line: var(--bf-night-border);
+  --accent: var(--bf-blue);
+  --accent-text: #fff;
+  --link: var(--bf-blue);
+  --danger: var(--bf-red);
+  --success: var(--bf-green);
+  --warning: var(--bf-orange);
+}
 
-  --graphite: #0a0a0c;
-  --ink: var(--tg-theme-text-color, #ffffff);
-  --muted: var(--tg-theme-hint-color, #8e8e93);
-  --line: var(--tg-theme-section-separator-color, rgba(255, 255, 255, 0.12));
-  --line-strong: color-mix(in srgb, var(--ink) 25%, transparent);
+:root[data-theme="light"] {
+  --canvas: #f4f4f5;
+  --surface: #fff;
+  --surface-raised: #fff;
+  --ink: #111318;
+  --muted: #707579;
+  --line: #e5e8ed;
+  --accent: #248bda;
+  --link: #248bda;
+  --danger: #df3f40;
+}
 
-  --accent: var(--tg-theme-button-color, #2ea6ff);
-  --accent-text: var(--tg-theme-button-text-color, #ffffff);
-  --accent-strong: color-mix(in srgb, var(--accent) 85%, #ffffff);
-  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface));
-
-  --success: #32d74b;
-  --success-soft: color-mix(in srgb, var(--success) 16%, var(--surface));
-  --danger: var(--tg-theme-destructive-text-color, #ff453a);
-  --danger-soft: color-mix(in srgb, var(--danger) 16%, var(--surface));
-
-  --dock-glass-bg: color-mix(in srgb, var(--surface) 68%, transparent);
-  --dock-glass-border: rgba(255, 255, 255, 0.16);
-  --dock-glass-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
-  --dock-lens-bg: color-mix(in srgb, var(--accent) 22%, var(--surface));
-  --dock-foreground: var(--ink);
+/* Component aliases shared by all Wukong screens. */
+:root {
+  --button-bg: var(--bf-button-blue);
+  --button-fg: #fff;
+  --field-bg: var(--surface);
+  --field-fg: var(--ink);
+  --field-border: var(--line);
+  --row-bg: var(--surface-raised);
+  --row-separator: var(--line);
+  --status-positive: var(--success);
+  --status-negative: var(--danger);
 }

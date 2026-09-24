@@ -558,20 +558,12 @@ const state = {
   pairingPollTimer: null,
   pairingPollAttempt: 0,
   pairingInFlight: false,
-  docketInView: true,
   presetLabels: { lite: "Lite", plus: "Plus", custom: "Custom" },
   customPresetLabelOverride: "",
   releaseVersionOverrides: {},
   debloatPaths: [],
   debloatPathsCustomized: false,
-  dispatchFabHideTimer: null,
   expandedLogJobId: "",
-  liquidPosition: 0,
-  liquidAnimationFrame: 0,
-  liquidSuppressClick: false,
-  greetingIndex: 0,
-  greetingTimer: 0,
-  mastheadFrame: 0,
   cacheClearPending: false,
   me: null,
   maintenance: { enabled: false, message: "", updatedAt: "", updatedBy: "" },
@@ -619,7 +611,6 @@ const themeMedia = window.matchMedia?.("(prefers-color-scheme: dark)");
 
 runtime.telegramThemeEventsBoundTo = null;
 
-const liquidSlots = [0, 1, 2, 3, 4];
 
 const sourceFactDefinitions = [
   ["source-provider", "provider"],
@@ -697,7 +688,25 @@ const eventStageLabels = {
   en: { preflight: "Preflight", download: "ROM download", build: "ROM build", upload: "Upload", complete: "Complete", "github-actions": "GitHub Actions", "github-actions-running": "GitHub Actions" }
 };
 
-export { mergeEvents, eventCursor, requestJson, RequestScopes, requestScopes, configuredMiniApiEndpoint, miniApiEndpoint, telegramBotUsername, publicRomCatalogEndpoint, validSignedLaunchToken, consumeSignedLaunchToken, parseInitDataFromHash, translations, pipelineLabels, $, $$, state, t, themeMedia, liquidSlots, sourceFactDefinitions, completenessSourceFactIds, requiredSourceFactIds, ZIP_METADATA_SUFFIXES, ZIP_MAX_METADATA_FILES, ZIP_MAX_METADATA_FILE_BYTES, ZIP_MAX_METADATA_TEXT_BYTES, ZIP_MAX_METADATA_FIELDS, ZIP_MAX_RANGE_BYTES, ZIP_MAX_CLIENT_BYTES, romDeviceBrands, romDeviceWords, terminalJobStatuses, eventTypeLabels, eventStageLabels, workspacePollingAllowed };
+export { mergeEvents, eventCursor, requestJson, RequestScopes, requestScopes, configuredMiniApiEndpoint, miniApiEndpoint, telegramBotUsername, publicRomCatalogEndpoint, validSignedLaunchToken, consumeSignedLaunchToken, parseInitDataFromHash, translations, pipelineLabels, $, $$, state, t, themeMedia, sourceFactDefinitions, completenessSourceFactIds, requiredSourceFactIds, ZIP_METADATA_SUFFIXES, ZIP_MAX_METADATA_FILES, ZIP_MAX_METADATA_FILE_BYTES, ZIP_MAX_METADATA_TEXT_BYTES, ZIP_MAX_METADATA_FIELDS, ZIP_MAX_RANGE_BYTES, ZIP_MAX_CLIENT_BYTES, romDeviceBrands, romDeviceWords, terminalJobStatuses, eventTypeLabels, eventStageLabels, workspacePollingAllowed };
 
 Object.assign(translations.vi, { reviewBuild: "Kiểm tra và build", selectionSummary: "{mods} MOD · {steps} bước pipeline", keyboardEditing: "Đang nhập cấu hình", syncSnapshot: "Dữ liệu lúc {time}", recipeHint: "Chọn preset và nền MOD. Tùy chỉnh thêm khi cần." });
 Object.assign(translations.en, { reviewBuild: "Review and build", selectionSummary: "{mods} MODs · {steps} pipeline steps", keyboardEditing: "Editing configuration", syncSnapshot: "Snapshot at {time}", recipeHint: "Choose a preset and MOD base. Fine-tune options when needed." });
+
+Object.assign(translations.vi, {
+  menuOpen: "Mở menu", backToBuild: "Trở về", buildIntroEyebrow: "TẠO BẢN ROM MỚI",
+  buildIntroDescription: "Chọn nguồn ROM, cấu hình bản build và kiểm tra trước khi bắt đầu."
+});
+Object.assign(translations.en, {
+  menuOpen: "Open menu", backToBuild: "Back", buildIntroEyebrow: "CREATE A NEW ROM BUILD",
+  buildIntroDescription: "Choose a ROM source, configure the build, and review it before starting."
+});
+
+Object.assign(translations.vi, {
+  jobFilters: "Bộ lọc nâng cao", incompleteLabel: "Kiểm tra trước khi tạo", readyLabel: "Sẵn sàng tạo build",
+  runtimePipeline: "Trạng thái hệ thống"
+});
+Object.assign(translations.en, {
+  jobFilters: "Advanced filters", incompleteLabel: "Review before creating", readyLabel: "Ready to create build",
+  runtimePipeline: "System status"
+});
