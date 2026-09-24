@@ -6,10 +6,5 @@
     "build": "node build.mjs",
     "test": "node --test test/*.test.js"
   },
-  "devDependencies": {
-    "esbuild": "0.25.12"
-  },
-  "dependencies": {
-    "@material/web": "^2.5.0"
-  }
+  "devDependencies": { "esbuild": "0.25.12" }
 }
