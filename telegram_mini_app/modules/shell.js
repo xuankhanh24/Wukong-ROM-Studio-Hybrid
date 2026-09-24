@@ -139,7 +139,7 @@ function bindEvents() {
   $("#connect-telegram").addEventListener("click", () => connectTelegramSession());
   $("#refresh-access").addEventListener("click", () => {
     if (!miniApiAvailable()) { connectTelegramSession(); return; }
-    loadSession({ countOpen: false }).catch((error) => toast(error.message, true));
+    loadSession({ countOpen: false }).then(() => initializeApprovedWorkspace()).catch((error) => toast(error.message, true));
   });
   $("#refresh-maintenance").addEventListener("click", () => {
     loadSession({ countOpen: false }).catch((error) => toast(error.message, true));

@@ -450,9 +450,8 @@ async function loadSession({ countOpen = true } = {}) {
 
 let autoVerifyTimer = null;
 
-async function autoVerifySession(attempt = 1, maxAttempts = 6) {
+async function autoVerifySession(attempt = 1, maxAttempts = 8) {
   clearTimeout(autoVerifyTimer);
-  ensureAutomaticTelegramConnection();
   if (miniApiAvailable()) {
     try {
       await loadSession();
@@ -469,12 +468,14 @@ async function autoVerifySession(attempt = 1, maxAttempts = 6) {
       return;
     }
   }
-  const insideTelegram = Boolean(runtime.TelegramApp?.platform && runtime.TelegramApp.platform !== "unknown");
-  if (insideTelegram && attempt < maxAttempts) {
-    const delayMs = Math.min(1000, 150 * attempt);
+  // While Telegram WebApp bridge completes asynchronous initialization
+  // (client postMessage handshake and initData injection), retry with backoff.
+  if (attempt < maxAttempts) {
+    const delayMs = Math.min(800, 100 * attempt);
     autoVerifyTimer = setTimeout(() => autoVerifySession(attempt + 1, maxAttempts), delayMs);
     return;
   }
+  ensureAutomaticTelegramConnection();
   renderAccessGate();
 }
 

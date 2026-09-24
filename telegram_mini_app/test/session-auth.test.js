@@ -25,4 +25,11 @@ test("startup automatically verifies session with polling retry and sessionStora
 
   // 4. No synchronous dead-end else renderAccessGate on initial startup
   assert.doesNotMatch(shellCode, /if\s*\(miniApiAvailable\(\)\)\s*\{[^}]*loadSession[^}]*\}\s*else\s*renderAccessGate\(\)/);
+
+  // 5. autoVerifySession retries asynchronously without gating on platform !== "unknown"
+  assert.doesNotMatch(sessionCode, /const insideTelegram = Boolean\(runtime\.TelegramApp\?\.platform && runtime\.TelegramApp\.platform !== "unknown"\);\s*if \(insideTelegram && attempt < maxAttempts\)/);
+
+  // 6. build.js imports runtime to avoid ReferenceError when syncing Telegram MainButton
+  const buildCode = await readFile(new URL("../modules/build.js", import.meta.url), "utf8");
+  assert.match(buildCode, /import\s*\{[^}]*\bruntime\b[^}]*\}\s*from\s*["']\.\/state\.js["']/);
 });

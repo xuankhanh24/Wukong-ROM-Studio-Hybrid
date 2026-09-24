@@ -1,4 +1,4 @@
-import { $, $$, miniApiEndpoint, pipelineLabels, state, t } from "./state.js";
+import { $, $$, miniApiEndpoint, pipelineLabels, runtime, state, t } from "./state.js";
 import { renderAdminPresetLabels, renderAdminReleaseEditor } from "./admin.js";
 import { activeSignedLaunchToken, apiRequest, effectiveInitData, loadSession, miniApiAvailable, miniApiUnavailableMessageKey, telegramTransportAvailable } from "./session.js";
 import { classifySource } from "./source-rom.js";

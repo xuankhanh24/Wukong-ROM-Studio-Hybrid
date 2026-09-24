@@ -16,7 +16,8 @@ function scheduleSourceProbe() {
 
 async function loadCatalog() {
   try {
-    const response = await fetch("./catalog.json", { cache: "no-cache" });
+    const catalogUrl = new URL("catalog.json", location.href);
+    const response = await fetch(catalogUrl, { cache: "no-cache" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const catalog = await response.json();
     if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.devices) || !Array.isArray(catalog.modVersions)) throw new Error("Invalid catalog");
@@ -29,10 +30,18 @@ async function loadCatalog() {
     options($("#mod-version"), catalog.modVersions.map((value) => ({ value, label: `${value} · ${state.catalog.modReleaseVersions[value] || value}` })), catalog.modVersions.includes("ColorOS_16.0.9") ? "ColorOS_16.0.9" : catalog.modVersions.at(-1));
     options($("#catalog-version"), catalog.modVersions.map((value) => ({ value, label: `${value} · ${state.catalog.modReleaseVersions[value] || value}` })), catalog.modVersions.includes("ColorOS_16.0.9") ? "ColorOS_16.0.9" : catalog.modVersions.at(-1));
     renderPresetLabels();
-    if (privateApiAvailable()) await Promise.all([refreshLiveReleaseVersions(), refreshLivePresetLabels()]);
+    if (privateApiAvailable()) {
+      await Promise.all([
+        refreshLiveReleaseVersions().catch(() => {}),
+        refreshLivePresetLabels().catch(() => {})
+      ]);
+    }
     const count = Object.values(catalog.modsByVersion).reduce((total, names) => total + names.length, 0);
-    $("#catalog-status").textContent = t("catalogReady", { mods: count, versions: catalog.modVersions.length });
-    $("#catalog-status").closest("div").querySelector("i").classList.add("ok");
+    const catalogStatus = $("#catalog-status");
+    if (catalogStatus) {
+      catalogStatus.textContent = t("catalogReady", { mods: count, versions: catalog.modVersions.length });
+      catalogStatus.closest("div")?.querySelector("i")?.classList.add("ok");
+    }
     renderPipelineSteps();
     renderMods();
     renderDebloatSummary();
@@ -41,7 +50,9 @@ async function loadCatalog() {
     updateSourceDetection();
     renderSelectedJob();
   } catch (error) {
-    $("#catalog-status").textContent = t("catalogFailed");
+    console.error("loadCatalog error:", error);
+    const catalogStatus = $("#catalog-status");
+    if (catalogStatus) catalogStatus.textContent = t("catalogFailed");
     toast(t("catalogFailed"), true);
   }
 }
