@@ -288,34 +288,11 @@ function updateSummary() {
   syncTelegramMainButton(ready);
 }
 
-function syncTelegramMainButton(ready) {
-  const tg = runtime.TelegramApp;
-  const insideTelegram = Boolean(tg?.platform && tg.platform !== "unknown");
-  if (!tg?.MainButton || !insideTelegram) {
-    document.body.classList.remove("telegram-main-button");
-    try { tg?.MainButton?.hide(); } catch (_) {}
-    return;
-  }
-  const isBuild = !document.body.dataset.view || document.body.dataset.view === "build";
-  if (!isBuild) {
-    try { tg.MainButton.hide(); } catch (_) {}
-    document.body.classList.remove("telegram-main-button");
-    return;
-  }
-  document.body.classList.add("telegram-main-button");
-  if (ready) {
-    try {
-      tg.MainButton.setText(t("launch") || "Bắt đầu build");
-      tg.MainButton.enable();
-      tg.MainButton.show();
-    } catch (_) {}
-  } else {
-    try {
-      tg.MainButton.setText(t("finishSource") || "Hoàn tất cấu hình");
-      tg.MainButton.disable();
-      tg.MainButton.show();
-    } catch (_) {}
-  }
+function syncTelegramMainButton() {
+  // A native bottom button creates a second footer below the persistent dock.
+  // Keep the one build action in the same viewport as Wukong navigation.
+  document.body.classList.remove("telegram-main-button");
+  try { runtime.TelegramApp?.MainButton?.hide(); } catch (_) {}
 }
 
 function positiveInteger(input, errorKey) {
@@ -563,7 +540,6 @@ async function submitRecipe() {
   if (state.submitInFlight) return null;
   if (!miniApiAvailable()) throw new Error(t(miniApiUnavailableMessageKey()));
   state.submitInFlight = true;
-  try { runtime.TelegramApp?.MainButton?.showProgress?.(); } catch (_) {}
   $("#submit-recipe")?.setAttribute("aria-busy", "true");
   $("#submit-recipe") && ($("#submit-recipe").disabled = true);
   $("#confirm-submit") && ($("#confirm-submit").disabled = true);
@@ -618,7 +594,6 @@ async function submitRecipe() {
     return job;
   } finally {
     state.submitInFlight = false;
-    try { runtime.TelegramApp?.MainButton?.hideProgress?.(); } catch (_) {}
     $("#submit-recipe")?.removeAttribute("aria-busy");
     renderSubmitRecovery();
     updateSummary();

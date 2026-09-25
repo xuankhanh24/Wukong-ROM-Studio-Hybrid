@@ -367,7 +367,7 @@ function applyProbeResult(result, uri, { announce = true } = {}) {
   if (device && [...$("#device").options].some((option) => option.value === device)) {
     $("#device").value = device;
     state.sourceAutoDevice = device;
-    if (announce) toast(t("autoSelected", { device }));
+    if (announce && (!document.body.dataset.view || document.body.dataset.view === "build")) toast(t("autoSelected", { device }));
   }
   selectModPackForVersion(version, product);
   state.sourceProbeUri = uri;

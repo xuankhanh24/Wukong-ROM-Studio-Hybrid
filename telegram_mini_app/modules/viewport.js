@@ -10,7 +10,11 @@ export function bindViewport(bridge) {
     root.dataset.keyboard = String(keyboard);
     root.style.setProperty("--viewport-height", `${boundBridge?.viewportStableHeight || window.innerHeight}px`);
     for (const edge of ["top", "right", "bottom", "left"]) {
-      const inset = Math.max(Number(boundBridge?.safeAreaInset?.[edge]) || 0, Number(boundBridge?.contentSafeAreaInset?.[edge]) || 0);
+      const deviceInset = Number(boundBridge?.safeAreaInset?.[edge]) || 0;
+      const contentInset = Number(boundBridge?.contentSafeAreaInset?.[edge]) || 0;
+      const inset = Math.max(deviceInset, contentInset);
+      root.style.setProperty(`--telegram-device-safe-${edge}`, `${deviceInset}px`);
+      root.style.setProperty(`--telegram-content-safe-${edge}`, `${contentInset}px`);
       root.style.setProperty(`--telegram-safe-${edge}`, `${inset}px`);
     }
     if (keyboard) document.activeElement?.scrollIntoView({ block: "nearest", behavior: "instant" });

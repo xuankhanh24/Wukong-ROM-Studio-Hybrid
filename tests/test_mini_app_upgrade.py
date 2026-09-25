@@ -70,14 +70,67 @@ class MiniAppUpgradeTests(unittest.TestCase):
 
     def test_supported_telegram_launch_requests_fullscreen(self):
         def exercise(page):
-            result = page.evaluate("""() => ({
-                requests: document.body.dataset.fullscreenRequests,
-                fullscreen: document.body.classList.contains('telegram-fullscreen'),
-                dock: getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none'
-            })""")
-            self.assertEqual(result, {"requests": "1", "fullscreen": True, "dock": True})
+            result = page.evaluate("""async () => {
+                document.documentElement.style.setProperty('--telegram-device-safe-top', '24px');
+                document.documentElement.style.setProperty('--telegram-safe-top', '88px');
+                const bridge = window.Telegram.WebApp;
+                let hidden = 0; let shown = 0;
+                bridge.MainButton = { hide() { hidden += 1; }, show() { shown += 1; } };
+                const { syncTelegramMainButton } = await import('/modules/build.js');
+                syncTelegramMainButton(true);
+                const brand = document.querySelector('.telegram-floating-brand');
+                const rect = brand.getBoundingClientRect();
+                const hero = document.querySelector('#build .bf-hero').getBoundingClientRect();
+                const dock = document.querySelector('.bottom-nav').getBoundingClientRect();
+                const action = document.querySelector('#submit-recipe').getBoundingClientRect();
+                return {
+                    requests: document.body.dataset.fullscreenRequests,
+                    fullscreen: document.body.classList.contains('telegram-fullscreen'),
+                    brandVisible: getComputedStyle(brand).display === 'flex',
+                    brandCentered: Math.abs(rect.left + rect.width / 2 - innerWidth / 2) < 1,
+                    brandInChrome: rect.top < 88,
+                    heroClear: hero.top >= rect.bottom + 12,
+                    dockVisible: getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none',
+                    footerGap: dock.top - action.bottom,
+                    nativeHidden: hidden > 0 && shown === 0,
+                    singleFooter: !document.body.classList.contains('telegram-main-button')
+                };
+            }""")
+            self.assertEqual(result["requests"], "1")
+            self.assertTrue(all(value for key, value in result.items()
+                                if key not in {"requests", "footerGap"}), result)
+            self.assertGreater(result["footerGap"], 0)
 
         _render_mini_app_in_chrome(api_enabled=True, fullscreen_supported=True, page_action=exercise)
+
+    def test_fullscreen_admin_detail_rows_and_brand_do_not_overlap(self):
+        def exercise(page):
+            result = page.evaluate("""() => {
+                document.documentElement.style.setProperty('--telegram-device-safe-top', '24px');
+                document.documentElement.style.setProperty('--telegram-safe-top', '88px');
+                const brand = document.querySelector('.telegram-floating-brand');
+                const top = brand.getBoundingClientRect().top;
+                const facts = [...document.querySelectorAll('.user-detail-grid > div')];
+                const activity = [...document.querySelectorAll('#admin-user-current-activity .user-current-activity')];
+                const factClear = facts.every(row => {
+                    const label = row.querySelector('small').getBoundingClientRect();
+                    const value = row.querySelector('strong').getBoundingClientRect();
+                    return value.top >= label.bottom && row.getBoundingClientRect().right <= innerWidth;
+                });
+                const activityClear = activity.every(row => {
+                    const heading = row.querySelector('span').getBoundingClientRect();
+                    const line = row.querySelector('small')?.getBoundingClientRect();
+                    return !line || line.top >= heading.bottom;
+                });
+                scrollTo(0, 480);
+                return { factClear, activityClear, brandFixed: brand.getBoundingClientRect().top === top,
+                         noOverflow: document.documentElement.scrollWidth === innerWidth };
+            }""")
+            self.assertTrue(all(result.values()), result)
+
+        _render_mini_app_in_chrome(api_enabled=True, admin_user=True, initial_view="system",
+                                   click_admin_user=True, fullscreen_supported=True,
+                                   page_action=exercise)
 
     def test_dock_switches_views_and_mod_picker_starts_collapsed(self):
         def exercise(page):

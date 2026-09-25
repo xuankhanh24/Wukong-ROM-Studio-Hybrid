@@ -1,6 +1,16 @@
 /* Mobile-first rhythm shared by Studio, lists, profile and administration. */
 :root { --mobile-gutter: 16px; --mobile-section-gap: 28px; --radius-group: 12px; --radius-control: 10px; }
 body { font-size: 16px; line-height: 1.45; }
+/* Telegram's fullscreen header is transparent. Keep its controls over a clean
+   canvas and place Wukong's identity between the native left/right controls. */
+.telegram-floating-brand { display: none; }
+body.telegram-hosted.telegram-fullscreen { --telegram-floating-top: max(44px, calc(var(--telegram-device-safe-top, 0px) + 22px)); }
+body.telegram-hosted.telegram-fullscreen::before { content: ""; position: fixed; z-index: 50; inset: 0 0 auto; height: max(calc(var(--telegram-safe-top, 0px) + 8px), calc(var(--telegram-floating-top) + 48px)); background: var(--canvas); pointer-events: none; }
+body.telegram-hosted.telegram-fullscreen .telegram-floating-brand { position: fixed; z-index: 51; top: var(--telegram-floating-top); left: 50%; display: flex; align-items: center; gap: 7px; max-width: calc(100vw - 168px); height: 38px; padding: 5px 12px 5px 6px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--ink) 8%, var(--canvas)); color: var(--ink); white-space: nowrap; pointer-events: none; transform: translateX(-50%); }
+:root[data-color-scheme="dark"] body.telegram-hosted.telegram-fullscreen .telegram-floating-brand { background: color-mix(in srgb, #000 28%, var(--canvas)); }
+.telegram-floating-brand img { width: 25px; height: 25px; flex: none; }
+.telegram-floating-brand strong { min-width: 0; overflow: hidden; font-size: 14px; line-height: 1; text-overflow: ellipsis; }
+body.telegram-hosted.telegram-fullscreen main { padding-top: max(calc(var(--telegram-safe-top, 0px) + 12px), calc(var(--telegram-floating-top) + 64px)); }
 ::selection { background: color-mix(in srgb, var(--accent) 25%, var(--surface)); color: var(--ink); }
 input, textarea { caret-color: var(--accent); }
 button, summary, select { touch-action: manipulation; }
@@ -67,6 +77,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, t
 #submit-recipe { width: 100%; margin-inline: 0; }
 body:not(.telegram-main-button) #submit-recipe:disabled { width: 100%; margin-inline: 0; }
 body:not(.telegram-main-button) #submit-recipe { width: min(528px, calc(100vw - 2 * var(--mobile-gutter))); bottom: calc(84px + var(--safe-bottom)); box-shadow: 0 0 0 6px var(--canvas); }
+body:not(.telegram-main-button) #submit-recipe:disabled[aria-busy="true"] { position: fixed; left: 50%; bottom: calc(84px + var(--safe-bottom)); width: min(528px, calc(100vw - 2 * var(--mobile-gutter))); margin: 0; box-shadow: 0 0 0 6px var(--canvas); transform: translateX(-50%); }
 .readiness-checklist li { min-height: 58px; }
 
 /* List pages use the same outer alignment as the form. */
@@ -127,6 +138,19 @@ body:not(.telegram-main-button) #submit-recipe { width: min(528px, calc(100vw - 
 .user-row > .access-badge { grid-area: status; align-self: center; font-size: 12px; }
 .user-admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .user-admin-stats > div { min-height: 72px; }
+.user-detail-grid { grid-template-columns: minmax(0, 1fr); gap: 0; overflow: hidden; border-radius: var(--radius-group); background: var(--surface); }
+.user-detail-grid > div { display: grid; gap: 4px; min-width: 0; min-height: 54px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.user-detail-grid > div:last-child { border-bottom: 0; }
+.user-detail-grid small { display: block; color: var(--muted); font-size: 13px; line-height: 1.3; }
+.user-detail-grid strong { display: block; min-width: 0; color: var(--ink); font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.user-detail-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.user-detail-actions button { min-height: 44px; white-space: normal; }
+.user-current-activities { display: grid; min-width: 0; width: 100%; }
+.user-current-activity { display: grid; gap: 5px; min-width: 0; padding: 12px 0; overflow-wrap: anywhere; }
+.user-current-activity > span { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.user-current-activity > span strong { min-width: 0; line-height: 1.3; }
+.user-current-activity > small { display: block; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.user-current-activity > button { justify-self: start; min-height: 44px; margin-top: 4px; }
 
 /* The notice floats above both navigation and the contextual build action. */
 .toast { bottom: calc(90px + var(--safe-bottom)); width: max-content; max-width: calc(100vw - 2 * var(--mobile-gutter)); border-radius: 12px; font-size: 14px; line-height: 1.35; text-align: center; }
@@ -137,7 +161,7 @@ body[data-view="build"]:not(.telegram-main-button):has(#submit-recipe:not(:disab
 @media (max-width: 620px) {
   main { padding: 12px var(--mobile-gutter) calc(124px + var(--safe-bottom)); }
   body.telegram-hosted main { padding-top: 12px; }
-  body.telegram-hosted.telegram-fullscreen main { padding-top: calc(12px + var(--telegram-safe-top, 0px)); }
+  body.telegram-hosted.telegram-fullscreen main { padding-top: max(calc(var(--telegram-safe-top, 0px) + 12px), calc(var(--telegram-floating-top) + 64px)); }
   .source-input-head { display: grid; }
   .source-input-head > div { justify-content: flex-start; }
   .release-version-details .release-version-editor { display: grid; }
@@ -152,4 +176,5 @@ body[data-view="build"]:not(.telegram-main-button):has(#submit-recipe:not(:disab
   .profile-highlight { padding-inline: 6px; }
   .bottom-nav > button { font-size: 10px; }
   .bottom-nav .dock-profile-label { font-size: 10px; }
+  .user-detail-actions { grid-template-columns: minmax(0, 1fr); }
 }
