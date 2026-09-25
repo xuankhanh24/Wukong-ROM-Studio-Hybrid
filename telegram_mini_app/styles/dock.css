@@ -163,7 +163,7 @@
     z-index:60;
     display:grid;
     grid-template-columns:repeat(var(--dock-slot-count),minmax(0,1fr));
-    width:clamp(400px,38vw,520px);
+    width:clamp(540px,52vw,760px);
     max-width:calc(100vw - 32px);
     height:72px;
     padding:5px;

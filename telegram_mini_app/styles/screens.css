@@ -100,34 +100,33 @@
   .runtime-strip > div { border-right: 1px solid var(--line); border-bottom: 0; }
 }:root[data-color-scheme="dark"] {
   color-scheme: dark;
-  --canvas: var(--tg-theme-secondary-bg-color, #0f0f0f);
-  --surface: var(--tg-theme-bg-color, #1c1c1e);
-  --surface-raised: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #1c1c1e));
-  --surface-soft: color-mix(in srgb, var(--canvas) 60%, var(--surface));
-  --surface-hover: color-mix(in srgb, #ffffff 6%, var(--surface));
-  --graphite: #0a0a0c;
-  --ink: var(--tg-theme-text-color, #ffffff);
-  --muted: var(--tg-theme-hint-color, #8e8e93);
-  --line: var(--tg-theme-section-separator-color, rgba(255, 255, 255, 0.12));
-  --line-strong: color-mix(in srgb, var(--ink) 25%, transparent);
-  --accent: var(--tg-theme-button-color, #2ea6ff);
-  --accent-strong: color-mix(in srgb, var(--accent) 85%, #ffffff);
-  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface));
-  --aqua: #5ac8fa;
-  --aqua-soft: color-mix(in srgb, var(--aqua) 16%, var(--surface));
-  --coral: #ff9f0a;
-  --coral-soft: color-mix(in srgb, var(--coral) 16%, var(--surface));
-  --sun: #ffd60a;
-  --sun-soft: color-mix(in srgb, var(--sun) 16%, var(--surface));
-  --success: #32d74b;
-  --success-soft: color-mix(in srgb, var(--success) 16%, var(--surface));
-  --danger-soft: color-mix(in srgb, var(--danger) 16%, var(--surface));
-  --liquid-accent: var(--accent);
-  --dock-glass-bg: color-mix(in srgb, var(--surface) 68%, transparent);
-  --dock-glass-border: rgba(255, 255, 255, 0.16);
-  --dock-glass-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
-  --dock-lens-bg: color-mix(in srgb, var(--accent) 22%, var(--surface));
-  --dock-foreground: var(--ink);
+  --canvas: #17191d;
+  --surface: #1d2025;
+  --surface-raised: #23272d;
+  --surface-soft: #2b2f35;
+  --graphite: #121417;
+  --ink: #f1efe9;
+  --muted: #b9b6ae;
+  --line: #3b3e43;
+  --line-strong: #5c5f63;
+  --accent: #6f92bd;
+  --accent-strong: #a2bbd8;
+  --accent-soft: #293746;
+  --aqua: #78a7a0;
+  --aqua-soft: #263b38;
+  --coral: #bf8a7f;
+  --coral-soft: #452f2c;
+  --sun: #c2a16b;
+  --sun-soft: #403725;
+  --success: #78b79c;
+  --success-soft: #253a31;
+  --danger-soft: #452f2c;
+  --liquid-accent: #0091ff;
+  --dock-glass-bg: linear-gradient(118deg,rgba(255,255,255,.11),rgba(255,255,255,.025) 38%,rgba(80,125,181,.08)),rgba(8,12,19,.24);
+  --dock-glass-border: rgba(255,255,255,.28);
+  --dock-glass-shadow: 0 20px 46px rgba(0,0,0,.34);
+  --dock-lens-bg: linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.035)),rgba(72,109,158,.1);
+  --dock-foreground: #f5f7fb;
 }:root[data-color-scheme="dark"] .masthead,
 :root[data-color-scheme="dark"] .contents-rail { background: var(--surface); }:root[data-color-scheme="dark"] .bottom-nav button.active { color:inherit; }:root[data-color-scheme="dark"] .primary { color:#fff; }:root[data-color-scheme="dark"] .task-tabs input:checked + span { color:#fff; background:var(--accent); }:root[data-color-scheme="dark"] .readiness-checklist .complete i,
 :root[data-color-scheme="dark"] .dispatch-docket .readiness-checklist .complete i { box-shadow:inset 0 0 0 3px var(--surface-raised); }@media (prefers-reduced-motion: reduce) {
