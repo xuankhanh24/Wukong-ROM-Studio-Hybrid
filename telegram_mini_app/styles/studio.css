@@ -18,24 +18,28 @@ button, .bottom-nav button { min-width: var(--target-size); }
 input, textarea, select { font-size: 16px; }
 small, .field > span, .field > small, .source-facts dt, .source-facts dd, .readiness-checklist small, .bottom-nav button span, .runtime-strip small, .dispatch-docket header, .job-history-card small { font-size: var(--text-label); }
 button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-.masthead {
+.masthead,
+header.masthead,
+#masthead,
+:root .masthead,
+:root[data-color-scheme="dark"] .masthead,
+:root[data-color-scheme="light"] .masthead {
   display: flex !important;
-  align-items: center;
-  justify-content: center;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  min-height: 48px;
-  padding: max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) 16px 8px;
+  align-items: center !important;
+  justify-content: center !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  min-height: 48px !important;
+  padding: calc(max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 12px) 16px 12px !important;
   background: transparent !important;
+  border: none !important;
+  border-top: none !important;
   border-bottom: none !important;
+  box-shadow: none !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
-  pointer-events: none;
-}
-:root[data-color-scheme="dark"] .masthead {
-  background: transparent !important;
-  border-bottom: none !important;
+  pointer-events: none !important;
 }
 
 .brand-pill {
@@ -44,15 +48,15 @@ button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); o
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: 38px;
   max-width: calc(100vw - 120px);
-  padding: 4px 16px 4px 10px;
+  padding: 5px 18px 5px 12px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 35%, transparent);
-  background: color-mix(in srgb, var(--surface-raised) 75%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  backdrop-filter: blur(16px) saturate(1.4);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.38);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
   user-select: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -73,10 +77,10 @@ button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); o
   text-overflow: ellipsis;
 }
 :root[data-color-scheme="dark"] .brand-pill {
-  background: rgba(22, 27, 34, 0.72);
-  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(22, 27, 34, 0.42);
+  border-color: rgba(255, 255, 255, 0.12);
   color: #f1efe9;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 html.is-fullscreen .masthead,
@@ -99,17 +103,21 @@ body[data-view="profile"] main {
   padding-top: 0 !important;
 }
 body[data-view="profile"] .profile-view {
-  margin-top: calc(-1 * (max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 52px)) !important;
+  margin-top: calc(-1 * (max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 60px)) !important;
 }
 body[data-view="profile"] .profile-scene {
   margin-top: 0 !important;
-  padding-top: calc(max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 56px) !important;
+  padding-top: calc(max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 68px) !important;
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
 }
 
-.studio-header {
-  margin-bottom: 16px;
+.studio-header,
+.page-head.studio-header {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  margin-top: 8px;
+  margin-bottom: 20px;
 }
 .studio-header h1 {
   margin-bottom: 4px;
@@ -262,10 +270,12 @@ main { padding-top: 36px !important; padding-bottom: 128px; }
     padding-bottom: calc(124px + env(safe-area-inset-bottom));
   }
   .masthead {
-    padding-top: max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px));
-    padding-bottom: 8px;
+    padding-top: calc(max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 12px) !important;
+    padding-bottom: 12px !important;
     background: transparent !important;
+    border: none !important;
     border-bottom: none !important;
+    box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -275,12 +285,12 @@ main { padding-top: 36px !important; padding-bottom: 128px; }
     padding-right: 0 !important;
   }
   body[data-view="profile"] .profile-view {
-    margin-top: calc(-1 * (max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 52px)) !important;
+    margin-top: calc(-1 * (max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 60px)) !important;
   }
   body[data-view="profile"] .profile-scene {
     margin: 0 !important;
-    padding-top: calc(max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 56px) !important;
-    min-height: calc(100dvh + max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 52px);
+    padding-top: calc(max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 68px) !important;
+    min-height: calc(100dvh + max(18px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 60px);
     border-radius: 0 !important;
   }
   .dossier-section { margin-bottom: 12px; padding: 15px; }

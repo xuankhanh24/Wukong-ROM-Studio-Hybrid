@@ -127,7 +127,7 @@
   --dock-glass-shadow: 0 20px 46px rgba(0,0,0,.34);
   --dock-lens-bg: linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.035)),rgba(72,109,158,.1);
   --dock-foreground: #f5f7fb;
-}:root[data-color-scheme="dark"] .masthead,
+}:root[data-color-scheme="dark"] .masthead { background: transparent !important; border-bottom: none !important; }
 :root[data-color-scheme="dark"] .contents-rail { background: var(--surface); }:root[data-color-scheme="dark"] .bottom-nav button.active { color:inherit; }:root[data-color-scheme="dark"] .primary { color:#fff; }:root[data-color-scheme="dark"] .task-tabs input:checked + span { color:#fff; background:var(--accent); }:root[data-color-scheme="dark"] .readiness-checklist .complete i,
 :root[data-color-scheme="dark"] .dispatch-docket .readiness-checklist .complete i { box-shadow:inset 0 0 0 3px var(--surface-raised); }@media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
