@@ -71,7 +71,7 @@ function navigate(name, smooth = true) {
     closeAdminUserPage({ restoreFocus: false, scroll: false });
   }
   $$(".view").forEach((node) => node.classList.toggle("active", node.id === name));
-  $$("#app-menu [data-nav]").forEach((node) => {
+  $$("#app-menu [data-nav], .bottom-nav [data-nav]").forEach((node) => {
     const active = node.dataset.nav === name;
     node.classList.toggle("active", active);
     if (active) node.setAttribute("aria-current", "page"); else node.removeAttribute("aria-current");

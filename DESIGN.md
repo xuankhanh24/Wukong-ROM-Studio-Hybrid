@@ -17,6 +17,7 @@ Wukong reconstructs the visual grammar observed in the authenticated @BotFather 
 | Bot detail | Job progress, event log, artifacts, and contextual actions |
 | Settings lists | ROM library, service settings, account, and admin operations |
 | Telegram bottom action and back | Build submit and contextual navigation in the Telegram WebApp bridge |
+| Persistent workspace navigation | Five-item bottom dock for Studio, Jobs, Profile, Catalog, and System |
 
 ## Source of truth
 
@@ -26,8 +27,9 @@ System mode follows Telegram color-scheme changes. The dark palette matches valu
 
 ## Interaction rules
 
-- The first screen is the complete create-build form. Advanced MOD and pipeline controls expand only when relevant. The review group updates as inputs change.
-- Telegram owns its native top bar. In Telegram, Wukong's navigation appears as grouped rows on the build screen; ordinary browsers show a matching fallback title/menu bar. Secondary screens use Telegram BackButton or the browser fallback back control.
+- The first screen is the create-build form. MOD selection and pipeline controls stay collapsed until needed so source, core configuration, delivery, and review are scannable. The review group updates as inputs change.
+- Telegram owns its native top bar. Wukong uses a persistent five-item bottom dock rather than repeating navigation after the form. Ordinary browsers retain a fallback title/menu bar. Secondary screens use Telegram BackButton or the browser fallback back control.
+- On Telegram versions that support it, the Mini App requests fullscreen at launch, including launches from the chat menu button. Older or unsupported clients retain the expanded viewport.
 - Telegram MainButton is the create-build action and reflects ready, disabled, and loading states. Ordinary browsers retain the in-form button.
 - Loading, empty, failed, expired-session, maintenance, and uncertain-submission states remain visible with a recovery action. Vietnamese and English labels are maintained together.
 - All actions retain at least a 44px touch target when practical; focus styles, labels, contrast, and announcement regions remain available to assistive technology.

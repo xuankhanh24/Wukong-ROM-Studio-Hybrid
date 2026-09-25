@@ -6,6 +6,33 @@ from tests.test_telegram_mini_app import _render_mini_app_in_chrome
 
 
 class MiniAppUpgradeTests(unittest.TestCase):
+    def test_supported_telegram_launch_requests_fullscreen(self):
+        def exercise(page):
+            result = page.evaluate("""() => ({
+                requests: document.body.dataset.fullscreenRequests,
+                fullscreen: document.body.classList.contains('telegram-fullscreen'),
+                dock: getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none'
+            })""")
+            self.assertEqual(result, {"requests": "1", "fullscreen": True, "dock": True})
+
+        _render_mini_app_in_chrome(api_enabled=True, fullscreen_supported=True, page_action=exercise)
+
+    def test_dock_switches_views_and_mod_picker_starts_collapsed(self):
+        def exercise(page):
+            picker = page.locator("#mod-picker")
+            self.assertFalse(picker.evaluate("node => node.open"))
+            picker.locator("summary").click()
+            self.assertTrue(picker.evaluate("node => node.open"))
+            page.locator(".bottom-nav [data-nav='jobs']").click()
+            self.assertEqual(page.locator(".view.active").get_attribute("id"), "jobs")
+            self.assertEqual(page.locator(".bottom-nav [data-nav='jobs']").get_attribute("aria-current"), "page")
+            page.locator(".bottom-nav [data-nav='build']").click()
+            self.assertEqual(page.locator(".view.active").get_attribute("id"), "build")
+            self.assertTrue(picker.evaluate("node => node.open"))
+            self.assertEqual(page.locator("#dock-profile .dock-profile-label").inner_text(), "Hồ sơ")
+
+        _render_mini_app_in_chrome(api_enabled=True, jobs_fixture=True, page_action=exercise)
+
     def test_polling_restarts_on_visibility_and_online_without_losing_snapshot(self):
         def exercise(page):
             result = page.evaluate("""async () => {
@@ -194,7 +221,7 @@ class MiniAppUpgradeTests(unittest.TestCase):
                 const selectors = [
                     '#app-menu-toggle', '#source-uri', '#paste-source', '#clear-source',
                     '#probe-source', '#device', '#preset', '#submit-recipe',
-                    '.bf-build-navigation button'
+                    '.bottom-nav button'
                 ];
                 return selectors.flatMap((selector) => [...document.querySelectorAll(selector)])
                     .filter((node) => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden')
@@ -212,16 +239,18 @@ class MiniAppUpgradeTests(unittest.TestCase):
                 def exercise(page):
                     result = page.evaluate("""() => ({
                         width:innerWidth, documentWidth:document.documentElement.scrollWidth,
-                        oldDock:document.querySelector('.bottom-nav') === null,
-                        positions:document.querySelectorAll('.bf-build-navigation [data-nav]').length,
+                        dockVisible:getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none',
+                        positions:document.querySelectorAll('.bottom-nav [data-nav]').length,
+                        modsCollapsed:!document.querySelector('#mod-picker').open,
                         advanced:document.querySelector('.build-options details.advanced').open,
                         facts:document.querySelectorAll('.source-summary dd').length,
                         form:document.querySelector('#recipe-form').contains(document.querySelector('#submit-recipe'))
                     })""")
                     self.assertEqual(result["width"], width)
                     self.assertLessEqual(result["documentWidth"], width)
-                    self.assertTrue(result["oldDock"])
-                    self.assertEqual(result["positions"], 4)
+                    self.assertTrue(result["dockVisible"])
+                    self.assertEqual(result["positions"], 5)
+                    self.assertTrue(result["modsCollapsed"])
                     self.assertEqual(result["facts"], 4)
                     self.assertFalse(result["advanced"])
                     self.assertTrue(result["form"])
@@ -257,24 +286,24 @@ class MiniAppUpgradeTests(unittest.TestCase):
 
                 _render_mini_app_in_chrome(api_enabled=True, window_width=width, window_height=height, page_action=exercise)
 
-    def test_telegram_owns_header_and_wukong_uses_grouped_navigation(self):
+    def test_telegram_owns_header_and_wukong_restores_dock_navigation(self):
         for width in (390, 1280):
             with self.subTest(width=width):
                 def exercise(page):
                     result = page.evaluate("""() => ({
                         telegramHosted: document.body.classList.contains('telegram-hosted'),
                         fallbackHeader: getComputedStyle(document.querySelector('.app-header')).display,
-                        oldDockAbsent: document.querySelector('.bottom-nav') === null,
-                        navigationVisible: getComputedStyle(document.querySelector('.bf-build-navigation')).display !== 'none',
-                        navigationRows: document.querySelectorAll('.bf-build-navigation .bf-row').length,
+                        dockVisible: getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none',
+                        navigationItems: document.querySelectorAll('.bottom-nav [data-nav]').length,
+                        duplicateRows: document.querySelector('.bf-build-navigation') !== null,
                         deliveryHeading: Boolean(document.querySelector('.delivery-section > .bf-section-head')),
                         sourceFacts: document.querySelectorAll('.source-summary dd').length,
                     })""")
                     self.assertTrue(result["telegramHosted"])
                     self.assertEqual(result["fallbackHeader"], "none")
-                    self.assertTrue(result["oldDockAbsent"])
-                    self.assertTrue(result["navigationVisible"])
-                    self.assertEqual(result["navigationRows"], 4)
+                    self.assertTrue(result["dockVisible"])
+                    self.assertEqual(result["navigationItems"], 5)
+                    self.assertFalse(result["duplicateRows"])
                     self.assertTrue(result["deliveryHeading"])
                     self.assertEqual(result["sourceFacts"], 4)
 

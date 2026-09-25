@@ -2,9 +2,11 @@
    This layer deliberately replaces the former card-dashboard presentation. */
 html, body { background: var(--canvas); }
 body { font-size: 14px; line-height: 1.43; }
-main { max-width: 560px; padding: 24px 16px calc(92px + var(--safe-bottom)); }
+main { max-width: 560px; padding: 24px 16px calc(108px + var(--safe-bottom)); }
 body.telegram-hosted .app-header { display: none; }
 body.telegram-hosted main { min-height: var(--viewport-height, 100dvh); padding-top: 20px; }
+body.telegram-hosted.telegram-fullscreen main { padding-top: calc(20px + var(--telegram-safe-top, 0px)); }
+#build { padding-bottom: 40px; }
 
 /* Browser fallback echoes Telegram's title pill; native clients own their chrome. */
 .app-header { position: relative; border: 0; background: var(--canvas); }
@@ -26,7 +28,8 @@ body.telegram-hosted main { min-height: var(--viewport-height, 100dvh); padding-
 .bf-hero > svg { color: var(--accent); stroke-width: 1.6; }
 .bf-hero h1 { margin: 0; color: var(--ink); font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
 .bf-hero p { max-width: 450px; margin: 9px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
-.build-hero { padding-bottom: 30px; }
+.build-hero { padding-bottom: 24px; }
+.build-hero > img { width: 72px; height: 72px; filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--accent) 24%, transparent)); }
 .page-head { margin: 14px 0 22px; }
 .page-head h1 { font-size: 22px; }
 .page-head p { color: var(--muted); }
@@ -45,7 +48,6 @@ body.telegram-hosted main { min-height: var(--viewport-height, 100dvh); padding-
 .bf-row .nav-icon { width: 21px; height: 21px; color: var(--muted); }
 .bf-row:hover, .device-row:hover, .job-history-card:hover { background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
 .bf-nav-profile { display: grid; place-items: center; width: 21px; height: 21px; border: 1.6px solid currentColor; border-radius: 50%; color: var(--muted); font-size: 12px; }
-.bf-build-navigation { margin-top: 38px; }
 .bf-runtime-status { margin: 0 0 18px; border: 0; background: transparent; }
 .bf-runtime-status > summary { min-height: 36px; padding: 6px 12px; color: var(--muted); font-size: 12px; font-weight: 500; }
 .bf-runtime-status > summary::after { font-size: 17px; }
@@ -60,8 +62,9 @@ button.secondary { border: 0; background: var(--surface); color: var(--accent); 
 .field > span:first-child, .field > label:first-child { font-weight: 500; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea { border: 0; border-radius: var(--radius-control); background: var(--field-bg); color: var(--field-fg); }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; box-shadow: none; }
-.source-input-head { margin: 0 12px 9px; }
+.source-input-head { flex-direction: row; align-items: center; gap: 4px; margin: 0 8px 8px 12px; }
 .source-input-head label { font-size: 15px; font-weight: 500; }
+.source-input-head > div { flex-wrap: nowrap; gap: 0; }
 .source-input-head button, .selection-bar button, .source-facts-head button, .release-version-controls button { background: transparent; color: var(--accent); font-size: 13px; }
 .source-input-head button, .probe-button { min-width: 44px; min-height: 44px; }
 .source-input-field textarea { min-height: 78px; padding: 15px 16px; background: var(--surface); }
@@ -87,8 +90,13 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .release-version-controls input { background: color-mix(in srgb, var(--ink) 4%, var(--surface)) !important; }
 .release-version-controls button { padding: 5px; }
 .config-summary { margin: 12px; padding: 0; background: transparent; color: var(--muted); }
-.selection-bar { margin: 27px 12px 10px; padding: 0; border: 0; }
-.selection-bar strong { font-size: 17px; }
+.mod-picker { overflow: hidden; margin-top: 18px; border: 0; border-radius: var(--radius-group); background: var(--surface); }
+.mod-picker > summary { min-height: 59px; padding: 12px 15px; color: var(--ink); }
+.mod-picker > summary > span { flex: 1; font-size: 15px; font-weight: 600; }
+.mod-picker > summary > small { color: var(--accent); font-size: 13px; font-weight: 600; }
+.mod-picker-body { padding: 0 12px 14px; border-top: 1px solid var(--line); }
+.selection-bar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; margin: 9px 0 12px; padding: 0; border: 0; }
+.selection-bar button { min-height: 44px; padding: 6px 10px; }
 .mod-search { margin-bottom: 11px; }
 .mod-search input { background: var(--surface) !important; }
 .mod-list, .steps, .switches, .mod-group-items { overflow: hidden; border: 0; border-radius: var(--radius-group); background: var(--surface); }
@@ -118,8 +126,23 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .readiness-checklist small { color: var(--muted); }
 #launch-warning { margin: 9px 12px 15px; color: var(--muted); }
 #submit-recipe { width: calc(100% - 24px); min-height: 49px; margin: 0 12px; }
-body:not(.telegram-main-button) #submit-recipe { position: fixed; z-index: 30; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); width: min(528px, calc(100vw - 24px)); margin: 0; box-shadow: 0 0 0 10px var(--canvas); transform: translateX(-50%); }
+body:not(.telegram-main-button) #submit-recipe { position: fixed; z-index: 30; left: 50%; bottom: calc(72px + var(--safe-bottom)); width: min(528px, calc(100vw - 24px)); margin: 0; box-shadow: 0 0 0 8px var(--canvas); transform: translateX(-50%); }
 body:not(.telegram-main-button) #submit-recipe:active { transform: translateX(-50%) scale(.99); }
+body:not(.telegram-main-button) #submit-recipe:disabled { position: static; width: calc(100% - 24px); margin: 0 12px; box-shadow: none; transform: none; }
+body:not(.telegram-main-button)[data-view]:not([data-view="build"]) #submit-recipe { display: none; }
+
+/* The dock restores one-handed navigation without repeating it below the build form. */
+.bottom-nav { position: fixed; z-index: 45; right: 50%; bottom: var(--safe-bottom); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; gap: 3px; width: min(520px, calc(100vw - 20px)); min-height: 62px; padding: 5px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: 0 12px 32px rgba(0, 0, 0, .16); transform: translateX(50%); }
+.bottom-nav > button { display: grid; align-content: center; justify-items: center; gap: 2px; min-width: 0; min-height: 52px; padding: 5px 2px; border: 0; border-radius: 13px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 600; line-height: 1.15; white-space: nowrap; }
+.bottom-nav > button .nav-icon { width: 21px; height: 21px; }
+.bottom-nav > button.active { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.bottom-nav > button:focus-visible { outline-offset: -3px; }
+.bottom-nav .dock-profile > span:not(.dock-profile-label) { display: grid; place-items: center; width: 25px; height: 25px; overflow: hidden; border-radius: 50%; background: var(--accent); color: #fff; font-size: 10px; }
+.bottom-nav .dock-profile > span:not(.dock-profile-label), .bottom-nav .dock-profile > img { grid-area: 1 / 1; }
+.bottom-nav .dock-profile img { z-index: 1; width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
+.bottom-nav .dock-profile-label { grid-area: 2 / 1; color: inherit; font-size: 11px; font-weight: 600; }
+body.access-checking .bottom-nav, body.access-limited .bottom-nav, body.maintenance-limited .bottom-nav, html[data-keyboard="true"] .bottom-nav { display: none; }
+html[data-keyboard="true"] body:not(.telegram-main-button) #submit-recipe { display: none; }
 
 /* Index/list/detail screens reuse exactly one visual grammar. */
 .job-history-sheet, .rom-catalog-panel, .catalog-sheet, .system-actions, .local-settings, .user-admin, .active-job, .catalog-release-admin, .catalog-preset-admin, .batch-config-card, .batch-monitor { margin: 0 0 29px; padding: 0; border: 0; background: transparent; box-shadow: none; }
@@ -180,13 +203,13 @@ body:not(.telegram-main-button) #submit-recipe:active { transform: translateX(-5
 dialog { border: 0; background: var(--surface); }
 
 @media (max-width: 620px) {
-  main { padding: 17px 12px calc(76px + var(--safe-bottom)); }
+  main { padding: 17px 12px calc(106px + var(--safe-bottom)); }
   .bf-hero { padding-top: 12px; }
   .bf-hero > img, .bf-hero > svg { width: 64px; height: 64px; margin-bottom: 18px; }
   .release-version-editor { display: grid; }
   .release-version-controls { width: 100%; }
   .selection-bar { align-items: flex-start; }
-  .source-input-head { align-items: center; }
-  .source-input-head > div { justify-content: flex-start; }
-  .bf-build-navigation { margin-top: 31px; }
+  .source-input-head { flex-direction: row; align-items: center; }
+  .source-input-head > div { justify-content: flex-end; }
+  .bottom-nav { width: calc(100vw - 16px); }
 }

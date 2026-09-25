@@ -34,6 +34,12 @@ function renderProfileTrigger(button, profile) {
   if (!profile) return;
   const avatar = profileAvatar(profile);
   button.replaceChildren(...avatar.childNodes);
+  if (button.id === "dock-profile") {
+    const label = document.createElement("small");
+    label.className = "dock-profile-label";
+    label.textContent = t("navProfile");
+    button.append(label);
+  }
   button.style.setProperty("--avatar-hue", avatar.style.getPropertyValue("--avatar-hue"));
   if (profile.photoUrl) button.style.setProperty("--avatar-image", `url(${JSON.stringify(String(profile.photoUrl))})`);
   else button.style.removeProperty("--avatar-image");

@@ -132,6 +132,7 @@ class _MiniAppFixtureHandler(BaseHTTPRequestHandler):
     pending_user = False
     library_scenario = ""
     maintenance_enabled = False
+    fullscreen_supported = False
 
     def log_message(self, _format: str, *_args: object) -> None:
         return
@@ -200,7 +201,7 @@ Object.defineProperty(navigator, 'clipboard', { value: {
 """ if self.click_artifact_actions else ""
             source = f"""
 window.__telegramEvents = {{}};
-window.Telegram = {{ WebApp: {{ {session}platform: 'android', colorScheme: 'light', ready() {{}}, expand() {{}}, isVersionAtLeast() {{ return false; }}, onEvent(name, callback) {{ window.__telegramEvents[name] = callback; }}, offEvent(name, callback) {{ if (window.__telegramEvents[name] === callback) delete window.__telegramEvents[name]; }}, setHeaderColor(value) {{ document.body.dataset.telegramHeaderColor = value; }}, setBackgroundColor(value) {{ document.body.dataset.telegramBackgroundColor = value; }}, openTelegramLink() {{}}, openLink(url) {{ document.body.dataset.openedArtifact = url; }}, readTextFromClipboard(callback) {{ callback({clipboard_value}); }}, HapticFeedback: {{ notificationOccurred() {{}}, impactOccurred() {{}}, selectionChanged() {{ document.body.dataset.hapticSelections = String(Number(document.body.dataset.hapticSelections || 0) + 1); }} }} }} }};
+window.Telegram = {{ WebApp: {{ {session}platform: 'android', colorScheme: 'light', ready() {{}}, expand() {{}}, isVersionAtLeast(version) {{ return {str(self.fullscreen_supported).lower()} && version === '8.0'; }}, requestFullscreen() {{ this.isFullscreen = true; document.body.dataset.fullscreenRequests = String(Number(document.body.dataset.fullscreenRequests || 0) + 1); window.__telegramEvents.fullscreenChanged?.(); }}, onEvent(name, callback) {{ window.__telegramEvents[name] = callback; }}, offEvent(name, callback) {{ if (window.__telegramEvents[name] === callback) delete window.__telegramEvents[name]; }}, setHeaderColor(value) {{ document.body.dataset.telegramHeaderColor = value; }}, setBackgroundColor(value) {{ document.body.dataset.telegramBackgroundColor = value; }}, openTelegramLink() {{}}, openLink(url) {{ document.body.dataset.openedArtifact = url; }}, readTextFromClipboard(callback) {{ callback({clipboard_value}); }}, HapticFeedback: {{ notificationOccurred() {{}}, impactOccurred() {{}}, selectionChanged() {{ document.body.dataset.hapticSelections = String(Number(document.body.dataset.hapticSelections || 0) + 1); }} }} }} }};
 {exec_fallback}
 window.addEventListener('DOMContentLoaded', () => {{
   if (!{json.dumps(self.library_scenario)}) return;
@@ -356,7 +357,7 @@ window.addEventListener('load', () => {{
       button.click();
       document.body.dataset.profileOpened = String(document.querySelector('#profile')?.classList.contains('active') === true);
       document.body.dataset.activeProfileView = document.body.dataset.view || '';
-      document.body.dataset.legacyDockAbsent = String(document.querySelector('.bottom-nav') === null);
+      document.body.dataset.dockRestored = String(document.querySelector('.bottom-nav') !== null);
     }};
     setTimeout(openProfile, 250);
   }}
@@ -1106,6 +1107,7 @@ def _render_mini_app_in_chrome(
     pending_user: bool = False,
     library_scenario: str = "",
     maintenance_enabled: bool = False,
+    fullscreen_supported: bool = False,
     screenshot_output: Path | None = None,
     window_width: int = 390,
     window_height: int = 1400,
@@ -1156,6 +1158,7 @@ def _render_mini_app_in_chrome(
             "pending_user": pending_user,
             "library_scenario": library_scenario,
             "maintenance_enabled": maintenance_enabled,
+            "fullscreen_supported": fullscreen_supported,
         },
     )
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -1395,7 +1398,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-action="cache"', html)
         self.assertIn('data-action="cache_clear"', html)
         self.assertIn("renderCatalog", script)
-        self.assertIn('$$("#app-menu [data-nav]")', script)
+        self.assertIn('$$("#app-menu [data-nav], .bottom-nav [data-nav]")', script)
         self.assertIn("incompleteLabel", script)
         self.assertIn("chooseDeviceHint", script)
         self.assertIn('class="bf-runtime-status"', html)
@@ -1413,8 +1416,9 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertEqual(["build", "jobs", "catalog", "system"], re.findall(r'data-nav="([^"]+)"', menu.group(0)))
         self.assertIn('class="bf-hero build-hero"', html)
         self.assertIn('class="build-review incomplete"', html)
-        self.assertIn('class="bf-page-section bf-build-navigation"', html)
-        self.assertNotIn('class="bottom-nav"', html)
+        self.assertIn('class="bottom-nav"', html)
+        self.assertIn('class="mod-picker" id="mod-picker"', html)
+        self.assertNotIn('class="bf-page-section bf-build-navigation"', html)
         self.assertNotIn('id="dispatch-fab"', html)
         self.assertIn("--bf-night-bg: #1a2026", styles)
         self.assertIn("--bf-night-group: #212a33", styles)
@@ -1435,7 +1439,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-nav="profile"', html)
         self.assertIn('id="app-menu-toggle"', html)
         self.assertIn('id="browser-back"', html)
-        self.assertNotIn('class="bottom-nav"', html)
+        self.assertIn('class="bottom-nav"', html)
         self.assertNotIn('id="header-profile"', html)
         self.assertIn('src="./WukongStudio.svg"', html)
         self.assertEqual(
@@ -1474,7 +1478,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("body.telegram-main-button #submit-recipe { display: none; }", styles)
         self.assertIn("--avatar-image", script)
         self.assertNotIn("profile-dragging", script)
-        self.assertNotIn(':root[data-color-scheme="dark"] .bottom-nav', styles)
+        self.assertIn('.bottom-nav > button.active', styles)
 
     def test_admin_system_surface_renders_user_access_and_quota_ledger(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
@@ -1641,7 +1645,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-profile-opened="true"', dom)
         self.assertIn('data-selected-theme="dark"', dom)
         self.assertIn('data-active-profile-view="profile"', dom)
-        self.assertIn('data-legacy-dock-absent="true"', dom)
+        self.assertIn('data-dock-restored="true"', dom)
         profile = re.search(r'<section class="view profile-view active" id="profile".*?</section>\s*</main>', dom, re.DOTALL)
         self.assertIsNotNone(profile)
         self.assertIn("Fixture User", profile.group(0))

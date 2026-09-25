@@ -32,7 +32,6 @@
       <button id="browser-back" class="browser-back" type="button" data-i18n-aria="backToBuild" aria-label="Về tạo build"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg><span data-i18n="backToBuild">Trở về</span></button>
       <div class="app-header-copy"><img class="app-mark" src="./WukongStudio.svg" width="28" height="28" alt=""><strong>Wk Studio</strong></div>
       <span class="connection sr-only" id="telegram-state"><i></i><span data-i18n="previewMode">PREVIEW MODE</span></span>
-      <button id="dock-profile" class="profile-avatar app-profile" type="button" data-nav="profile" data-i18n-aria="openProfile" aria-label="Mở hồ sơ" hidden><span>WK</span></button>
       <button id="app-menu-toggle" class="app-menu-toggle" type="button" aria-expanded="false" aria-controls="app-menu" data-i18n-aria="menuOpen" aria-label="Mở menu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
     </div>
     <nav id="app-menu" class="app-menu" aria-label="Điều hướng Wukong" hidden>
@@ -120,9 +119,10 @@
           <div class="field-grid three"><label class="field"><span data-i18n="runner">Nơi chạy</span><select id="execution"><option value="github-auto">GitHub Auto</option><option value="github-hosted">GitHub Hosted</option><option value="self-hosted-linux">Self-hosted Linux</option></select></label><label class="field"><span data-i18n="edition">Phiên bản</span><select id="preset"><option value="lite">Lite</option><option value="plus" selected>Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select></label><label class="field"><span data-i18n="modPack">Nền MOD</span><select id="mod-version"></select><small id="mod-release-version">—</small></label></div>
           <div class="release-version-editor"><div><strong id="release-version-title" data-i18n="releaseVersion">Phiên bản phát hành</strong><small id="release-version-hint" data-i18n="releaseVersionHint">Mặc định cố định theo MOD pack; thay đổi chỉ áp dụng cho job hiện tại.</small></div><div class="release-version-controls"><label class="sr-only" for="mod-release-version-input" data-i18n="releaseVersion">Phiên bản phát hành</label><input id="mod-release-version-input" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="release-version-hint"><button id="save-mod-release-version" type="button" data-i18n="saveReleaseVersion">Áp dụng cho job</button></div></div>
           <div class="release-version-editor custom-release-active" id="custom-preset-label-editor" hidden><div><strong data-i18n="customPresetJobTitle">Tên bản Custom</strong><small id="custom-preset-label-hint" data-i18n="customPresetJobHint">Đổi Custom thành tên riêng như Limited; chỉ áp dụng cho job hiện tại.</small></div><div class="release-version-controls"><label class="sr-only" for="custom-preset-label-input" data-i18n="customPresetJobTitle">Tên bản Custom</label><input id="custom-preset-label-input" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="custom-preset-label-hint" placeholder="Limited"><button id="apply-custom-preset-label" type="button" data-i18n="applyCustomPresetJob">Áp dụng cho job</button></div></div>
-          <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details><div class="selection-bar"><div><strong data-i18n="mods">MOD áp dụng</strong><small id="mod-count">0 đã chọn</small></div><div><button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button><button id="select-all" type="button" data-i18n="selectAll">Tất cả</button><button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button></div></div>
+          <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details>
+          <details class="mod-picker" id="mod-picker"><summary><span data-i18n="mods">MOD áp dụng</span><small id="mod-count">0 đã chọn</small></summary><div class="mod-picker-body"><div class="selection-bar"><button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button><button id="select-all" type="button" data-i18n="selectAll">Tất cả</button><button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button></div>
           <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
-          <div class="mod-list" id="mod-list" aria-live="polite"></div>
+          <div class="mod-list" id="mod-list" aria-live="polite"></div></div></details>
           <details class="advanced"><summary><span data-i18n="advanced">Pipeline nâng cao</span><b id="pipeline-count">0/0</b></summary><div class="advanced-body"><div class="steps" id="steps"></div><section class="debloat-control"><header><div><strong data-i18n="debloatPaths">Đường dẫn cần xóa</strong><small data-i18n="debloatPathsHint">Danh sách tùy chỉnh chỉ dùng cho job hiện tại và tự khôi phục sau khi gửi build.</small></div><button id="edit-debloat-paths" type="button" data-i18n="editDebloatPaths">Tùy chỉnh</button></header><div class="debloat-summary" id="debloat-summary"><strong id="debloat-path-count">0 đường dẫn</strong><small id="debloat-path-state" data-i18n="debloatDefaultState">Đang dùng danh sách mặc định</small></div><div class="debloat-editor" id="debloat-editor" hidden><label class="field field-wide"><span data-i18n="debloatEditorHint">Mỗi dòng là một đường dẫn tương đối</span><textarea id="debloat-paths" rows="10" spellcheck="false" placeholder="my_stock\app\Browser"></textarea></label><footer><button id="cancel-debloat-paths" type="button" data-i18n="cancelDialog">Hủy</button><button class="primary compact" id="save-debloat-paths" type="button" data-i18n="saveDebloatPaths">Lưu cho job này</button></footer></div></section></div></details>
         </section>
         <section class="bf-page-section delivery-section">
@@ -148,15 +148,6 @@
           <button class="primary" id="submit-recipe" type="submit" disabled><span data-i18n="finishSource">Hoàn tất cấu hình</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
         </aside>
       </form>
-      <section class="bf-page-section bf-build-navigation" aria-label="Điều hướng Wukong">
-        <header class="bf-section-head"><h2>Wukong</h2></header>
-        <div class="bf-list">
-          <button type="button" class="bf-row" data-nav="jobs"><svg class="nav-icon" aria-hidden="true"><use href="#nav-jobs"/></svg><span data-i18n="navJobs">Jobs</span><b aria-hidden="true">›</b></button>
-          <button type="button" class="bf-row" data-nav="catalog"><svg class="nav-icon" aria-hidden="true"><use href="#nav-catalog"/></svg><span data-i18n="navCatalog">Thư viện</span><b aria-hidden="true">›</b></button>
-          <button type="button" class="bf-row" data-nav="system"><svg class="nav-icon" aria-hidden="true"><use href="#nav-system"/></svg><span data-i18n="navSystem">Hệ thống</span><b aria-hidden="true">›</b></button>
-          <button type="button" class="bf-row" data-nav="profile"><span class="bf-nav-profile" aria-hidden="true">W</span><span data-i18n="openProfile">Hồ sơ</span><b aria-hidden="true">›</b></button>
-        </div>
-      </section>
       <details class="bf-runtime-status"><summary data-i18n="runtimePipeline">Trạng thái hệ thống</summary><div class="bf-list"><div class="bf-row"><span data-i18n="routePolicy">RUNNER</span><strong id="route-label">GitHub Auto</strong></div><div class="bf-row"><i class="status-dot waiting" id="runtime-pipeline-dot" aria-hidden="true"></i><span id="runtime-pipeline-state" data-i18n="runtimeWaiting">Chờ recipe hợp lệ</span></div><div class="bf-row"><span data-i18n="runtimeAllowance">LƯỢT BUILD · JOBS</span><button class="runtime-jobs-link" id="runtime-build-allowance" type="button" data-nav="jobs">—</button></div></div></details>
     </section>
 
@@ -288,6 +279,14 @@
       </section>
     </section>
   </main>
+
+  <nav class="bottom-nav" aria-label="Điều hướng Wukong">
+    <button class="active" type="button" data-nav="build" aria-current="page"><svg class="nav-icon" aria-hidden="true"><use href="#nav-studio"/></svg><span data-i18n="navBuild">Studio</span></button>
+    <button type="button" data-nav="jobs"><svg class="nav-icon" aria-hidden="true"><use href="#nav-jobs"/></svg><span data-i18n="navJobs">Jobs</span></button>
+    <button id="dock-profile" class="dock-profile" type="button" data-nav="profile" data-i18n-aria="openProfile" aria-label="Mở hồ sơ"><span>WK</span></button>
+    <button type="button" data-nav="catalog"><svg class="nav-icon" aria-hidden="true"><use href="#nav-catalog"/></svg><span data-i18n="navCatalog">Thư viện</span></button>
+    <button type="button" data-nav="system"><svg class="nav-icon" aria-hidden="true"><use href="#nav-system"/></svg><span data-i18n="navSystem">Hệ thống</span></button>
+  </nav>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <dialog class="user-dialog" id="user-create-dialog" aria-labelledby="user-create-title"><form method="dialog" id="user-create-form"><header><div><small data-i18n="addUserKicker">HỒ SƠ MỚI</small><h2 id="user-create-title" data-i18n="addUser">Thêm Telegram ID</h2></div><button value="cancel" data-i18n-aria="closeDialog" aria-label="Đóng">×</button></header><label class="field"><span>Telegram ID</span><input id="new-user-id" inputmode="numeric" required></label><label class="field"><span>Username</span><input id="new-user-username"></label><label class="field"><span data-i18n="displayName">Tên hiển thị</span><input id="new-user-display-name"></label><footer><button value="cancel" data-i18n="cancelDialog">Hủy</button><button class="primary" id="create-user-confirm" value="default" type="submit" data-i18n="createPendingUser">Tạo hồ sơ chờ duyệt</button></footer></form></dialog>

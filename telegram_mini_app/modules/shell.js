@@ -288,9 +288,23 @@ function renderSessionDiagnostics() {
 
 function activateTelegramApp() {
   bindViewport(runtime.TelegramApp);
-  document.body.classList.toggle("telegram-hosted", Boolean(runtime.TelegramApp?.platform && runtime.TelegramApp.platform !== "unknown"));
+  const insideTelegram = Boolean(runtime.TelegramApp?.platform && runtime.TelegramApp.platform !== "unknown");
+  document.body.classList.toggle("telegram-hosted", insideTelegram);
+  document.body.classList.toggle("telegram-fullscreen", insideTelegram && Boolean(runtime.TelegramApp?.isFullscreen));
   try {
     runtime.TelegramApp.ready(); runtime.TelegramApp.expand();
+    if (insideTelegram && runtime.TelegramApp.isVersionAtLeast?.("8.0") && typeof runtime.TelegramApp.requestFullscreen === "function") {
+      runtime.TelegramApp.onEvent?.("fullscreenChanged", () => {
+        document.body.classList.toggle("telegram-fullscreen", Boolean(runtime.TelegramApp.isFullscreen));
+        bindViewport(runtime.TelegramApp);
+      });
+      runtime.TelegramApp.onEvent?.("fullscreenFailed", () => {
+        document.body.classList.remove("telegram-fullscreen");
+      });
+      if (!runtime.TelegramApp.isFullscreen) {
+        try { runtime.TelegramApp.requestFullscreen(); } catch (_) { /* Older clients stay expanded. */ }
+      }
+    }
     if (runtime.TelegramApp.isVersionAtLeast?.("7.7")) runtime.TelegramApp.disableVerticalSwipes?.();
     if (runtime.TelegramApp.isVersionAtLeast?.("6.1")) {
       runtime.TelegramApp.setHeaderColor?.("secondary_bg_color");

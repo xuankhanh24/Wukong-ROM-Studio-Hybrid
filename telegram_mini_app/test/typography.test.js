@@ -20,5 +20,7 @@ test("uses measured BotFather visual tokens and newly composed Wukong screens", 
   assert.match(html, /id="app-menu"/);
   assert.match(html, /class="bf-hero build-hero"/);
   assert.match(html, /class="bf-page-section source-section"/);
-  assert.doesNotMatch(html, /class="bottom-nav"|class="dispatch-fab"|geist-sans-variable|runtime-strip|dossier-section|dispatch-docket/);
+  assert.match(html, /class="bottom-nav"/);
+  assert.match(html, /class="mod-picker" id="mod-picker"/);
+  assert.doesNotMatch(html, /class="dispatch-fab"|geist-sans-variable|runtime-strip|dossier-section|dispatch-docket/);
 });
