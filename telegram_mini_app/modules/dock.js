@@ -37,8 +37,13 @@ function applyTheme(theme = state.theme, persist = false) {
   });
   if (persist) localStorage.setItem("wukong-theme", state.theme);
   try {
-    runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
-    runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    if (document.body.dataset.view === "profile") {
+      runtime.TelegramApp?.setHeaderColor?.("#080e1b");
+      runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
+    } else {
+      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
+      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    }
   } catch (_) {}
 }
 
@@ -203,6 +208,21 @@ function navigate(name, smooth = true) {
     state.batchPollTimer = null;
   }
   document.body.dataset.view = name;
+  document.documentElement.dataset.view = name;
+  try {
+    if (name === "profile") {
+      document.documentElement.style.backgroundColor = "#080e1b";
+      document.body.style.backgroundColor = "#080e1b";
+      runtime.TelegramApp?.setHeaderColor?.("#080e1b");
+      runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
+    } else {
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+      const resolved = resolvedTheme();
+      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
+      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    }
+  } catch (_) {}
   if ($("#system")?.classList.contains("admin-user-open")) {
     closeAdminUserPage({ restoreFocus: false, scroll: false });
   }
