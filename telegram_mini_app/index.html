@@ -19,6 +19,14 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body class="access-checking">
+  <!--
+  THESIS: Wukong uses BotFather's calm grouped-settings grammar and rejects the former dashboard-card collage.
+  OWN-WORLD: Telegram canvas, one blue accent, centered purpose heroes, solid grouped rows, quiet separators, and compact native controls.
+  STORY: identify the current task, complete one clearly grouped decision at a time, review, then act once.
+  FIRST VIEWPORT: native Telegram chrome and centered Wukong identity above one concise hero; the first form group begins without competing cards.
+  FORM: competitor-faithful mobile operating surface, pinned by the user's BotFather reference.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
   <svg class="icon-sprite" aria-hidden="true">
     <symbol id="nav-studio" viewBox="0 0 24 24"><path d="M3.5 11.5 12 4l8.5 7.5M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"/></symbol>
     <symbol id="nav-jobs" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
@@ -236,7 +244,7 @@
     </section>
 
     <section class="view" id="system" aria-labelledby="system-title">
-      <header class="page-head"><div><h1 id="system-title" data-i18n="systemTitle">Trạng thái dịch vụ</h1></div><button class="primary compact" data-action="diagnostics" data-i18n="runDiagnostics">Chạy chẩn đoán</button></header>
+      <header class="bf-hero system-hero"><svg class="bf-hero-icon" aria-hidden="true"><use href="#nav-system"/></svg><h1 id="system-title" data-i18n="systemTitle">Hệ thống</h1><p data-i18n="systemIntro">Kiểm tra kết nối và quản lý các thiết đặt vận hành.</p><button class="primary compact" data-action="diagnostics" data-i18n="runDiagnostics">Chạy chẩn đoán</button></header>
       <div class="system-ledger">
         <div><b>01</b><i id="telegram-health"></i><span><strong>Telegram</strong><small id="telegram-auth-state" data-i18n="authenticatedPreview">Chưa xác thực. Hãy mở từ nút Mini App trong bot.</small></span></div>
         <div><b>02</b><i></i><span><strong>GitHub Actions</strong><small data-i18n="runnerChecked">Kiểm runner ngay khi submit</small></span></div>

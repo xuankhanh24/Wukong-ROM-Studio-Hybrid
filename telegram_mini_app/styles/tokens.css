@@ -85,4 +85,6 @@
   --row-separator: var(--line);
   --status-positive: var(--success);
   --status-negative: var(--danger);
+  --toast-bg: #111820;
+  --toast-fg: #fff;
 }

@@ -1,0 +1,528 @@
+/* Final BotFather-derived language layer.
+   One mobile grammar owns hierarchy, spacing, grouped rows and actions. */
+:root {
+  --wk-gutter: 16px;
+  --wk-content: 560px;
+  --wk-section-gap: 32px;
+  --wk-row-x: 16px;
+  --wk-row-y: 12px;
+  --wk-row-min: 56px;
+  --wk-group-radius: 12px;
+  --wk-control-radius: 10px;
+  --wk-title: 28px;
+  --wk-section-title: 21px;
+  --wk-body: 15px;
+  --wk-caption: 13px;
+  --wk-dock-height: 72px;
+  --radius-control: var(--wk-control-radius);
+  --radius-group: var(--wk-group-radius);
+}
+
+html { background: var(--canvas); }
+body { font-size: var(--wk-body); line-height: 1.42; overflow-x: clip; }
+h1, h2, h3, strong, b { text-wrap: balance; }
+p, small, dd { text-wrap: pretty; }
+button, input, select, textarea { letter-spacing: 0; }
+main {
+  width: 100%;
+  max-width: var(--wk-content);
+  padding: 18px var(--wk-gutter) calc(126px + var(--safe-bottom));
+}
+body.telegram-hosted main { padding-top: 18px; }
+body.telegram-hosted.telegram-fullscreen main {
+  padding-top: max(calc(var(--telegram-safe-top, 0px) + 18px), calc(var(--telegram-floating-top) + 72px));
+}
+
+/* Native chrome identity: same quiet centered capsule used by BotFather. */
+body.telegram-hosted.telegram-fullscreen::before {
+  height: max(calc(var(--telegram-safe-top, 0px) + 12px), calc(var(--telegram-floating-top) + 54px));
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
+}
+body.telegram-hosted.telegram-fullscreen .telegram-floating-brand {
+  height: 40px;
+  max-width: calc(100vw - 184px);
+  padding: 6px 14px 6px 7px;
+  gap: 8px;
+  background: color-mix(in srgb, var(--ink) 7%, var(--canvas));
+  box-shadow: none;
+}
+.telegram-floating-brand strong { font-size: 15px; font-weight: 700; }
+
+/* Page purpose. One centered hero, one thought, one visual accent. */
+.bf-hero,
+.profile-hero {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 18px 10px 34px;
+  text-align: center;
+}
+.bf-hero > img,
+.bf-hero > svg,
+.profile-avatar-hero {
+  width: 72px;
+  height: 72px;
+  margin: 0 0 22px;
+}
+.bf-hero > svg { color: var(--accent); stroke-width: 2; }
+.bf-hero h1,
+.profile-identity h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--wk-title);
+  font-weight: 750;
+  line-height: 1.14;
+  letter-spacing: -.025em;
+}
+.bf-hero p,
+.profile-identity p {
+  max-width: 420px;
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.system-hero > button { margin-top: 18px; min-width: 164px; }
+
+/* Section hierarchy. Titles sit outside grouped surfaces like BotFather. */
+.bf-page-section,
+.job-history-sheet,
+.rom-catalog-panel,
+.catalog-sheet,
+.system-actions,
+.local-settings,
+.user-admin,
+.active-job,
+.catalog-release-admin,
+.catalog-preset-admin,
+.batch-config-card,
+.batch-monitor {
+  margin: 0 0 var(--wk-section-gap);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.bf-section-head,
+.job-history-sheet > header,
+.rom-catalog-panel > header,
+.catalog-sheet > header,
+.system-actions > header,
+.batch-monitor > header,
+.user-admin > header,
+.local-settings > h2 {
+  margin: 0 0 11px;
+  padding: 0 2px;
+}
+.bf-section-head h2,
+.job-history-sheet > header h2,
+.rom-catalog-panel > header h2,
+.catalog-sheet > header h2,
+.system-actions h2,
+.local-settings > h2,
+.user-admin > header h2,
+.library-technical-summary h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--wk-section-title);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -.018em;
+}
+.rom-catalog-panel > header p,
+.system-actions > header p,
+.user-admin > header p,
+.batch-monitor > header p,
+.bf-section-note {
+  max-width: 460px;
+  margin: 7px 2px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.42;
+}
+.bf-section-note { margin-top: 9px; }
+
+/* Group anatomy: solid surface, shared radius, separators instead of cards. */
+.bf-list,
+.build-options > .field-grid,
+.source-state,
+.source-manual,
+.source-facts-details,
+.mod-picker,
+.advanced,
+.switches,
+.readiness-checklist,
+.job-history,
+.job-history-tabs,
+.library-tabs,
+.rom-catalog-filters,
+.rom-catalog-results,
+.catalog-controls,
+.device-table,
+.catalog-mods,
+.profile-highlights,
+.profile-fact-list,
+.system-ledger,
+.system-actions > p,
+.system-actions > div,
+.local-settings > .settings-grid,
+.user-admin-stats,
+.user-admin-controls,
+.user-table,
+.user-detail-grid,
+.batch-choice-grid,
+.batch-items,
+.batch-events {
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--wk-group-radius);
+  background: var(--surface);
+  box-shadow: none;
+}
+.bf-row,
+.build-options > .field-grid > label,
+.switches > label,
+.steps > label,
+.mod-group-items > label,
+.readiness-checklist li,
+.job-history > *,
+.rom-release,
+.device-row,
+.profile-highlight,
+.profile-fact,
+.system-ledger > div,
+.settings-grid > label,
+.theme-setting,
+.user-row {
+  min-height: var(--wk-row-min);
+  padding: var(--wk-row-y) var(--wk-row-x);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+.bf-row:last-child,
+.build-options > .field-grid > label:last-child,
+.switches > label:last-child,
+.steps > label:last-child,
+.mod-group-items > label:last-child,
+.readiness-checklist li:last-child,
+.job-history > *:last-child,
+.rom-release:last-child,
+.device-row:last-child,
+.profile-highlight:last-child,
+.profile-fact:last-child,
+.system-ledger > div:last-child,
+.settings-grid > *:last-child,
+.user-row:last-child { border-bottom: 0; }
+
+/* Form rows read label → current value → disclosure, never as loose cards. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+select,
+textarea {
+  min-height: 50px;
+  padding: 12px 15px;
+  border: 0;
+  border-radius: var(--wk-control-radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.35;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .72; }
+.source-input-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 9px;
+}
+.source-input-head label { font-size: 16px; font-weight: 650; }
+.source-input-head > div { display: flex; align-items: center; justify-content: flex-end; gap: 0; }
+.source-input-head button,
+.selection-bar button,
+.source-facts-head button,
+.bf-text-action,
+.runtime-jobs-link {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 650;
+}
+.source-input-head #open-rom-catalog { margin-right: auto; }
+.source-input-field textarea { min-height: 96px; resize: vertical; }
+.source-input-field > small {
+  display: block;
+  margin: 8px 2px 0;
+  color: var(--muted);
+  font-size: var(--wk-caption);
+  line-height: 1.42;
+}
+.source-state {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  margin-top: 16px;
+  padding: 14px 16px;
+}
+.source-state-mark { width: 42px; height: 42px; border-radius: 50%; }
+.source-state-copy small { color: var(--accent); font-size: 11px; letter-spacing: .04em; }
+.source-state-copy strong { font-size: 16px; line-height: 1.25; }
+.source-state-copy p { margin-top: 3px; font-size: 13px; line-height: 1.38; }
+.source-state .probe-button:not([hidden]) { grid-column: 1 / -1; width: 100%; margin-top: 2px; }
+.source-manual,
+.source-facts-details,
+.mod-picker,
+.advanced { margin-top: 14px; }
+details > summary { min-height: 56px; padding: 12px var(--wk-row-x); font-size: 15px; font-weight: 550; }
+details > summary::after { font-size: 22px; }
+.advanced-body { padding: 0 16px 16px; }
+
+.build-options > .field-grid { display: block; margin-bottom: 14px; }
+.build-options > .field-grid > label {
+  display: grid;
+  grid-template-columns: minmax(108px, 42%) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.build-options > .field-grid > label > span { font-size: 15px; font-weight: 500; }
+.build-options > .field-grid select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 28px 8px 4px;
+  background: transparent;
+  color: var(--muted);
+  text-align: right;
+  text-align-last: right;
+}
+.release-version-details { margin: 0 0 14px; }
+.release-version-details > summary #release-version-current {
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.release-version-editor { gap: 10px; padding: 14px 16px 16px; }
+.release-version-controls { width: 100%; }
+.release-version-controls input { background: color-mix(in srgb, var(--ink) 4%, var(--surface)) !important; }
+.config-summary { margin: 10px 2px 0; font-size: 13px; line-height: 1.4; }
+.mod-picker { margin-top: 16px; }
+.mod-picker > summary { min-height: 60px; }
+.mod-picker > summary > span { font-size: 16px; font-weight: 650; }
+.mod-picker-body { padding: 0 0 12px; }
+.selection-bar { margin: 0; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.mod-search { margin: 10px 12px; }
+.mod-search > span { margin-left: 2px; }
+.mod-group > header { margin: 20px 16px 8px; }
+.mod-group h3 { font-size: 15px; }
+.switches > label { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+.switches > label > span strong { font-size: 15px; }
+.switches > label > span small { margin-top: 2px; font-size: 12px; line-height: 1.35; }
+
+/* Review is the single visual climax; blue action carries the page. */
+.build-review { margin: 0 0 28px; padding: 0; }
+.build-review > header {
+  margin: 0 2px 11px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.build-review > header small { color: var(--ink); font-size: var(--wk-section-title); font-weight: 750; }
+#launch-summary { margin: 10px 2px; font-size: 14px; }
+.readiness-checklist { margin: 0; }
+.readiness-checklist li { align-items: flex-start; }
+.readiness-checklist b { font-size: 15px; }
+.readiness-checklist small { margin-top: 2px; font-size: 12px; }
+#launch-warning { margin: 9px 2px 14px; font-size: 13px; }
+#submit-recipe { min-height: 52px; border-radius: var(--wk-control-radius); font-size: 16px; }
+body:not(.telegram-main-button) #submit-recipe {
+  bottom: calc(var(--wk-dock-height) + 20px + var(--safe-bottom));
+  width: min(calc(var(--wk-content) - 2 * var(--wk-gutter)), calc(100vw - 2 * var(--wk-gutter)));
+  box-shadow: 0 0 0 8px var(--canvas);
+}
+body:not(.telegram-main-button) #submit-recipe:disabled { position: static; width: 100%; margin: 0; }
+
+/* Secondary screens. Search and filters precede the list; headers stay distinct. */
+.jobs-connection { margin: -14px 0 22px; }
+.job-history-sheet > header { align-items: center; }
+.job-history-sheet > header > div { margin-right: auto; }
+.job-history-sheet > header > span { display: none; }
+.job-history-filters { margin: 0 0 20px; }
+.job-history-search { margin-bottom: 4px; }
+.job-history-search input { min-height: 54px !important; padding-left: 46px !important; }
+.job-history-search svg { top: 16px; left: 16px; }
+.bf-filter-details > summary { min-height: 44px; padding: 6px 2px; color: var(--accent); font-size: 14px; }
+.bf-filter-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.job-history-tabs,
+.library-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; }
+.library-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 28px; }
+.job-history-tabs button,
+.library-tabs button { min-height: 48px; padding: 8px 7px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-size: 14px; }
+.job-history-tabs button.active,
+.library-tabs button[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.job-history-card { padding: 14px 16px; }
+.active-job { padding: 0; }
+.active-job > * { max-width: 100%; }
+.active-job > header,
+.active-job > section,
+.active-job > details,
+.active-job > div { margin-inline: 0; padding-inline: 16px; }
+.job-technical { border-radius: 0; background: transparent; }
+.job-technical > summary { margin-inline: -16px; padding-inline: 16px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--canvas); font-size: var(--wk-section-title); font-weight: 750; }
+.job-technical > summary::after { display: none; }
+.job-context { padding-block: 14px; }
+.job-facts {
+  display: block !important;
+  overflow: hidden;
+  margin: 12px 0 0;
+  border-radius: var(--wk-group-radius);
+  background: var(--surface);
+}
+.job-facts > div {
+  display: grid;
+  grid-template-columns: minmax(100px, 40%) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-height: 54px;
+  padding: 11px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.job-facts > div:last-child { border-bottom: 0; }
+.job-facts small { margin: 0; font-size: 12px; line-height: 1.35; }
+.job-facts strong { font-size: 14px; line-height: 1.35; text-align: right; }
+.job-artifacts > article { padding: 14px 0; }
+.job-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.job-controls button, .job-artifact-actions button { min-height: 44px; }
+
+.rom-catalog-filters,
+.catalog-controls,
+.user-admin-controls,
+.settings-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.rom-catalog-filters > label,
+.rom-catalog-filters > .rom-device-field,
+.catalog-controls > label,
+.user-admin-controls > label,
+.settings-grid > label,
+.theme-setting { min-height: 70px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.rom-catalog-filters > button { min-height: 52px; margin: 12px; }
+.rom-catalog-filters input,
+.rom-catalog-filters select,
+.catalog-controls input,
+.catalog-controls select,
+.user-admin-controls input,
+.user-admin-controls select,
+.settings-grid select { padding-inline: 0; background: transparent !important; }
+.rom-results-heading { margin: 0 2px 10px; font-size: 13px; }
+.rom-release { align-items: flex-start; }
+.rom-catalog-note { margin-inline: 2px; }
+
+/* Profile and System use the same grouped-row grammar. */
+.profile-scene, .profile-scene-content { min-height: 0; }
+.profile-scene-backdrop { display: none; }
+.profile-hero { padding-top: 18px; }
+.profile-badges { justify-content: center; }
+.profile-highlights { display: block; margin-bottom: var(--wk-section-gap); }
+.profile-highlight { min-height: 58px; text-align: left; }
+.profile-highlight small { flex: 1; font-size: 14px; }
+.profile-highlight strong { font-size: 16px; }
+.profile-detail-groups { gap: var(--wk-section-gap); }
+.profile-fact-group h2 { margin: 0 0 11px; padding: 0 2px; background: transparent; font-size: var(--wk-section-title); }
+.profile-fact { min-height: var(--wk-row-min); }
+.system-ledger { margin-bottom: var(--wk-section-gap); }
+.system-ledger > div { align-items: center; }
+.system-ledger > div > b { display: none; }
+.system-ledger strong { font-size: 15px; }
+.system-ledger small { margin-top: 2px; font-size: 12px; line-height: 1.35; }
+.system-actions > p,
+.system-actions > div,
+.local-settings > .settings-grid { margin: 0; padding: 14px 16px; }
+.system-actions > div:has(> button) { display: grid; gap: 0; padding: 0; }
+.system-actions > div:has(> button) > button { min-height: 58px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; }
+.system-actions > div:has(> button) > button:last-child { border-bottom: 0; }
+.theme-selector { width: 100%; margin-top: 8px; }
+
+/* Administration stays readable on a phone: no pseudo-table columns. */
+.user-admin > header { display: grid; gap: 12px; }
+.user-admin > header > button { width: 100%; }
+.user-admin-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; }
+.user-admin-stats > div {
+  min-height: 76px;
+  padding: 12px 14px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.user-admin-stats > div:nth-child(2n) { border-right: 0; }
+.user-admin-stats > div:nth-last-child(-n+2) { border-bottom: 0; }
+.user-admin-controls { margin-bottom: 16px; }
+.user-table-head { display: none; }
+.user-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "identity open" "activity status" "quota status"; gap: 5px 10px; padding: 14px 16px; }
+.user-row > .user-identity { grid-area: identity; }
+.user-row > .user-open { grid-area: open; }
+.user-row > .user-activity { grid-area: activity; }
+.user-row > .user-quota { grid-area: quota; }
+.user-row > .access-badge { grid-area: status; align-self: center; }
+.user-detail-grid { display: block; }
+.user-detail-grid > div { min-height: 62px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+.user-detail-grid > div:last-child { border-bottom: 0; }
+.user-detail-grid small { font-size: 12px; }
+.user-detail-grid strong { margin-top: 3px; font-size: 15px; }
+.user-detail-actions { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+
+/* One-handed navigation: visually subordinate, consistent, and clear. */
+.bottom-nav {
+  width: min(520px, calc(100vw - 20px));
+  min-height: var(--wk-dock-height);
+  padding: 6px;
+  gap: 2px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 8px 28px rgb(0 0 0 / .15);
+}
+.bottom-nav > button {
+  min-height: 58px;
+  padding: 6px 2px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.bottom-nav > button.active { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.bottom-nav > button .nav-icon { width: 22px; height: 22px; }
+
+/* State treatment and responsive edge cases. */
+.toast { bottom: calc(var(--wk-dock-height) + 18px + var(--safe-bottom)); background: var(--toast-bg); color: var(--toast-fg); }
+body[data-view="build"]:has(#submit-recipe:not(:disabled)) .toast { bottom: calc(var(--wk-dock-height) + 82px + var(--safe-bottom)); }
+.empty-state, .job-empty, .rom-catalog-empty, .catalog-empty, .user-empty { padding: 28px 20px; text-align: center; }
+
+@media (max-width: 380px) {
+  .bf-hero h1, .profile-identity h1 { font-size: 25px; }
+  .bf-hero p { font-size: 14px; }
+  .source-input-head { grid-template-columns: minmax(0, 1fr); }
+  .source-input-head > div { justify-content: flex-start; }
+  .build-options > .field-grid > label { grid-template-columns: minmax(92px, 40%) minmax(0, 1fr); }
+  .bottom-nav > button, .bottom-nav .dock-profile-label { font-size: 10px; }
+}
+
+@media (min-width: 621px) {
+  main { padding-inline: 20px; }
+  .bf-hero { padding-top: 26px; }
+  .user-detail-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -695,11 +695,25 @@ Object.assign(translations.en, { reviewBuild: "Review and build", selectionSumma
 
 Object.assign(translations.vi, {
   menuOpen: "Mở menu", backToBuild: "Trở về", buildIntroEyebrow: "TẠO BẢN ROM MỚI",
-  buildIntroDescription: "Chọn nguồn ROM, cấu hình bản build và kiểm tra trước khi bắt đầu."
+  buildIntroDescription: "Dán link ROM, chọn cấu hình và tạo một job build.",
+  deliveryTitle: "Nhận kết quả", deliveryHint: "Chọn nơi nhận file sau khi build xong.",
+  jobsTitle: "Jobs", jobsIntro: "Theo dõi tiến độ và mở kết quả của từng bản build.",
+  systemTitle: "Hệ thống", systemIntro: "Kiểm tra kết nối và quản lý các thiết đặt vận hành.",
+  sourceIdleKicker: "NHẬN DIỆN TỰ ĐỘNG", sourceIdleTitle: "Dán link ROM để bắt đầu",
+  sourceIdleMessage: "Wukong tự nhận thiết bị, phiên bản và dung lượng trước khi build.",
+  libraryIntro: "Tìm ROM phù hợp hoặc tra cứu thiết bị và bộ MOD.",
+  romCatalogHint: "Chọn thiết bị, khu vực và phiên bản cần đưa vào Studio."
 });
 Object.assign(translations.en, {
   menuOpen: "Open menu", backToBuild: "Back", buildIntroEyebrow: "CREATE A NEW ROM BUILD",
-  buildIntroDescription: "Choose a ROM source, configure the build, and review it before starting."
+  buildIntroDescription: "Paste a ROM link, choose a configuration and create a build job.",
+  deliveryTitle: "Receive results", deliveryHint: "Choose where to receive the completed build.",
+  jobsTitle: "Jobs", jobsIntro: "Track progress and open the result of each build.",
+  systemTitle: "System", systemIntro: "Check connections and manage operational settings.",
+  sourceIdleKicker: "AUTO DETECTION", sourceIdleTitle: "Paste a ROM link to begin",
+  sourceIdleMessage: "Wukong detects the device, version and size before building.",
+  libraryIntro: "Find a suitable ROM or explore supported devices and MOD packs.",
+  romCatalogHint: "Choose the device, region and release to send to Studio."
 });
 
 Object.assign(translations.vi, {

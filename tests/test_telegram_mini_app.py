@@ -1619,7 +1619,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertNotIn('data-i18n="buildIntro"', html)
         self.assertIn('data-i18n="jobsIntro"', html)
         self.assertNotIn('data-i18n="catalogIntro"', html)
-        self.assertNotIn('data-i18n="systemIntro"', html)
+        self.assertIn('data-i18n="systemIntro"', html)
         self.assertNotIn('class="process-key"', html)
         self.assertIn('id="admin-maintenance" hidden', html)
         self.assertRegex(dom, r'id="admin-maintenance"[^>]* hidden')

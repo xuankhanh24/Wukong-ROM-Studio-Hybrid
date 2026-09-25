@@ -5,7 +5,7 @@ description: Wukong interface reconstructed from the observed @BotFather Mini Ap
 
 # Wukong Mini App design system
 
-Wukong reconstructs the visual grammar observed in the authenticated @BotFather Mini App and the ten user-provided screenshots: centered identity/page-purpose hero, flat dark canvas, solid grouped rows, understated explanatory copy, blue links and primary actions, restrained iconography, and Telegram-owned top chrome. Wukong keeps its own name, icon, terminology, and ROM workflows. BotFather's deployed bundle and private design assets are not dependencies. [Source investigation](docs/research/botfather-mini-app-source.md) distinguishes the deployed assets from an open-source repository.
+Wukong reconstructs the visual grammar observed in the authenticated @BotFather Mini App and the ten user-provided screenshots: centered identity/page-purpose hero, Telegram canvas, solid grouped rows, understated explanatory copy, blue links and primary actions, restrained iconography, and Telegram-owned top chrome. Wukong keeps its own name, icon, terminology, and ROM workflows. BotFather's deployed bundle and private design assets are not dependencies. [Source investigation](docs/research/botfather-mini-app-source.md) distinguishes the deployed assets from an open-source repository.
 
 ## Pattern mapping
 
@@ -21,13 +21,16 @@ Wukong reconstructs the visual grammar observed in the authenticated @BotFather 
 
 ## Source of truth
 
-`telegram_mini_app/styles/tokens.css` holds measured dark primitives, Telegram light-theme fallbacks, semantic colors, and component aliases. `botfather-reference.css` composes the new reference-derived shell, heroes, rows, forms, and lists, while `botfather-components.css` and `botfather-screens.css` cover shared and dynamic states across jobs, library, profile, system, and admin. `styles.css` imports these active files.
+`telegram_mini_app/styles/tokens.css` holds measured primitives, Telegram theme fallbacks, semantic colors, and component aliases. `botfather-language.css` is the final authority for the mobile grammar: a 16px gutter, 32px section rhythm, 21px section titles, 56px grouped rows, 12px group radius, one blue accent, and a 560px content ceiling. Earlier component files retain structural and state styling; the language layer deliberately normalizes their layout so no screen invents its own card, spacing, or type scale.
 
 System mode follows Telegram color-scheme changes. The dark palette matches values measured in the running BotFather Mini App; light mode uses Telegram theme parameters where available because the supplied references are dark. Light and dark overrides remain available under Mini App settings. BotFather declares ProductSans, but Wukong intentionally uses licensed system-font fallbacks rather than importing that deployed font. Screen content respects Telegram's safe-area values, the browser viewport, keyboard resizing, and reduced-motion preference.
 
 ## Interaction rules
 
 - The first screen is the create-build form. MOD selection and pipeline controls stay collapsed until needed so source, core configuration, delivery, and review are scannable. The review group updates as inputs change.
+- Every primary destination begins with one centered purpose hero. Section titles live outside their grouped surface; related controls share one surface and separators instead of becoming individual cards.
+- Copy states the immediate decision or outcome in one short sentence. Secondary explanation sits below its group and never competes with the primary action.
+- Mobile details use label/value rows rather than two-column card grids. Long identifiers may wrap, but navigation labels and primary actions remain on one line.
 - Telegram owns its native back and menu controls. In fullscreen mode, Wukong places a compact centered identity pill between those controls and reserves a clean safe-area band so scrolled content never sits behind them. Ordinary browsers retain a fallback title/menu bar. Secondary screens use Telegram BackButton or the browser fallback back control.
 - On Telegram versions that support it, the Mini App requests fullscreen at launch, including launches from the chat menu button. Older or unsupported clients retain the expanded viewport.
 - A single in-app create-build action sits above the persistent five-item dock when ready, including inside Telegram. Telegram MainButton stays hidden to avoid a second footer below the dock; the form still exposes its disabled and loading states.
