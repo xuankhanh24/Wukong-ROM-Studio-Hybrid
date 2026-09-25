@@ -419,10 +419,12 @@ function isSafePresetLabel(value) {
 function renderReleaseVersion() {
   const label = selectedReleaseVersion();
   const display = $("#mod-release-version");
+  const current = $("#release-version-current");
   const title = $("#release-version-title");
   const hint = $("#release-version-hint");
   const input = $("#mod-release-version-input");
   if (display) display.textContent = label;
+  if (current) current.textContent = label;
   if (title) title.textContent = t("releaseVersion");
   if (hint) hint.textContent = t("releaseVersionHint");
   if (input) {

@@ -1,0 +1,155 @@
+/* Mobile-first rhythm shared by Studio, lists, profile and administration. */
+:root { --mobile-gutter: 16px; --mobile-section-gap: 28px; --radius-group: 12px; --radius-control: 10px; }
+body { font-size: 16px; line-height: 1.45; }
+::selection { background: color-mix(in srgb, var(--accent) 25%, var(--surface)); color: var(--ink); }
+input, textarea { caret-color: var(--accent); }
+button, summary, select { touch-action: manipulation; }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { padding-inline: var(--mobile-gutter); }
+.bf-hero { padding: 8px 12px 20px; }
+.bf-hero > img, .bf-hero > svg, .build-hero > img { width: 56px; height: 56px; margin-bottom: 12px; }
+.bf-hero h1 { font-size: 24px; line-height: 1.18; }
+.bf-hero p { margin-top: 8px; font-size: 15px; line-height: 1.42; }
+.bf-page-section { margin-bottom: var(--mobile-section-gap); }
+.bf-section-head { margin: 0 0 11px; }
+.bf-section-head h2, .job-history-sheet > header h2, .catalog-sheet > header h2, .system-actions h2, .local-settings h2 { font-size: 19px; line-height: 1.25; }
+.bf-section-note { margin-inline: 2px; font-size: 14px; }
+.bf-row, .device-row, .user-row, .profile-fact, .system-ledger > div, .switches > label, .steps > label, .mod-group-items > label, .rom-release, .job-history > * { padding-inline: 16px; }
+.bf-row { font-size: 16px; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea { font-size: 16px; }
+.field > span:first-child, .field > label:first-child, .rom-catalog-filters label > span:first-child, .rom-device-field > span:first-child { font-size: 14px; }
+
+/* The source entry has one dominant field and one clearly separated action row. */
+.source-input-head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin: 0 0 9px; }
+.source-input-head label { font-size: 16px; font-weight: 600; }
+.source-input-head > div { display: flex; justify-content: flex-start; gap: 4px; }
+.source-input-head button { min-width: 44px; min-height: 44px; padding: 8px 10px; font-size: 14px; }
+.source-input-head #open-rom-catalog { margin-right: auto; font-weight: 700; }
+.source-input-field textarea { min-height: 88px; max-height: 180px; padding: 14px 16px; line-height: 1.4; }
+.source-input-field > small { margin: 6px 2px 0; font-size: 13px; line-height: 1.4; }
+.source-state { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 11px; padding: 14px; }
+.source-state-copy strong { font-size: 15px; line-height: 1.25; }
+.source-state-copy p { font-size: 13px; line-height: 1.35; }
+.source-state .probe-button:not([hidden]) { grid-column: 1 / -1; width: 100%; min-height: 44px; margin-top: 2px; }
+.source-facts-details { margin-top: 12px; border: 0; background: var(--surface); }
+.source-facts-details > summary { min-height: 52px; font-size: 15px; }
+.source-facts-details > summary strong { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 500; }
+.source-facts-details > .source-summary { display: none; }
+.source-facts-details .source-facts-head { padding: 12px 14px 0; }
+.source-facts-details .source-facts { margin: 0 12px 12px; }
+.source-facts > div { padding: 11px 12px; }
+.source-facts dt { font-size: 12px; }
+.source-facts dd { font-size: 14px; }
+.source-manual > summary, .advanced > summary, .mod-picker > summary { min-height: 54px; font-size: 15px; }
+
+/* Advanced release naming is available without occupying the primary recipe. */
+.release-version-details { margin-top: -18px; border: 0; border-radius: var(--radius-group); background: var(--surface); }
+.release-version-details > summary { min-height: 52px; padding: 12px 16px; font-size: 15px; font-weight: 500; }
+.release-version-details > summary #release-version-current { min-width: 0; margin-left: auto; overflow: hidden; color: var(--muted); font-size: 14px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
+.release-version-details .release-version-editor { display: grid; gap: 10px; padding: 4px 16px 16px; border-top: 0; }
+.release-version-editor small { font-size: 13px; }
+.release-version-controls { width: 100%; }
+.release-version-controls button { min-height: 44px; padding-inline: 10px; font-size: 14px; }
+.build-options > .field-grid { margin-bottom: 18px; }
+.build-options > .field-grid > label { min-height: 54px; padding: 8px 16px; }
+.build-options > .field-grid > label > span { font-size: 15px; }
+.build-options > .field-grid select { min-height: 44px; font-size: 15px; }
+.config-summary { margin: 12px 2px; font-size: 13px; }
+.mod-picker { margin-top: 16px; }
+.mod-picker > summary { min-height: 58px; padding-inline: 16px; }
+.mod-picker > summary > span { font-size: 15px; }
+.selection-bar button { min-height: 44px; font-size: 14px; }
+.switches > label { min-height: 65px; }
+.switches > label > span small { font-size: 13px; }
+.build-review > header { margin-inline: 0; }
+#launch-summary { margin-inline: 0; font-size: 15px; }
+#launch-warning { margin-inline: 0; font-size: 14px; }
+#submit-recipe { width: 100%; margin-inline: 0; }
+body:not(.telegram-main-button) #submit-recipe:disabled { width: 100%; margin-inline: 0; }
+body:not(.telegram-main-button) #submit-recipe { width: min(528px, calc(100vw - 2 * var(--mobile-gutter))); bottom: calc(84px + var(--safe-bottom)); box-shadow: 0 0 0 6px var(--canvas); }
+.readiness-checklist li { min-height: 58px; }
+
+/* List pages use the same outer alignment as the form. */
+.job-history-sheet > header, .catalog-sheet > header, .rom-catalog-panel > header, .system-actions > h2, .local-settings > h2 { margin-inline: 0; }
+.job-history-filters, .rom-catalog-filters, .catalog-controls, .user-admin-controls { margin-bottom: 18px; }
+.job-history-search input { min-height: 52px !important; }
+.bf-filter-details > summary { min-height: 44px; padding-inline: 2px; font-size: 14px; }
+.job-history-tabs button, .library-tabs button, .theme-selector button, .user-tabs button { min-height: 44px; }
+.job-history-sheet > header { align-items: center; }
+.job-history-sheet > header > span { display: none; }
+.bf-text-action { min-height: 44px !important; padding: 8px; font-size: 14px; }
+.profile-hero { margin-bottom: 20px; padding: 8px 0 16px; }
+.profile-identity { display: grid; justify-items: center; }
+.profile-identity p { margin: 4px 0 0; }
+.profile-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 9px; }
+.profile-badge { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 9px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent); font-size: 12px; font-weight: 600; }
+.profile-badge.approved { background: color-mix(in srgb, var(--success) 13%, var(--surface)); color: var(--success); }
+.profile-highlights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.profile-highlight { min-height: 92px; gap: 4px; padding: 12px 10px; border-right: 1px solid var(--line); border-bottom: 0; text-align: center; }
+.profile-highlight:last-child { border-right: 0; }
+.profile-highlight small { font-size: 12px; line-height: 1.25; }
+.profile-highlight strong { font-size: 17px; }
+.profile-fact-group h2 { padding: 0 0 10px; font-size: 19px; }
+.profile-fact { min-height: 52px; }
+.page-head { align-items: center; margin: 8px 0 18px; }
+.page-head h1 { font-size: 23px; }
+.page-head > button { min-height: 44px !important; }
+#system.active { display: flex; flex-direction: column; }
+#system > .page-head { order: 0; }
+#system > .system-ledger { order: 1; }
+#system > .system-actions:not(.admin-maintenance):not(.admin-batch-launch) { order: 2; }
+#system > .local-settings { order: 3; }
+#system > .admin-maintenance { order: 4; }
+#system > .admin-batch-launch { order: 5; }
+#system > .user-admin { order: 6; }
+#system > .admin-user-page, #system > .admin-job-page, #system > .admin-batch-page { order: 7; }
+.system-ledger > div { min-height: 58px; }
+.system-ledger small { font-size: 13px; }
+.system-actions > p, .system-actions > div, .local-settings > .settings-grid { padding: 16px; }
+.admin-maintenance > div:last-child { padding: 0; background: transparent; }
+.admin-maintenance > div:last-child > button { min-height: 60px; border: 0; border-radius: var(--radius-group); background: var(--surface); }
+.admin-batch-launch > header { display: grid; gap: 12px; }
+.admin-batch-launch > header > button { width: 100%; min-height: 48px; }
+.local-settings .settings-grid > label, .theme-setting { font-size: 14px; }
+.user-admin > header small, .user-admin > header p { font-size: 13px; }
+.user-admin-controls { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.user-row > .user-open, .user-pagination button { display: grid; place-items: center; min-width: 44px; min-height: 44px; }
+.user-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "identity open" "activity activity" "quota status"; align-items: start; gap: 8px 10px; padding-block: 14px; }
+.user-row > .user-identity { grid-area: identity; min-width: 0; flex: none; align-self: center; }
+.user-row > .user-open { grid-area: open; border: 0; align-self: center; }
+.user-row > .user-current-activities { grid-area: activity; display: grid; min-width: 0; width: 100%; flex: none; }
+.user-row .user-current-activity { display: grid; gap: 3px; width: 100%; padding: 7px 0; overflow-wrap: anywhere; }
+.user-row .user-current-activity:last-child { border-bottom: 0; }
+.user-row .user-current-activity > span { display: flex; align-items: center; gap: 6px; }
+.user-row .user-current-activity strong { font-size: 14px; }
+.user-row .user-current-activity small { color: var(--muted); font-size: 13px; line-height: 1.35; }
+.user-row > .user-quota { grid-area: quota; align-self: center; font-size: 13px; }
+.user-row > .access-badge { grid-area: status; align-self: center; font-size: 12px; }
+.user-admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.user-admin-stats > div { min-height: 72px; }
+
+/* The notice floats above both navigation and the contextual build action. */
+.toast { bottom: calc(90px + var(--safe-bottom)); width: max-content; max-width: calc(100vw - 2 * var(--mobile-gutter)); border-radius: 12px; font-size: 14px; line-height: 1.35; text-align: center; }
+body[data-view="build"]:not(.telegram-main-button):has(#submit-recipe:not(:disabled)) .toast { bottom: calc(151px + var(--safe-bottom)); }
+.bottom-nav { width: calc(100vw - 16px); }
+.bottom-nav > button { min-height: 52px; }
+
+@media (max-width: 620px) {
+  main { padding: 12px var(--mobile-gutter) calc(124px + var(--safe-bottom)); }
+  body.telegram-hosted main { padding-top: 12px; }
+  body.telegram-hosted.telegram-fullscreen main { padding-top: calc(12px + var(--telegram-safe-top, 0px)); }
+  .source-input-head { display: grid; }
+  .source-input-head > div { justify-content: flex-start; }
+  .release-version-details .release-version-editor { display: grid; }
+  .profile-highlights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .page-head { gap: 12px; }
+}
+@media (max-width: 350px) {
+  .page-head { align-items: stretch; flex-direction: column; }
+  .page-head > button { align-self: flex-start; }
+  .source-state { grid-template-columns: 36px minmax(0, 1fr); gap: 9px; padding: 12px; }
+  .source-state-mark { width: 36px; height: 36px; }
+  .profile-highlight { padding-inline: 6px; }
+  .bottom-nav > button { font-size: 10px; }
+  .bottom-nav .dock-profile-label { font-size: 10px; }
+}

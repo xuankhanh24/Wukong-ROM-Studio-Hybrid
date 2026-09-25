@@ -56,6 +56,7 @@ function updateMetadataCompleteness() {
   const total = completenessSourceFactIds.length;
   const requiredComplete = completed(requiredSourceFactIds);
   $("#source-metadata-count").textContent = t("metadataCompleteness", { complete, total });
+  $("#source-facts-summary-count").textContent = `${complete}/${total}`;
   return {
     complete,
     total,

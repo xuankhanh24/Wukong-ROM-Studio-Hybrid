@@ -6,6 +6,68 @@ from tests.test_telegram_mini_app import _render_mini_app_in_chrome
 
 
 class MiniAppUpgradeTests(unittest.TestCase):
+    def test_mobile_layout_keeps_dock_and_controls_clear_at_phone_widths(self):
+        for width in (320, 360, 390):
+            with self.subTest(width=width):
+                def exercise(page):
+                    source_facts = page.locator('#source-facts')
+                    self.assertTrue(source_facts.is_visible())
+                    source_facts.locator('summary').click()
+                    self.assertTrue(source_facts.evaluate('node => node.open'))
+                    self.assertTrue(page.locator('#source-provider').is_visible())
+                    source_facts.locator('summary').click()
+                    page.locator('.release-version-details summary').click()
+                    self.assertTrue(page.locator('.release-version-details').evaluate('node => node.open'))
+                    self.assertTrue(page.locator('#mod-release-version-input').is_visible())
+                    page.locator('.release-version-details summary').click()
+                    result = page.evaluate("""() => {
+                        const rect = selector => document.querySelector(selector).getBoundingClientRect();
+                        const dock = rect('.bottom-nav');
+                        const action = rect('#submit-recipe');
+                        const sourceActions = [...document.querySelectorAll('.source-input-head button')];
+                        const sourceActionHeights = sourceActions.map(button => button.getBoundingClientRect().height);
+                        const facts = document.querySelector('#source-facts');
+                        const release = document.querySelector('.release-version-details');
+                        const views = {};
+                        for (const name of ['build', 'jobs', 'catalog', 'profile', 'system']) {
+                            document.querySelector(`.bottom-nav [data-nav="${name}"]`).click();
+                            views[name] = {
+                                overflow: document.documentElement.scrollWidth > innerWidth,
+                                left: Math.round(rect('.view.active').left),
+                                right: Math.round(innerWidth - rect('.view.active').right)
+                            };
+                        }
+                        return {
+                            views, dockWidth: dock.width, actionGap: dock.top - action.bottom,
+                            sourceActions: sourceActionHeights,
+                            factsCollapsed: !facts.open, releaseCollapsed: !release.open,
+                            profileBadgesGap: getComputedStyle(document.querySelector('.profile-badges')).gap
+                        };
+                    }""")
+                    self.assertTrue(all(not item["overflow"] for item in result["views"].values()))
+                    self.assertTrue(all(item["left"] == item["right"] == 16 for item in result["views"].values()))
+                    self.assertGreaterEqual(result["dockWidth"], width - 20)
+                    self.assertGreater(result["actionGap"], 0)
+                    self.assertTrue(all(height >= 44 for height in result["sourceActions"]))
+                    self.assertTrue(result["factsCollapsed"] and result["releaseCollapsed"])
+                    self.assertNotEqual(result["profileBadgesGap"], "normal")
+                    page.locator('.user-row').first.wait_for(timeout=5000)
+                    user_row = page.locator('.user-row').first.evaluate("""row => {
+                        const box = selector => row.querySelector(selector).getBoundingClientRect();
+                        const identity = box('.user-identity');
+                        const activity = box('.user-current-activities');
+                        const quota = box('.user-quota');
+                        const open = box('.user-open');
+                        return { activityBelowIdentity: activity.top >= identity.bottom,
+                                 quotaBelowActivity: quota.top >= activity.bottom,
+                                 openTarget: open.width >= 44 && open.height >= 44 };
+                    }""")
+                    self.assertTrue(all(user_row.values()), user_row)
+
+                _render_mini_app_in_chrome(api_enabled=True, admin_user=True,
+                                           window_width=width, window_height=740,
+                                           page_action=exercise)
+
     def test_supported_telegram_launch_requests_fullscreen(self):
         def exercise(page):
             result = page.evaluate("""() => ({
