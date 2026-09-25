@@ -146,61 +146,83 @@ body[data-view="profile"] .profile-scene-content {
   margin-bottom: 20px;
 }
 .studio-header h1 {
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 .studio-header .greeting-carousel {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 8px;
-  min-height: 24px;
-  width: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 7px !important;
+  min-height: auto !important;
+  width: 100% !important;
   max-width: 100% !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
   opacity: 1 !important;
   transform: none !important;
+  margin-top: 4px !important;
+}
+.studio-header .greeting-badge-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 3px 10px 3px 8px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface-raised) 75%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 30%, transparent) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 .studio-header .greeting-mark {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #239160;
-  box-shadow: 0 0 6px rgba(35, 145, 96, 0.45);
-}
-.studio-header .greeting-copy {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
+  width: 6px !important;
+  height: 6px !important;
+  flex: 0 0 auto !important;
+  border-radius: 50% !important;
+  background: var(--success) !important;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--success) 60%, transparent) !important;
 }
 .studio-header .greeting-carousel small {
-  color: var(--muted);
-  font: 600 9px/1.2 "Geist Mono", monospace;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  flex-shrink: 0;
+  color: var(--muted) !important;
+  font: 650 9px/1.2 "Geist Mono", monospace !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  flex-shrink: 0 !important;
   display: inline-block !important;
 }
+.studio-header .greeting-copy {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
 .studio-header .greeting-message-viewport {
-  overflow: hidden;
-  margin-top: 0;
-  min-width: 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6px, #000 calc(100% - 6px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 6px, #000 calc(100% - 6px), transparent 100%);
+  display: block !important;
+  width: 100% !important;
+  overflow: visible !important;
+  margin-top: 0 !important;
+  min-width: 0 !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
 }
 .studio-header .greeting-carousel strong {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  line-height: 1.35;
-  white-space: nowrap;
-  width: max-content;
-  max-width: none;
+  display: block !important;
+  font-family: var(--font-body, "Geist Sans", sans-serif) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--muted) !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+  width: 100% !important;
+  max-width: 68ch !important;
+  text-wrap: balance !important;
+  word-break: break-word !important;
+}
+:root[data-color-scheme="dark"] .studio-header .greeting-badge-row {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+:root[data-color-scheme="dark"] .studio-header .greeting-carousel strong {
+  color: rgba(255, 255, 255, 0.75) !important;
 }
 
 .language-setting {

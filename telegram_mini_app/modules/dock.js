@@ -53,11 +53,25 @@ function greetingName() {
 
 function greetingMessages() {
   const hour = new Date().getHours();
-  const timeKey = hour < 12 ? "greetingMorning" : hour < 18 ? "greetingAfternoon" : "greetingEvening";
+  let timeKey;
+  if (hour >= 5 && hour < 12) {
+    timeKey = (hour % 2 === 0) ? "greetingMorning" : "greetingMorning2";
+  } else if (hour >= 12 && hour < 18) {
+    timeKey = (hour % 2 === 0) ? "greetingAfternoon" : "greetingAfternoon2";
+  } else if (hour >= 18 && hour < 22) {
+    timeKey = (hour % 2 === 0) ? "greetingEvening" : "greetingEvening2";
+  } else {
+    timeKey = (hour % 2 === 0) ? "greetingNight" : "greetingNight2";
+  }
   const values = { name: greetingName(), jobs: Number(state.me?.jobCount || 0), remaining: Number(state.me?.buildCredits || 0) };
   return [
     { key: timeKey },
-    { key: "greetingWish" },
+    { key: "greetingWishSmooth" },
+    { key: "greetingWishClean" },
+    { key: "greetingWishCool" },
+    { key: "greetingWishFlash" },
+    { key: "greetingWishCustom" },
+    { key: "greetingWishMagisk" },
     { key: state.me?.unlimited ? "greetingUnlimited" : "greetingAllowance", values }
   ].map((item) => ({ ...item, text: t(item.key, { ...values, ...(item.values || {}) }) }));
 }
