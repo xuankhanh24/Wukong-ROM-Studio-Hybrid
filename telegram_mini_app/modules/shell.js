@@ -71,7 +71,33 @@ function bindEvents() {
       if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
       if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
       if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
-      if (document.body.dataset.view !== "build") navigate("build");
+      if (document.body.dataset.view && document.body.dataset.view !== "build") {
+        navigate("build");
+        return;
+      }
+      try { runtime.TelegramApp?.close?.(); } catch (_) { window.history.back(); }
+    });
+  }
+  const mastheadBack = $("#masthead-back");
+  if (mastheadBack) {
+    mastheadBack.addEventListener("click", () => {
+      const system = $("#system");
+      if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
+      if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
+      if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
+      if (document.body.dataset.view && document.body.dataset.view !== "build") {
+        navigate("build");
+        return;
+      }
+      try { runtime.TelegramApp?.close?.(); } catch (_) { window.history.back(); }
+    });
+  }
+  const mastheadActions = $("#masthead-actions");
+  if (mastheadActions) {
+    mastheadActions.addEventListener("click", () => {
+      if (typeof runtime.TelegramApp?.requestFullscreen === "function") {
+        try { runtime.TelegramApp.requestFullscreen(); } catch (_) {}
+      }
     });
   }
   $("#cache-clear-confirm")?.addEventListener("click", () => performCacheClear());
@@ -293,6 +319,7 @@ function activateTelegramApp() {
   try {
     runtime.TelegramApp.ready();
     runtime.TelegramApp.expand();
+    runtime.TelegramApp?.BackButton?.show?.();
     if (typeof runtime.TelegramApp.requestFullscreen === "function") {
       runtime.TelegramApp.requestFullscreen();
     }

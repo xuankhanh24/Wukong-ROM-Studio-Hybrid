@@ -25,61 +25,112 @@ button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); o
   position: sticky;
   top: 0;
   z-index: 50;
-  min-height: 48px;
-  padding: max(6px, var(--safe-top)) 14px 6px;
+  min-height: 52px;
+  padding: max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) 16px 10px;
   background: color-mix(in srgb, var(--surface-raised) var(--masthead-surface-mix), transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--line-strong) 14%, transparent);
   -webkit-backdrop-filter: blur(var(--masthead-backdrop-blur)) saturate(calc(1.08 + var(--masthead-scroll) * .28));
   backdrop-filter: blur(var(--masthead-backdrop-blur)) saturate(calc(1.08 + var(--masthead-scroll) * .28));
 }
 
-.brand-pill {
+.botfather-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  min-height: 38px;
+}
+
+.bf-pill {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 32px;
-  max-width: calc(100vw - 140px);
-  padding: 3px 14px 3px 8px;
+  gap: 7px;
+  min-height: 36px;
+  padding: 4px 14px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--line-strong) 40%, transparent);
   background: color-mix(in srgb, var(--surface-raised) 85%, var(--canvas));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: var(--ink);
+  font-family: var(--font-body, "Geist Sans", sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
   user-select: none;
-  pointer-events: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
-.brand-pill img {
+.bf-pill:active {
+  transform: scale(0.96);
+}
+
+.bf-back {
+  padding-left: 10px;
+  padding-right: 14px;
+  z-index: 2;
+}
+.bf-back svg {
+  flex-shrink: 0;
+}
+
+.bf-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px 4px 8px;
+  pointer-events: none;
+  cursor: default;
+  z-index: 1;
+}
+.bf-brand img {
   width: 20px;
   height: 20px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.brand-pill span {
-  font-family: var(--font-body, "Geist Sans", sans-serif);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink);
+.bf-brand span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-:root[data-color-scheme="dark"] .brand-pill {
+
+.bf-actions {
+  padding: 4px 10px;
+  gap: 8px;
+  z-index: 2;
+}
+.bf-actions svg {
+  flex-shrink: 0;
+}
+
+:root[data-color-scheme="dark"] .bf-pill {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.14);
+  color: #f1efe9;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
 }
-:root[data-color-scheme="dark"] .brand-pill span {
-  color: #f1efe9;
+:root[data-color-scheme="dark"] .bf-pill:hover,
+:root[data-color-scheme="dark"] .bf-pill:active {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 html.is-fullscreen .masthead,
 body.is-fullscreen .masthead {
-  display: none !important;
+  display: flex !important;
+  padding-top: max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px));
 }
 html.is-fullscreen main,
 body.is-fullscreen main {
-  padding-top: max(12px, env(safe-area-inset-top));
+  padding-top: max(36px, env(safe-area-inset-top, 0px)) !important;
+}
+
+.access-gate,
+.maintenance-gate {
+  padding-top: calc(max(18px, env(safe-area-inset-top, 0px)) + 56px) !important;
 }
 
 .studio-header {
@@ -169,7 +220,7 @@ body.is-fullscreen main {
   background: var(--surface-raised);
   border-color: var(--accent);
 }
-main { padding-bottom: 128px; }
+main { padding-top: 36px !important; padding-bottom: 128px; }
 .view-heading { margin-bottom: 20px; }
 .view-heading h1 { letter-spacing: -.025em; text-wrap: balance; }
 .runtime-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); }
@@ -229,8 +280,16 @@ main { padding-bottom: 128px; }
   .bottom-nav { bottom: max(14px, env(safe-area-inset-bottom)); }
 }
 @media (max-width:860px) {
-  main { padding-left: max(14px, var(--telegram-safe-left, 0px)); padding-right: max(14px, var(--telegram-safe-right, 0px)); padding-bottom: calc(124px + env(safe-area-inset-bottom)); }
-  .masthead { padding-top: max(7px, var(--safe-top)); padding-bottom: 7px; }
+  main {
+    padding-top: 36px !important;
+    padding-left: max(14px, var(--telegram-safe-left, 0px));
+    padding-right: max(14px, var(--telegram-safe-right, 0px));
+    padding-bottom: calc(124px + env(safe-area-inset-bottom));
+  }
+  .masthead {
+    padding-top: max(14px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px));
+    padding-bottom: 10px;
+  }
   .dossier-section { margin-bottom: 12px; padding: 15px; }
   /* The three build selectors become a thumb-friendly vertical stack on phones. */
   .build-options .field-grid,
