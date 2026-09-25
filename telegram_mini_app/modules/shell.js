@@ -291,12 +291,33 @@ function renderSessionDiagnostics() {
 function activateTelegramApp() {
   bindViewport(runtime.TelegramApp);
   try {
-    runtime.TelegramApp.ready(); runtime.TelegramApp.expand();
+    runtime.TelegramApp.ready();
+    runtime.TelegramApp.expand();
+    if (typeof runtime.TelegramApp.requestFullscreen === "function") {
+      runtime.TelegramApp.requestFullscreen();
+    }
     if (runtime.TelegramApp.isVersionAtLeast?.("7.7")) runtime.TelegramApp.disableVerticalSwipes?.();
     if (runtime.TelegramApp.isVersionAtLeast?.("6.1")) {
       runtime.TelegramApp.setHeaderColor?.("secondary_bg_color");
       runtime.TelegramApp.setBackgroundColor?.("secondary_bg_color");
     }
+    const syncFullscreen = () => {
+      const isFs = Boolean(runtime.TelegramApp?.isFullscreen);
+      document.documentElement.classList.toggle("is-fullscreen", isFs);
+      document.body.classList.toggle("is-fullscreen", isFs);
+    };
+    runtime.TelegramApp?.onEvent?.("fullscreenChanged", syncFullscreen);
+    runtime.TelegramApp?.onEvent?.("fullscreenFailed", (err) => {
+      console.warn("Telegram requestFullscreen failed:", err);
+    });
+    syncFullscreen();
+    const ensureFsOnInteraction = () => {
+      if (!runtime.TelegramApp?.isFullscreen && typeof runtime.TelegramApp?.requestFullscreen === "function") {
+        try { runtime.TelegramApp.requestFullscreen(); } catch (_) {}
+      }
+      window.removeEventListener("pointerdown", ensureFsOnInteraction);
+    };
+    window.addEventListener("pointerdown", ensureFsOnInteraction, { once: true, passive: true });
   } catch (_) {}
 }
 

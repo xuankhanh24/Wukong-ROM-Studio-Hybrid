@@ -27,7 +27,7 @@ The Mini App is an operate surface designed under the **Telegram Native HIG (Hum
 --target-size: 44px;
 ```
 
-Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
+Body text is 14–16px, labels are at least 12px, and interactive controls use a 44px minimum hitbox. Typography uses native system font stacks with Geist Sans, while Geist Mono / JetBrains Mono is reserved for IDs, paths, versions, and measurements. Cobalt is the only chromatic accent, while focus rings use `--focus` and status colors communicate state rather than decoration. All colors dynamically adapt to the user's active Telegram theme (Light, Dark, Night, Tinted).
 
 ## Surface rules
 

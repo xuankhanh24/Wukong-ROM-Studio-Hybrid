@@ -34,13 +34,12 @@
   FORM: Editorial technical ledger; information-dense, quiet in motion and explicit about every state.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
   -->
-  <header class="masthead">
-    <a class="wordmark" href="#build" aria-label="Wukong ROM Studio"><img src="./WukongStudio.svg" width="38" height="38" alt=""><span><strong>WUKONG</strong><small>ROM STUDIO</small></span></a>
-    <div class="masthead-meta">
-      <span class="greeting-carousel" id="greeting-carousel" hidden aria-live="polite"><span class="greeting-mark" id="greeting-mark" aria-hidden="true"></span><span class="greeting-copy"><small id="greeting-kicker">WUKONG</small><span class="greeting-message-viewport"><strong id="greeting-message">—</strong></span></span></span>
-      <span class="connection" id="telegram-state"><i></i><span data-i18n="previewMode">PREVIEW MODE</span></span>
-      <button id="language" class="language-button" type="button">VI / EN</button>
+  <header class="masthead" id="masthead">
+    <div class="brand-pill" aria-label="Wukong Studio">
+      <img src="./WukongStudio.svg" width="20" height="20" alt="" aria-hidden="true">
+      <span>Wukong Studio</span>
     </div>
+    <span class="connection" id="telegram-state" hidden><i></i><span data-i18n="previewMode">PREVIEW MODE</span></span>
   </header>
 
   <section class="access-gate" id="access-gate" aria-live="polite">
@@ -76,7 +75,18 @@
 
   <main>
     <section class="view active" id="build" aria-labelledby="build-title">
-      <header class="page-head"><div><h1 id="build-title" data-i18n="buildTitle">Wukong Studio</h1></div></header>
+      <header class="page-head studio-header">
+        <div>
+          <h1 id="build-title" data-i18n="buildTitle">Wukong Studio</h1>
+          <div class="greeting-carousel" id="greeting-carousel" hidden aria-live="polite">
+            <span class="greeting-mark" id="greeting-mark" aria-hidden="true"></span>
+            <span class="greeting-copy">
+              <small id="greeting-kicker">WUKONG</small>
+              <span class="greeting-message-viewport"><strong id="greeting-message">—</strong></span>
+            </span>
+          </div>
+        </div>
+      </header>
       <section class="runtime-strip" aria-label="Build runtime status">
         <div><i class="status-dot waiting" aria-hidden="true"></i><span><small data-i18n="routePolicy">RUNNER</small><strong id="route-label">GitHub Auto</strong></span></div>
         <div><i class="status-dot waiting" id="runtime-pipeline-dot" aria-hidden="true"></i><span><small data-i18n="runtimePipeline">PIPELINE</small><strong id="runtime-pipeline-state" data-i18n="runtimeWaiting">Chờ recipe hợp lệ</strong></span></div>
@@ -262,7 +272,7 @@
         <div class="user-table" role="table" aria-label="Telegram users"><div class="user-table-head" role="row"><span>Telegram</span><span data-i18n="activity">Hoạt động</span><span data-i18n="allowance">Hạn mức</span><span data-i18n="accessStatus">Trạng thái</span><span></span></div><div id="user-table-body"></div></div>
         <div class="user-pagination"><span id="user-page-summary">0</span><div><button id="user-prev" type="button">←</button><button id="user-next" type="button">→</button></div></div>
       </section>
-      <section class="local-settings"><h2 data-i18n="miniSettings">Thiết đặt Mini App</h2><div class="settings-grid"><label><span data-i18n="defaultPreset">Preset mặc định</span><select id="default-preset"><option value="lite">Lite</option><option value="plus">Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select></label><div class="theme-setting"><span data-i18n="themeTitle">Chủ đề hệ thống</span><div class="theme-selector" id="theme-selector" role="group" aria-label="Chủ đề hệ thống"><button type="button" data-theme-value="system"><span data-i18n="themeSystem">Theo hệ thống</span></button><button type="button" data-theme-value="light"><span data-i18n="themeLight">Sáng</span></button><button type="button" data-theme-value="dark"><span data-i18n="themeDark">Tối</span></button></div></div></div></section>
+      <section class="local-settings"><h2 data-i18n="miniSettings">Thiết đặt Mini App</h2><div class="settings-grid"><label><span data-i18n="defaultPreset">Preset mặc định</span><select id="default-preset"><option value="lite">Lite</option><option value="plus">Plus</option><option value="both">Lite + Plus</option><option value="custom">Custom</option></select></label><div class="language-setting"><span data-i18n="languageLabel">Ngôn ngữ</span><button id="language" class="language-button" type="button">VI / EN</button></div><div class="theme-setting"><span data-i18n="themeTitle">Chủ đề hệ thống</span><div class="theme-selector" id="theme-selector" role="group" aria-label="Chủ đề hệ thống"><button type="button" data-theme-value="system"><span data-i18n="themeSystem">Theo hệ thống</span></button><button type="button" data-theme-value="light"><span data-i18n="themeLight">Sáng</span></button><button type="button" data-theme-value="dark"><span data-i18n="themeDark">Tối</span></button></div></div></div></section>
       <section class="admin-user-page" id="admin-user-page" hidden aria-labelledby="admin-user-page-title">
         <button class="admin-user-back" id="admin-user-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h11"/></svg><span data-i18n="backToUsers">Người dùng & lượt build</span></button>
         <div id="user-detail-content"></div>
