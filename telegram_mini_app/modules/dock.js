@@ -40,9 +40,6 @@ function applyTheme(theme = state.theme, persist = false) {
     if (document.body.dataset.view === "profile") {
       runtime.TelegramApp?.setHeaderColor?.("#080e1b");
       runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
-    } else if (document.body.dataset.view === "build") {
-      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#000000" : "#f5f5f7");
-      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#000000" : "#f5f5f7");
     } else {
       runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
       runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
@@ -232,12 +229,6 @@ function navigate(name, smooth = true) {
       document.body.style.backgroundColor = "#080e1b";
       runtime.TelegramApp?.setHeaderColor?.("#080e1b");
       runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
-    } else if (name === "build") {
-      document.documentElement.style.backgroundColor = "";
-      document.body.style.backgroundColor = "";
-      const resolved = resolvedTheme();
-      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#000000" : "#f5f5f7");
-      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#000000" : "#f5f5f7");
     } else {
       document.documentElement.style.backgroundColor = "";
       document.body.style.backgroundColor = "";

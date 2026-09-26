@@ -138,34 +138,21 @@ body[data-view="profile"] .profile-scene-content {
   padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* ==========================================================================
-   Apple Design System: Studio Header & Dynamic Island Greeting
-   Reference: design-md/apple/DESIGN.md
-   ========================================================================== */
 .studio-header,
 .page-head.studio-header {
   border-bottom: none !important;
   padding-bottom: 0 !important;
-  margin-top: 6px;
-  margin-bottom: 24px;
+  margin-top: 8px;
+  margin-bottom: 20px;
 }
 .studio-header h1 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-body), sans-serif;
-  font-size: clamp(30px, 4vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.028em; /* Signature "Apple tight" display tracking */
-  line-height: 1.08;
-  color: #1d1d1f;
   margin-bottom: 8px;
-}
-:root[data-color-scheme="dark"] .studio-header h1 {
-  color: #ffffff;
 }
 .studio-header .greeting-carousel {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
-  gap: 8px !important;
+  gap: 7px !important;
   min-height: auto !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -179,37 +166,28 @@ body[data-view="profile"] .profile-scene-content {
 .studio-header .greeting-badge-row {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 7px !important;
-  padding: 4px 12px 4px 10px !important;
-  border-radius: 9999px !important; /* Apple pill */
-  background: rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: none !important;
-}
-:root[data-color-scheme="dark"] .studio-header .greeting-badge-row {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  gap: 6px !important;
+  padding: 3px 10px 3px 8px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface-raised) 75%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 30%, transparent) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 .studio-header .greeting-mark {
-  width: 7px !important;
-  height: 7px !important;
+  width: 6px !important;
+  height: 6px !important;
   flex: 0 0 auto !important;
   border-radius: 50% !important;
-  background: #34c759 !important; /* Apple System Green */
-  box-shadow: 0 0 6px rgba(52, 199, 89, 0.45) !important;
+  background: var(--success) !important;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--success) 60%, transparent) !important;
 }
 .studio-header .greeting-carousel small {
-  color: #86868b !important;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
+  color: var(--muted) !important;
+  font: 650 9px/1.2 "Geist Mono", monospace !important;
+  letter-spacing: .08em !important;
   text-transform: uppercase !important;
   flex-shrink: 0 !important;
   display: inline-block !important;
-}
-:root[data-color-scheme="dark"] .studio-header .greeting-carousel small {
-  color: #98989d !important;
 }
 .studio-header .greeting-copy {
   display: block !important;
@@ -228,20 +206,23 @@ body[data-view="profile"] .profile-scene-content {
 }
 .studio-header .greeting-carousel strong {
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif !important;
-  font-size: 14.5px !important;
-  font-weight: 400 !important;
-  color: #6e6e73 !important;
-  line-height: 1.47 !important;
-  letter-spacing: -0.012em !important;
+  font-family: var(--font-body, "Geist Sans", sans-serif) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--muted) !important;
+  line-height: 1.5 !important;
   white-space: normal !important;
   width: 100% !important;
   max-width: 68ch !important;
   text-wrap: balance !important;
   word-break: break-word !important;
 }
+:root[data-color-scheme="dark"] .studio-header .greeting-badge-row {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
 :root[data-color-scheme="dark"] .studio-header .greeting-carousel strong {
-  color: #a1a1a6 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
 }
 
 .language-setting {
@@ -270,1287 +251,46 @@ body[data-view="profile"] .profile-scene-content {
   background: var(--surface-raised);
   border-color: var(--accent);
 }
-/* ==========================================================================
-   Apple Design System: Studio Tab Canvas & Architecture
-   Reference: design-md/apple/DESIGN.md
-   ========================================================================== */
-body[data-view="build"] {
-  background-color: #f5f5f7 !important; /* Apple Parchment Canvas */
-}
-:root[data-color-scheme="dark"] body[data-view="build"] {
-  background-color: #000000 !important; /* Apple Pure Black */
-}
-
-main {
-  width: min(1200px, 100%);
-  margin: 0 auto;
-  padding-top: 24px !important;
-  padding-bottom: calc(var(--dock-reserve) + var(--safe-bottom) + 16px);
-}
-
-.view-heading {
-  margin-bottom: 20px;
-}
-.view-heading h1 {
-  letter-spacing: -.028em;
-  text-wrap: balance;
-}
-
-/* ==========================================================================
-   Apple Segmented Runtime Strip
-   ========================================================================== */
-#build .runtime-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  margin: 0 0 24px;
-  padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-}
-:root[data-color-scheme="dark"] #build .runtime-strip {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-}
-#build .runtime-strip > div {
-  display: grid;
-  grid-template-columns: 10px 1fr;
-  align-items: center;
-  gap: 12px;
-  min-height: 64px;
-  padding: 12px 18px;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .runtime-strip > div {
-  border-right-color: rgba(255, 255, 255, 0.08);
-}
-#build .runtime-strip > div:last-child {
-  border-right: 0;
-}
-#build .runtime-strip small {
-  margin-bottom: 4px;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-:root[data-color-scheme="dark"] #build .runtime-strip small {
-  color: #98989d;
-}
-#build .runtime-strip strong {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .runtime-strip strong {
-  color: #ffffff;
-}
-#build .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-#build .status-dot.online {
-  background: #34c759;
-  box-shadow: 0 0 6px rgba(52, 199, 89, 0.4);
-}
-#build .status-dot.waiting {
-  background: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
-  animation: apple-dot-pulse 2s ease-in-out infinite;
-}
-:root[data-color-scheme="dark"] #build .status-dot.waiting {
-  background: #2997ff;
-  box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.2);
-}
-#build .status-dot.neutral {
-  background: #8e8e93;
-}
-@keyframes apple-dot-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.65; transform: scale(0.9); }
-}
-#build .runtime-jobs-link {
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #0066cc;
-  text-align: left;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build .runtime-jobs-link {
-  color: #2997ff;
-}
-#build .runtime-jobs-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-/* ==========================================================================
-   Recipe Form & Apple Store Utility Cards
-   ========================================================================== */
-#recipe-form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 20px;
-  align-items: start;
-}
-#build .dossier-section {
-  position: relative;
-  border-radius: 18px; /* Apple rounded.lg */
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  padding: 24px;
-  margin-bottom: 20px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-:root[data-color-scheme="dark"] #build .dossier-section {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-}
-#build .section-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-#build .section-heading > span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(0, 102, 204, 0.08);
-  color: #0066cc;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-:root[data-color-scheme="dark"] #build .section-heading > span {
-  background: rgba(41, 151, 255, 0.15);
-  color: #2997ff;
-}
-#build .section-heading h2 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-body), sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.016em;
-  color: #1d1d1f;
-  margin: 0 0 3px;
-}
-:root[data-color-scheme="dark"] #build .section-heading h2 {
-  color: #ffffff;
-}
-#build .section-heading p {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13.5px;
-  font-weight: 400;
-  line-height: 1.45;
-  color: #86868b;
-  margin: 0;
-}
-:root[data-color-scheme="dark"] #build .section-heading p {
-  color: #98989d;
-}
-
-/* ==========================================================================
-   Section 01: Smart Source Workbench
-   ========================================================================== */
-#build .smart-source {
-  border-radius: 14px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-:root[data-color-scheme="dark"] #build .smart-source {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-input-field {
-  padding: 18px;
-}
-#build .source-input-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-#build .source-input-head > label {
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-:root[data-color-scheme="dark"] #build .source-input-head > label {
-  color: #98989d;
-}
-#build .source-input-head > div {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-#build .source-input-head button {
-  min-height: 32px;
-  padding: 6px 14px;
-  border-radius: 9999px; /* Apple pill */
-  border: none;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.12s var(--ease), background-color 0.15s ease, opacity 0.15s ease;
-}
-#build .source-input-head button:active {
-  transform: scale(0.95);
-}
-#build #open-rom-catalog {
-  background: rgba(0, 102, 204, 0.08);
-  color: #0066cc;
-}
-:root[data-color-scheme="dark"] #build #open-rom-catalog {
-  background: rgba(41, 151, 255, 0.15);
-  color: #2997ff;
-}
-#build #paste-source {
-  background: #0066cc; /* Apple Action Blue */
-  color: #ffffff;
-}
-:root[data-color-scheme="dark"] #build #paste-source {
-  background: #2997ff;
-  color: #ffffff;
-}
-#build #clear-source {
-  background: rgba(0, 0, 0, 0.05);
-  color: #86868b;
-}
-:root[data-color-scheme="dark"] #build #clear-source {
-  background: rgba(255, 255, 255, 0.1);
-  color: #98989d;
-}
-#build #source-uri {
-  width: 100%;
-  min-height: 92px;
-  border-radius: 12px;
-  padding: 12px 14px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #1d1d1f;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  resize: vertical;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-:root[data-color-scheme="dark"] #build #source-uri {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-#build #source-uri:focus {
-  border-color: #0071e3;
-  outline: 2px solid rgba(0, 113, 227, 0.25);
-  outline-offset: 1px;
-}
-#build .source-input-field > small {
-  display: block;
-  margin-top: 8px;
-  color: #86868b;
-  font-size: 12px;
-  line-height: 1.45;
-}
-:root[data-color-scheme="dark"] #build .source-input-field > small {
-  color: #98989d;
-}
-
-/* Source State Callout */
-#build .source-state {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
-  min-height: 74px;
-  padding: 14px 18px;
-  margin: 0 18px 18px;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-:root[data-color-scheme="dark"] #build .source-state {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-state-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.04);
-  color: #86868b;
-  border: none;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-:root[data-color-scheme="dark"] #build .source-state-mark {
-  background: rgba(255, 255, 255, 0.08);
-  color: #98989d;
-}
-#build .source-state-copy > small {
-  display: block;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-#build .source-state-copy strong {
-  display: block;
-  margin-top: 3px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .source-state-copy strong {
-  color: #ffffff;
-}
-#build .source-state-copy p {
-  margin: 3px 0 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  color: #86868b;
-  line-height: 1.4;
-}
-:root[data-color-scheme="dark"] #build .source-state-copy p {
-  color: #98989d;
-}
-#build .source-state.detected {
-  background: rgba(52, 199, 89, 0.06);
-  border-color: rgba(52, 199, 89, 0.2);
-}
-#build .source-state.detected .source-state-mark {
-  background: rgba(52, 199, 89, 0.15);
-  color: #34c759;
-}
-#build .source-state.detected .source-state-copy > small {
-  color: #34c759;
-}
-#build .source-state.probing {
-  background: rgba(255, 149, 0, 0.08);
-  border-color: rgba(255, 149, 0, 0.25);
-}
-#build .source-state.probing .source-state-mark {
-  background: rgba(255, 149, 0, 0.18);
-  color: #ff9500;
-}
-#build .source-state.invalid,
-#build .source-state.probe-failed {
-  background: rgba(255, 59, 48, 0.08);
-  border-color: rgba(255, 59, 48, 0.25);
-}
-#build .source-state.invalid .source-state-mark,
-#build .source-state.probe-failed .source-state-mark {
-  background: rgba(255, 59, 48, 0.18);
-  color: #ff3b30;
-}
-#build .probe-button {
-  min-height: 38px;
-  padding: 8px 18px;
-  border-radius: 9999px; /* Apple pill */
-  border: none;
-  background: #0066cc;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.12s var(--ease), background-color 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build .probe-button {
-  background: #2997ff;
-}
-#build .probe-button:active {
-  transform: scale(0.95);
-}
-
-/* Apple Technical Specifications Specs Grid */
-#build #source-facts {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  background: #ffffff;
-}
-:root[data-color-scheme="dark"] #build #source-facts {
-  background: #1c1c1e;
-  border-top-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-facts-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .source-facts-head {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-facts-head small {
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-#build .source-facts-head strong {
-  display: block;
-  margin-top: 2px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .source-facts-head strong {
-  color: #ffffff;
-}
-#build #copy-source-metadata {
-  min-height: 32px;
-  padding: 6px 14px;
-  border-radius: 9999px;
-  border: 1px solid rgba(0, 102, 204, 0.2);
-  background: rgba(0, 102, 204, 0.06);
-  color: #0066cc;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-:root[data-color-scheme="dark"] #build #copy-source-metadata {
-  background: rgba(41, 151, 255, 0.12);
-  border-color: rgba(41, 151, 255, 0.25);
-  color: #2997ff;
-}
-#build .source-facts {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 0;
-  padding: 0;
-}
-#build .source-facts div {
-  padding: 12px 16px;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .source-facts div {
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-facts div:nth-child(3n) {
-  border-right: 0;
-}
-#build .source-facts dt {
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-:root[data-color-scheme="dark"] #build .source-facts dt {
-  color: #98989d;
-}
-#build .source-facts dd {
-  margin: 4px 0 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d1d1f;
-  overflow-wrap: anywhere;
-}
-:root[data-color-scheme="dark"] #build .source-facts dd {
-  color: #ffffff;
-}
-#build .source-summary {
-  display: none !important;
-}
-#build .source-manual {
-  margin-top: 16px;
-  border-radius: 12px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-:root[data-color-scheme="dark"] #build .source-manual {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .source-manual summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 44px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0066cc;
-}
-:root[data-color-scheme="dark"] #build .source-manual summary {
-  color: #2997ff;
-}
-
-/* ==========================================================================
-   Section 02: Build Configuration & Mod Workbench
-   ========================================================================== */
-#build .field-grid.three {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-}
-#build .field > span {
-  display: block;
-  margin-bottom: 8px;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-:root[data-color-scheme="dark"] #build .field > span {
-  color: #98989d;
-}
-#build .field select,
-#build .field input[type="text"],
-#build .field input[type="search"],
-#build .field input[type="numeric"],
-#build #source-size {
-  width: 100%;
-  min-height: 46px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #f5f5f7;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-:root[data-color-scheme="dark"] #build .field select,
-:root[data-color-scheme="dark"] #build .field input,
-:root[data-color-scheme="dark"] #build #source-size {
-  background: #2c2c2e;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-#build .field select:focus,
-#build .field input:focus {
-  border-color: #0071e3;
-  outline: 2px solid rgba(0, 113, 227, 0.25);
-  outline-offset: 1px;
-}
-#build #mod-release-version {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-  color: #86868b;
-}
-
-/* Release Version Editor */
-#build .release-version-editor {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .release-version-editor {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .release-version-editor strong {
-  display: block;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .release-version-editor strong {
-  color: #ffffff;
-}
-#build .release-version-editor small {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
-  color: #86868b;
-}
-#build .release-version-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-#build .release-version-controls input {
-  min-height: 38px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #ffffff;
-  padding: 6px 12px;
-  font-size: 13px;
-}
-:root[data-color-scheme="dark"] #build .release-version-controls input {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.12);
-}
-#build #save-mod-release-version,
-#build #apply-custom-preset-label {
-  min-height: 38px;
-  padding: 7px 16px;
-  border-radius: 9999px;
-  border: none;
-  background: #0066cc;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: transform 0.12s var(--ease);
-}
-:root[data-color-scheme="dark"] #build #save-mod-release-version,
-:root[data-color-scheme="dark"] #build #apply-custom-preset-label {
-  background: #2997ff;
-}
-#build #save-mod-release-version:active,
-#build #apply-custom-preset-label:active {
-  transform: scale(0.95);
-}
-
-/* Selection Toolbar */
-#build .selection-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
-  padding: 10px 16px;
-  border-radius: 14px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .selection-bar {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .selection-bar strong {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .selection-bar strong {
-  color: #ffffff;
-}
-#build .selection-bar small {
-  margin-left: 8px;
-  color: #86868b;
-  font-size: 12px;
-}
-#build .selection-bar button {
-  min-height: 32px;
-  padding: 6px 14px;
-  border-radius: 9999px; /* Apple capsule pill */
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #ffffff;
-  color: #0066cc;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  cursor: pointer;
-  transition: transform 0.12s var(--ease), background-color 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build .selection-bar button {
-  background: #3a3a3c;
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #2997ff;
-}
-#build .selection-bar button:active {
-  transform: scale(0.95);
-}
-
-/* Apple Search Input */
-#build .mod-search {
-  margin-top: 14px;
-}
-#build #mod-search {
-  border-radius: 9999px; /* Apple search pill */
-  height: 44px;
-  padding: 10px 18px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 14px;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build #mod-search {
-  background: #2c2c2e;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-#build #mod-search:focus {
-  background: #ffffff;
-  border-color: #0071e3;
-}
-:root[data-color-scheme="dark"] #build #mod-search:focus {
-  background: #1c1c1e;
-}
-
-/* Mod List Grouped Table */
-#build .mod-list {
-  display: grid;
-  gap: 14px;
-  margin-top: 16px;
-}
-#build .mod-group {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #fafafc;
-  overflow: hidden;
-  transition: border-color 0.18s ease;
-}
-:root[data-color-scheme="dark"] #build .mod-group {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .mod-group > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: #f0f0f4;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
-:root[data-color-scheme="dark"] #build .mod-group > header {
-  background: #1e1e20;
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-#build .mod-group h3 {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: #86868b;
-}
-:root[data-color-scheme="dark"] #build .mod-group h3 {
-  color: #98989d;
-}
-#build .mod-group > header span {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.05);
-  color: #86868b;
-  font-size: 11px;
-  font-weight: 600;
-}
-:root[data-color-scheme="dark"] #build .mod-group > header span {
-  background: rgba(255, 255, 255, 0.1);
-  color: #98989d;
-}
-#build .mod-group-items {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  padding: 10px;
-}
-#build .mod-group label > span {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: transform 0.12s var(--ease), background-color 0.15s ease, border-color 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build .mod-group label > span {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .mod-group label:active > span {
-  transform: scale(0.97);
-}
-#build .mod-group label > span svg {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1.5px solid #c7c7cc;
-  padding: 2px;
-  color: transparent;
-  background: transparent;
-  flex-shrink: 0;
-  transition: all 0.18s ease;
-}
-:root[data-color-scheme="dark"] #build .mod-group label > span svg {
-  border-color: #48484a;
-}
-#build .mod-group label > span b {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d1d1f;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-:root[data-color-scheme="dark"] #build .mod-group label > span b {
-  color: #ffffff;
-}
-#build .mod-group input:checked + span {
-  background: rgba(0, 102, 204, 0.07);
-  border-color: rgba(0, 102, 204, 0.35);
-}
-:root[data-color-scheme="dark"] #build .mod-group input:checked + span {
-  background: rgba(41, 151, 255, 0.14);
-  border-color: rgba(41, 151, 255, 0.4);
-}
-#build .mod-group input:checked + span svg {
-  border-color: #0066cc;
-  background: #0066cc;
-  color: #ffffff;
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 2.2;
-}
-:root[data-color-scheme="dark"] #build .mod-group input:checked + span svg {
-  border-color: #2997ff;
-  background: #2997ff;
-}
-
-/* Advanced Pipeline & Debloat */
-#build .steps {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
-}
-#build .steps span {
-  display: block;
-  min-height: 44px;
-  padding: 11px 12px 11px 34px;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  position: relative;
-}
-:root[data-color-scheme="dark"] #build .steps span {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .steps span::before {
-  content: "";
-  position: absolute;
-  top: 16px;
-  left: 12px;
-  width: 12px;
-  height: 12px;
-  border: 1.5px solid #c7c7cc;
-  border-radius: 4px;
-}
-#build .steps input:checked + span {
-  border-color: rgba(0, 102, 204, 0.35);
-  background: rgba(0, 102, 204, 0.06);
-}
-:root[data-color-scheme="dark"] #build .steps input:checked + span {
-  border-color: rgba(41, 151, 255, 0.4);
-  background: rgba(41, 151, 255, 0.12);
-}
-#build .steps input:checked + span::before {
-  border-color: #0066cc;
-  background: #0066cc;
-}
-:root[data-color-scheme="dark"] #build .steps input:checked + span::before {
-  border-color: #2997ff;
-  background: #2997ff;
-}
-
-/* ==========================================================================
-   Section 03: Delivery Options & Apple iOS Switches
-   ========================================================================== */
-#build .delivery-section {
-  border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  padding: 24px;
-}
-:root[data-color-scheme="dark"] #build .delivery-section {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .switches {
-  border-radius: 16px;
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-:root[data-color-scheme="dark"] #build .switches {
-  background: #252528;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-#build .switches label {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 16px;
-  align-items: center;
-  min-height: 64px;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build .switches label {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-#build .switches label:last-child {
-  border-bottom: 0;
-}
-#build .switches strong {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .switches strong {
-  color: #ffffff;
-}
-#build .switches small {
-  margin-top: 3px;
-  color: #86868b;
-  font-size: 12px;
-}
-:root[data-color-scheme="dark"] #build .switches small {
-  color: #98989d;
-}
-#build .switches em {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 600;
-  color: #86868b;
-}
-
-/* Authentic iOS Toggle Switch */
-#build .switches i {
-  position: relative;
-  display: block;
-  width: 51px;
-  height: 31px;
-  border-radius: 31px;
-  background: #e9e9ea;
-  border: none;
-  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
-}
-:root[data-color-scheme="dark"] #build .switches i {
-  background: #39393d;
-}
-#build .switches i::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-#build .switches input:checked ~ i {
-  background: #34c759; /* Apple iOS Switch Green */
-}
-#build .switches input:checked ~ i::after {
-  transform: translateX(20px);
-}
-#build .switches input:checked ~ em {
-  color: #34c759;
-}
-
-/* ==========================================================================
-   Dispatch Docket (Summary Sidebar & Signature CTA)
-   ========================================================================== */
-#build .dispatch-docket {
-  grid-column: 2;
-  grid-row: 1 / span 4;
-  position: sticky;
-  top: 90px;
-  padding: 22px;
-  border-radius: 20px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-:root[data-color-scheme="dark"] #build .dispatch-docket {
-  background: #1c1c1e;
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-}
-#build .dispatch-docket > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-:root[data-color-scheme="dark"] #build .dispatch-docket > header {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-#build #readiness-label {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-#build .dispatch-docket.incomplete #readiness-label {
-  background: rgba(255, 149, 0, 0.12);
-  color: #ff9500;
-}
-#build .dispatch-docket:not(.incomplete) #readiness-label {
-  background: rgba(52, 199, 89, 0.12);
-  color: #34c759;
-}
-#build #readiness-count {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: #86868b;
-}
-#build #launch-summary {
-  display: block;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-body), sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #1d1d1f;
-  overflow-wrap: anywhere;
-}
-:root[data-color-scheme="dark"] #build #launch-summary {
-  color: #ffffff;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-#build .readiness-checklist {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 6px 0;
-  list-style: none;
-}
-#build .readiness-checklist li {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 12px;
-  align-items: center;
-  min-height: 48px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-:root[data-color-scheme="dark"] #build .readiness-checklist li {
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-#build .readiness-checklist li:last-child {
-  border-bottom: 0;
-}
-#build .readiness-checklist i {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid #c7c7cc;
-  background: transparent;
-  transition: all 0.2s ease;
-}
-:root[data-color-scheme="dark"] #build .readiness-checklist i {
-  border-color: #48484a;
-}
-#build .readiness-checklist .complete i {
-  border-color: #34c759;
-  background: #34c759;
-  box-shadow: 0 0 6px rgba(52, 199, 89, 0.4);
-}
-#build .readiness-checklist b {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-:root[data-color-scheme="dark"] #build .readiness-checklist b {
-  color: #ffffff;
-}
-#build .readiness-checklist small {
-  margin-top: 2px;
-  color: #86868b;
-  font-size: 11px;
-}
-#build #launch-warning {
-  margin: 14px 0 16px;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-/* Signature Apple Pill CTA Button */
-#build #submit-recipe {
-  width: 100%;
-  min-height: 50px;
-  border-radius: 9999px; /* Apple rounded.pill */
-  background: #0066cc; /* Action Blue */
-  color: #ffffff;
-  border: none;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 14px rgba(0, 102, 204, 0.28);
-  cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
-}
-:root[data-color-scheme="dark"] #build #submit-recipe {
-  background: #2997ff;
-  box-shadow: 0 4px 18px rgba(41, 151, 255, 0.35);
-}
-#build #submit-recipe:not(:disabled):active {
-  transform: scale(0.96);
-}
-#build #submit-recipe:disabled {
-  opacity: 0.35;
-  box-shadow: none;
-  cursor: not-allowed;
-}
-#build #submit-recipe svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.2;
-}
-
-/* Mobile Floating Dispatch Button (Apple Pill FAB) */
-.dispatch-fab {
-  position: fixed;
-  bottom: calc(var(--dock-reserve) + 8px);
-  right: 18px;
-  z-index: 45;
-  min-height: 48px;
-  padding: 0 22px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #0066cc;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  box-shadow: 0 4px 20px rgba(0, 102, 204, 0.4);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, visibility 0.2s;
-}
-:root[data-color-scheme="dark"] .dispatch-fab {
-  background: #2997ff;
-  box-shadow: 0 4px 24px rgba(41, 151, 255, 0.45);
-}
-.dispatch-fab:active {
-  transform: scale(0.95);
-}
-[data-keyboard="true"] .dispatch-fab,
-[data-keyboard="true"] .bottom-nav {
-  visibility: hidden;
-  pointer-events: none;
-}
-[data-keyboard="true"] main {
-  padding-bottom: 32px;
-}
-
-/* Session Recovery Box */
-.session-recovery {
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(0, 102, 204, 0.05);
-  border: 1px solid rgba(0, 102, 204, 0.15);
-  margin-bottom: 14px;
-}
-:root[data-color-scheme="dark"] .session-recovery {
-  background: rgba(41, 151, 255, 0.1);
-  border-color: rgba(41, 151, 255, 0.2);
-}
-.session-recovery button {
-  width: 100%;
-  min-height: 42px;
-  border-radius: 9999px;
-  border: 1px solid #0066cc;
-  background: transparent;
-  color: #0066cc;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-}
-:root[data-color-scheme="dark"] .session-recovery button {
-  border-color: #2997ff;
-  color: #2997ff;
-}
-
-/* Jobs technical references */
+main { padding-top: 36px !important; padding-bottom: 128px; }
+.view-heading { margin-bottom: 20px; }
+.view-heading h1 { letter-spacing: -.025em; text-wrap: balance; }
+.runtime-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); }
+.runtime-strip > div { padding: 11px 15px; border-right: 1px solid var(--line); }
+.runtime-strip > div:last-child { border-right: 0; }
+.runtime-strip strong { font-size: 12px; }
+.runtime-strip small { font-size: 9px; line-height: 1; }
+.dossier-section { border: 1px solid var(--line); border-top-width: 1px; box-shadow: none; border-radius: 12px; padding: 22px; background: var(--surface-raised); }
+.section-heading { margin-bottom: 17px; }
+.section-heading h2, .dispatch-docket h2 { font-size: 18px; letter-spacing: -.015em; }
+.section-heading p { font-size: 12px; max-width: 65ch; color: var(--muted); }
+.source-input-head { align-items: center; gap: 8px; }
+.source-state { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 74px; padding: 12px 15px; background: var(--surface-soft); border-top: 1px solid var(--line); border-radius: 0; }
+.source-state-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); color: var(--muted); background: var(--surface-raised); }
+.source-state-copy strong { font-size: 13px; }
+.source-state-copy p { font-size: 11px; line-height: 1.4; }
+.source-facts { margin: 0; border: 0; }
+.source-summary { display: none !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0; padding: 0; border-top: 1px solid var(--line); }
+.source-summary > div { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 11px 13px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: none; }
+.source-summary > div:nth-child(2n) { border-right: 0; }
+.source-summary > div:nth-last-child(-n+2) { border-bottom: 0; }
+.source-summary dt { color: var(--muted); font: 500 12px/1.2 var(--font-body); }
+.source-summary dd { min-height: 28px; margin: 7px 0 0; font-family: var(--font-body); font-size: 14px; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.metadata-details, .build-advanced { border-block: 1px solid var(--line); }
+.metadata-details summary, .build-advanced > summary { display: list-item; padding: 12px 4px; color: var(--ink); font-size: 14px; cursor: pointer; }
+.metadata-details .source-facts { padding-bottom: 16px; }
+.metadata-details .source-facts-head { border: 0; background: transparent; }
+.field-grid.three { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.config-summary { display: none; }
+.advanced-content { display: grid; gap: 20px; padding: 16px 0; }
+.advanced-content > .field { max-width: 380px; }
+.advanced-content .selection-bar { margin: 0; flex-wrap: wrap; }
+.advanced-content .advanced { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.delivery-section { padding: 22px; }
+.dispatch-docket { border: 1px solid var(--line-strong); border-radius: 12px; padding: 18px; background: var(--surface-raised); box-shadow: none; }
+.dispatch-docket > strong { font-size: 16px; overflow-wrap: anywhere; }
+.dispatch-docket > p, .session-recovery p { font-size: 14px; line-height: 1.55; }
+.session-recovery { padding: 14px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-raised); }
+.session-recovery button { width: 100%; }
 .job-technical { border-block: 1px solid var(--line); margin: 16px 0; }
 .job-technical > summary { cursor: default; padding: 12px 0; font-size: 14px; }
 .job-technical .job-facts, .job-technical .job-context { border: 0; background: transparent; padding-inline: 0; }
@@ -1560,103 +300,22 @@ main {
 .job-controls { flex-wrap: wrap; }
 .job-status { font-size: 12px; }
 .bottom-nav { bottom: var(--safe-bottom); }
-
-/* ==========================================================================
-   Responsive Adaptations
-   ========================================================================== */
-@media (min-width: 861px) {
-  #recipe-form {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 0 20px;
-  }
-  .dispatch-docket {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-    top: 90px;
-  }
-  .dispatch-fab {
-    display: none !important;
-  }
-  main {
-    padding-bottom: 128px;
-  }
-  .bottom-nav {
-    bottom: max(14px, env(safe-area-inset-bottom));
-  }
+.dispatch-fab { bottom: calc(var(--dock-reserve) + 4px); right: 15px; width: auto; min-width: 0; height: 44px; padding: 0 14px 0 16px; border: 1px solid var(--dock-glass-border); border-radius: 999px; color: var(--dock-foreground); background: var(--dock-glass-bg); box-shadow: var(--dock-glass-shadow); -webkit-backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); backdrop-filter: blur(10px) saturate(1.5) contrast(1.08); }
+[data-keyboard="true"] .dispatch-fab, [data-keyboard="true"] .bottom-nav { visibility: hidden; pointer-events: none; }
+[data-keyboard="true"] main { padding-bottom: 32px; }
+@media (min-width:861px) {
+  #recipe-form { grid-template-columns: minmax(0,1fr) 320px; gap: 0 16px; }
+  .dispatch-docket { grid-column: 2; grid-row: 1 / span 3; top: 130px; }
+  .dispatch-fab { display: none !important; }
+  main { padding-bottom: 128px; }
+  .bottom-nav { bottom: max(14px, env(safe-area-inset-bottom)); }
 }
-
-@media (max-width: 860px) {
+@media (max-width:860px) {
   main {
-    padding-top: 20px !important;
+    padding-top: 36px !important;
     padding-left: max(14px, var(--telegram-safe-left, 0px));
     padding-right: max(14px, var(--telegram-safe-right, 0px));
     padding-bottom: calc(124px + env(safe-area-inset-bottom));
-  }
-  #recipe-form {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  #build .dispatch-docket {
-    grid-column: 1;
-    grid-row: auto;
-    position: static;
-    margin-top: 10px;
-    padding: 20px;
-  }
-  #build .field-grid.three {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  #build .runtime-strip {
-    grid-template-columns: 1fr;
-    margin-bottom: 18px;
-  }
-  #build .runtime-strip > div {
-    min-height: 54px;
-    border-right: 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  :root[data-color-scheme="dark"] #build .runtime-strip > div {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-  #build .runtime-strip > div:last-child {
-    border-bottom: 0;
-  }
-  #build .source-state {
-    grid-template-columns: 38px minmax(0, 1fr);
-    margin: 0 12px 14px;
-    padding: 12px 14px;
-  }
-  #build .source-state .probe-button {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-  #build .source-facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  #build .source-facts div:nth-child(3n) {
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  #build .source-facts div:nth-child(2n) {
-    border-right: 0;
-  }
-  #build .mod-group-items {
-    grid-template-columns: 1fr;
-  }
-  #build .dossier-section {
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  #build .release-version-editor {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  #build .release-version-controls {
-    width: 100%;
-  }
-  #build .release-version-controls input {
-    flex: 1;
   }
   .masthead,
   header.masthead,
@@ -1696,38 +355,32 @@ main {
   body[data-view="profile"] .profile-scene-content {
     padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
   }
+  .dossier-section { margin-bottom: 12px; padding: 15px; }
+  /* The three build selectors become a thumb-friendly vertical stack on phones. */
+  .build-options .field-grid,
+  .build-options .field-grid.three { grid-template-columns: 1fr; gap: 13px; }
+  .build-options .field-grid.three .field > span { margin-bottom: 6px; font-size: 9px; }
+  .runtime-strip { grid-template-columns: 1fr; margin-bottom: 16px; }
+  .runtime-strip > div { min-height: 52px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .runtime-strip > div:last-child { border-bottom: 0; }
+  .runtime-strip small { display: block; }
+  .dispatch-docket { padding: 20px; }
+  .source-state { grid-template-columns: 34px minmax(0, 1fr); }
+  .source-state .probe-button { grid-column: 1 / -1; width: 100%; }
+  .release-version-controls { flex-wrap: wrap; }
+  .release-version-controls input { min-width: 100px; width: 100%; }
+  .release-version-controls button { width: 100%; }
+}
+@media (max-width:390px) {
+  main { padding-left: 10px; padding-right: 10px; }
+  .dossier-section { padding: 12px; }
+  .source-input-head { flex-wrap: wrap; }
+  .field-grid.three { grid-template-columns: 1fr; }
+}
+@media (max-width:360px) {
+  .source-input-head > div { width: 100%; justify-content: space-between; }
 }
 
-@media (max-width: 420px) {
-  main {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-  #build .dossier-section {
-    padding: 14px;
-  }
-  #build .source-input-head {
-    flex-wrap: wrap;
-  }
-  #build .source-input-head > div {
-    width: 100%;
-    justify-content: space-between;
-  }
-  #build .field-grid.three {
-    grid-template-columns: 1fr;
-  }
-  #build .source-facts {
-    grid-template-columns: 1fr;
-  }
-  #build .source-facts div {
-    border-right: 0 !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
