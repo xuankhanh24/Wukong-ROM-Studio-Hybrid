@@ -86,9 +86,28 @@ jobs:
           ! grep -R -Ei \
             "github\.com|github\.io|${GITHUB_REPOSITORY_OWNER}|${repository_name}|${legacy_github_owner}|${legacy_cloudflare_handle}|DATABASE_URL|github_pat_" \
             .vercel-static --exclude-dir=licenses
+      - name: Clear queued or hung Vercel deployments
+        if: steps.deployment-mode.outputs.mode == 'cli'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Inspecting Vercel build queue for stuck deployments..."
+          for state in BUILDING QUEUED INITIALIZING; do
+            res="$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&state=${state}")"
+            uids="$(echo "$res" | jq -r '.deployments[]?.uid // empty' 2>/dev/null || true)"
+            for uid in $uids; do
+              echo "Cancelling stuck Vercel deployment: $uid (state: $state)"
+              curl -s -X PATCH -H "Authorization: Bearer $VERCEL_TOKEN" \
+                "https://api.vercel.com/v12/deployments/${uid}/cancel?teamId=${VERCEL_ORG_ID}" || true
+            done
+          done
       - name: Deploy bundle to Vercel
         if: steps.deployment-mode.outputs.mode == 'cli'
         id: deploy
+        timeout-minutes: 8
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           WUKONG_RELEASE_SHA: ${{ inputs.release_sha || github.sha }}
