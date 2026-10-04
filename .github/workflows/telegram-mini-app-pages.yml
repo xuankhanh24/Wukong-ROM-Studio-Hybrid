@@ -104,28 +104,6 @@ jobs:
                 "https://api.vercel.com/v12/deployments/${uid}/cancel?teamId=${VERCEL_ORG_ID}" || true
             done
           done
-      - name: Ensure team access for dashboard management
-        if: steps.deployment-mode.outputs.mode == 'cli'
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== 1. Inspect Token Owner ==="
-          curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/user" || true
-          echo ""
-
-          echo "=== 2. Inspect Teams ==="
-          curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/teams" || true
-          echo ""
-
-          echo "=== 3. Invite Member to Team ==="
-          team_id="${VERCEL_ORG_ID:-team_r1Xe5ozxPEWZcNvzj2mKFHiu}"
-          curl -s -w "\nHTTP_STATUS:%{http_code}\n" -X POST \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            -H "Content-Type: application/json" \
-            "https://api.vercel.com/v2/teams/${team_id}/members" \
-            -d '{"email":"luuxuankhanh2004@gmail.com","role":"MEMBER"}' || true
       - name: Deploy bundle to Vercel
         if: steps.deployment-mode.outputs.mode == 'cli'
         id: deploy
