@@ -16,9 +16,9 @@
   .page-head::before, .page-head::after { display: none; }
   h1 { font-size: 30px; }
   .page-head p { font-size: 12px; }
-  .runtime-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 14px; }
-  .runtime-strip > div { min-height: auto; padding: 8px 6px; border-right: 1px solid var(--line); border-bottom: 0; }
-  .runtime-strip > div:last-child { border-right: 0; }
+  .runtime-strip { grid-template-columns: 1fr; margin: 0 0 16px; }
+  .runtime-strip > div { min-height: 52px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .runtime-strip > div:last-child { border-bottom: 0; }
   #recipe-form { display: block; }
   .dossier-section { margin-bottom: 12px; padding: 15px; }
   .section-heading { grid-template-columns: 30px 1fr; gap: 9px; }
@@ -35,8 +35,7 @@
   .source-facts div:last-child { border-bottom: 0; }
   .selection-bar { align-items: flex-start; flex-direction: column; }
   .selection-bar > div:last-child { flex-wrap: wrap; }
-  .mod-group-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .steps { grid-template-columns: 1fr; }
+  .mod-group-items, .steps { grid-template-columns: 1fr; }
   .switches label { grid-template-columns: 26px minmax(0,1fr); }
   .switches em { grid-column: 2; }
   .dispatch-docket { position: static; margin-top: 12px; }

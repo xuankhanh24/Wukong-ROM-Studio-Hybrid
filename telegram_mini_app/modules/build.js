@@ -92,64 +92,18 @@ function renderMods(reset = true) {
   ["google", "camera", "interface", "security", "core", "other"].forEach((category) => {
     const groupNames = groups.get(category);
     if (!groupNames?.length) return;
-    const section = document.createElement("section");
-    section.className = "mod-group";
-    section.dataset.category = category;
-    if (category === "other") section.classList.add("collapsed");
-
+    const section = document.createElement("section"); section.className = "mod-group"; section.dataset.category = category;
     const header = document.createElement("header");
-    header.setAttribute("role", "button");
-    header.setAttribute("tabindex", "0");
-    header.setAttribute("aria-expanded", category === "other" ? "false" : "true");
-
-    const title = document.createElement("h3");
-    title.textContent = modCategoryLabel(category);
-
-    const meta = document.createElement("div");
-    meta.className = "mod-group-meta";
-
-    const count = document.createElement("span");
-    count.className = "mod-group-count";
-    const activeCount = groupNames.filter((name) => current.has(name)).length;
-    count.textContent = `${activeCount}/${groupNames.length}`;
-    if (activeCount > 0) count.classList.add("has-active");
-
-    const chevron = document.createElement("span");
-    chevron.className = "mod-group-chevron";
-    chevron.setAttribute("aria-hidden", "true");
-    chevron.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-
-    meta.append(count, chevron);
-    header.append(title, meta);
-
-    header.addEventListener("click", () => {
-      const isCollapsed = section.classList.toggle("collapsed");
-      header.setAttribute("aria-expanded", String(!isCollapsed));
-      try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
-    });
-    header.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        header.click();
-      }
-    });
-
-    const items = document.createElement("div");
-    items.className = "mod-group-items";
-    section.append(header, items);
+    const title = document.createElement("h3"); title.textContent = modCategoryLabel(category);
+    const count = document.createElement("span"); count.textContent = String(groupNames.length);
+    const items = document.createElement("div"); items.className = "mod-group-items";
+    header.append(title, count); section.append(header, items);
     groupNames.forEach((name) => {
       const label = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.value = name;
-      input.checked = current.has(name);
-      const span = document.createElement("span");
-      span.title = name;
-      const text = document.createElement("b");
-      text.textContent = name;
-      span.append(selectionMark(), text);
-      label.append(input, span);
-      items.append(label);
+      const input = document.createElement("input"); input.type = "checkbox"; input.value = name; input.checked = current.has(name);
+      const span = document.createElement("span"); span.title = name;
+      const text = document.createElement("b"); text.textContent = name;
+      span.append(selectionMark(), text); label.append(input, span); items.append(label);
     });
     list.append(section);
   });
@@ -202,12 +156,7 @@ function filterMods() {
     label.hidden = Boolean(query) && !label.textContent.toLocaleLowerCase().includes(query);
   });
   $$("#mod-list .mod-group").forEach((group) => {
-    const hasVisible = [...group.querySelectorAll("label")].some((label) => !label.hidden);
-    group.hidden = !hasVisible;
-    if (query && hasVisible) {
-      group.classList.remove("collapsed");
-      group.querySelector("header")?.setAttribute("aria-expanded", "true");
-    }
+    group.hidden = ![...group.querySelectorAll("label")].some((label) => !label.hidden);
   });
 }
 
@@ -291,15 +240,6 @@ function updateSummary() {
   $("#launch-summary").textContent = summary;
   if ($("#mobile-launch-summary")) $("#mobile-launch-summary").textContent = summary;
   $("#mod-count").textContent = `${selectedMods().length} ${t("selected")}`;
-  $$(".mod-group").forEach((group) => {
-    const total = group.querySelectorAll(".mod-group-items input").length;
-    const checked = group.querySelectorAll(".mod-group-items input:checked").length;
-    const countSpan = group.querySelector(".mod-group-count");
-    if (countSpan) {
-      countSpan.textContent = `${checked}/${total}`;
-      countSpan.classList.toggle("has-active", checked > 0);
-    }
-  });
   const currentUri = $("#source-uri")?.value?.trim() || "";
   const sourceDetection = classifySource(currentUri);
   const sourceReady = Boolean(sourceDetection?.valid);
@@ -346,7 +286,6 @@ function updateSummary() {
     node.textContent = t(ready ? "launch" : "finishSource");
   });
   $("#dispatch-fab")?.setAttribute("aria-label", t("fabBuild"));
-  $("#dispatch-fab")?.classList.toggle("ready", ready);
   syncTelegramMainButton(ready);
 }
 
