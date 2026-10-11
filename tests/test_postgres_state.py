@@ -146,6 +146,34 @@ class PostgresJobStoreTests(unittest.TestCase):
         migrated_event = target.events(manifest.job_id)[0]
         self.assertEqual(original_event.to_dict(), migrated_event.to_dict())
 
+    def test_reset_access_preserves_durable_audit_and_lifetime_usage(self) -> None:
+        admin = Identity("telegram", "42", "admin")
+        store = PostgresTelegramAccessStore(connect=self.connect, dialect="sqlite", admin_ids=[42])
+        store.observe_user(99, display_name="Keep History")
+        store.approve(99, actor=admin)
+        store.reserve_build(99, job_id="historic-job", idempotency_key="historic-request")
+        before = store.user_events(99, actor=admin)
+        with self.assertRaises(ValueError):
+            store.reset_access(99, actor=admin)
+        with self.assertRaises(PermissionError):
+            store.reset_access(42, actor=admin, reason="protected")
+        with self.assertRaises(PermissionError):
+            store.reset_access(99, actor=Identity("telegram", "100", "user"), reason="denied")
+        store.reset_access(99, actor=admin, reason="start over")
+        user = store.profile(99)
+        self.assertEqual("pending", user["accessStatus"])
+        self.assertEqual(0, user["buildCredits"])
+        self.assertFalse(user["unlimited"])
+        self.assertEqual("", user["approvedAt"])
+        self.assertEqual(1, user["jobCount"])
+        self.assertEqual(1, user["lifetimeUsed"])
+        self.assertEqual("historic-job", user["lastJobId"])
+        self.assertIsNone(store.identity(99))
+        self.assertTrue(all(event in store.user_events(99, actor=admin) for event in before))
+        store.approve(99, actor=admin)
+        self.assertEqual(1, store.profile(99)["buildCredits"])
+        self.assertEqual(1, store.profile(99)["jobCount"])
+
     def test_telegram_access_is_durable_and_enforces_admin_role(self) -> None:
         admin = Identity("telegram", "42", "admin")
         first = PostgresTelegramAccessStore(

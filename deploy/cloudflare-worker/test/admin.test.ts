@@ -1,6 +1,7 @@
-import { SELF } from "cloudflare:test";
+import { SELF, env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 import { tmaHeaders } from "./helpers";
+import { issueLaunchToken } from "../src/auth";
 
 describe("admin user management", () => {
   it("shows complete user identity, approves access, and updates Build Allowance", async () => {
@@ -169,4 +170,60 @@ describe("admin user management", () => {
     );
     expect(invalid.status).toBe(400);
   }, 30_000);
+  it("resets access without losing history and requests approval once on the next visit", async () => {
+    const subject = "88009";
+    const userHeaders = await tmaHeaders(Number(subject), { first_name: "Reset User" });
+    const adminHeaders = { ...(await tmaHeaders(1678823419)), "Content-Type": "application/json" };
+    const action = (id: string, name: string, payload: Record<string, unknown>) => SELF.fetch(
+      `https://worker.example/v1/admin/users/${id}/${name}`,
+      { method: "POST", headers: adminHeaders, body: JSON.stringify(payload) }
+    );
+    await SELF.fetch("https://worker.example/v1/session/open", { method: "POST", headers: userHeaders });
+    await action(subject, "approve", { reason: "initial approval" });
+    await action(subject, "allowance", { operation: "unlimited", unlimited: true, reason: "test unlimited" });
+    await action(subject, "allowance", { operation: "concurrency", value: 5 });
+    await env.DB.prepare(
+      "UPDATE wukong_telegram_users SET job_count=7, lifetime_used=3, last_job_id='historical-job', last_job_status='succeeded' WHERE subject=?"
+    ).bind(subject).run();
+    const before = await env.DB.prepare("SELECT * FROM wukong_telegram_user_events WHERE subject=?").bind(subject).all();
+    expect((await action(subject, "reset-access", {})).status).toBe(400);
+    const denied = await SELF.fetch(`https://worker.example/v1/admin/users/${subject}/reset-access`, {
+      method: "POST", headers: { ...userHeaders, "Content-Type": "application/json" }, body: JSON.stringify({ reason: "unauthorized" })
+    });
+    expect(denied.status).toBe(403);
+    expect((await action("1678823419", "reset-access", { reason: "protected admin" })).status).toBe(409);
+    expect((await action("999999999", "reset-access", { reason: "missing user" })).status).toBe(409);
+    const reset = await action(subject, "reset-access", { reason: "start over" });
+    expect(reset.status).toBe(200);
+    await expect(reset.json()).resolves.toMatchObject({ user: {
+      accessStatus: "pending", role: "user", buildCredits: 0, unlimited: false, concurrentJobLimit: 1,
+      approvedAt: "", revokedAt: "", jobCount: 7, lifetimeUsed: 3, lifetimeGranted: 1,
+      lastJobId: "historical-job", lastJobStatus: "succeeded", displayName: "Reset User"
+    } });
+    const after = await env.DB.prepare("SELECT * FROM wukong_telegram_user_events WHERE subject=?").bind(subject).all();
+    expect(after.results).toEqual(expect.arrayContaining(before.results));
+    expect(after.results).toEqual(expect.arrayContaining([expect.objectContaining({ event_type: "access_reset", actor_subject: "1678823419", reason: "start over" })]));
+    expect(await env.DB.prepare("SELECT * FROM wukong_telegram_access WHERE subject=?").bind(subject).first()).toBeNull();
+    const launchHeaders = { ...userHeaders, Authorization: `wla ${await issueLaunchToken(subject, "123456789:fixture_bot_secret_value")}` };
+    expect((await SELF.fetch("https://worker.example/v1/jobs", { headers: launchHeaders })).status).toBe(403);
+    for (let i = 0; i < 2; i++) {
+      const me = await SELF.fetch("https://worker.example/v1/me", { headers: userHeaders });
+      await expect(me.json()).resolves.toMatchObject({ user: { accessStatus: "pending" } });
+    }
+    const notifications = await env.DB.prepare(
+      "SELECT dedupe_key FROM wukong_telegram_notification_outbox WHERE dedupe_key LIKE 'access-request-reset:%' AND payload_json LIKE '%88009%'"
+    ).all();
+    expect(notifications.results).toHaveLength(1);
+    const reapproved = await action(subject, "approve", { reason: "fresh approval" });
+    await expect(reapproved.json()).resolves.toMatchObject({ user: { accessStatus: "approved", buildCredits: 1, jobCount: 7, lifetimeGranted: 2 } });
+    await action(subject, "revoke", { reason: "revoke then reset" });
+    await action(subject, "reset-access", { reason: "second cycle" });
+    await SELF.fetch("https://worker.example/v1/me", { headers: userHeaders });
+    const nextCycle = await env.DB.prepare(
+      "SELECT dedupe_key FROM wukong_telegram_notification_outbox WHERE dedupe_key LIKE 'access-request-reset:%' AND payload_json LIKE '%88009%'"
+    ).all();
+    expect(nextCycle.results).toHaveLength(2);
+  });
+
+
 });

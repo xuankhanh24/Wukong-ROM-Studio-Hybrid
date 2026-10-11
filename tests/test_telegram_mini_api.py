@@ -49,6 +49,39 @@ def signed_init_data(
 
 
 class TelegramMiniAppAPITests(unittest.TestCase):
+    def test_reset_access_preserves_history_and_requires_new_approval(self) -> None:
+        admin = self.access.identity(1)
+        self.access.observe_user(42, display_name="Keep History")
+        self.access.open_session(42, "before-reset")
+        self.access.reserve_build(42, job_id="historical-job", idempotency_key="historical-request")
+        self.access.revoke(42, actor=admin, reason="old revoke")
+        before = self.access.user_events(42, actor=admin)
+        route = "/v1/admin/users/42/reset-access"
+        self.assertEqual(403, self.client.post(route, headers=self.headers(43), json={"reason": "bad actor"}).status_code)
+        self.assertEqual(400, self.client.post(route, headers=self.headers(1), json={}).status_code)
+        response = self.client.post(route, headers=self.headers(1), json={"reason": "start over"})
+        self.assertEqual(200, response.status_code)
+        user = response.get_json()["user"]
+        self.assertEqual("pending", user["accessStatus"])
+        self.assertEqual(0, user["buildCredits"])
+        self.assertFalse(user["unlimited"])
+        self.assertEqual("", user["approvedAt"])
+        self.assertEqual("", user["revokedAt"])
+        self.assertEqual(1, user["jobCount"])
+        self.assertEqual(1, user["lifetimeUsed"])
+        self.assertEqual("historical-job", user["lastJobId"])
+        self.assertIsNone(self.access.identity(42))
+        after = self.access.user_events(42, actor=admin)
+        self.assertTrue(all(event in after for event in before))
+        self.assertTrue(any(event["type"] == "access_reset" and event["reason"] == "start over" for event in after))
+        self.assertEqual(200, self.client.get("/v1/me", headers=self.headers(42)).status_code)
+        self.assertEqual(403, self.client.get("/v1/jobs", headers=self.headers(42)).status_code)
+        self.assertEqual(409, self.client.post("/v1/admin/users/1/reset-access", headers=self.headers(1), json={"reason": "protected"}).status_code)
+        self.assertEqual(409, self.client.post("/v1/admin/users/999/reset-access", headers=self.headers(1), json={"reason": "missing"}).status_code)
+        self.access.approve(42, actor=admin, reason="fresh approval")
+        self.assertEqual(1, self.access.profile(42)["buildCredits"])
+        self.assertEqual(1, self.access.profile(42)["jobCount"])
+
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)

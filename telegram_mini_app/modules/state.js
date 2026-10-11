@@ -216,6 +216,7 @@ Object.assign(translations.en, {
 
 Object.assign(translations.vi, {
   buildAllowance: "LƯỢT BUILD", unlimited: "Không giới hạn", pending: "Chờ duyệt", approved: "Đã duyệt", revoked: "Đã thu hồi",
+  resetUserAccess: "Xóa quyền", resetUserAccessMessage: "Đặt lại quyền và hạn mức của người dùng về chờ cấp quyền: 0 lượt build, tắt unlimited và 1 job đồng thời. Người dùng phải xin cấp quyền lại khi mở Mini App. Lịch sử job, hoạt động và nhật ký vẫn được lưu.",
   quotaExhausted: "Đã hết lượt", quotaRequiredHint: "Tài khoản chưa được duyệt hoặc đã hết lượt build.",
   userLedgerKicker: "QUẢN TRỊ TRUY CẬP", userLedgerTitle: "Người dùng & lượt build", userLedgerHint: "Duyệt tài khoản, cấp lượt và xem lịch sử mà không xóa dấu vết.",
   addUser: "Thêm Telegram ID", addUserKicker: "HỒ SƠ MỚI", searchUsers: "Tìm người dùng", accessStatus: "Trạng thái", allUsers: "Tất cả",
@@ -234,6 +235,7 @@ Object.assign(translations.vi, {
 
 Object.assign(translations.en, {
   buildAllowance: "BUILD CREDIT", unlimited: "Unlimited", pending: "Pending", approved: "Approved", revoked: "Revoked",
+  resetUserAccess: "Reset access", resetUserAccessMessage: "Reset this user to pending approval: 0 build credits, unlimited disabled and 1 concurrent job. The user must request approval again when opening the Mini App. Job history, activity and audit logs are retained.",
   quotaExhausted: "No credits", quotaRequiredHint: "This account is pending, revoked, or has no build credits left.",
   userLedgerKicker: "ACCESS CONTROL", userLedgerTitle: "Users & build credits", userLedgerHint: "Approve accounts, allocate credits and retain a complete audit trail.",
   addUser: "Add Telegram ID", addUserKicker: "NEW PROFILE", searchUsers: "Find user", accessStatus: "Status", allUsers: "All",

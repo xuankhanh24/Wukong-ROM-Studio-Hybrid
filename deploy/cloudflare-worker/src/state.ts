@@ -273,7 +273,25 @@ export async function observeUser(
       ))
     ]);
   }
-  return (await profile(env, subject))!;
+  const observed = (await profile(env, subject))!;
+  await requestAccessAfterReset(env, observed);
+  return observed;
+}
+
+export async function requestAccessAfterReset(env: Env, user: TelegramProfile): Promise<void> {
+  if (user.accessStatus !== "pending") return;
+  // Each reset starts a new approval cycle; the outbox deduplicates revisits.
+  const reset = await env.DB.prepare(
+    "SELECT event_id FROM wukong_telegram_user_events WHERE subject = ? AND event_type = 'access_reset' ORDER BY created_at DESC, event_id DESC LIMIT 1"
+  ).bind(user.telegramId).first<{ event_id: string }>();
+  if (!reset) return;
+  const admins = configuredAdmins(env);
+  if (!admins.length) return;
+  const now = new Date().toISOString();
+  await env.DB.batch(admins.map((adminSubject) => notificationStatement(
+    env, adminSubject, `access-request-reset:${reset.event_id}:${adminSubject}`,
+    accessRequestMessage(user.telegramId, user.displayName, user.username), now
+  )));
 }
 
 export async function openSession(
@@ -411,6 +429,37 @@ export async function revokeUser(
       `⛔ <b>Quyền truy cập đã bị thu hồi</b>\n\nLý do: ${escapeTelegramHtml(normalizedReason)}`,
       now
     )
+  ]);
+  return (await profile(env, subject))!;
+}
+
+export async function resetUserAccess(
+  env: Env,
+  value: unknown,
+  actorSubject: string,
+  reason: string
+): Promise<TelegramProfile> {
+  const subject = requireTelegramSubject(value);
+  const normalizedReason = reason.trim();
+  if (!normalizedReason) throw new Error("A reason is required to reset access");
+  const current = await profile(env, subject);
+  if (!current) throw new Error("Telegram user not found");
+  if (current.configuredAdmin || configuredAdmins(env).includes(subject)) {
+    throw new Error("Configured Telegram admins cannot have their access reset");
+  }
+  const now = new Date().toISOString();
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM wukong_telegram_access WHERE subject = ?").bind(subject),
+    env.DB.prepare(
+      `UPDATE wukong_telegram_users SET access_status = 'pending', role = 'user',
+       build_credits = 0, unlimited = 0, concurrent_job_limit = 1,
+       approved_at = '', revoked_at = '', access_actor = ?, access_reason = ? WHERE subject = ?`
+    ).bind(actorSubject, normalizedReason.slice(0, 1024), subject),
+    eventStatement(env, subject, "access_reset", now, {
+      actor: actorSubject,
+      reason: normalizedReason,
+      details: { previousStatus: current.accessStatus, creditsRemoved: current.buildCredits, unlimitedBefore: current.unlimited, concurrentJobLimitBefore: current.concurrentJobLimit }
+    })
   ]);
   return (await profile(env, subject))!;
 }

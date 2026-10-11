@@ -301,7 +301,7 @@ async function loadAdminUsers({ reset = false } = {}) {
 function adminAuditArticle(event) {
   const article = document.createElement("article");
   article.dataset.adminEventId = String(event.eventId || `${event.type || "event"}:${event.createdAt || ""}`);
-  const name = document.createElement("strong"); name.textContent = event.type;
+  const name = document.createElement("strong"); name.textContent = event.type === "access_reset" ? t("resetUserAccess") : event.type;
   const detail = document.createElement("small");
   detail.textContent = `${formatDate(event.createdAt)}${event.actorTelegramId ? ` · ${event.actorTelegramId}` : ""}${event.reason ? ` · ${event.reason}` : ""}`;
   article.append(name, detail);
@@ -407,21 +407,21 @@ function requestAdminAction(user, action) {
   const error = $("#admin-action-error");
   const confirm = $("#admin-action-confirm");
   const needsValue = ["credit-subtract", "credit-set", "concurrency-set"].includes(action);
-  const needsReason = action === "revoke" || action === "credit-subtract" || (action === "unlimited" && user.unlimited);
+  const needsReason = action === "revoke" || action === "reset-access" || action === "credit-subtract" || (action === "unlimited" && user.unlimited);
   const allowsReason = needsReason || action === "approve" || action === "credit-set" || action === "concurrency-set";
   $("#admin-action-title").textContent = t({
-    approve: "approveUser", revoke: "revokeUser", "credit-subtract": "subtractCredit",
+    approve: "approveUser", revoke: "revokeUser", "reset-access": "resetUserAccess", "credit-subtract": "subtractCredit",
     "credit-set": "setCredit", "concurrency-set": "setConcurrentJobs", unlimited: "toggleUnlimited"
   }[action]);
-  $("#admin-action-message").textContent = t("adminActionMessage");
+  $("#admin-action-message").textContent = t(action === "reset-access" ? "resetUserAccessMessage" : "adminActionMessage");
   valueField.hidden = !needsValue;
   reasonField.hidden = !allowsReason;
   valueInput.value = action === "credit-set" ? String(user.buildCredits || 0)
     : action === "concurrency-set" ? String(user.concurrentJobLimit || 1) : "1";
   reasonInput.value = action === "approve" ? "approved by admin" : "";
   error.hidden = true;
-  confirm.classList.toggle("danger-confirm", action === "revoke");
-  confirm.classList.toggle("primary", action !== "revoke");
+  confirm.classList.toggle("danger-confirm", ["revoke", "reset-access"].includes(action));
+  confirm.classList.toggle("primary", !["revoke", "reset-access"].includes(action));
   dialog.showModal();
   requestAnimationFrame(() => (needsValue ? valueInput : allowsReason ? reasonInput : confirm).focus());
   return new Promise((resolve) => {
@@ -465,7 +465,7 @@ async function runAdminUserAction(user, action) {
   const input = await requestAdminAction(user, action);
   if (!input) return;
   let path = action; let body = {};
-  if (action === "approve" || action === "revoke") body.reason = input.reason;
+  if (["approve", "revoke", "reset-access"].includes(action)) body.reason = input.reason;
   if (action === "credit-add") { path = "allowance"; body = { operation: "add", value: 1, reason: input.reason }; }
   if (action === "credit-subtract") { path = "allowance"; body = { operation: "add", value: -input.value, reason: input.reason }; }
   if (action === "credit-set") {
@@ -526,6 +526,7 @@ async function openAdminUser(telegramId) {
   const definitions = user.accessStatus === "approved"
     ? [["credit-add", t("addCredit")], ["credit-subtract", t("subtractCredit")], ["credit-set", t("setCredit")], ["concurrency-set", t("setConcurrentJobs")], ["unlimited", t("toggleUnlimited")], ["revoke", t("revokeUser"), "danger"]]
     : [["approve", t("approveUser")]];
+  definitions.push(["reset-access", t("resetUserAccess"), "danger"]);
   definitions.forEach(([action, label, className]) => { const button = document.createElement("button"); button.type = "button"; button.textContent = label; if (className) button.className = className; button.disabled = Boolean(user.configuredAdmin); button.addEventListener("click", () => runAdminUserAction(user, action).catch((error) => toast(error.message, true))); actions.append(button); });
   const auditTitle = document.createElement("h3"); auditTitle.textContent = t("auditTitle");
   const audit = document.createElement("div"); audit.id = "admin-user-audit-log"; audit.className = "user-audit";

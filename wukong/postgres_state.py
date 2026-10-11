@@ -927,6 +927,36 @@ class PostgresTelegramAccessStore(_DatabaseStore):
             )
             self._append_event(cursor, subject, "revoked", actor=actor.subject, reason=reason)
 
+    def reset_access(
+        self,
+        user_id: int | str,
+        *,
+        actor: Identity,
+        reason: str = "",
+    ) -> None:
+        self._require_admin(actor)
+        reason = require_sensitive_admin_reason(reason, action="reset access")
+        subject = self._subject(user_id)
+        if subject in self._configured_admins:
+            raise PermissionError("Configured Telegram admins cannot have their access reset")
+        with self._lock, self._connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(self._sql(
+                "SELECT access_status, build_credits, unlimited FROM wukong_telegram_users WHERE subject = ?"
+            ), (subject,))
+            previous = cursor.fetchone()
+            if previous is None:
+                raise ValueError("Telegram user not found")
+            cursor.execute(self._sql("DELETE FROM wukong_telegram_access WHERE subject = ?"), (subject,))
+            cursor.execute(self._sql(
+                "UPDATE wukong_telegram_users SET access_status = 'pending', role = 'user', "
+                "build_credits = 0, unlimited = 0, approved_at = '', revoked_at = '', "
+                "access_actor = ?, access_reason = ? WHERE subject = ?"
+            ), (actor.subject, reason[:1024], subject))
+            self._append_event(cursor, subject, "access_reset", actor=actor.subject, reason=reason,
+                               details={"previousStatus": str(previous[0]), "creditsRemoved": int(previous[1]),
+                                        "unlimitedBefore": bool(previous[2])})
+
     def list_access(self, *, actor: Identity) -> dict[str, list[str]]:
         self._require_admin(actor)
         with self._connection() as connection:

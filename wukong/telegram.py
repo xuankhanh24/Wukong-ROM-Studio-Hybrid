@@ -62,7 +62,7 @@ def require_sensitive_admin_reason(
         and int(credits_after) < int(credits_before)
     )
     disables_unlimited = unlimited_before is True and unlimited_after is False
-    if (reduces_credits or disables_unlimited or action == "revoke") and not normalized:
+    if (reduces_credits or disables_unlimited or action in {"revoke", "reset access"}) and not normalized:
         raise ValueError(f"A reason is required to {action}")
     return normalized
 
@@ -352,6 +352,36 @@ class TelegramAccessStore:
                 reason=reason,
                 creditsRemoved=previous,
             )
+            self._write(state)
+
+    def reset_access(
+        self,
+        user_id: int | str,
+        *,
+        actor: Identity,
+        reason: str = "",
+    ) -> None:
+        self._require_admin(actor)
+        reason = require_sensitive_admin_reason(reason, action="reset access")
+        subject = self._subject(user_id)
+        if subject in self._configured_admins:
+            raise PermissionError("Configured Telegram admins cannot have their access reset")
+        with self._lock:
+            state = self._read()
+            if subject not in state.get("profiles", {}):
+                raise ValueError("Telegram user not found")
+            profile = self._ensure_profile(state, subject)
+            previous = dict(profile)
+            profile.update({
+                "accessStatus": "pending", "role": "user", "buildCredits": 0,
+                "unlimited": False, "approvedAt": "", "revokedAt": "",
+                "accessActor": actor.subject, "accessReason": reason,
+            })
+            state["users"] = [value for value in state.get("users", []) if value != subject]
+            state["admins"] = [value for value in state.get("admins", []) if value != subject]
+            self._event(state, subject, "access_reset", actor=actor.subject, reason=reason,
+                        previousStatus=previous["accessStatus"], creditsRemoved=previous["buildCredits"],
+                        unlimitedBefore=previous["unlimited"])
             self._write(state)
 
     def update_allowance(
