@@ -77,8 +77,13 @@
   .debloat-control > header, .debloat-summary { align-items: stretch; flex-direction: column; }
   .debloat-summary small { text-align: left; }
   .job-history-tabs button { flex-direction: column; gap: 4px; }
-  .release-version-controls { min-width:0; width:100%; }
-  .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .toast {
+    top: calc(max(16px, env(safe-area-inset-top, 0px), var(--telegram-safe-top, 0px)) + 54px);
+    right: 12px;
+    left: auto;
+    bottom: auto;
+    max-width: min(340px, calc(100vw - 24px));
+  }
 }@media (max-width: 390px) {
   main { padding-inline: 10px; }
   .dossier-section { padding: 12px; }
