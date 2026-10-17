@@ -599,7 +599,7 @@ async function loadAdminJobDetail() {
     const signal = requestScopes.start("adminJob");
     const payload = view.historicalLogPage && view.events.length
       ? { activeJob: await apiRequest(`/v1/jobs/${encodeURIComponent(view.jobId)}`, { signal }), events: [], eventsHasMore: view.jobEventsHasMore }
-      : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodeURIComponent(view.jobId)}&after=${after}`, { signal });
+      : await apiRequest(`/v1/sync?includeHistory=0&includeEvents=0&jobId=${encodeURIComponent(view.jobId)}`, { signal });
     if (state.adminJobView !== view || requestId !== view.requestId || !workspacePollingAllowed()) return;
     const job = payload.activeJob;
     if (!job || (job.job_id || job.jobId) !== view.jobId) {
@@ -673,6 +673,112 @@ function renderJobParameters(job, root, reader) {
     }
   }
   return details;
+}
+
+function getPipelinePhases() {
+  const isVi = state.language === "vi";
+  return [
+    { id: "source", label: isVi ? "ROM nguồn" : "Source ROM" },
+    { id: "unpack", label: isVi ? "Bung nén" : "Unpack" },
+    { id: "mod", label: isVi ? "Áp dụng MOD" : "Apply MOD" },
+    { id: "package", label: isVi ? "Đóng gói" : "Packaging" },
+    { id: "publish", label: isVi ? "Xuất xưởng" : "Publishing" },
+  ];
+}
+
+function pipelinePhaseIndex(stage, status) {
+  const s = String(stage || "").toLowerCase();
+  const st = String(status || "").toLowerCase();
+  if (st === "succeeded") return 5;
+  if (["upload", "uploading", "mirror", "complete", "notify"].some((k) => s.includes(k)) || st === "uploading") return 4;
+  if (["repack", "super", "vbmeta", "vendor_boot", "package", "zip"].some((k) => s.includes(k))) return 3;
+  if (["apply_mod", "mod", "sync_config"].some((k) => s.includes(k))) return 2;
+  if (["extract", "payload", "unpack", "debloat"].some((k) => s.includes(k))) return 1;
+  return 0;
+}
+
+function renderJobStepper(job, events = []) {
+  const container = document.createElement("section");
+  container.className = "job-stepper";
+
+  const titleRow = document.createElement("div");
+  titleRow.className = "job-stepper-title";
+  const title = document.createElement("span");
+  title.textContent = state.language === "vi" ? "Tiến trình build ROM" : "Build Pipeline";
+  const stageName = document.createElement("span");
+  stageName.textContent = job.stage || statusLabel(job.status);
+  titleRow.append(title, stageName);
+  container.append(titleRow);
+
+  const phaseIndex = pipelinePhaseIndex(job.stage, job.status);
+  const isFailed = ["failed", "cancelled"].includes(String(job.status || "").toLowerCase());
+  const isSucceeded = String(job.status || "").toLowerCase() === "succeeded";
+
+  const list = document.createElement("ol");
+  list.className = "job-stepper-stages";
+
+  getPipelinePhases().forEach((phase, index) => {
+    const item = document.createElement("li");
+    let stateClass = "pending";
+    let icon = String(index + 1);
+
+    if (isSucceeded || index < phaseIndex) {
+      stateClass = "complete";
+      icon = "✓";
+    } else if (index === phaseIndex) {
+      if (isFailed) {
+        stateClass = "failed";
+        icon = "✕";
+      } else {
+        stateClass = "running";
+        icon = "●";
+      }
+    }
+
+    item.className = `stepper-stage ${stateClass}`;
+    const badge = document.createElement("span");
+    badge.className = "stepper-badge";
+    badge.textContent = icon;
+
+    const label = document.createElement("span");
+    label.className = "stepper-label";
+    label.textContent = phase.label;
+
+    item.append(badge, label);
+    list.append(item);
+  });
+  container.append(list);
+
+  if (isFailed) {
+    const errorBanner = document.createElement("div");
+    errorBanner.className = "job-error-banner";
+    const errorIcon = document.createElement("span");
+    errorIcon.textContent = "⚠️";
+    const errorText = document.createElement("div");
+    const errorTitle = document.createElement("strong");
+    errorTitle.textContent = t("pipelineFailed") || "Build không thành công";
+    const errorMsg = document.createElement("span");
+    errorMsg.textContent = job.error || "Đã xảy ra lỗi trong quá trình thực thi.";
+    errorText.append(errorTitle, errorMsg);
+    errorBanner.append(errorIcon, errorText);
+    container.append(errorBanner);
+  } else if (isSucceeded) {
+    const successBanner = document.createElement("div");
+    successBanner.className = "job-success-banner";
+    const successIcon = document.createElement("span");
+    successIcon.textContent = "🎉";
+    const successText = document.createElement("span");
+    successText.textContent = t("pipelineComplete") || "Build hoàn tất! Link tải đã sẵn sàng bên dưới.";
+    successBanner.append(successIcon, successText);
+    container.append(successBanner);
+  }
+
+  const upload = [...events].reverse().find((event) => event.type === "upload_progress");
+  if (upload && !isSucceeded && !isFailed) {
+    container.append(renderUploadProgressCard(upload));
+  }
+
+  return container;
 }
 
 function renderActiveJob(job, events, inspection = null) {
@@ -760,61 +866,29 @@ function renderActiveJob(job, events, inspection = null) {
   }
   facts.append(...factNodes);
   const artifacts = renderArtifacts(job);
+  const stepper = renderJobStepper(job, events);
   const actions = document.createElement("div"); actions.className = "job-controls";
   const jobId = job.job_id || job.jobId;
-  const logExpanded = reader.expandedLogJobId === jobId;
-  const logButton = document.createElement("button"); logButton.type = "button"; logButton.className = "job-log-toggle";
-  logButton.dataset.jobFocus = "log-toggle";
-  logButton.textContent = t(logExpanded ? "hideFullLog" : "viewFullLog");
-  logButton.setAttribute("aria-expanded", String(logExpanded));
-  logButton.addEventListener("click", () => {
-    reader.expandedLogJobId = logExpanded ? "" : jobId;
-    renderActiveJob(job, events, inspection);
-    if (!logExpanded) requestAnimationFrame(() => root.querySelector(".job-events")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
-  });
-  actions.append(logButton);
-  if (reader.jobEventsHasMore) {
-    const more = document.createElement("button"); more.type = "button"; more.textContent = t("loadMoreJobEvents");
-    more.dataset.jobFocus = "load-more-events";
-    more.addEventListener("click", () => { more.disabled = true; loadLogPage(jobId, events, "next", inspection).catch(error => toast(error.message, true)).finally(() => { more.disabled = false; }); });
-    actions.append(more);
-  }
-  if (Number(events[0]?.sequence) > 1) {
-    const previous = document.createElement("button"); previous.type = "button";
-    previous.textContent = t("previousEvents"); previous.dataset.jobFocus = "previous-events";
-    previous.addEventListener("click", () => loadLogPage(jobId, events, "previous", inspection).catch(error => toast(error.message, true)));
-    actions.append(previous);
-  }
   if (!inspection && !terminalJobStatuses.has(job.status)) actions.append(jobAction(t("cancel"), "cancel", job, true));
   if (!inspection && ["failed", "cancelled"].includes(job.status) && job.checkpoint) actions.append(jobAction(t("resume"), "resume", job));
   const config = state.me?.role === "admin" ? renderJobParameters(job, root, reader) : null;
   const technical = document.createElement("details"); technical.className = "job-technical";
-  technical.open = true;
-  technical.dataset.alwaysOpen = "true";
-  technical.addEventListener("toggle", () => { if (!technical.open) technical.open = true; });
+  technical.open = reader.expandedMetadataJobId === jobId;
+  technical.addEventListener("toggle", () => { if (technical.isConnected) reader.expandedMetadataJobId = technical.open ? jobId : ""; });
   const technicalTitle = document.createElement("summary"); technicalTitle.textContent = t("metadataDetails");
-  technicalTitle.setAttribute("aria-disabled", "true");
-  technicalTitle.addEventListener("click", (event) => event.preventDefault());
   technical.append(technicalTitle, context, facts);
   const updated = document.createElement("small"); updated.className = "job-sync-time";
   updated.textContent = `${t("latestUpdate")}: ${formatDate(job.updated_at || job.updatedAt)}`;
   progress.append(updated);
-  const before = [header, creator, progress, technical];
-  const previousLog = root.querySelector(".job-events");
-  const previousTop = previousLog?.scrollTop || 0;
-  const atBottom = previousLog ? previousLog.scrollHeight - previousTop - previousLog.clientHeight < 36 : true;
-  const nextLog = renderEvents(events, logExpanded);
-  const log = previousLog?.isEqualNode(nextLog) ? previousLog : nextLog;
-  const children = [...before, ...(config ? [config] : []), artifacts, actions, log];
+  const before = [header, creator, progress, stepper, technical];
+  const children = [...before, ...(config ? [config] : []), artifacts, ...(actions.children.length ? [actions] : [])];
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index], current = root.children[index];
-    // Retain equal presentation nodes and the attached parameter reader.
     if (current === child || (index < before.length && current?.isEqualNode(child))) continue;
     if (current) root.insertBefore(child, current); else root.append(child);
     if (current && !children.includes(current)) current.remove();
   }
   while (root.children.length > children.length) root.lastElementChild.remove();
-  if (log !== previousLog) log.scrollTop = atBottom && !reader.historicalLogPage ? log.scrollHeight : previousTop;
   if (focusedJobControlKey) {
     root.querySelector(`[data-job-focus="${focusedJobControlKey}"]`)?.focus({ preventScroll: true });
   }
@@ -1124,7 +1198,7 @@ async function loadJobDetail(jobId) {
   const signal = requestScopes.start("jobDetail");
   const eventPayload = state.historicalLogPage && sameJob
     ? { activeJob: await apiRequest(`/v1/jobs/${encodedJobId}`, { signal }), events: [], eventsHasMore: state.jobEventsHasMore }
-    : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodedJobId}&after=${after}`, { signal });
+    : await apiRequest(`/v1/sync?includeHistory=0&includeEvents=0&jobId=${encodedJobId}`, { signal });
   const job = eventPayload.activeJob;
   if (requestId !== state.jobDetailRequestId || state.activeJobId !== jobId) return;
   if (!job || (job.job_id || job.jobId) !== jobId) throw new Error(t("jobUnavailable"));
@@ -1192,6 +1266,7 @@ async function loadJobs({ force = false } = {}) {
       ? state.activeEvents.reduce((maximum, event) => Math.max(maximum, Number(event.sequence || 0)), 0)
       : 0;
     const params = jobHistoryParams({ jobId: requestedId, after });
+    params.set("includeEvents", "0");
     const payload = await apiRequest(`/v1/sync?${params.toString()}`, { signal: requestScopes.start("jobs") });
     if (historyRequestId !== state.jobHistoryRequestId || selectionVersion !== state.jobDetailRequestId || requestedId !== state.activeJobId) return;
     state.maintenance = payload.maintenance || state.maintenance;

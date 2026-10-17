@@ -194,6 +194,7 @@ def monitor_progress(
     last_upload_sent = 0.0
     pending_events: list[dict[str, Any]] = []
     callback_sequence = sequence_offset + 1
+    last_sent = 0.0
     while time.monotonic() - started < timeout_seconds:
         manifest = _read_json(manifest_path)
         events = _read_events(events_path)
@@ -212,23 +213,32 @@ def monitor_progress(
         if status in TERMINAL_STATUSES:
             return
         signature = (status, stage, progress)
-        upload_only = bool(pending_events) and all(
-            str(event.get("type") or "") == "upload_progress" for event in pending_events
-        )
+        upload_events = [e for e in pending_events if str(e.get("type") or "") == "upload_progress"]
+        upload_only = bool(pending_events) and len(upload_events) == len(pending_events)
         now = time.monotonic()
         stage_or_status_changed = (
             last_signature is None
             or signature[:2] != last_signature[:2]
         )
-        progress_changed = last_signature is None or signature[2] != last_signature[2]
+        progress_jump = last_signature is None or abs(signature[2] - last_signature[2]) >= 0.05
+        heartbeat_due = (now - last_sent) >= 30.0
         should_send = bool(manifest) and (
             stage_or_status_changed
-            or bool(pending_events) and not upload_only
-            or upload_only and now - last_upload_sent >= 5
-            or progress_changed and not pending_events
+            or (upload_only and now - last_upload_sent >= 5.0)
+            or progress_jump
+            or heartbeat_due
         )
         if should_send:
             callback_sequence += 1
+            # Keep only essential events (latest upload_progress, errors, warnings, checkpoints)
+            # to prevent burning D1 write quota on trivial build logs.
+            filtered_events: list[dict[str, Any]] = []
+            if upload_events:
+                filtered_events.append(upload_events[-1])
+            for event in pending_events:
+                etype = str(event.get("type") or "")
+                if etype in {"error", "warning", "checkpoint"} or event.get("error") or event.get("warning"):
+                    filtered_events.append(event)
             _post_signed(
                 api_url,
                 "/internal/actions/progress",
@@ -241,17 +251,18 @@ def monitor_progress(
                     "progress": progress,
                     "events": [
                         _translated_event(event, sequence_offset)
-                        for event in pending_events
+                        for event in filtered_events
                     ],
                 },
                 secret,
                 attempts=3,
             )
             last_signature = signature
-            if upload_only:
+            last_sent = now
+            if upload_events:
                 last_upload_sent = now
             pending_events.clear()
-        time.sleep(max(0.5, interval_seconds))
+        time.sleep(max(1.0, interval_seconds))
 
 
 def terminal_callback(
