@@ -228,6 +228,8 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 }
 
 function updateSummary() {
+  const wkPatches = $("#wk-manager-patches");
+  if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
   const selectionSummary = $("#config-summary");
   if (selectionSummary) selectionSummary.textContent = t("selectionSummary", { mods: selectedMods().length, steps: $$("#steps input:checked").length });
   const selectedDevice = $("#device")?.value || "";
@@ -289,37 +291,12 @@ function updateSummary() {
   syncTelegramMainButton(ready);
 }
 
-function syncTelegramMainButton(ready) {
+function syncTelegramMainButton(_ready) {
   const tg = runtime.TelegramApp;
   if (!tg?.MainButton) return;
-  const isBuild = !document.body.dataset.view || document.body.dataset.view === "build";
-  if (!isBuild) {
-    try { tg.MainButton.hide(); } catch (_) {}
-    return;
-  }
-  const isMobile = window.innerWidth <= 860;
-  if (!isMobile) {
-    try { tg.MainButton.hide(); } catch (_) {}
-    return;
-  }
-  if (ready) {
-    try {
-      tg.MainButton.setText(`🚀 ${t("launch") || "BẮT ĐẦU TẠO ROM"}`);
-      tg.MainButton.enable();
-      tg.MainButton.show();
-    } catch (_) {}
-  } else {
-    const currentUri = $("#source-uri")?.value?.trim() || "";
-    if (currentUri) {
-      try {
-        tg.MainButton.setText(t("finishSource") || "Chờ hoàn tất cấu hình");
-        tg.MainButton.disable();
-        tg.MainButton.show();
-      } catch (_) {}
-    } else {
-      try { tg.MainButton.hide(); } catch (_) {}
-    }
-  }
+  try {
+    tg.MainButton.hide();
+  } catch (_) {}
 }
 
 function positiveInteger(input, errorKey) {
@@ -502,6 +479,7 @@ function saveDebloatPaths() {
 }
 
 function resetJobDraft() {
+  $$("#wk-manager-patches input").forEach((input) => { input.checked = input.defaultChecked; });
   const source = $("#source-uri");
   if (source) {
     source.value = "";
@@ -530,6 +508,7 @@ function buildRecipe() {
   recipe.build = {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
+      wkManagerPatches: $$("#wk-manager-patches input:checked").map((input) => input.value),
       enabledSteps: $$("#steps input:checked").map((input) => input.value)
         .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),
       package: $("#package").checked, notifyTelegram: $("#notify").checked

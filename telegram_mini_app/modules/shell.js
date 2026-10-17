@@ -60,6 +60,7 @@ function bindEvents() {
   bindLiquidBottomTabs();
 
   if (runtime.TelegramApp?.MainButton) {
+    try { runtime.TelegramApp.MainButton.hide(); } catch (_) {}
     runtime.TelegramApp.MainButton.onClick(() => {
       const submitBtn = $("#submit-recipe");
       if (submitBtn && !submitBtn.disabled) submitBtn.click();

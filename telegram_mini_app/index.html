@@ -144,6 +144,20 @@
           <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details><div class="selection-bar"><div><strong data-i18n="mods">MOD áp dụng</strong><small id="mod-count">0 đã chọn</small></div><div><button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button><button id="select-all" type="button" data-i18n="selectAll">Tất cả</button><button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button></div></div>
           <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
           <div class="mod-list" id="mod-list" aria-live="polite"></div>
+          <fieldset id="wk-manager-patches" hidden>
+            <legend>WK Manager · Patch tùy chọn / Optional patches</legend>
+            <label><input type="checkbox" value="keybox_manager" checked> Quản lý Keybox / Keybox manager</label>
+            <label><input type="checkbox" value="play_integrity_spoof" checked> Play Integrity Spoof</label>
+            <label><input type="checkbox" value="gamespoof" checked> Game Spoof</label>
+            <label><input type="checkbox" value="hma_privacy_spoof" checked> HMA Quyền riêng tư / HMA privacy spoof</label>
+            <label><input type="checkbox" value="kernel_manager" checked> Trình quản lý Kernel & Nguồn / Kernel & Power manager</label>
+            <label><input type="checkbox" value="power_button_remap" checked> Remap nút nguồn / Power button remap</label>
+            <label><input type="checkbox" value="multi_window" checked> Đa cửa sổ nổi / Floating multi-window</label>
+            <label><input type="checkbox" value="disable_flag_secure" checked> Tắt cờ bảo mật / Disable FLAG_SECURE</label>
+            <label><input type="checkbox" value="black_window" checked> Tương thích cửa sổ nổi / Floating window compatibility</label>
+            <label><input type="checkbox" value="multi_audio" checked> Âm thanh nhiều ứng dụng / Multiple app audio</label>
+            <p>Chỉ áp dụng các hook được chọn ở trên / Only selected hooks are applied.</p>
+          </fieldset>
           <details class="advanced"><summary><span data-i18n="advanced">Pipeline nâng cao</span><b id="pipeline-count">0/0</b></summary><div class="advanced-body"><div class="steps" id="steps"></div><section class="debloat-control"><header><div><strong data-i18n="debloatPaths">Đường dẫn cần xóa</strong><small data-i18n="debloatPathsHint">Danh sách tùy chỉnh chỉ dùng cho job hiện tại và tự khôi phục sau khi gửi build.</small></div><button id="edit-debloat-paths" type="button" data-i18n="editDebloatPaths">Tùy chỉnh</button></header><div class="debloat-summary" id="debloat-summary"><strong id="debloat-path-count">0 đường dẫn</strong><small id="debloat-path-state" data-i18n="debloatDefaultState">Đang dùng danh sách mặc định</small></div><div class="debloat-editor" id="debloat-editor" hidden><label class="field field-wide"><span data-i18n="debloatEditorHint">Mỗi dòng là một đường dẫn tương đối</span><textarea id="debloat-paths" rows="10" spellcheck="false" placeholder="my_stock\app\Browser"></textarea></label><footer><button id="cancel-debloat-paths" type="button" data-i18n="cancelDialog">Hủy</button><button class="primary compact" id="save-debloat-paths" type="button" data-i18n="saveDebloatPaths">Lưu cho job này</button></footer></div></section></div></details>
         <section class="dossier-section delivery-section">
           <header class="section-heading"><span>03</span><div><h2 data-i18n="deliveryTitle">Kết quả build</h2><p data-i18n="deliveryHint">Đóng gói ZIP, tải lên Drive và gửi link qua Telegram.</p></div></header>
