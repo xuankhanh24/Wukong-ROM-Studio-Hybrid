@@ -1,0 +1,17 @@
+bin/
+desktop/
+Flash_script/
+MOD/
+OFX/
+platform_external_avb-master/
+ROM_BUILD_DONE/
+STARK/
+TWRP/
+Backups/
+copy-image/
+Updates/
+.git/
+.github/
+.agents/
+.codex/
+tests/
