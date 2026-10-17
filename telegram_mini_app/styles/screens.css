@@ -78,7 +78,7 @@
   .debloat-summary small { text-align: left; }
   .job-history-tabs button { flex-direction: column; gap: 4px; }
   .release-version-controls { min-width:0; width:100%; }
-  .toast { top: 68px; right: 12px; }
+  .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }@media (max-width: 390px) {
   main { padding-inline: 10px; }
   .dossier-section { padding: 12px; }

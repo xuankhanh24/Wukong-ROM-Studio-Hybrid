@@ -37,11 +37,16 @@ function applyLanguage() {
 
 function toast(message, error = false) {
   const node = $("#toast");
-  node.textContent = message;
+  if (!node || !message) return;
+  const icon = error
+    ? '<span class="toast-badge error" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>'
+    : '<span class="toast-badge success" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  node.innerHTML = `${icon}<span class="toast-text"></span>`;
+  node.querySelector(".toast-text").textContent = message;
   node.classList.toggle("error", error);
   node.classList.add("visible");
   clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(() => node.classList.remove("visible"), 3600);
+  state.toastTimer = setTimeout(() => node.classList.remove("visible"), 3200);
   if (runtime.TelegramApp?.HapticFeedback) runtime.TelegramApp.HapticFeedback.notificationOccurred(error ? "error" : "success");
 }
 
