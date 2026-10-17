@@ -98,16 +98,23 @@ jobs:
             res="$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
               "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&state=${state}")"
             uids="$(echo "$res" | jq -r '.deployments[]?.uid // empty' 2>/dev/null || true)"
+            if [[ -z "$uids" ]]; then
+              res="$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+                "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&state=${state}")"
+              uids="$(echo "$res" | jq -r '.deployments[]?.uid // empty' 2>/dev/null || true)"
+            fi
             for uid in $uids; do
               echo "Cancelling stuck Vercel deployment: $uid (state: $state)"
               curl -s -X PATCH -H "Authorization: Bearer $VERCEL_TOKEN" \
                 "https://api.vercel.com/v12/deployments/${uid}/cancel?teamId=${VERCEL_ORG_ID}" || true
+              curl -s -X PATCH -H "Authorization: Bearer $VERCEL_TOKEN" \
+                "https://api.vercel.com/v12/deployments/${uid}/cancel" || true
             done
           done
       - name: Deploy bundle to Vercel
         if: steps.deployment-mode.outputs.mode == 'cli'
         id: deploy
-        timeout-minutes: 8
+        timeout-minutes: 15
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           WUKONG_RELEASE_SHA: ${{ inputs.release_sha || github.sha }}
