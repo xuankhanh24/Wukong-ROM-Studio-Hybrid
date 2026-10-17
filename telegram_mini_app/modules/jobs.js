@@ -599,7 +599,7 @@ async function loadAdminJobDetail() {
     const signal = requestScopes.start("adminJob");
     const payload = view.historicalLogPage && view.events.length
       ? { activeJob: await apiRequest(`/v1/jobs/${encodeURIComponent(view.jobId)}`, { signal }), events: [], eventsHasMore: view.jobEventsHasMore }
-      : await apiRequest(`/v1/sync?includeHistory=0&includeEvents=0&jobId=${encodeURIComponent(view.jobId)}`, { signal });
+      : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodeURIComponent(view.jobId)}&after=${after}`, { signal });
     if (state.adminJobView !== view || requestId !== view.requestId || !workspacePollingAllowed()) return;
     const job = payload.activeJob;
     if (!job || (job.job_id || job.jobId) !== view.jobId) {
@@ -773,11 +773,6 @@ function renderJobStepper(job, events = []) {
     container.append(successBanner);
   }
 
-  const upload = [...events].reverse().find((event) => event.type === "upload_progress");
-  if (upload && !isSucceeded && !isFailed) {
-    container.append(renderUploadProgressCard(upload));
-  }
-
   return container;
 }
 
@@ -869,19 +864,50 @@ function renderActiveJob(job, events, inspection = null) {
   const stepper = renderJobStepper(job, events);
   const actions = document.createElement("div"); actions.className = "job-controls";
   const jobId = job.job_id || job.jobId;
+  const logExpanded = reader.expandedLogJobId === jobId;
+  const logButton = document.createElement("button"); logButton.type = "button"; logButton.className = "job-log-toggle";
+  logButton.dataset.jobFocus = "log-toggle";
+  logButton.textContent = t(logExpanded ? "hideFullLog" : "viewFullLog");
+  logButton.setAttribute("aria-expanded", String(logExpanded));
+  logButton.addEventListener("click", () => {
+    reader.expandedLogJobId = logExpanded ? "" : jobId;
+    renderActiveJob(job, events, inspection);
+    if (!logExpanded) requestAnimationFrame(() => root.querySelector(".job-events")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  });
+  actions.append(logButton);
+  if (reader.jobEventsHasMore) {
+    const more = document.createElement("button"); more.type = "button"; more.textContent = t("loadMoreJobEvents");
+    more.dataset.jobFocus = "load-more-events";
+    more.addEventListener("click", () => { more.disabled = true; loadLogPage(jobId, events, "next", inspection).catch(error => toast(error.message, true)).finally(() => { more.disabled = false; }); });
+    actions.append(more);
+  }
+  if (Number(events[0]?.sequence) > 1) {
+    const previous = document.createElement("button"); previous.type = "button";
+    previous.textContent = t("previousEvents"); previous.dataset.jobFocus = "previous-events";
+    previous.addEventListener("click", () => loadLogPage(jobId, events, "previous", inspection).catch(error => toast(error.message, true)));
+    actions.append(previous);
+  }
   if (!inspection && !terminalJobStatuses.has(job.status)) actions.append(jobAction(t("cancel"), "cancel", job, true));
   if (!inspection && ["failed", "cancelled"].includes(job.status) && job.checkpoint) actions.append(jobAction(t("resume"), "resume", job));
   const config = state.me?.role === "admin" ? renderJobParameters(job, root, reader) : null;
   const technical = document.createElement("details"); technical.className = "job-technical";
-  technical.open = reader.expandedMetadataJobId === jobId;
-  technical.addEventListener("toggle", () => { if (technical.isConnected) reader.expandedMetadataJobId = technical.open ? jobId : ""; });
+  technical.open = true;
+  technical.dataset.alwaysOpen = "true";
+  technical.addEventListener("toggle", () => { if (!technical.open) technical.open = true; });
   const technicalTitle = document.createElement("summary"); technicalTitle.textContent = t("metadataDetails");
+  technicalTitle.setAttribute("aria-disabled", "true");
+  technicalTitle.addEventListener("click", (event) => event.preventDefault());
   technical.append(technicalTitle, context, facts);
   const updated = document.createElement("small"); updated.className = "job-sync-time";
   updated.textContent = `${t("latestUpdate")}: ${formatDate(job.updated_at || job.updatedAt)}`;
   progress.append(updated);
   const before = [header, creator, progress, stepper, technical];
-  const children = [...before, ...(config ? [config] : []), artifacts, ...(actions.children.length ? [actions] : [])];
+  const previousLog = root.querySelector(".job-events");
+  const previousTop = previousLog?.scrollTop || 0;
+  const atBottom = previousLog ? previousLog.scrollHeight - previousTop - previousLog.clientHeight < 36 : true;
+  const nextLog = renderEvents(events, logExpanded);
+  const log = previousLog?.isEqualNode(nextLog) ? previousLog : nextLog;
+  const children = [...before, ...(config ? [config] : []), artifacts, actions, log];
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index], current = root.children[index];
     if (current === child || (index < before.length && current?.isEqualNode(child))) continue;
@@ -889,6 +915,7 @@ function renderActiveJob(job, events, inspection = null) {
     if (current && !children.includes(current)) current.remove();
   }
   while (root.children.length > children.length) root.lastElementChild.remove();
+  if (log !== previousLog) log.scrollTop = atBottom && !reader.historicalLogPage ? log.scrollHeight : previousTop;
   if (focusedJobControlKey) {
     root.querySelector(`[data-job-focus="${focusedJobControlKey}"]`)?.focus({ preventScroll: true });
   }
@@ -1198,7 +1225,7 @@ async function loadJobDetail(jobId) {
   const signal = requestScopes.start("jobDetail");
   const eventPayload = state.historicalLogPage && sameJob
     ? { activeJob: await apiRequest(`/v1/jobs/${encodedJobId}`, { signal }), events: [], eventsHasMore: state.jobEventsHasMore }
-    : await apiRequest(`/v1/sync?includeHistory=0&includeEvents=0&jobId=${encodedJobId}`, { signal });
+    : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodedJobId}&after=${after}`, { signal });
   const job = eventPayload.activeJob;
   if (requestId !== state.jobDetailRequestId || state.activeJobId !== jobId) return;
   if (!job || (job.job_id || job.jobId) !== jobId) throw new Error(t("jobUnavailable"));
@@ -1266,7 +1293,6 @@ async function loadJobs({ force = false } = {}) {
       ? state.activeEvents.reduce((maximum, event) => Math.max(maximum, Number(event.sequence || 0)), 0)
       : 0;
     const params = jobHistoryParams({ jobId: requestedId, after });
-    params.set("includeEvents", "0");
     const payload = await apiRequest(`/v1/sync?${params.toString()}`, { signal: requestScopes.start("jobs") });
     if (historyRequestId !== state.jobHistoryRequestId || selectionVersion !== state.jobDetailRequestId || requestedId !== state.activeJobId) return;
     state.maintenance = payload.maintenance || state.maintenance;
