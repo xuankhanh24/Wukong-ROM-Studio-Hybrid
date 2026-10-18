@@ -33,7 +33,8 @@ def main() -> None:
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     print(content_cache_key(json.loads((root / "content-packs/index.json").read_text(encoding="utf-8")), args.mod_version,
-        (root / "tools/linux-x86_64.json").read_bytes() + (root / "tools/bootstrap_linux.py").read_bytes()))
+        (root / "tools/linux-x86_64.json").read_bytes() + (root / "tools/bootstrap_linux.py").read_bytes()
+        + (root / "bin/Java/toolchain.json").read_bytes()))
 
 
 if __name__ == "__main__":

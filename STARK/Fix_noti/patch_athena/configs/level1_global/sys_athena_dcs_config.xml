@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_athena_dcs_config</filter-name>
+    <feature_switch key="app_status_enable" val="false" />
+    <feature_switch key="app_exit_server_feature_on" val="true" />
+    <feature_switch key="app_exit_client_feature_on" val="false" />
+</filter-conf>

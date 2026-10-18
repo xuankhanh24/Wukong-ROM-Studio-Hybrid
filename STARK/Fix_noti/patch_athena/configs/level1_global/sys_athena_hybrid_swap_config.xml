@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_athena_hybrid_swap_config</filter-name>
+    <hybrid_swap_config>
+        <scene name="normal">
+            <ram value="8">
+                <hybrid_swap_action_config action="10" cgroup="#" label="110" value="2300 2000 2300 1536" />
+                <hybrid_swap_action_config action="22" cgroup="#" label="122" value="3 0 99 0 0 0 100 399 80 0 0 400 499 70 0 0" />
+            </ram>
+
+            <ram value="12">
+                <hybrid_swap_action_config action="10" cgroup="#" label="110" value="2500 2200 2500 1536" />
+                <hybrid_swap_action_config action="22" cgroup="#" label="122" value="3 0 99 0 0 0 100 399 80 0 0 400 499 70 0 0" />
+            </ram>
+
+            <ram value="16">
+                <hybrid_swap_action_config action="10" cgroup="#" label="110" value="2500 2200 2500 1536" />
+                <hybrid_swap_action_config action="22" cgroup="#" label="122" value="3 0 99 0 0 0 100 399 80 0 0 400 499 70 0 0" />
+            </ram>
+
+            <ram value="24">
+                <hybrid_swap_action_config action="10" cgroup="#" label="110" value="5000 4500 5000 1536" />
+                <hybrid_swap_action_config action="22" cgroup="#" label="122" value="3 0 99 0 0 0 100 399 80 0 0 400 499 70 0 0" />
+            </ram>
+
+        </scene>
+
+        <config key="hybrid_swap_boot_delay" type="Long" value="0" />
+        <config key="hybrid_swap_normal_delay" type="Long" value="10000" />
+    </hybrid_swap_config>
+</filter-conf>

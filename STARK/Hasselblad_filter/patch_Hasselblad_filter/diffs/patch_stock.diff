@@ -1,0 +1,20 @@
+--- com.oplus.camera.unit.sdk/DefaultUtil.smali (Stock)
++++ com.oplus.camera.unit.sdk/DefaultUtil.smali (MOD)
+@@ -3966,7 +3966,7 @@
+     const-string v0, "com.oplus.camera.support.custom.hasselblad.watermark"
+ 
+     .line 1293
+-    invoke-virtual {p0, v0, v2}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
++    invoke-virtual {p0, v0, v1}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+ 
+     const-string v0, "com.oplus.camera.customwatermark.config.size"
+ 
+@@ -4620,7 +4620,7 @@
+     const-string v0, "com.oplus.use.hasselblad.style.support"
+ 
+     .line 1419
+-    invoke-virtual {p0, v0, v2}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
++    invoke-virtual {p0, v0, v1}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+ 
+     const-string v0, "com.oplus.hasselblad.watermark.support.default"
+ 

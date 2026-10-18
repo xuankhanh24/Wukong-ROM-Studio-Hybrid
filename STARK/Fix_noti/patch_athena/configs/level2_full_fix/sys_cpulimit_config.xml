@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_cpulimit_config</filter-name>
+    <versionCode>1.0</versionCode>
+    <cpuSetConfig enable="false" version="">
+        <groupConfig Level="1" L_bg="2-3" H_BG="0-4"/>
+        <groupConfig Level="2" L_bg="1-3" H_BG="0-5"/>
+        <cpuThreshold Low="90" High="98"/>
+    </cpuSetConfig>
+    <!--
+    platform       - getprop from ro.soc.model
+    Lbg            - Low background cgroup cpus
+    Hbg            - High background cgroup cpus
+    ExendedBg      - extend background cpus if little cores highload
+    ExcludeProduct - disable for this product
+    -->
+    <cpuSetSwitch>
+        <!-- Qcom Soc Platform -->
+        <switchConfig Platform="SM8650" Lbg="0-1" Hbg="0-1,5-6" ExendedBg="0-1,4-6" ExcludeProduct="" />
+        <switchConfig Platform="SM8750" Lbg="0-3" Hbg="0-5" ExendedBg="0-5" ExcludeProduct="" />
+        <switchConfig Platform="SM8850" Lbg="0-3" Hbg="0-5" ExendedBg="0-5" ExcludeProduct="" />
+        <!-- Mtk Soc Platform -->
+        <switchConfig Platform="MT6985" Lbg="2-3" Hbg="0-4" ExendedBg="0-4" ExcludeProduct="" />
+        <switchConfig Platform="MT6989" Lbg="2-3" Hbg="0-4" ExendedBg="0-4" ExcludeProduct="" />
+        <switchConfig Platform="MT6991" Lbg="2-3" Hbg="0-4" ExendedBg="0-4" ExcludeProduct="" />
+        <switchConfig Platform="MT6993" Lbg="2-3" Hbg="0-4" ExendedBg="0-4" ExcludeProduct="" />
+    </cpuSetSwitch>
+    <extendBgCpus enable="false"/>
+    <cpuSetPkg category="black" all="false">
+        <!--
+        <pkg>com.tencent.mm</pkg>
+        <pkg>com.taobao.taobao</pkg>
+        <pkg>com.eg.android.AlipayGphone</pkg>
+        <pkg>com.ss.android.ugc.aweme</pkg>
+        <pkg>com.tencent.mobileqq</pkg>
+        <pkg>com.baidu.searchbox</pkg>
+        <pkg>com.autonavi.minimap</pkg>
+        <pkg>com.tencent.mtt</pkg>
+        <pkg>com.sohu.inputmethod.sogou</pkg>
+        <pkg>com.xunmeng.pinduoduo</pkg>
+        <pkg>com.qiyi.video</pkg>
+        <pkg>com.smile.gifmaker</pkg>
+        <pkg>com.sina.weibo</pkg>
+        <pkg>com.jingdong.app.mall</pkg>
+        <pkg>com.baidu.BaiduMap</pkg>
+        <pkg>com.tencent.qqlive</pkg>
+        <pkg>com.ss.android.article.news</pkg>
+        <pkg>com.kugou.android</pkg>
+        <pkg>com.UCMobile</pkg>
+        <pkg>com.snda.wifilocating</pkg>
+        <pkg>com.youku.phone</pkg>
+        <pkg>com.mt.mtxx.mtxx</pkg>
+        <pkg>com.tencent.qqmusic</pkg>
+        <pkg>com.tencent.news</pkg>
+        <pkg>com.tencent.android.qqdownloader</pkg>
+        <pkg>cn.wps.moffice_eng</pkg>
+        <pkg>com.kuaishou.nebula</pkg>
+        <pkg>com.hunantv.imgo.activity</pkg>
+        <pkg>cn.gov.tax.its</pkg>
+        <pkg>com.ss.android.ugc.aweme.lite</pkg>
+        <pkg>cn.kuwo.player</pkg>
+        <pkg>com.tencent.qqpimsecure</pkg>
+        <pkg>com.baidu.input</pkg>
+        <pkg>tv.danmaku.bili</pkg>
+        <pkg>com.tencent.tmgp.sgame</pkg>
+        <pkg>com.lemon.lv</pkg>
+        <pkg>com.iflytek.inputmethod</pkg>
+        <pkg>com.baidu.homework</pkg>
+        <pkg>com.qihoo.appstore</pkg>
+        <pkg>com.dragon.read</pkg>
+        <pkg>com.taobao.litetao</pkg>
+        <pkg>com.sinovatech.unicom.ui</pkg>
+        <pkg>com.netease.cloudmusic</pkg>
+        <pkg>com.happyelements.AndroidAnimal</pkg>
+        <pkg>com.qihoo360.mobilesafe</pkg>
+        <pkg>com.tencent.karaoke</pkg>
+        <pkg>com.sina.news</pkg>
+        <pkg>com.ss.android.article.video</pkg>
+        <pkg>com.achievo.vipshop</pkg>
+        <pkg>com.huawei.health</pkg>
+        <pkg>com.dianping.v1</pkg>
+        <pkg>com.tencent.tmgp.pubgmhd</pkg>
+        <pkg>com.zhongduomei.rrmj.society</pkg>
+        <pkg>com.moji.mjweather</pkg>
+        <pkg>com.netease.newsreader.activity</pkg>
+        <pkg>sina.mobile.tianqitong</pkg>
+        <pkg>com.kmxs.reader</pkg>
+        <pkg>com.xingin.xhs</pkg>
+        <pkg>com.ss.android.ugc.live</pkg>
+        <pkg>com.immomo.momo</pkg>
+        <pkg>ctrip.android.view</pkg>
+        <pkg>com.tencent.androidqqmail</pkg>
+        <pkg>com.alibaba.android.rimet</pkg>
+        <pkg>com.tencent.qqpim</pkg>
+        <pkg>com.meitu.meiyancamera</pkg>
+        <pkg>com.taobao.idlefish</pkg>
+        <pkg>com.baidu.appsearch</pkg>
+        <pkg>com.tencent.map</pkg>
+        <pkg>com.ximalaya.ting.android</pkg>
+        <pkg>me.ele</pkg>
+        <pkg>com.tmall.wireless</pkg>
+        <pkg>com.tencent.wifimanager</pkg>
+        <pkg>com.MobileTicket</pkg>
+        <pkg>com.sdu.didi.psnger</pkg>
+        <pkg>com.youdao.dict</pkg>
+        <pkg>com.zhihu.android</pkg>
+        <pkg>com.cainiao.wireless</pkg>
+        <pkg>com.chaozh.iReaderFree</pkg>
+        <pkg>com.sankuai.meituan.takeoutnew</pkg>
+        <pkg>com.qihoo.browser</pkg>
+        <pkg>com.wuba</pkg>
+        <pkg>com.kuaikan.comic</pkg>
+        <pkg>com.qqgame.hlddz</pkg>
+        <pkg>com.babycloud.hanju</pkg>
+        <pkg>com.lingan.seeyou</pkg>
+        <pkg>com.baidu.netdisk</pkg>
+        <pkg>com.greenpoint.android.mc10086.activity</pkg>
+        <pkg>com.tencent.wework</pkg>
+        <pkg>com.wuba.zhuanzhuan</pkg>
+        <pkg>air.tv.douyu.android</pkg>
+        <pkg>com.tmri.app.main</pkg>
+        <pkg>com.qihoo.cleandroid_cn</pkg>
+        <pkg>com.chaoxing.mobile</pkg>
+        <pkg>com.autohome.mycar</pkg>
+        <pkg>com.le123.ysdq</pkg>
+        <pkg>com.tencent.weishi</pkg>
+        <pkg>cn.etouch.ecalendar</pkg>
+        <pkg>com.Qunar</pkg>
+        <pkg>com.sohu.newsclient</pkg>
+        <pkg>com.jingyao.easybike</pkg>
+        <pkg>com.duowan.kiwi</pkg>
+        <pkg>com.baidu.tieba</pkg>
+        <pkg>com.tencent.wemeet.app</pkg>
+        <pkg>cmccwm.mobilemusic</pkg>
+        <pkg>com.jifen.qukan</pkg>
+        <pkg>com.netease.mail</pkg>
+        <pkg>com.lemon.faceu</pkg>
+        <pkg>com.cleanmaster.mguard_cn</pkg>
+        <pkg>com.android.chrome</pkg>
+        <pkg>cn.opda.a.phonoalbumshoushou</pkg>
+        <pkg>com.wifi.key</pkg>
+        <pkg>com.jzzs.ParentsHelper</pkg>
+        <pkg>com.huaxiaozhu.rider</pkg>
+        <pkg>com.sdu.didi.gsui</pkg>
+        <pkg>com.t3go.passenger</pkg>
+        <pkg>com.ldygo.qhzc</pkg>
+        <pkg>com.fenbi.android.solar</pkg>
+        <pkg>com.xt.retouch</pkg>
+        <pkg>com.gorgeous.lite</pkg>
+        <pkg>com.ss.android.article.lite</pkg>
+        <pkg>com.example.cpusettester</pkg>
+        <pkg>com.example.testA</pkg>
+        <pkg>com.olpus.autotest.autotestcpuset</pkg>
+        <pkg>com.eap.eapdemo</pkg>
+        <sysblk>com.testalarmwakelocksensor</sysblk>
+        <sysblk>com.example.cpusettester</sysblk>
+        -->
+    </cpuSetPkg>
+    <vip_HBG enable="false">
+       <pkg name="com.tencent.mm" />
+       <pkg name="com.tencent.mobileqq" />
+    </vip_HBG>
+    <particularPkg enable="true">
+       <pkg name="com.oplus.camera" />
+    </particularPkg>
+    <cpuHighLoadCfg enable="true">
+        <loadThreshold Low="80" High="95"/>
+        <availableMem AvailMemValue="800"/>
+        <bigDataCfg enable="false" TriggerThreshold="95" onlyPreVersion="true"/>
+        <instantLoadCfg enable="true" TimeOut="5000"/>
+        <knReport ReportInterval="1" ReportThreshold = "80"/>
+        <windowLength WinLen="5" ShortWinLen="3"/>
+        <thermalThreshold Low="7" High="10"/>
+        <loadForThermal Low="80" High="90"/>
+        <dStateTime Threshold="30"/>
+        <mngLevelCtrlRetrigger IntervalTime="5000" LimitCount="0" />
+        <continuousHighLoadCntRec IntervalTime="20000" LimitCount="10" />
+        <processList>
+            <memProcName>kswapd0</memProcName>
+            <memProcName>hybridswapd:0</memProcName>
+            <memProcName>kshrink_slabd</memProcName>
+            <systemProcName>system_server</systemProcName>
+            <systemProcName>surfaceflinger</systemProcName>
+        </processList>
+        <expectedHighLoadScene enable="false">
+            <pkg name = "com.oplus.camera" />
+        </expectedHighLoadScene>
+    </cpuHighLoadCfg>
+    <dex2oatCpusetCfg enable="true">
+        <groupConfig compileReason="install" sensScene="gps|audio|video|call|game" minGroup="0" maxGroup="2"/>
+        <groupConfig compileReason="bg-dexopt" sensScene="gps|audio|video|call" minGroup="0" maxGroup="2"/>
+        <groupConfig compileReason="inactive" sensScene="gps|audio|video|call|game" minGroup="0" maxGroup="2"/>
+        <groupConfig compileReason="shared" sensScene="gps|audio|video|call|game" minGroup="1" maxGroup="3"/>
+        <dex2oatImpBgPkg enable="true">
+            <pkg name="com.coloros.backuprestore" />
+            <pkg name="com.heytap.market" />
+            <pkg name="com.android.packageinstaller" />
+            <pkg name="com.oplus.appdetail" />
+            <pkg name="com.google.android.packageinstaller" />
+        </dex2oatImpBgPkg>
+    </dex2oatCpusetCfg>
+</filter-conf>

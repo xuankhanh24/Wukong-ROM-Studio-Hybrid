@@ -1,3 +1,4 @@
+import inspect
 import tempfile
 import unittest
 from pathlib import Path
@@ -184,13 +185,14 @@ class WkManagerPatcherTests(unittest.TestCase):
             )
             self.assertTrue(changed)
 
-    def test_framework_get_key_entry_uses_single_descriptor_lambda(self):
-        source = Path(wk_manager_patcher.__file__).read_text(encoding="utf-8")
+    def test_framework_get_key_entry_resolves_oem_request_semantically(self):
+        source = inspect.getsource(wk_manager_patcher.patch_framework_decoded)
         start = source.index('"getKeyEntry(Landroid/system/keystore2/KeyDescriptor;)')
         end = source.index('report.importedSmali = _copy_stark_smali', start)
         block = source[start:end]
-        self.assertIn("KeyStore2$$ExternalSyntheticLambda9", block)
-        self.assertNotIn("KeyStore2$$ExternalSyntheticLambda8", block)
+        self.assertNotIn("KeyStore2$$ExternalSyntheticLambda9", block)
+        self.assertIn('"getKeyEntry"', block)
+        self.assertIn('_replace_keystore_method', source)
 
     def test_copy_stark_smali_targets_classes6(self):
         with tempfile.TemporaryDirectory() as temp:

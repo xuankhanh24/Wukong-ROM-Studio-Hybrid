@@ -796,8 +796,14 @@ class TelegramAccessStore:
             try:
                 with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
                     json.dump({"schemaVersion": 2, **state}, handle, indent=2, sort_keys=True)
-                    handle.write("\n")
-                os.replace(temporary_name, self.path)
+                for attempt in range(5):
+                    try:
+                        os.replace(temporary_name, self.path)
+                        break
+                    except PermissionError:
+                        if attempt == 4:
+                            raise
+                        time.sleep(0.02)
             finally:
                 Path(temporary_name).unlink(missing_ok=True)
             if self.on_change:

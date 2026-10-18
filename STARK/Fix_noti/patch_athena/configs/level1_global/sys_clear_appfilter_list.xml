@@ -1,0 +1,416 @@
+<filter-conf>
+<version>9999123199</version>
+    <isOpen>1</isOpen>
+    <filter-name>sys_clear_appfilter_list</filter-name>
+    <!--   protect processes  -->
+    <ProtectProcessInfo>com.oplus.safecenter#com.oplus.safecenter:clear_filter</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.battery#com.oplus.battery</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.ota#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.ota#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.alarmclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oneplus.deskclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oppo.alarmclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.redteamobile.roaming#com.redteamobile.virtual.softsim</ProtectProcessInfo>
+    <ProtectProcessInfo>com.redteamobile.virtual.softsim#com.redteamobile.virtual.softsim</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.cosa#com.oplus.cosa:service</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.gms#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.gsf#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.heytap.mcs#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oneplus.deskclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.deskclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.android.deskclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.tts#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.android.chrome#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.android.vending#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.microsoft.office.outlook#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.mobilesecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.bitdefender.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.kms.free#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.xb.topnews#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>id.co.babe#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zhangyue.read#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>org.simalliance.openmobileapi.service#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.apps.tachyon#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopee.my#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.camera#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.oppopods#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.melody#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.webview#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.youtube#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.microsoft.windowsintune.companyportal#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.smsoft.justremind#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.access_company.android.nfcommunicator#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.trendmicro.tmmspersonal#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.murad.waktusolat#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>org.hicham.salaat#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.arabiait.azkar#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.athan#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.athanotify#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.athanow.prayer_times#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.bitsmedia.android.muslimpro#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.dot.azkari#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.geospatialtechnology.visualqiblah#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.guidedways.ipray#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.haz.prayer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.hisn.almuslim#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.kosratdahmad.myprayers#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ls.arabic#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.maher4web.hisn#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.masarat.salati#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.mobileappsteam.myprayer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.mobilion.diyanet.namazvakit#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.parfield.prayers.lite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.raimbekov.android.sajde#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.simppro.azkar#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.sommayah.myprayertimes#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>idreams.com.azkar#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.bsb.hike#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.deskclock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.calendar#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.caiharbor.esim#com.caiharbor.esim:eSIMService</ProtectProcessInfo>
+    <ProtectProcessInfo>com.wsandroid.suite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.co.daj.consumer.ifilter#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.jakarta.baca.lite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>app.buzz.share#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.qidian.QDReader.traditional#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.qidian.Int.reader#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.treydev.pns</ProtectProcessInfo>
+    <ProtectProcessInfo>com.hike.chat.stickers#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>pl.interia.czateria#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>pl.wykop.droid#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.discord#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tinder#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.adopteunmec.androides#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>tv.twitch.android.app#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.xiaomi.hm.health#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.garmin.android.apps.connectmobile#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>fi.polar.polarflow#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.fitbit.FitbitMobile#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.huami.watch.hmwatchmanager#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.huawei.bone#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.eterno#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>id.co.babe#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.engloryintertech.caping#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.discord#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tumblr#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.microsoft.mobile.polymer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.life360.android.safetymapd#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.nationaledtech.Boomerang#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.qustodio.qustodioapp#com.qustodio.qustodioapp</ProtectProcessInfo>
+    <ProtectProcessInfo>com.cleanmaster.mguard#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.apps.go.clean.boost.master#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.cleanmaster.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.avast.android.mobilesecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.lookout#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.drweb#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.qihoo.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.psafe.msuite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.lm.powersecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.qihoo.security.lite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oneapp.max.cleaner.booster#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zrgiu.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ehawk.antivirus.applock.wifi#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.fasttrack.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.wsandroid.suite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.mobilesecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.eset.ems2.gp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.rocket.tools.clean.antivirus.master#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antivirus.tablet#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.avira.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oneapp.max.security.pro#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.jb.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.estsoft.alyac#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.hyperspeed.rocketclean#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.trustlook.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.guardian.security.pri#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.s.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.hyperspeed.rocketclean.pro#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antivirus.mobilesecurity.viruscleaner.applock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.drweb.pro#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.naver.lineantivirus.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.co.yahoo.android.ysecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.trendmicro.tmmspersonal.jp.googleplayversion#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.hawk.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.bitdefender.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.secore.privacyshield#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.cleansweep#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.cyou.security#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.comodo.cisme.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.sophos.smsec#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antivirussystemforandroid.brainiacs.googleplay#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.free.security.anti.virus2018#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.freeantivirus.cleanvirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.androhelm.antivirus.free2#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.protoolapps.antivirus.security.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coopresapps.free.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antivirus.fast.safeboost.wemakeit.googleplay#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.norton.snap#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.applock#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.antiy.avlpro#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.proteapps.antivirus#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zemana.msecurity#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.co.bbss.android.security.sagiwall_gp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.co.daj.consumer.ifilter#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.apps.kids.familylinkhelper#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.kddi.familysmile.mvno#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.smamori.parent#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>jp.co.nttdocomo.anshinmode#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.symantec.familysafety#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.fitbit.FitbitMobile#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.pizzahut.phd#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>app.goplus.in.myapplication#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>carzonrent.crdapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>club.fromfactory#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.application.services.partner#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.application.zomato.ordering#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.application.zomatomerchant#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.cordrive.app.carzonrent#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.deliverynow#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.Dominos#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.done.faasos#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.fitbit.FitbitMobile#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.freshmenu#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ftw_and_co.happn#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.global.foodpanda.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.india.foodpanda.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.jabong.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.lazada.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.mcdonalds.mobileapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.megacabsnew.app.customer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.meru.merumobile#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.microsoft.mobile.ploymer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.mobile.app.mcdelivery#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.mti.taxibookings.app#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.myntra.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.nationaledtech.Boommerang#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.notifier.bamboo#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.paytm.business#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.paytmmall#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.pizzahut#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.poncho#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.quora.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ril.ajio#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.savaari.app#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopclues#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopclues.seller#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopee.Th#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopping.limeroad#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.snapdeal.main#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.snapdeal.seller#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.stpl.fasttrackbooking1#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tabcabs.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ubercab.eats#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.winit.merucab#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.yum.kfc#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zzkko#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>droid.shuttl.driver#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>fit.cure.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>id.mcdonalds.delivery#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.amazon.mShop.android.#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.amazonbusiness.berrio.android.app#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.burgerkingindia.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.mohalla.sharechat#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.swiggy.delivery#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>in.swiggy.partnerapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ma.dista.yum#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>taxi.sixcrore.customer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>vn.foody.delivery#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>im.thebot.messenger#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.pathao.driver#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tokopedia.tkpd#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.egets.drivers#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.egets.takeaways#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.daraz.sellercenter#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.onekyat.app#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shop.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>nz.co.trademe.trademe#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.grabtaxi.passenger#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.honestbee.consumer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zalora.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopee.ph#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.allgoritm.youla#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.avito.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.deliveryclub#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.deliveryclub.rider#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.gettaxi.dbx.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.joom#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.foodfox.client#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.foodfox.courier.debug.releaseserver#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.foodfox.vendor#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.handh.net#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.ok.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.yandex.taximeter#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.gojek.driver.sg.car#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.grab.food.dax#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.grabpay.merchant#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.sc.lazada#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zalora.sc#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>net.giosis.qsm.sg#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.jumia.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.shopee.tw#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>dbx.taiwantaxi#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.deliveroo.driverapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>app.zenly.locator#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ubercab.driver#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ubercab.fleet#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.olacabs.customer#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.olacabs.android.operator#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.whatsapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.samsung.android.app.watchmanager#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>ru.ok.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.vkontakte.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.facebook.katana#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.facebook.lite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.facebook.mlite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.facebook.orca#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.talk#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.instagram.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.kakao.talk#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.linkedin.android#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.p1.mobile.putong#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.pinterest#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.ss.android.ugc.trill#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tencent.mm#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.tencent.mobileqq#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.whatsapp.w4b#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.zing.zalo#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>org.telegram.messenger#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.apps.vega#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.apps.maps#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.android.webview#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.linecorp.linelite#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.phonenoareainquire#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.phonenoareainquire#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.heytap.accessory#com.heytap.accessory</ProtectProcessInfo>
+    <ProtectProcessInfo>com.aiunit.aon#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.myairtelapp#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.heytap.health.international#com.heytap.health.international:transport</ProtectProcessInfo>
+    <ProtectProcessInfo>com.gojek.resto.staging#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.google.android.wearable.app#com.google.android.wearable.app:flow#com.google.android.wearable.app:background</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.logkit#com.oplus.logkit.coreservice.LogCoreService</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.oscenter#com.oplus.oscenter</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.smartlock#com.coloros.smartlock</ProtectProcessInfo>
+    <ProtectProcessInfo>com.coloros.smartsidebar#com.coloros.smartsidebar:edgepanel</ProtectProcessInfo>
+    <ProtectProcessInfo>com.heytap.pictorial#com.heytap.pictorial</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oppo.instant.local.service#NONE</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.dmp#com.oplus.dmp</ProtectProcessInfo>
+    <ProtectProcessInfo>com.oplus.ipspace#com.oplus.ipspace:pendant</ProtectProcessInfo>
+
+    <RestartTencent>true</RestartTencent>
+    <MorningClearRandomTimeStart>2</MorningClearRandomTimeStart>
+    <MorningClearRandomTimeEnd>5</MorningClearRandomTimeEnd>
+
+    <p_wl pkg="com.snapchat.android" bg_clean_strategy="8862"/>
+    <p_wl pkg="jp.naver.line.android" kill_restart_service="jp.naver.line.android" bg_clean_strategy="8726"/>
+    <p_wl pkg="com.bbm" kill_restart_service="com.bbm" />
+    <p_wl pkg="com.skype.raider" kill_restart_service="com.skype.raider" />
+    <p_wl pkg="com.viber.voip" kill_restart_service="com.viber.voip" />
+    <p_wl pkg="com.imo.android.imoim" kill_restart_service="com.imo.android.imoim" />
+    <p_wl pkg="android.process.contacts" remove_task_filter="android.process.contacts" />
+    <p_wl pkg="com.android.email" remove_task_filter="com.android.email:remote" />
+    <p_wl pkg="com.google.android.dialer" remove_task_filter="com.google.android.dialer" />
+    <p_wl pkg="com.oppo.quicksearchbox" remove_task_filter="com.oppo.quicksearchbox" />
+    <p_wl pkg="com.oplus.tzupdate" bg_clean_strategy="6144" />
+    <p_wl pkg="com.android.incallui" bg_clean_strategy="14337" />
+    <p_wl pkg="com.oppo.usercenter" bg_clean_strategy="14337" />
+    <p_wl pkg="com.heytap.usercenter" bg_clean_strategy="14337" />
+    <p_wl pkg="com.heytap.openid" bg_clean_strategy="8193" />
+    <p_wl pkg="android.ext.services" bg_clean_strategy="14337" />
+    <p_wl pkg="com.android.contacts" bg_clean_strategy="39811" />
+    <p_wl pkg="com.debug.loggerui" bg_clean_strategy="8192" />
+    <p_wl pkg="com.oplus.securitypermission" bg_clean_strategy="0" />
+    <p_wl pkg="com.oplus.securitykeyboard" bg_clean_strategy="14336" />
+    <p_wl pkg="com.heytap.habit.analysis" bg_clean_strategy="0" />
+    <p_wl pkg="com.coloros.activation" bg_clean_strategy="0" />
+    <p_wl pkg="com.oplus.romupdate" bg_clean_strategy="0" />
+    <p_wl pkg="com.oplus.sau" bg_clean_strategy="0" />
+    <p_wl pkg="com.coloros.oshare" bg_clean_strategy="0" />
+    <p_wl pkg="com.opos.ads" bg_clean_strategy="0" />
+    <p_wl pkg="com.oneplus.camera" bg_clean_strategy="6657" remove_task_filter="com.oneplus.camera" />
+    <p_wl pkg="com.oplus.safecenter" proc_keep="com.oplus.safecenter:clear_filter" />
+    <p_wl pkg="com.oplus.battery" proc_keep="com.oplus.battery" />
+    <p_wl pkg="com.redteamobile.roaming" proc_keep="com.redteamobile.virtual.softsim" remove_task_filter="com.redteamobile.virtual.softsim" />
+    <p_wl pkg="com.redteamobile.virtual.softsim" proc_keep="com.redteamobile.virtual.softsim" />
+    <p_wl pkg="com.oplus.cosa" proc_keep="com.oplus.cosa:service" />
+    <p_wl pkg="com.google.android.gms" use_kill="true" kill_restart_service="com.google.android.gm" />
+    <p_wl pkg="com.oplus.camera" use_kill="true" bg_clean_strategy="6657" remove_task_filter="com.oplus.camera" />
+    <p_wl pkg="com.bsb.hike" use_kill="true" kill_restart_service="com.bsb.hike" />
+    <p_wl pkg="com.caiharbor.esim" proc_keep="com.caiharbor.esim:eSIMService" />
+    <p_wl pkg="com.qustodio.qustodioapp" proc_keep="com.qustodio.qustodioapp" />
+    <p_wl pkg="com.pathao.driver" use_kill="true" kill_restart_service="com.path" />
+    <p_wl pkg="ru.ok.android" use_kill="true" kill_restart_service="ru.ok.android" />
+    <p_wl pkg="com.whatsapp" use_kill="true" kill_restart_service="com.whatsapp" bg_clean_strategy="9101"/>
+    <p_wl pkg="com.samsung.android.app.watchmanager" use_kill="true" />
+    <p_wl pkg="com.vkontakte.android" use_kill="true" kill_restart_service="com.vkontakte.android" />
+    <p_wl pkg="com.facebook.katana" use_kill="true" kill_restart_service="com.facebook.katana" bg_clean_strategy="8726"/>
+    <p_wl pkg="com.facebook.lite" use_kill="true" kill_restart_service="com.facebook.lite" />
+    <p_wl pkg="com.facebook.mlite" use_kill="true" kill_restart_service="com.facebook.mlite" />
+    <p_wl pkg="com.facebook.orca" use_kill="true" kill_restart_service="com.facebook.orca" />
+    <p_wl pkg="com.google.android.talk" use_kill="true" kill_restart_service="com.google.android.talk" />
+    <p_wl pkg="com.instagram.android" use_kill="true" kill_restart_service="com.instagram.android" bg_clean_strategy="8862" />
+    <p_wl pkg="com.kakao.talk" use_kill="true" kill_restart_service="com.kakao.talk" />
+    <p_wl pkg="com.linkedin.android" use_kill="true" kill_restart_service="com.linkedin.android" />
+    <p_wl pkg="com.pinterest" use_kill="true" kill_restart_service="com.pinterest" />
+    <p_wl pkg="com.tencent.mm" use_kill="true"
+        service_quick_restart="com.tencent.mm:push"
+        remove_task_filter="com.tencent.mm#com.tencent.mm:tools#com.tencent.mm:push"
+        kill_restart_service="com.tencent.mm"
+    />
+    <p_wl pkg="com.tencent.mobileqq" use_kill="true"
+        service_quick_restart="com.tencent.mobileqq:MSF"
+        remove_task_filter="com.tencent.mobileqq#com.tencent.mobileqq:MSF"
+        kill_restart_service="com.tencent.mobileqq"
+    />
+    <p_wl pkg="com.whatsapp.w4b" use_kill="true" kill_restart_service="com.whatsapp.w4b" bg_clean_strategy="8862"/>
+    <p_wl pkg="com.zing.zalo" use_kill="true" kill_restart_service="com.zing.zalo" />
+    <p_wl pkg="org.telegram.messenger" use_kill="true" kill_restart_service="org.telegram.messenger" />
+    <p_wl pkg="com.linecorp.linelite" use_kill="true" kill_restart_service="com.linecorp.linelite" />
+    <p_wl pkg="com.coloros.phonenoareainquire" use_kill="true" />
+    <p_wl pkg="com.oplus.phonenoareainquire" use_kill="true" />
+    <p_wl pkg="com.heytap.accessory"
+        proc_keep="com.heytap.accessory"
+        service_quick_restart="com.heytap.accessory"
+        remove_task_filter="com.heytap.accessory"
+    />
+    <p_wl pkg="com.myairtelapp" use_kill="true" bg_clean_strategy="0" />
+    <p_wl pkg="com.heytap.health.international"
+        proc_keep="com.heytap.health.international:transport"
+        remove_task_filter="com.heytap.health.international:transport"
+    />
+    <p_wl pkg="com.google.android.wearable.app"
+        proc_keep="com.google.android.wearable.app:flow#com.google.android.wearable.app:background"
+        remove_task_filter="com.google.android.wearable.app:flow#com.google.android.wearable.app:background"
+    />
+    <p_wl pkg="com.oplus.logkit" proc_keep="com.oplus.logkit.coreservice.LogCoreService" />
+    <p_wl pkg="com.oplus.oscenter" proc_keep="com.oplus.oscenter" />
+    <p_wl pkg="com.coloros.smartlock" proc_keep="com.coloros.smartlock" bg_clean_strategy="0" />
+    <p_wl pkg="com.coloros.smartsidebar" proc_keep="com.coloros.smartsidebar:edgepanel" bg_clean_strategy="0" />
+    <p_wl pkg="com.heytap.pictorial" proc_keep="com.heytap.pictorial" bg_clean_strategy="0" />
+    <p_wl pkg="com.oppo.instant.local.service" use_kill="true" bg_clean_strategy="14849" />
+    <p_wl pkg="com.oplus.dmp" proc_keep="com.oplus.dmp" />
+    <p_wl pkg="com.heytap.openid" proc_keep="com.heytap.openid"/>
+    <p_wl pkg="com.oplus.ipspace" proc_keep="com.oplus.ipspace:pendant" remove_task_filter="com.oplus.ipspace:pendant" />
+    <p_wl pkg="com.oplus.smartmediacontroller" bg_clean_strategy="4" />
+    <p_wl pkg="com.oplus.riderMode" bg_clean_strategy="1" />
+
+    <!-- Add to keep system app backwards compatibility: do not skip proc_keep in one-key clear and memory guard. -->
+    <p_cond_wl pkg="com.oplus.safecenter" proc_keep="com.oplus.safecenter:clear_filter@0xDEDFFE" />
+    <p_cond_wl pkg="com.oplus.battery" proc_keep="com.oplus.battery@0xDEDFFE" />
+    <p_cond_wl pkg="com.oplus.cosa" proc_keep="com.oplus.cosa:service@0xDEDFFE" />
+    <p_cond_wl pkg="com.heytap.accessory"
+        proc_keep="com.heytap.accessory@0xDEDFFE"
+        service_quick_restart="com.heytap.accessory"
+        remove_task_filter="com.heytap.accessory"
+    />
+    <p_cond_wl pkg="com.oplus.logkit" proc_keep="com.oplus.logkit.coreservice.LogCoreService@0xDEDFFE" />
+    <p_cond_wl pkg="com.coloros.smartlock" proc_keep="com.coloros.smartlock@0xDEDFFE" bg_clean_strategy="0" />
+    <p_cond_wl pkg="com.coloros.smartsidebar" proc_keep="com.coloros.smartsidebar:edgepanel@0xDEDFFE" bg_clean_strategy="0" />
+    <p_cond_wl pkg="com.heytap.pictorial" proc_keep="com.heytap.pictorial@0xDEDFFE" bg_clean_strategy="0" />
+    <p_cond_wl pkg="com.oplus.dmp" proc_keep="com.oplus.dmp@0xDEDFFE" />
+    <p_cond_wl pkg="com.oplus.securityguard" bg_clean_strategy="0xf0-0x7-2162688" />
+    <p_cond_wl pkg="com.android.providers.contacts" proc_keep="0x18-0x3-android.process.acore@0x2000" />
+    <p_cond_wl pkg="android.process.acore" proc_keep="0x18-0x3-android.process.acore@0x2000" />
+    <p_cond_wl pkg="com.heytap.htms" proc_keep="0xF0-0x4-com.heytap.htms:ovads@0xFFFFFFFF" />
+    <p_cond_wl pkg="com.heytap.mcs" proc_keep="0xF0-0x4-com.heytap.mcs:ovads@0xFFFFFFFF" />
+</filter-conf>

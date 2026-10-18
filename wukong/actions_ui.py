@@ -105,7 +105,7 @@ class GitHubActionsUI:
             if warning:
                 _emit(f"::warning title={_command_text(title)}::{_command_text(warning)}")
             else:
-                _emit(f"[Wukong] ✓ Hoàn thành {title}{suffix}")
+                _emit(f"[Wukong] ✓ {title} · Hoàn thành / Completed{suffix}")
             self.close_group()
         elif status == "failed":
             message = event.get("message") or "Stage failed"

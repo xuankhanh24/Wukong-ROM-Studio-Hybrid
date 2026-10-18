@@ -32,7 +32,7 @@ def main() -> int:
     parser.add_argument("--remote", default=DEFAULT_REMOTE)
     parser.add_argument(
         "--target",
-        choices=("preview", "refresh", "drive", "github", "all"),
+        choices=("preview", "refresh", "drive", "github", "all", "release"),
         required=True,
     )
     parser.add_argument("--rclone-config")
@@ -42,6 +42,7 @@ def main() -> int:
     parser.add_argument("--skip-download-verify", action="store_true")
     parser.add_argument("--folder", help="Managed Content folder whose complete pack must replace Drive")
     parser.add_argument("--run-id", help="UUID used to scope transactional artifacts for this run")
+    parser.add_argument('--defer-catalog', action='store_true', help='Upload release and save local index; commit the catalog separately after upgrading consumers')
     args = parser.parse_args()
 
     if args.folder and args.migrate_shared:
@@ -83,6 +84,20 @@ def main() -> int:
                 remote=args.remote,
             ),
         )
+        return 0
+    if args.target == 'release':
+        from wukong.github_content import DEFAULT_REPOSITORY, publish_release_packs
+        result = publish_release_packs(
+            install, index_path,
+            repository=args.repository or os.environ.get('WUKONG_GITHUB_REPOSITORY', DEFAULT_REPOSITORY),
+            token=os.environ.get('WUKONG_GITHUB_TOKEN', ''),
+            pack_ids=selected_pack_ids,
+            branch=args.branch,
+            progress=lambda values: emit('content-progress', **values),
+            publish_catalog=not args.defer_catalog,
+        )
+        emit('github-release', **result)
+        emit('complete', packs=len(result['packs']), changed=len(result['packs']))
         return 0
     if args.migrate_shared:
         migrated = migrate_shared_mods(install)

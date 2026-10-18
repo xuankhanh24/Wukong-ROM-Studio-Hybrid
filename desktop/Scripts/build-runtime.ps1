@@ -128,9 +128,34 @@ Copy-Tree (Join-Path $source 'platform_external_avb-master') (Join-Path $scriptR
 # cannot be hashed or installed as regular files on Windows. GitHub Actions
 # consumes the Linux tree directly from the repository instead.
 Copy-Tree (Join-Path $source 'bin\Windows') (Join-Path $destination 'Runtime\Bin\Windows')
+Copy-Tree (Join-Path $source 'bin\Java') (Join-Path $destination 'Runtime\Bin\Java')
+foreach ($javaFile in @('toolchain.json', 'apktool.jar', 'smali.jar', 'baksmali.jar')) {
+    Assert-FileHashMatch (Join-Path $source "bin\Java\$javaFile") (Join-Path $destination "Runtime\Bin\Java\$javaFile")
+}
 Copy-Tree (Join-Path $source 'config') (Join-Path $destination 'Runtime\Config')
 Copy-Tree (Join-Path $source 'Flash_script') (Join-Path $destination 'Runtime\Flash_script')
 Copy-Tree (Join-Path $source 'STARK') (Join-Path $destination 'Content\STARK')
+# Compatibility shims retain old script paths. The implementation is installed
+# below with the runtime-owned wukong package, independently of Content packs.
+Copy-Item -LiteralPath (Join-Path $source 'STARK\patch_common.py') -Destination (Join-Path $scriptRoot 'stark_patch_common.py') -Force
+Assert-FileHashMatch (Join-Path $source 'STARK\patch_common.py') (Join-Path $scriptRoot 'stark_patch_common.py')
+# Patch scripts also run without a developer SDK on the installed machine.
+Push-Location $source
+try {
+    $zipalignSource = & python -c 'from STARK.patch_common import find_tool; print(find_tool("zipalign") or "")'
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($zipalignSource)) {
+        throw 'zipalign with -P 16 support is required to build the desktop runtime.'
+    }
+    $zipalignSource = [IO.Path]::GetFullPath($zipalignSource.Trim())
+    Copy-Item -LiteralPath $zipalignSource -Destination (Join-Path $destination 'Runtime\Bin\Windows\AMD64\zipalign.exe') -Force
+    $zipalignDll = Join-Path (Split-Path -Parent $zipalignSource) 'libwinpthread-1.dll'
+    if (Test-Path -LiteralPath $zipalignDll) {
+        Copy-Item -LiteralPath $zipalignDll -Destination (Join-Path $destination 'Runtime\Bin\Windows\AMD64\libwinpthread-1.dll') -Force
+    }
+}
+finally {
+    Pop-Location
+}
 Copy-Tree (Join-Path $source 'Flash_script') (Join-Path $destination 'Content\Flash_script')
 $trackedWkPolicy = Join-Path $source 'config\wk_manager_system_policy.cil'
 $contentWkPolicy = Join-Path $destination 'Content\STARK\WK_Manager\system\system\etc\selinux\stark_plat_sepolicy.cil'
@@ -218,6 +243,11 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 & (Join-Path $pythonRoot 'python.exe') -c "import flask, requests, google.protobuf, zstandard; import studio_server, studio_core, wukong; print('runtime smoke import: OK')"
 if ($LASTEXITCODE -ne 0) {
     throw 'Bundled Python smoke import failed.'
+}
+
+& (Join-Path $pythonRoot 'python.exe') -c 'import os, sys; from pathlib import Path; root=Path(sys.argv[1]); os.environ.update(WUKONG_STUDIO_DESKTOP_MODE="1", WUKONG_STUDIO_INSTALL_ROOT=str(root)); import studio_core; primary=studio_core._stark_archive_helper(); primary.toolchain_report(probe=True); studio_core.STARK_ROOT=root/"Temp"/"missing-content"; fallback=studio_core._stark_archive_helper(); assert fallback is primary; assert Path(fallback.__file__).resolve()==(root/"Runtime/Scripts/wukong/patch_tools.py").resolve(); print("runtime-owned toolchain: version, hash and missing-content checks OK")' $destination
+if ($LASTEXITCODE -ne 0) {
+    throw 'Bundled archive helper upgrade smoke failed.'
 }
 
 Write-Host "Runtime staged at $destination"

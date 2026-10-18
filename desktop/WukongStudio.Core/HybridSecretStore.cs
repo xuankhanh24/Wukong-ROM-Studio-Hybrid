@@ -18,10 +18,9 @@ public sealed class HybridSecretStore(StudioLayout layout)
     {
         if (string.IsNullOrWhiteSpace(credentials.GitHubRepository)
             || !credentials.GitHubRepository.Contains('/')
-            || string.IsNullOrWhiteSpace(credentials.GitHubToken)
-            || string.IsNullOrWhiteSpace(credentials.RcloneConfig))
+            || string.IsNullOrWhiteSpace(credentials.GitHubToken))
         {
-            throw new InvalidDataException("GitHub repository, token and rclone configuration are required.");
+            throw new InvalidDataException("GitHub repository and token are required. rclone is optional for content uploads.");
         }
         layout.EnsureWritableDirectories();
         var plain = JsonSerializer.SerializeToUtf8Bytes(credentials);

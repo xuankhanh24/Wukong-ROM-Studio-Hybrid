@@ -948,7 +948,10 @@ class TelegramDaemonUITests(unittest.TestCase):
             "vi",
             controller.ui_state.session(42),
         )
-        self.assertIn("WK_Manager", picker.text)
+        session = controller.ui_state.session(42)
+        pages = [picker] + [controller._mod_picker("vi", session, page=page)
+                            for page in range(1, (len(session["mod_options"]) + 7) // 8)]
+        self.assertTrue(any("WK_Manager" in page.text for page in pages))
 
     def test_runtime_uses_the_same_content_root_as_the_bot_catalog(self) -> None:
         with tempfile.TemporaryDirectory() as root:

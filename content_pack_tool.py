@@ -12,6 +12,7 @@ from wukong.content_packs import (
     merge_content_index_pack,
     upload_content_packs,
     write_content_index,
+    load_content_index,
 )
 
 
@@ -53,7 +54,7 @@ def main() -> int:
             index = write_content_index(content_root, index_path, remote=args.remote)
         print(json.dumps({"packs": len(index["packs"]), "index": str(index_path)}))
         return 0
-    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index = load_content_index(index_path)
     if args.command == "upload":
         upload_content_packs(
             content_root,

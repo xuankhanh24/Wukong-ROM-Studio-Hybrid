@@ -42,14 +42,6 @@
       "sizeBytes": 2493824,
       "license": "AGPL-3.0-only",
       "source": "https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/tree/a14828fdee37c402b32662ab48c4ea96f8a68ce9"
-    },
-    {
-      "name": "apktool_3.0.2.jar",
-      "url": "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.2/apktool_3.0.2.jar",
-      "sha256": "eee4669a704a14e0623407e6701b0b91887e61e1e4049cb7a82833e14ae8b5fd",
-      "sizeBytes": 15476804,
-      "license": "Apache-2.0",
-      "source": "https://github.com/iBotPeaches/Apktool/tree/v3.0.2"
     }
   ],
   "systemTools": {

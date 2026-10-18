@@ -1,0 +1,136 @@
+<filter-conf>
+    <version>9999123199</version>
+    <isOpen>1</isOpen>
+    <filter-name>sys_system_config_list</filter-name>
+    <!--   NEW kill service restart list since MP3 version  -->
+    <KillRestartServiceProNew>com.facebook.katana</KillRestartServiceProNew>
+    <KillRestartServiceProNew>jp.naver.line.android</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.whatsapp</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.bbm</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.skype.raider</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.viber.voip</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.path</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.bsb.hike</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.imo.android.imoim</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.google.android.gm</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.vkontakte.android</KillRestartServiceProNew>
+    <KillRestartServiceProNew>ru.ok.android</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.facebook.lite</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.facebook.mlite</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.facebook.orca</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.google.android.talk</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.instagram.android</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.kakao.talk</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.linkedin.android</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.pinterest</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.tencent.mm</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.tencent.mobileqq</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.whatsapp.w4b</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.zing.zalo</KillRestartServiceProNew>
+    <KillRestartServiceProNew>org.telegram.messenger</KillRestartServiceProNew>
+    <KillRestartServiceProNew>com.linecorp.linelite</KillRestartServiceProNew>
+
+    <!--   tencent mini pro activity keyword list -->
+    <RedundentTaskClass>com.tencent.mm.plugin.appbrand.ui.AppBrandUI</RedundentTaskClass>
+    <RedundentTaskClass>com.tencent.mm.plugin.appbrand.ui.AppBrandInToolsUI</RedundentTaskClass>
+
+    <RemoveTaskFilterProcessNew>com.oplus.camera</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.oneplus.camera</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.tencent.mm:push</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.tencent.mobileqq:MSF</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.tencent.mm:tools</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>android.process.contacts</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.android.email:remote</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.google.android.dialer</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.heytap.accessory</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.heytap.health.international:transport</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.google.android.wearable.app:background</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.google.android.wearable.app:flow</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.redteamobile.virtual.softsim</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.heytap.quicksearchbox</RemoveTaskFilterProcessNew>
+    <RemoveTaskFilterProcessNew>com.oplus.ipspace:pendant</RemoveTaskFilterProcessNew>
+
+    <ServiceQuickRestartProc>com.heytap.accessory</ServiceQuickRestartProc>
+    <ServiceQuickRestartProc>com.tencent.mm:push</ServiceQuickRestartProc>
+    <ServiceQuickRestartProc>com.tencent.mobileqq:MSF</ServiceQuickRestartProc>
+
+    <SystemDumpHeapEnable>true</SystemDumpHeapEnable>
+
+    <ProtectSelfWhiteList>com.coloros.alarmclock</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.backuprestore</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.backuprestore.remoteservice</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oneplus.deskclock</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oneplus.backuprestore</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oneplus.backuprestore.remoteservice</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.redteamobile.roaming</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.screenshot</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oppo.ctautoregist</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.keychain</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.safesdkproxy</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.cleanmaster.sdk</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.oshare</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.filemanager</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.gallery3d</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.safecenter</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oppo.customize.service</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.blacklist</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.healthcheck</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.contacts</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.mms</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.weather.service</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.blacklistapp</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.launcher</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.settings</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.systemui</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.gesture</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.notificationmanager</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.trafficmonitor</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.wifibackuprestore</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.ted.number</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.calendar</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.providers.fileinfo</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oppo.camera</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.camera</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.nearme.sync</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.nearme.ocloud</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.ota</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.cloud</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.heytap.cloud</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.battery</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.screenrecorder</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.screenrecorder</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oneplus.screenrecord</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.cellbroadcastreceiver</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.smartdrive</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oppo.videocallfloat</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.wirelesssettings</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.oppopods</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.melody</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.translate</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.colorfilestand</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.videoeditor</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.personalassistant</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.android.dlna.service</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.heytap.health</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.karaoke</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.postmanservice</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.postmanservice</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.cast</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.synergy</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.realme.wellbeing</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oneplus.camera.pictureprocessing</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.caseflash</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.oplus.padconnect</ProtectSelfWhiteList>
+    <ProtectSelfWhiteList>com.coloros.accessibilityassistant</ProtectSelfWhiteList>
+
+    <!--add for self-protect 12.0-->
+    <ProtectSelfPolicy scope="pkg" pkg="com.oplus.rom.server" process="NA" reason="protect pkg" timeout="86400000" maxtime="86400000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.realme.link" process="NA" reason="protect link pkg" timeout="86400000" maxtime="86400000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.oplus.sau" process="NA" reason="protect pkg" timeout="1800000" maxtime="1800000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.oplus.romupdate" process="NA" reason="protect pkg" timeout="600000" maxtime="600000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.nearme.statistics.rom" process="NA" reason="protect pkg" timeout="600000" maxtime="600000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.oplus.securitypermission" process="NA" reason="protect pkg" timeout="300000" maxtime="300000" scene="0" />
+    <ProtectSelfPolicy scope="process" pkg="com.oplus.linker" process="com.oplus.linker" reason="protect process" timeout="86400000" maxtime="86400000" scene="0" />
+    <ProtectSelfPolicy scope="process" pkg="com.coloros.digitalwellbeing" process="com.coloros.digitalwellbeing" reason="protect process" timeout="60000" maxtime="60000" scene="0" />
+    <ProtectSelfPolicy scope="pkg" pkg="com.heytap.accessory" process="NA" reason="OAF p2p connection established" timeout="10800000" maxtime="10800000" scene="0" />
+</filter-conf>

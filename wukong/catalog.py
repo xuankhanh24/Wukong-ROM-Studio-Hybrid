@@ -14,7 +14,8 @@ LITE_DEFAULT_MODS: list[str] = [
 ]
 PLUS_DEFAULT_EXCLUDED_MODS: set[str] = {"Gallery_mod_CN", "Disable_flag_secure"}
 SHARED_MOD_NAMES: frozenset[str] = frozenset(
-    {"Fake_lock", "WK_Manager", "WK_Installer"}
+    {"Fake_lock", "WK_Manager", "WK_Installer", "Camera_mod", "Chat_bubbles",
+     "Cts_Gemini", "Fix_noti", "Hasselblad_filter", "Launcher_mod", "Settings_mod"}
 )
 PUBLIC_PATCH_ONLY_MOD_NAMES: frozenset[str] = frozenset(
     {"Block_ota", "Disable_flag_secure"}

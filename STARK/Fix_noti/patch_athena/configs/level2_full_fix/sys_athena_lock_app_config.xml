@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_athena_lock_app_config</filter-name>
+
+    <config_map key="default_lock_app" type="Integer">
+        <sub key="com.tencent.mm" val="0" />
+        <sub key="com.tencent.mobileqq" val="0" />
+        <sub key="com.zing.zalo" val="0" />
+        <sub key="com.facebook.orca" val="0" />
+        <sub key="com.facebook.katana" val="0" />
+        <sub key="com.instagram.android" val="0" />
+        <sub key="jp.naver.line.android" val="0" />
+        <sub key="com.whatsapp" val="0" />
+        <sub key="com.bbm" val="0" />
+        <sub key="com.skype.raider" val="0" />
+        <sub key="com.viber.voip" val="0" />
+        <sub key="com.path" val="0" />
+        <sub key="com.facebook.lite" val="0" />
+        <sub key="com.bsb.hike" val="0" />
+        <sub key="com.imo.android.imoim" val="0" />
+        <sub key="com.google.android.gm" val="0" />
+        <sub key="com.mplusapp" val="0" />
+
+        <sub key="com.tencent.mm#999" val="0" />
+        <sub key="com.tencent.mobileqq#999" val="0" />
+        <sub key="com.zing.zalo#999" val="0" />
+        <sub key="com.facebook.orca#999" val="0" />
+        <sub key="com.facebook.katana#999" val="0" />
+        <sub key="com.instagram.android#999" val="0" />
+        <sub key="jp.naver.line.android#999" val="0" />
+        <sub key="com.whatsapp#999" val="0" />
+        <sub key="com.bbm#999" val="0" />
+        <sub key="com.skype.raider#999" val="0" />
+        <sub key="com.viber.voip#999" val="0" />
+        <sub key="com.path#999" val="0" />
+        <sub key="com.facebook.lite#999" val="0" />
+        <sub key="com.bsb.hike#999" val="0" />
+        <sub key="com.imo.android.imoim#999" val="0" />
+        <sub key="com.google.android.gm#999" val="0" />
+            <sub key="tw.nekomimi.nekogram" val="0" />
+        <sub key="tw.nekomimi.nekogram#999" val="0" />
+        <sub key="org.telegram.plus" val="0" />
+        <sub key="org.telegram.plus#999" val="0" />
+        <sub key="org.thunderdog.challegram" val="0" />
+        <sub key="org.thunderdog.challegram#999" val="0" />
+    </config_map>
+
+</filter-conf>

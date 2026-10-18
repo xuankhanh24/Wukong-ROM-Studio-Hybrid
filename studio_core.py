@@ -50,6 +50,8 @@ from studio_paths import (
     platform_tool_path,
 )
 from src.core.utils import gettype
+from wukong.mod_features import (normalize_features as _normalize_mod_features,
+    DEFAULT_LAUNCHER_FEATURES)
 from wukong.catalog import (
     LITE_DEFAULT_MODS,
     MODIFIABLE_PARTITIONS,
@@ -86,7 +88,7 @@ ROM_SHA256_MEMO_LIMIT = 64
 MOD_DIR = CONTENT_ROOT / "MOD"
 DEFAULT_MOD_VERSION = "ColorOS_16.0.7"
 PLATFORM_BIN_DIR = platform_bin_dir(BIN_ROOT)
-APKTOOL_JAR = PLATFORM_BIN_DIR / "apktool_3.0.2.jar"
+APKTOOL_JAR = BIN_ROOT / "Java" / "apktool.jar"
 APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
@@ -307,6 +309,8 @@ class BuildSpec:
     specFingerprint: str | None = None
     resumePreset: str | None = None
     wkManagerPatches: list[str] | None = None
+    launcherFeatures: list[str] | None = None
+    fixNotiFeatures: list[str] | None = None
 
     def selected_mod_names(self) -> list[str]:
         names = self.modNames or ([self.modName] if self.modName else [])
@@ -396,6 +400,8 @@ class BuildSpec:
             specFingerprint=(str(payload.get("specFingerprint") or "").strip() or None),
             resumePreset=(str(payload.get("resumePreset") or "").strip().lower() or None),
             wkManagerPatches=normalize_patches(payload.get("wkManagerPatches")),
+            launcherFeatures=normalize_mod_features(payload.get("launcherFeatures"), "launcherFeatures"),
+            fixNotiFeatures=normalize_mod_features(payload.get("fixNotiFeatures"), "fixNotiFeatures"),
         )
 
 
@@ -452,6 +458,13 @@ class BuildContext:
 
 class StudioError(RuntimeError):
     pass
+
+
+def normalize_mod_features(value, field):
+    try:
+        return _normalize_mod_features(value, field)
+    except ValueError as error:
+        raise StudioError(str(error)) from error
 
 
 def build_edition_name(spec: "BuildSpec") -> str:
@@ -1431,6 +1444,11 @@ def list_mods(mod_version: str | None = None, *, mod_root: Path | None = None) -
                 patch_only = mod_dir.name in PATCH_ONLY_MODS
                 directories = sorted(path.name for path in mod_dir.iterdir() if path.is_dir())
                 compatible = [name for name in directories if name in MOD_PARTITIONS]
+                # Upgrades install patch scripts independently of prepared APKs.
+                # A script-only shared directory must not shadow an existing
+                # version-specific payload until shared payloads are available.
+                if shared and not compatible and not patch_only:
+                    continue
                 skipped = [name for name in directories if name not in MOD_PARTITIONS]
                 root_files = sorted(path.name for path in mod_dir.iterdir() if path.is_file())
                 blocked_reason = BLOCKED_MODS.get(mod_dir.name)
@@ -1578,6 +1596,8 @@ def inspect_rom(
     debloat_paths: Iterable[str] | None = None,
     enforce_space: bool = True,
     required_steps: Iterable[str] | None = None,
+    launcher_features: list[str] | None = None,
+    fix_noti_features: list[str] | None = None,
 ) -> dict[str, Any]:
     path = Path(rom_path).expanduser().resolve()
     errors: list[str] = []
@@ -1628,11 +1648,30 @@ def inspect_rom(
         except StudioError as exc:
             errors.append(str(exc))
     jar_patch_mods = {"Fix_noti", "WK_Manager", "Disable_flag_secure"}.intersection(selected_mod_names)
+    if fix_noti_features is not None and 'level2' not in fix_noti_features:
+        jar_patch_mods.discard('Fix_noti')
+    if 'apply_mod' in requested_steps and 'Fix_noti' in selected_mod_names and fix_noti_features:
+        try:
+            helper = _stark_archive_helper()
+            for tool_name in ('java', 'apktool', 'zipalign'):
+                helper.require_tool(tool_name)
+        except (OSError, RuntimeError) as error:
+            errors.append(f'Fix_noti Athena toolchain is unavailable: {error}')
+    if 'apply_mod' in requested_steps and 'Launcher_mod' in selected_mod_names and set(launcher_features or ()) - {'global_region'}:
+        try:
+            helper = _stark_archive_helper()
+            for tool_name in ('java', 'javac', 'd8', 'apktool', 'smali', 'baksmali', 'zipalign'):
+                helper.require_tool(tool_name)
+            helper.android_jar()
+        except (OSError, RuntimeError) as error:
+            errors.append(f'Launcher APK features require JDK and Android SDK: {error}')
     if "apply_mod" in requested_steps and jar_patch_mods:
-        if not APKTOOL_JAR.is_file():
-            errors.append(f"Missing apktool dependency: {APKTOOL_JAR}")
-        if not shutil.which("java"):
-            errors.append("Java is required to patch selected JAR MODs")
+        try:
+            helper = _stark_archive_helper()
+            for tool_name in ('java', 'apktool', 'smali', 'baksmali'):
+                helper.require_tool(tool_name)
+        except (OSError, RuntimeError) as error:
+            errors.append(f"Shared patch toolchain is unavailable: {error}")
     if (
         "apply_mod" in requested_steps
         and "WK_Manager" in selected_mod_names
@@ -2117,28 +2156,12 @@ def plan_steps(spec: BuildSpec, workspace: Path | None = None) -> list[str]:
 
 
 def _run_command(command: list[str], *, cwd: Path = ROOT_DIR, verbose: bool | None = None) -> None:
-    is_verbose = verbose if verbose is not None else (os.environ.get("WUKONG_VERBOSE_BUILD", "0") == "1")
-    cmd_name = Path(command[0]).name if command else "command"
-    print(f"[*] CMD: {' '.join(command)}", flush=True)
-    if is_verbose:
-        result = subprocess.run(command, cwd=cwd, check=False)
-    else:
-        result = subprocess.run(
-            command,
-            cwd=cwd,
-            check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            errors="replace",
-        )
-        if result.returncode != 0:
-            if result.stdout:
-                print(f"[!] LỖI THỰC THI LỆNH ({result.returncode}):\n{result.stdout.strip()}", flush=True)
-            raise StudioError(f"Command failed with exit code {result.returncode}: {cmd_name}")
-        return
-    if result.returncode != 0:
-        raise StudioError(f"Command failed with exit code {result.returncode}: {cmd_name}")
+    # Compatibility adapter: ROM jobs and standalone mods share one live logger.
+    from wukong.patch_tools import run_command
+    try:
+        run_command(command, cwd=cwd, check=True)
+    except subprocess.CalledProcessError as error:
+        raise StudioError(f"Command failed with exit code {error.returncode}: {Path(command[0]).name}") from error
 
 
 def _emit_progress(context: BuildContext, progress: int, message: str = "") -> None:
@@ -2470,12 +2493,10 @@ def _stark_destination(partition_destination: Path, relative: Path) -> Path:
 
 
 def _stark_archive_helper():
-    spec = importlib.util.spec_from_file_location("stark_archive", STARK_ROOT / "patch_common.py")
-    if spec is None or spec.loader is None:
-        raise StudioError("Shared STARK archive helper is missing")
-    helper = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(helper)
-    return helper
+    # Application code must survive an older Content pack or content replacement.
+    # Retain this compatibility function for existing callers and integrations.
+    from wukong import patch_tools
+    return patch_tools
 
 
 def _preserve_zip_entry_attributes(original: Path, rebuilt: Path, *, changed_dex=None) -> None:
@@ -2483,25 +2504,9 @@ def _preserve_zip_entry_attributes(original: Path, rebuilt: Path, *, changed_dex
     helper.merge_rebuilt_archive(original, rebuilt, original, dex_only=True, changed_dex=changed_dex)
 
 
-def _smali_dex_fingerprints(decoded: Path) -> dict[str, str]:
-    fingerprints = {}
-    for folder in decoded.iterdir():
-        if not folder.is_dir():
-            continue
-        if folder.name == "smali":
-            name = "classes.dex"
-        elif match := re.fullmatch(r"smali_classes(\d+)", folder.name):
-            name = f"classes{match[1]}.dex"
-        else:
-            continue
-        digest = hashlib.sha256()
-        for path in sorted(folder.rglob("*.smali")):
-            digest.update(path.relative_to(folder).as_posix().encode("utf-8") + b"\x00")
-            # Smali files are small. Avoid allocating the 8 MiB streaming
-            # buffer used for ROM images once for every class in the tree.
-            digest.update(hashlib.sha256(path.read_bytes()).digest())
-        fingerprints[name] = digest.hexdigest()
-    return fingerprints
+def _smali_dex_fingerprints(decoded: Path, *, progress=None) -> dict[str, str]:
+    from wukong.smali_io import dex_fingerprints
+    return dex_fingerprints(decoded, progress=progress)
 
 
 def _patch_fix_noti_smali(decoded: Path) -> None:
@@ -2558,8 +2563,10 @@ def _patch_jar_with_apktool(
 ) -> dict[str, Any]:
     if not jar.is_file():
         raise StudioError(f"JAR patch target is missing: {jar}")
-    if not APKTOOL_JAR.is_file():
-        raise StudioError(f"apktool dependency is missing: {APKTOOL_JAR}")
+    total_started = time.perf_counter()
+    helper = _stark_archive_helper()
+    java = helper.require_tool('java')
+    apktool = helper.require_tool('apktool')
     work_dir.mkdir(parents=True, exist_ok=True)
     decoded = work_dir / "decoded"
     rebuilt = work_dir / "rebuilt.jar"
@@ -2593,24 +2600,44 @@ def _patch_jar_with_apktool(
             shutil.rmtree(decoded)
         if status_callback:
             status_callback(f"Giải mã {jar.name}")
-        _run_command(["java", "-jar", str(APKTOOL_JAR), "d", "-f", str(jar), "-o", str(decoded)])
+        helper.run_tool([java, "-jar", apktool, "d", "-f", str(jar), "-o", str(decoded)], runner=_run_command)
     decode_seconds = time.perf_counter() - decode_started
 
-    before_dex = _smali_dex_fingerprints(decoded)
-    patch_started = time.perf_counter()
-    report = patcher(decoded)
-    after_dex = _smali_dex_fingerprints(decoded)
+    def fingerprint_progress(phase):
+        return lambda done, total: print(
+            f"[*] {jar.name}: {phase} smali {done}/{total}", flush=True)
+
+    fingerprint_started = time.perf_counter()
+    before_dex = _smali_dex_fingerprints(decoded, progress=fingerprint_progress('before patch'))
+    fingerprint_seconds = time.perf_counter() - fingerprint_started
+    from wukong.smali_io import index_scope
+    print(f"[*] {jar.name}: indexing smali paths", flush=True)
+    index_started = time.perf_counter()
+    with index_scope(decoded):
+        index_seconds = time.perf_counter() - index_started
+        print(f"[*] {jar.name}: applying selected hooks", flush=True)
+        patch_started = time.perf_counter()
+        report = patcher(decoded)
+        patch_seconds = time.perf_counter() - patch_started
+    fingerprint_started = time.perf_counter()
+    after_dex = _smali_dex_fingerprints(decoded, progress=fingerprint_progress('after patch'))
+    fingerprint_seconds += time.perf_counter() - fingerprint_started
+    removed_dex = set(before_dex).difference(after_dex)
+    if removed_dex:
+        raise StudioError(f"Patch removed DEX trees; original JAR is unchanged: {', '.join(sorted(removed_dex))}")
     changed_dex = {name for name, digest in after_dex.items() if before_dex.get(name) != digest}
-    patch_seconds = time.perf_counter() - patch_started
     for generated in (decoded / "build", decoded / "dist"):
         if generated.exists():
             shutil.rmtree(generated)
     if status_callback:
         status_callback(f"Đóng gói {jar.name}")
     build_started = time.perf_counter()
-    smali_tool = _stark_archive_helper().find_tool("smali")
+    smali_tool = helper.require_tool("smali")
     selective_build = bool(before_dex or after_dex) and bool(smali_tool)
     if selective_build:
+        from wukong.smali_io import assembly_api
+        api_level = assembly_api(decoded)
+        print(f"[*] {jar.name}: assemble changed DEX using API {api_level}", flush=True)
         # Assemble only trees changed by the selected hooks. Original OEM DEX
         # and non-DEX local records are retained by the merge below.
         dex_output = work_dir / "rebuilt-dex"
@@ -2619,10 +2646,17 @@ def _patch_jar_with_apktool(
             for name in sorted(changed_dex):
                 folder = "smali" if name == "classes.dex" else "smali_" + name[:-4]
                 output = dex_output / name
-                _run_command(["java", "-jar", str(smali_tool), "a", str(decoded / folder), "-o", str(output)])
+                try:
+                    helper.run_tool([java, "-jar", str(smali_tool), "a", str(decoded / folder),
+                                     "--api", str(api_level), "-o", str(output)], runner=_run_command)
+                except helper.ToolchainError as exc:
+                    raise StudioError(
+                        f"Smali produced missing or invalid DEX {name} at API {api_level}; "
+                        "original JAR is unchanged. Check assembler diagnostics above."
+                    ) from exc
                 archive.write(output, name)
     else:
-        _run_command(["java", "-jar", str(APKTOOL_JAR), "b", str(decoded), "-o", str(rebuilt)])
+        helper.run_tool([java, "-jar", apktool, "b", str(decoded), "-o", str(rebuilt)], runner=_run_command)
     build_seconds = time.perf_counter() - build_started
     preserve_started = time.perf_counter()
     _preserve_zip_entry_attributes(jar, rebuilt, changed_dex=changed_dex if before_dex or after_dex else None)
@@ -2651,11 +2685,13 @@ def _patch_jar_with_apktool(
             "changedDex": sorted(changed_dex),
             "decodedReused": decoded_reused,
             "decodeSeconds": round(decode_seconds, 3),
+            "fingerprintSeconds": round(fingerprint_seconds, 3),
+            "indexSeconds": round(index_seconds, 3),
             "patchSeconds": round(patch_seconds, 3),
             "buildSeconds": round(build_seconds, 3),
             "preserveSeconds": round(preserve_seconds, 3),
             "totalSeconds": round(
-                decode_seconds + patch_seconds + build_seconds + preserve_seconds,
+                time.perf_counter() - total_started,
                 3,
             ),
         }
@@ -3291,6 +3327,56 @@ def _refresh_plat_sepolicy_hash(rom_unpack: Path) -> dict[str, str]:
     }
 
 
+def _publish_patched_apk(stock: Path, output: Path, rom_unpack: Path) -> str:
+    if not output.is_file():
+        raise StudioError(f'APK patcher did not produce {output.name}')
+    with tempfile.TemporaryDirectory(prefix='.apk-publish-', dir=stock.parent) as directory:
+        staged = Path(directory) / stock.name
+        shutil.copy2(output, staged)
+        with zipfile.ZipFile(staged) as archive:
+            if archive.testzip():
+                raise StudioError('Patched APK failed CRC validation')
+        os.replace(staged, stock)
+    return stock.relative_to(rom_unpack).parts[0].removesuffix('_unpacked')
+
+
+def _patch_selected_noti(rom_unpack: Path, workspace: Path, selected: list[str]) -> str | None:
+    if not selected:
+        return None
+    candidates = sorted({*rom_unpack.rglob('Athena.apk'), *rom_unpack.rglob('OplusAthena.apk')})
+    if len(candidates) != 1:
+        raise StudioError(f'Fix_noti requires exactly one stock Athena APK; found {len(candidates)}')
+    stock = candidates[0]
+    work = workspace / 'mod-tools' / 'Athena'
+    work.mkdir(parents=True, exist_ok=True)
+    output = work / stock.name
+    output.unlink(missing_ok=True)
+    script = STARK_ROOT / 'Fix_noti/patch_athena/patch_athena.py'
+    level = '1' if selected == ['level1'] else '2'
+    _run_command([sys.executable, str(script), '-i', str(stock), '-o', str(output),
+                  '-l', level, '--no-interactive'])
+    return _publish_patched_apk(stock, output, rom_unpack)
+
+
+def _patch_selected_launcher(rom_unpack: Path, workspace: Path, selected: list[str]) -> str | None:
+    features = [name for name in selected if name != 'global_region']
+    if not features:
+        return None
+    candidates = sorted(rom_unpack.rglob('OplusLauncher.apk'))
+    if len(candidates) != 1:
+        raise StudioError(f'Launcher features require exactly one stock OplusLauncher.apk; found {len(candidates)}')
+    stock = candidates[0]
+    work = workspace / 'mod-tools' / 'Launcher_mod'
+    work.mkdir(parents=True, exist_ok=True)
+    output = work / 'OplusLauncher.apk'
+    output.unlink(missing_ok=True)
+    script = STARK_ROOT / 'Launcher_mod/patch_Launcher_mod/patch_launcher.py'
+    _run_command([sys.executable, str(script), str(stock), '--no-install',
+                  '--features', ','.join(features), '--output', str(output),
+                  '--module-output', str(work / 'Launcher-module.zip')])
+    return _publish_patched_apk(stock, output, rom_unpack)
+
+
 def apply_selected_mods(
     mod_names: Iterable[str],
     rom_unpack: Path,
@@ -3300,7 +3386,13 @@ def apply_selected_mods(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
     fake_lock_vbmeta_digest: str | None = None,
     wk_manager_patches: list[str] | None = None,
+    launcher_features: list[str] | None = None,
+    fix_noti_features: list[str] | None = None,
 ) -> dict[str, Any]:
+    launcher_features = normalize_mod_features(launcher_features, 'launcherFeatures')
+    fix_noti_features = normalize_mod_features(fix_noti_features, 'fixNotiFeatures')
+    launcher_selected = list(DEFAULT_LAUNCHER_FEATURES) if launcher_features is None else launcher_features
+    noti_selected = set(['level2'] if fix_noti_features is None else fix_noti_features)
     version = normalize_mod_version(mod_version)
     mods = validate_mods(mod_names, mod_version=version)
     copied = patched = copied_bytes = 0
@@ -3332,6 +3424,16 @@ def apply_selected_mods(
     for index, mod in enumerate(mods, start=1):
         emit_progress(int((index - 1) * 35 / total_mods), f"MOD {index}/{len(mods)} · {mod['name']}")
         mod_dir = (STARK_ROOT if mod.get("shared") else _mod_collection_dir(version)) / mod["name"]
+        if mod['name'] == 'Launcher_mod':
+            partition = _patch_selected_launcher(rom_unpack, workspace, launcher_selected)
+            if partition:
+                modified_partitions.add(partition)
+                patched += 1
+        if mod['name'] == 'Fix_noti' and fix_noti_features is not None:
+            partition = _patch_selected_noti(rom_unpack, workspace, fix_noti_features)
+            if partition:
+                modified_partitions.add(partition)
+                patched += 1
         for partition in mod["partitions"]:
             destination_info = _partition_destination(rom_unpack, partition, device)
             if not destination_info:
@@ -3342,6 +3444,12 @@ def apply_selected_mods(
                 if not source.is_file():
                     continue
                 relative = _safe_relative_path(str(source.relative_to(partition_source)))
+                if mod['name'] == 'Launcher_mod' and launcher_features is not None:
+                    if 'global_region' not in launcher_selected or source.suffix == '.apk':
+                        continue
+                if mod['name'] == 'Fix_noti' and fix_noti_features is not None:
+                    if 'level2' not in noti_selected:
+                        continue
                 if source.name.startswith("stark_"):
                     if (
                         mod["name"] in {"Fake_lock", "WK_Manager"}
@@ -3363,7 +3471,7 @@ def apply_selected_mods(
                 copied_bytes += source.stat().st_size
                 modified_partitions.add(target_partition)
         if mod["name"] == "Fix_noti":
-            fix_noti_selected = True
+            fix_noti_selected = 'level2' in noti_selected
         if mod["name"] == "WK_Manager":
             wk_manager_mod_dir = mod_dir
         if mod["name"] == "Disable_flag_secure":
@@ -3918,6 +4026,8 @@ def _stage_apply_mod(context: BuildContext) -> dict[str, Any]:
             str(fake_lock_vbmeta["digest"]) if fake_lock_vbmeta else None
         ),
         wk_manager_patches=context.spec.wkManagerPatches,
+        launcher_features=context.spec.launcherFeatures,
+        fix_noti_features=context.spec.fixNotiFeatures,
     )
     passthrough_after = _passthrough_partition_fingerprints(context.rom_unpack)
     changed_passthrough = sorted(
@@ -4476,6 +4586,8 @@ def _spec_payload(spec: BuildSpec) -> dict[str, Any]:
         "specFingerprint": spec.specFingerprint,
         "resumePreset": spec.resumePreset,
         "wkManagerPatches": spec.wkManagerPatches,
+        "launcherFeatures": spec.launcherFeatures,
+        "fixNotiFeatures": spec.fixNotiFeatures,
     }
 
 
@@ -4490,6 +4602,10 @@ def build_spec_fingerprint(spec: BuildSpec) -> str:
         "enabledSteps": spec.enabledSteps,
         "wkManagerPatches": spec.wkManagerPatches,
     }
+    if spec.launcherFeatures is not None:
+        payload['launcherFeatures'] = spec.launcherFeatures
+    if spec.fixNotiFeatures is not None:
+        payload['fixNotiFeatures'] = spec.fixNotiFeatures
     encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
@@ -5218,6 +5334,8 @@ def _execute_both_build(
         mod_names=spec.selected_mod_names() or preset_default_mods("both", spec.modVersion),
         mod_version=spec.modVersion,
         debloat_paths=spec.debloatPaths,
+        launcher_features=spec.launcherFeatures,
+        fix_noti_features=spec.fixNotiFeatures,
         required_steps=steps,
     )
     if not preflight["ok"]:
@@ -5302,6 +5420,8 @@ def execute_build(
         mod_names=spec.selected_mod_names(),
         mod_version=spec.modVersion,
         debloat_paths=spec.debloatPaths,
+        launcher_features=spec.launcherFeatures,
+        fix_noti_features=spec.fixNotiFeatures,
         required_steps=planned_steps,
     )
     if not preflight["ok"]:

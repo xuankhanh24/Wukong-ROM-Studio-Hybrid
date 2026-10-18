@@ -25,9 +25,23 @@ class DesktopScriptTests(unittest.TestCase):
         self.assertIn("Copy-Tree (Join-Path $source 'bin\\Windows')", content)
         self.assertNotIn("Copy-Tree (Join-Path $source 'bin')", content)
 
+    def test_runtime_stages_and_checks_archive_fallback_independent_of_content(self):
+        content = (ROOT / 'desktop/Scripts/build-runtime.ps1').read_text(encoding='utf-8')
+        self.assertIn("'STARK\\patch_common.py'", content)
+        self.assertIn("'stark_patch_common.py'", content)
+        self.assertIn('Assert-FileHashMatch', content)
+        self.assertIn('missing-content', content)
+        self.assertIn('smali.jar', content)
+
     def test_publish_python_test_list_keeps_every_module_in_one_command(self):
         content = (ROOT / "desktop/Scripts/publish.ps1").read_text(encoding="utf-8")
-        self.assertIn("tests.test_wk_manager_patcher `\n            tests.test_wukong_hybrid", content)
+        command = content.split('& python -m unittest -q', 1)[1].split('if ($LASTEXITCODE', 1)[0]
+        lines = command.strip().splitlines()
+        for line in lines[:-1]:
+            self.assertTrue(line.rstrip().endswith('`'), f'Broken PowerShell continuation: {line}')
+        for module in ('tests.test_wk_manager_patcher', 'tests.test_wk_manager_features',
+                       'tests.test_stark_archive', 'tests.test_wukong_hybrid'):
+            self.assertIn(module, command)
 
     def test_content_sync_preview_does_not_create_a_persistent_index(self):
         content = (

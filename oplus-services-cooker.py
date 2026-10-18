@@ -98,12 +98,6 @@ def patch_flexible_window_utils():
             '.param p1',
             '    const-string/jumbo v0, "black_window"\n\n    invoke-static {v0}, Landroid/preference/SettingsHelper;->getIntofSettings(Ljava/lang/String;)I\n\n    move-result v0\n\n    if-eqz v0, :cond_b\n\n    const/4 v0, 0x1\n\n    return v0\n    \n    :cond_b',
             'black_window'
-        ),
-        (
-            '.method public static isSupportMultiMode()Z',
-            '.registers',
-            '    const-string/jumbo v0, "multi_window"\n\n    invoke-static {v0}, Landroid/preference/SettingsHelper;->getIntofSettings(Ljava/lang/String;)I\n\n    move-result v0\n\n    if-eqz v0, :cond_b\n\n    const/4 v0, 0x1\n\n    return v0\n\n    .line 1655\n    :cond_b',
-            'multi_window'
         )
     ]
     
@@ -113,21 +107,11 @@ def patch_flexible_window_utils():
         print(f"FlexibleWindowUtils.smali already patched or no changes made.")
 
 def patch_flexible_window_manager_service():
-    file_path = os.path.join("framework-cooker", "oplus-services_unpack", "smali_classes2", "com", "android", "server", "wm", "FlexibleWindowManagerService.smali")
-    
-    patches = [
-        (
-            '.method public getMaxWinNum(I)I',
-            '.param p1',
-            '    const-string/jumbo v0, "multi_window"\n\n    invoke-static {v0}, Landroid/preference/SettingsHelper;->getIntofSettings(Ljava/lang/String;)I\n\n    move-result v0\n\n    if-eqz v0, :cond_c\n\n    const/16 v0, 0x10\n\n    return v0\n\n    :cond_c',
-            'multi_window'
-        )
-    ]
-    
-    if patch_smali_file(file_path, patches):
-        print(f"Patched FlexibleWindowManagerService.smali")
-    else:
-        print(f"FlexibleWindowManagerService.smali already patched or no changes made.")
+    from pathlib import Path
+    from wukong.wk_features import load_patcher
+    root = Path(__file__).resolve().parent
+    print(load_patcher(root / "STARK").patch_decoded(
+        root / "framework-cooker" / "oplus-services_unpack", ["multi_window"]))
 
 def patch_startup_strategy():
     file_path = os.path.join("framework-cooker", "oplus-services_unpack", "smali_classes", "com", "android", "server", "am", "OplusAppStartupManager$OplusStartupStrategy.smali")

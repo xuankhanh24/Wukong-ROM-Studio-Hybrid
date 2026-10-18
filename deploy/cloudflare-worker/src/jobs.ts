@@ -138,6 +138,26 @@ export function validateRecipe(value: unknown): JsonObject {
     throw new JobHttpError("Build preset is invalid", 400);
   }
   requiredText(build.modVersion, "MOD version", 128);
+  for (const [field, allowed] of Object.entries({
+    launcherFeatures: ["global_region", "recents", "dock", "taskbar", "feed", "search", "quick_search", "gestures", "ram"],
+    fixNotiFeatures: ["level1", "level2"]
+  })) {
+    if (build[field] === undefined || build[field] === null) continue;
+    const selected = build[field];
+    if (!Array.isArray(selected) || selected.some(value => typeof value !== "string" || !allowed.includes(value))) {
+      throw new JobHttpError(`Unsupported ${field} selection`, 400);
+    }
+    build[field] = [...new Set(selected)];
+    if (field === "fixNotiFeatures" && (build[field] as unknown[]).length > 1) {
+      throw new JobHttpError("Fix_noti: select LV1 or LV2, not both", 400);
+    }
+  }
+  if (build.wkManagerPatches !== undefined) {
+    if (!Array.isArray(build.wkManagerPatches) || build.wkManagerPatches.some(
+      value => typeof value !== "string" || !["multi_window", "power_button_remap", "black_window", "multi_audio"].includes(value)
+    )) throw new JobHttpError("Unsupported WK Manager patch selection", 400);
+    build.wkManagerPatches = [...new Set(build.wkManagerPatches)];
+  }
   if (build.modReleaseVersion !== undefined || build.mod_release_version !== undefined) {
     const release = requiredText(build.modReleaseVersion ?? build.mod_release_version, "MOD release version", 64).trim();
     if (!PRESET_LABEL.test(release)) {

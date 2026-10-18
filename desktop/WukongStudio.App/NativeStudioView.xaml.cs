@@ -16,6 +16,8 @@ namespace WukongStudio.App;
 
 public sealed partial class NativeStudioView : UserControl
 {
+    private readonly Dictionary<string, CheckBox> _launcherFeatureChecks = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, CheckBox> _fixNotiFeatureChecks = new(StringComparer.Ordinal);
     private static readonly HashSet<string> DefaultSteps = new(StringComparer.Ordinal)
     {
         "inspect_rom",
@@ -97,6 +99,8 @@ public sealed partial class NativeStudioView : UserControl
     public NativeStudioView()
     {
         InitializeComponent();
+        AddModFeatureChecks(LauncherFeatureChecks, _launcherFeatureChecks, StudioModFeatures.Launcher);
+        AddModFeatureChecks(FixNotiFeatureChecks, _fixNotiFeatureChecks, StudioModFeatures.FixNoti);
         JobsList.ItemsSource = _jobItems;
         RomRenamerList.ItemsSource = _romRenameItems;
         DevicesList.ItemsSource = _deviceItems;
@@ -1576,7 +1580,10 @@ public sealed partial class NativeStudioView : UserControl
             _debloatPaths.ToArray(),
             SelectedPreset(),
             steps,
-            NotifyTelegramCheckBox.IsChecked == true);
+            NotifyTelegramCheckBox.IsChecked == true,
+            WkManagerPatches: SelectedWkManagerPatches(),
+            LauncherFeatures: SelectedModFeatures(_launcherFeatureChecks),
+            FixNotiFeatures: SelectedModFeatures(_fixNotiFeatureChecks));
     }
 
     private async Task RunPreflightAsync(bool showSuccess)
@@ -2673,7 +2680,7 @@ public sealed partial class NativeStudioView : UserControl
             var repository = HybridRepositoryBox.Text.Trim();
             var token = HybridGitHubTokenBox.Password.Trim();
             var rcloneConfig = HybridRcloneConfigBox.Text.Trim();
-            if (!repository.Contains('/') || token.Length < 20 || !rcloneConfig.Contains("[wukong-gdrive]"))
+            if (!repository.Contains('/') || token.Length < 20 || (rcloneConfig.Length > 0 && !rcloneConfig.Contains("[wukong-gdrive]")))
             {
                 throw new InvalidDataException("Repository, GitHub token hoặc rclone.conf không hợp lệ.");
             }
@@ -3377,6 +3384,11 @@ public sealed partial class NativeStudioView : UserControl
             return;
         }
         var selection = _contentSyncFolderSelection!;
+        if (selection.PackId == "STARK/common")
+        {
+            ShowMessage("STARK được quản lý bằng Git", "Commit/push thư mục STARK trong mã nguồn rồi build bộ cài; không upload một bản STARK riêng đè lên bản dùng chung.", InfoBarSeverity.Informational);
+            return;
+        }
         ContentSyncPreviewSnapshot preview;
         try
         {
@@ -3402,7 +3414,7 @@ public sealed partial class NativeStudioView : UserControl
             return;
         }
         var confirmed = await ConfirmDialogAsync(
-            Localized("Thay thế content-pack trên Drive?"),
+            Localized("Upload phiên bản pack mới lên GitHub?"),
             $"{Localized("Thư mục đã chọn")}:\n{selection.SelectedFolder}\n\n" +
             $"{Localized("Content-pack sẽ bị thay thế toàn bộ")}:\n{selection.PackId}\n\n" +
             $"{FormatContentSyncPreview(preview, includePaths: false)}\n\n" +
@@ -3413,9 +3425,8 @@ public sealed partial class NativeStudioView : UserControl
                     : existingModPack ? "Đổi nhãn phát hành" : "Nhãn phát hành cho MOD mới")}: {requestedModReleaseVersion}\n" +
                   $"{Localized("Tên thư mục MOD không thay đổi")}: {selection.PackId[4..]}\n\n") +
             $"{Localized("Phạm vi được đóng gói")}:\n{selection.PackRoot}\n\n" +
-            Localized("Archive hiện tại trên Drive sẽ bị ghi đè trong khi upload, sau đó mới được xác minh. Nếu xác minh thất bại, Drive có thể đã chứa archive mới nhưng index cục bộ vẫn giữ bản đã xác minh trước đó."),
-            Localized("Thay thế trên Drive"),
-            destructive: true);
+            Localized("Tạo một GitHub Release mới. Bản cũ được giữ nguyên; chỉ công bố manifest sau khi mọi asset đã xác minh SHA-256."),
+            Localized("Upload và công bố"));
         if (!confirmed)
         {
             return;
@@ -3440,16 +3451,17 @@ public sealed partial class NativeStudioView : UserControl
         await RunBusyActionAsync(async () =>
         {
             BeginContentSyncProgress();
-            ContentSyncStatusText.Text = Localized("Đang thay thế content-pack trên Drive và xác minh checksum…");
+            ContentSyncStatusText.Text = Localized("Đang upload GitHub Releases và xác minh SHA-256…");
             try
             {
-                var driveOutput = await RunPlatformContentSyncAsync("drive", selection.SelectedFolder, _contentSyncCancellation.Token);
+                var driveOutput = await RunPlatformContentSyncAsync("release", selection.SelectedFolder, _contentSyncCancellation.Token);
+                _contentSyncUploadedChanges = true;
                 HybridResultBox.Text = driveOutput;
-                ContentSyncStatusText.Text = Localized("Thư mục đã chọn đã thay thế content-pack trên Drive; checksum đã xác minh. Hãy công bố manifest khi sẵn sàng.");
+                ContentSyncStatusText.Text = Localized("GitHub Release và manifest đã công bố. Các job mới sẽ dùng pack mới; bản cũ vẫn được giữ nguyên.");
                 CompleteContentSyncProgress();
                 ShowMessage(
                     Localized("Đã thay thế content-pack"),
-                    $"{selection.PackId} · {Localized("Binary mới đã sẵn sàng; công bố manifest để Actions và Telegram sử dụng.")}",
+                    $"{selection.PackId} · {Localized("Đã upload và công bố manifest cho Actions và Telegram.")}",
                     InfoBarSeverity.Success);
             }
             catch (OperationCanceledException)
@@ -3469,6 +3481,37 @@ public sealed partial class NativeStudioView : UserControl
         });
         _contentSyncCancellation.Dispose();
         _contentSyncCancellation = null;
+    }
+
+    private async void UploadAllModPacksClick(object sender, RoutedEventArgs e)
+    {
+        if (_layout is null) return;
+        if (!await ConfirmDialogAsync("Upload tất cả pack MOD lên GitHub?",
+            $"Nguồn: {Path.Combine(_layout.ContentRoot, "MOD")}\n\nTạo Release mới cho tất cả phiên bản MOD, xác minh SHA-256 rồi tự công bố manifest. Không sửa hoặc xóa pack cục bộ; không ghi đè asset cũ.",
+            "Upload tất cả")) return;
+        _contentSyncCancellation = new CancellationTokenSource();
+        try
+        {
+            await RunBusyActionAsync(async () =>
+            {
+                BeginContentSyncProgress();
+                ContentSyncStatusText.Text = "Đang upload tất cả MOD lên GitHub Releases…";
+                try
+                {
+                    HybridResultBox.Text = await RunPlatformContentSyncAsync("release", cancellationToken: _contentSyncCancellation.Token);
+                    _contentSyncUploadedChanges = true;
+                    CompleteContentSyncProgress();
+                    ContentSyncStatusText.Text = "Đã upload tất cả MOD và công bố manifest mới.";
+                }
+                catch (OperationCanceledException) { CancelContentSyncProgress(); throw; }
+                catch { FailContentSyncProgress(); throw; }
+            });
+        }
+        finally
+        {
+            _contentSyncCancellation.Dispose();
+            _contentSyncCancellation = null;
+        }
     }
 
     private async void PublishContentManifestClick(object sender, RoutedEventArgs e)
@@ -3510,7 +3553,7 @@ public sealed partial class NativeStudioView : UserControl
         var requiresCredentials = target != "preview";
         var credentials = requiresCredentials
             ? new HybridSecretStore(_layout).Load()
-                ?? throw new InvalidOperationException("Hãy lưu GitHub token và rclone.conf trong Thiết đặt trước.")
+                ?? throw new InvalidOperationException("Hãy lưu GitHub token có quyền Contents write trong Thiết đặt trước.")
             : null;
         var python = Path.Combine(_layout.PythonRoot, "python.exe");
         var script = Path.Combine(_layout.ScriptsRoot, "tools", "sync_platform_content.py");
@@ -3539,7 +3582,7 @@ public sealed partial class NativeStudioView : UserControl
         var rcloneConfig = Path.Combine(_layout.SecretsRoot, $".content-sync-{Guid.NewGuid():N}.conf");
         try
         {
-            if (credentials is not null)
+            if (credentials is not null && target == "drive")
             {
                 await File.WriteAllTextAsync(rcloneConfig, credentials.RcloneConfig, new UTF8Encoding(false));
                 File.SetAttributes(rcloneConfig, FileAttributes.Hidden | FileAttributes.Temporary);
@@ -3614,7 +3657,7 @@ public sealed partial class NativeStudioView : UserControl
                 while (await process.StandardOutput.ReadLineAsync(cancellationToken) is { } line)
                 {
                     output.AppendLine(line);
-                    if (target == "drive" && ContentSyncProgressProtocol.TryParse(line, out var progress))
+                    if ((target == "drive" || target == "release") && ContentSyncProgressProtocol.TryParse(line, out var progress))
                     {
                         RenderContentSyncProgress(progress!);
                     }
@@ -3840,7 +3883,7 @@ public sealed partial class NativeStudioView : UserControl
     private void RenderContentSyncSelection()
     {
         ContentSyncSelectionText.Text = _contentSyncFolderSelection is null
-            ? Localized("Chọn thư mục trong Content; Content\\STARK chứa WK_Manager và com.")
+            ? Localized("Chọn Content\\MOD\\<phiên bản> để upload một pack, hoặc upload tất cả MOD.")
             : $"{Localized("Sẽ thay thế pack")} {_contentSyncFolderSelection.PackId} · {_contentSyncFolderSelection.PackRoot}";
     }
 
@@ -3891,7 +3934,7 @@ public sealed partial class NativeStudioView : UserControl
                 ContentSyncSpeedText.Text = Localized("Chuẩn bị upload");
                 break;
             case "upload":
-                ContentSyncPhaseText.Text = Localized("Đang upload lên Google Drive");
+        ContentSyncPhaseText.Text = Localized("Đang upload lên GitHub Releases");
                 ContentSyncProgressBar.IsIndeterminate = false;
                 ContentSyncProgressBar.Value = progress.Percent;
                 ContentSyncPercentText.Text = $"{progress.Percent:0.#}%";
@@ -3905,7 +3948,7 @@ public sealed partial class NativeStudioView : UserControl
                 ContentSyncSpeedText.Text = $"{speed} · {eta}";
                 break;
             case "verify-remote":
-                ShowContentSyncVerification(progress, Localized("Đang xác minh dung lượng và checksum trên Drive"));
+                ShowContentSyncVerification(progress, Localized("Đang xác minh dung lượng và SHA-256 trên GitHub"));
                 break;
             case "verify-download":
                 ShowContentSyncVerification(progress, Localized("Đang tải xuống để kiểm tra toàn vẹn"));
@@ -4431,6 +4474,92 @@ public sealed partial class NativeStudioView : UserControl
         });
     }
 
+    private void AddModFeatureChecks(StackPanel panel, Dictionary<string, CheckBox> checks,
+        IReadOnlyList<StudioModFeature> features)
+    {
+        foreach (var feature in features)
+        {
+            var check = new CheckBox
+            {
+                Content = new TextBlock { Text = feature.Label, TextWrapping = TextWrapping.Wrap },
+                IsChecked = feature.DefaultSelected,
+                MinHeight = 44,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
+            };
+            AutomationProperties.SetName(check, feature.Label);
+            check.Checked += ConfigurationOptionChanged;
+            check.Unchecked += ConfigurationOptionChanged;
+            if (ReferenceEquals(checks, _fixNotiFeatureChecks))
+                check.Checked += (_, _) =>
+                {
+                    foreach (var other in checks.Values)
+                        if (!ReferenceEquals(other, check)) other.IsChecked = false;
+                };
+            checks.Add(feature.Id, check);
+            panel.Children.Add(check);
+        }
+    }
+
+    private static string[] SelectedModFeatures(Dictionary<string, CheckBox> checks) =>
+        checks.Where(item => item.Value.IsChecked == true).Select(item => item.Key).ToArray();
+
+    private static void RestoreModFeatures(Dictionary<string, CheckBox> checks,
+        IReadOnlyList<string>? selected, IReadOnlyList<StudioModFeature> definitions)
+    {
+        foreach (var feature in definitions)
+            checks[feature.Id].IsChecked = selected?.Contains(feature.Id) ?? feature.DefaultSelected;
+    }
+
+    private string[] SelectedWkManagerPatches()
+    {
+        var selected = new List<string>();
+        if (WkKeyboxManagerCheck.IsChecked == true) selected.Add("keybox_manager");
+        if (WkPlayIntegritySpoofCheck.IsChecked == true) selected.Add("play_integrity_spoof");
+        if (WkGameSpoofCheck.IsChecked == true) selected.Add("gamespoof");
+        if (WkHmaPrivacySpoofCheck.IsChecked == true) selected.Add("hma_privacy_spoof");
+        if (WkKernelManagerCheck.IsChecked == true) selected.Add("kernel_manager");
+        if (WkPowerRemapCheck.IsChecked == true) selected.Add("power_button_remap");
+        if (WkMultiWindowCheck.IsChecked == true) selected.Add("multi_window");
+        if (WkDisableFlagSecureCheck.IsChecked == true) selected.Add("disable_flag_secure");
+        if (WkBlackWindowCheck.IsChecked == true) selected.Add("black_window");
+        if (WkMultiAudioCheck.IsChecked == true) selected.Add("multi_audio");
+        return selected.ToArray();
+    }
+
+    private void UpdateWkPatchesSummary()
+    {
+        if (WkPatchesSummaryText is null)
+        {
+            return;
+        }
+        var count = SelectedWkManagerPatches().Length;
+        WkPatchesSummaryText.Text = $"{count} / 10 đã chọn";
+    }
+
+    private void SelectAllWkPatchesClick(object sender, RoutedEventArgs e) => SetAllWkPatches(selected: true);
+
+    private void ClearWkPatchesClick(object sender, RoutedEventArgs e) => SetAllWkPatches(selected: false);
+
+    private void SetAllWkPatches(bool selected)
+    {
+        _configuring = true;
+        WkKeyboxManagerCheck.IsChecked = selected;
+        WkPlayIntegritySpoofCheck.IsChecked = selected;
+        WkGameSpoofCheck.IsChecked = selected;
+        WkHmaPrivacySpoofCheck.IsChecked = selected;
+        WkKernelManagerCheck.IsChecked = selected;
+        WkPowerRemapCheck.IsChecked = selected;
+        WkMultiWindowCheck.IsChecked = selected;
+        WkDisableFlagSecureCheck.IsChecked = selected;
+        WkBlackWindowCheck.IsChecked = selected;
+        WkMultiAudioCheck.IsChecked = selected;
+        SelectComboByTag(PresetCombo, "custom");
+        _configuring = false;
+        UpdateConfigurationSummaries();
+        InvalidatePreflight();
+    }
+
     private StudioBuildProfile CaptureBuildProfile(string name) => StudioBuildProfile.Create(
         name,
         SelectedTag(ModVersionCombo) ?? string.Empty,
@@ -4438,7 +4567,10 @@ public sealed partial class NativeStudioView : UserControl
         _modChecks.Where(item => item.Value.IsChecked == true).Select(item => item.Key),
         _debloatPaths,
         _stepChecks.Where(item => item.Value.IsChecked == true).Select(item => item.Key),
-        NotifyTelegramCheckBox.IsChecked == true);
+        NotifyTelegramCheckBox.IsChecked == true,
+        SelectedWkManagerPatches(),
+        SelectedModFeatures(_launcherFeatureChecks),
+        SelectedModFeatures(_fixNotiFeatureChecks));
 
     private (int UnknownMods, int UnknownSteps) ApplyBuildProfile(StudioBuildProfile profile)
     {
@@ -4469,6 +4601,18 @@ public sealed partial class NativeStudioView : UserControl
             }
             EnforceExclusiveModSelection();
             var requestedSteps = profile.EnabledSteps.ToHashSet(StringComparer.Ordinal);
+            WkKeyboxManagerCheck.IsChecked = profile.WkManagerPatches?.Contains("keybox_manager") ?? true;
+            WkPlayIntegritySpoofCheck.IsChecked = profile.WkManagerPatches?.Contains("play_integrity_spoof") ?? true;
+            WkGameSpoofCheck.IsChecked = profile.WkManagerPatches?.Contains("gamespoof") ?? true;
+            WkHmaPrivacySpoofCheck.IsChecked = profile.WkManagerPatches?.Contains("hma_privacy_spoof") ?? true;
+            WkKernelManagerCheck.IsChecked = profile.WkManagerPatches?.Contains("kernel_manager") ?? true;
+            WkPowerRemapCheck.IsChecked = profile.WkManagerPatches?.Contains("power_button_remap") ?? true;
+            WkMultiWindowCheck.IsChecked = profile.WkManagerPatches?.Contains("multi_window") ?? true;
+            WkDisableFlagSecureCheck.IsChecked = profile.WkManagerPatches?.Contains("disable_flag_secure") ?? true;
+            WkBlackWindowCheck.IsChecked = profile.WkManagerPatches?.Contains("black_window") ?? true;
+            WkMultiAudioCheck.IsChecked = profile.WkManagerPatches?.Contains("multi_audio") ?? true;
+            RestoreModFeatures(_launcherFeatureChecks, profile.LauncherFeatures, StudioModFeatures.Launcher);
+            RestoreModFeatures(_fixNotiFeatureChecks, profile.FixNotiFeatures, StudioModFeatures.FixNoti);
             foreach (var (stepId, check) in _stepChecks)
             {
                 check.IsChecked = requestedSteps.Contains(stepId);
@@ -4768,7 +4912,14 @@ public sealed partial class NativeStudioView : UserControl
     private void UpdateConfigurationSummaries()
     {
         ModSelectionSummaryText.Text = $"{_modChecks.Count(item => item.Value.IsChecked == true)} / {_modChecks.Count} đã chọn";
+        WkManagerPatchesPanel.Visibility = _modChecks.TryGetValue("WK_Manager", out var wkCheck) && wkCheck.IsChecked == true
+            ? Visibility.Visible : Visibility.Collapsed;
+        LauncherFeaturesPanel.Visibility = _modChecks.TryGetValue("Launcher_mod", out var launcherCheck) && launcherCheck.IsChecked == true
+            ? Visibility.Visible : Visibility.Collapsed;
+        FixNotiFeaturesPanel.Visibility = _modChecks.TryGetValue("Fix_noti", out var notiCheck) && notiCheck.IsChecked == true
+            ? Visibility.Visible : Visibility.Collapsed;
         StepSelectionSummaryText.Text = $"{_stepChecks.Count(item => item.Value.IsChecked == true)} / {_stepChecks.Count} bước";
+        UpdateWkPatchesSummary();
     }
 
     private void InvalidatePreflight()

@@ -106,12 +106,13 @@ runs:
         if [ "$task" = build ]; then
           python3 -c "import json; from wukong.models import BuildRecipe; p='.wkstudio/recipe.json'; r=BuildRecipe.from_dict(json.load(open(p))); open(p, 'w').write(json.dumps(r.to_dict()))"
           mod_version="$(python3 -c "import json; print(json.load(open('.wkstudio/recipe.json'))['build']['modVersion'])")"
-          mkdir -p .wkstudio/bundled-shared
-          rm -rf .wkstudio/bundled-shared/Fake_lock
-          cp -a STARK/Fake_lock .wkstudio/bundled-shared/Fake_lock
-            cp -a STARK/WK_Manager/patch_WK_Manager .wkstudio/bundled-shared/wk-manager-patches
           install_pack() {
             local pack="$1"
+            if [ "$pack" = STARK/common ]; then
+              test -f STARK/run_patch.py
+              echo '[Wukong] STARK is shared from this Git revision; no remote overlay'
+              return
+            fi
             if python3 content_pack_tool.py verify --content-root . --index content-packs/index.json --pack "$pack" >/dev/null 2>&1; then
               echo "[Wukong] Content cache hit: $pack"
             else
@@ -123,13 +124,6 @@ runs:
           for pack in $(python3 -c "from wukong.rom_family import required_content_packs; import sys; print(' '.join(required_content_packs(sys.argv[1])[1:]))" "$mod_version"); do
             install_pack "$pack"
           done
-          # The current remote STARK archive predates the shared Fake_lock.
-          # Restore its bundled canonical tree after the atomic pack install.
-          rm -rf STARK/Fake_lock
-          cp -a .wkstudio/bundled-shared/Fake_lock STARK/Fake_lock
-            # Keep the current patch scripts/bridges when older remote packs are installed.
-            mkdir -p STARK/WK_Manager/patch_WK_Manager
-            cp -a .wkstudio/bundled-shared/wk-manager-patches/. STARK/WK_Manager/patch_WK_Manager/
           # Validate before downloading the multi-GB ROM. Strict mode preserves
           # channel parity: a requested MOD is never silently removed.
           if [ "${WUKONG_DROP_MISSING_MODS:-0}" = 1 ]; then
@@ -183,7 +177,7 @@ runs:
         set -euo pipefail
         python3 -m tools.bootstrap_linux
         python3 -m tools.smoke_linux
-    - name: "Thực thi pipeline ROM / Execute staged ROM build"
+    - name: "E · Pipeline 05–19 · Thực thi pipeline ROM / Execute staged ROM build"
       id: execute
       shell: bash
       env:

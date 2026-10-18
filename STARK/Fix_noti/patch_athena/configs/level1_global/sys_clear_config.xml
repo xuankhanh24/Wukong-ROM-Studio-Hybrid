@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_clear_config</filter-name>
+    <abnormal_memory_monitor>
+        <!-- type: ONLY ALLOW { Integer, Long, Float, String, Boolean } -->
+        <config key="allow_gc_foreground" type="Boolean"  val="true"/>
+        <config key="delay_after_force_gc_seconds" type="Integer"  val="2"/>
+        <config key="abnormal_memory_support_min_ram" type="Integer"  val="8"/>
+        <config key="memory_dcs_support_min_ram" type="Integer"  val="8"/>
+
+        <config key="dalvik_sync_config" type="String" val="90,95,60000,30000,6"/>
+        <config key="dalvik_force_notify_percent" type="Integer" val="95"/>
+
+        <feature_switch key="mem_abnormal_monitor_enable" val="true"/> <!-- only allow true or false -->
+        <feature_switch key="abnormal_mem_force_gc_enable" val="true"/> <!-- only allow true or false -->
+        <!-- Switch For Feature 8525242 -->
+        <feature_switch key="abnormal_mem_send_broadcast_before_clear" val="true"/> <!-- only allow true or false -->
+        <!-- PkgName List For Feature 8525242 -->
+        <config_list key="send_broadcast_before_clear_pkg_list" type="String">
+            <sub val="com.ss.android.ugc.aweme" />
+        </config_list>
+        <!-- Send Broadcast Delay Time For Feature 8525242 -->
+        <config key="send_broadcast_delay_time" type="Long" val="1000"/> <!-- millisecond -->
+
+        <feature_switch key="mem_excessive_support_upload_enable" val="true"/> <!-- only allow true or false -->
+
+        <config_map key="em_mem_monitor_config" type="Integer">
+            <sub key="monitor_start_delay" val="900000" />
+            <sub key="sample_time_proc" val="120000" />
+            <sub key="sample_time_kernel" val="1200000" />
+            <sub key="buffer_capacity_kernel" val="3" />
+            <sub key="buffer_capacity_mem" val="5" />
+            <sub key="lla_check_count" val="5" />
+            <sub key="proc_dla_min_ab_count" val="2" />
+        </config_map>
+
+        <!-- For 2G/3G/4G RAM -->
+        <config_map key="em_mem_default_threshold" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="250" />
+            <sub key="kernel_sunreclaim" val="1000" />
+            <sub key="kernel_vmalloc" val="700" />
+            <sub key="kernel_kmalloc" val="300" />
+            <sub key="kernel_kmalloc_enable" val="200" />
+            <sub key="kernel_unaccounted" val="1000" />
+            <sub key="fl_watermark_tip_ab_ion" val="30000" />
+            <sub key="fl_watermark_tip_ab_gpu" val="30000" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="2500" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="2800" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="2500" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="2500" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="2500" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="2300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="2000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="2000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="2000" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="3300" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="3000" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="3000" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="3000" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="2700" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="2400" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="2400" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="2400" /> <!-- MB -->
+        </config_map>
+
+        <!-- For 6G RAM -->
+        <config_map key="em_mem_default_threshold:1" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="300" />
+            <sub key="kernel_sunreclaim" val="1300" />
+            <sub key="kernel_vmalloc" val="800" />
+            <sub key="kernel_kmalloc" val="600" />
+            <sub key="kernel_kmalloc_enable" val="400" />
+            <sub key="kernel_unaccounted" val="2000" />
+            <sub key="fl_watermark_tip_ab_ion" val="5000" />
+            <sub key="fl_watermark_tip_ab_gpu" val="4000" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="3000" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="3300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="3000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="3000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="3000" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="2700" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="2400" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="2400" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="2400" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="3800" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="3500" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="3500" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="3500" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="3100" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="2800" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="2800" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="2800" /> <!-- MB -->
+        </config_map>
+
+        <!-- For 8G RAM -->
+        <config_map key="em_mem_default_threshold:2" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="350" />
+            <sub key="kernel_sunreclaim" val="1600" />
+            <sub key="kernel_vmalloc" val="1024" />
+            <sub key="kernel_kmalloc" val="1000" />
+            <sub key="kernel_kmalloc_enable" val="600" />
+            <sub key="kernel_unaccounted" val="3000" />
+            <sub key="fl_watermark_tip_ab_ion" val="5000" />
+            <sub key="fl_watermark_tip_ab_gpu" val="4000" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="3500" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="3800" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="3500" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="3500" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="3500" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="3100" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="2800" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="2800" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="2800" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="4800" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="4500" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="4500" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="4500" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="3900" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="3600" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="3600" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="3600" /> <!-- MB -->
+        </config_map>
+
+        <!-- For 12G RAM -->
+        <config_map key="em_mem_default_threshold:3" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="450" />
+            <sub key="kernel_sunreclaim" val="2000" />
+            <sub key="kernel_vmalloc" val="1500" />
+            <sub key="kernel_kmalloc" val="1200" />
+            <sub key="kernel_kmalloc_enable" val="800" />
+            <sub key="kernel_unaccounted" val="3000" />
+            <sub key="fl_watermark_tip_ab_ion" val="7000" />
+            <sub key="fl_watermark_tip_ab_gpu" val="6500" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="4000" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="4300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="4000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="4000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="4000" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="3500" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="3200" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="3200" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="3200" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="5300" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="5000" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="5000" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="5000" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="4300" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="4000" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="4000" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="4000" /> <!-- MB -->
+        </config_map>
+
+        <!-- For 16G RAM -->
+        <config_map key="em_mem_default_threshold:4" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="450" />
+            <sub key="kernel_sunreclaim" val="2000" />
+            <sub key="kernel_vmalloc" val="1500" />
+            <sub key="kernel_kmalloc" val="1500" />
+            <sub key="kernel_kmalloc_enable" val="1000" />
+            <sub key="kernel_unaccounted" val="3000" />
+            <sub key="fl_watermark_tip_ab_ion" val="11500" />
+            <sub key="fl_watermark_tip_ab_gpu" val="11000" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="5000" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="5300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="5000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="5000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="5000" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="4300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="4000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="4000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="4000" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="6300" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="6000" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="6000" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="6000" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="5100" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="4800" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="4800" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="4800" /> <!-- MB -->
+        </config_map>
+
+        <!-- For 24G RAM -->
+        <config_map key="em_mem_default_threshold:5" type="Integer">
+            <sub key="proc_check_min_rss" val="20" />
+            <sub key="kernel_stack" val="450" />
+            <sub key="kernel_sunreclaim" val="2000" />
+            <sub key="kernel_vmalloc" val="1500" />
+            <sub key="kernel_kmalloc" val="1500" />
+            <sub key="kernel_kmalloc_enable" val="1000" />
+            <sub key="kernel_unaccounted" val="3000" />
+            <sub key="fl_watermark_tip_ab_ion" val="19000" />
+            <sub key="fl_watermark_tip_ab_gpu" val="18000" />
+            <sub key="fl_watermark_tip_fk_ion" val="30000" />
+            <sub key="fl_watermark_tip_fk_gpu" val="30000" />
+
+            <!-- 3rd APP foreground tip & force_kill threshold-->
+            <sub key="itgsa_tip_dalvik" val="95" /> <!-- same as itgsa_app_dalvik_fg -->
+            <sub key="itgsa_fk_pss" val="5000" /> <!-- same as itgsa_app_pss_fg -->
+
+            <!-- 3rd APP foreground abnormal threshold-->
+            <sub key="itgsa_app_rss_fg" val="5300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_fg" val="5000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_fg" val="95" />   <!-- %  -->
+            <sub key="coloros_app_ion_fg" val="5000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_fg" val="5000" />  <!-- MB -->
+
+            <!-- 3rd APP background abnormal threshold-->
+            <sub key="itgsa_app_rss_bg" val="4300" />    <!-- MB -->
+            <sub key="itgsa_app_pss_bg" val="4000" />    <!-- MB -->
+            <sub key="itgsa_app_dalvik_bg" val="90" />   <!-- %  -->
+            <sub key="coloros_app_ion_bg" val="4000" />  <!-- MB -->
+            <sub key="coloros_app_gpu_bg" val="4000" />  <!-- MB -->
+
+            <!-- 3rd GAME foreground abnormal threshold-->
+            <sub key="itgsa_game_rss_fg" val="6300" />   <!-- MB -->
+            <sub key="itgsa_game_pss_fg" val="6000" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_fg" val="95" />  <!-- %  -->
+            <sub key="coloros_game_ion_fg" val="6000" /> <!-- MB -->
+            <sub key="coloros_game_gpu_fg" val="6000" /> <!-- MB -->
+
+            <!-- 3rd GAME background abnormal threshold-->
+            <sub key="itgsa_game_rss_bg" val="5100" />   <!-- MB -->
+            <sub key="itgsa_game_pss_bg" val="4800" />   <!-- MB -->
+            <sub key="itgsa_game_dalvik_bg" val="90" />  <!-- %  -->
+            <sub key="coloros_game_ion_bg" val="4800" /> <!-- MB -->
+            <sub key="coloros_game_gpu_bg" val="4800" /> <!-- MB -->
+        </config_map>
+
+        <config_map key="em_mem_default_threshold_map_for_ram" type="String">
+            <sub key="2" val="em_mem_default_threshold" />
+            <sub key="3" val="em_mem_default_threshold" />
+            <sub key="4" val="em_mem_default_threshold" />
+            <sub key="6" val="em_mem_default_threshold:1" />
+            <sub key="8" val="em_mem_default_threshold:2" />
+            <sub key="12" val="em_mem_default_threshold:3" />
+            <sub key="16" val="em_mem_default_threshold:4" />
+            <sub key="24" val="em_mem_default_threshold:5" />
+        </config_map>
+
+        <config_map key="abnormal_memory_periodic_trigger_threshold_map" type="Integer">
+            <sub key="8" val="2500" />
+            <sub key="12" val="4000" />
+            <sub key="16" val="6000" />
+            <sub key="24" val="8000" />
+        </config_map>
+
+        <!-- APP MEMORY WATERMARK CONFIG
+         <appmem_config
+                pkg="com.android.launcher"  // MUST, package name
+                compat_itgsa="0"      // OPT, 1: enable on itgsa, 0: not enable on itgsa, default 1
+                dev_type="a"          // OPT, config for device type, l: RAM<=8G, h: 8G<RAM<=18G, s: RAM>18G, a: default, all_ram
+
+                rss="4096"            // OPT, MB, rss abnormal watermark, used with pss
+                pss="2500"            // OPT, MB, pss abnormal watermark, used with rss
+                ion="2048"            // OPT, MB, ion abnormal watermark
+                gpu="2048"            // OPT, MB, gpu abnormal watermark
+                dalvik_p="90"         // OPT, %, dalvik used percent abnormal watermark
+                dalvik_p_abs="667"    // OPT, MB, dalvik used absolute abnormal watermark
+
+                rss_e="4096"            // OPT, MB, rss excessive watermark
+                pss_e="2500"            // OPT, MB, pss excessive watermark
+                ion_e="2048"            // OPT, MB, ion excessive watermark
+                gpu_e="2048"            // OPT, MB, gpu excessive watermark
+                dalvik_e="80"           // OPT, %, dalvik used percent excessive watermark
+                dalvik_e_abs="667"      // OPT, MB, dalvik used absolute excessive watermark
+
+                rss_c="4096"            // OPT, rss critical abnormal watermark
+                pss_c="2500"            // OPT, pss critical abnormal watermark
+                ion_c="2048"            // OPT, ion critical abnormal watermark
+                gpu_c="2048"            // OPT, gpu critical abnormal watermark
+                dalvik_c="95"           // OPT, %, dalvik used percent critical abnormal watermark
+                dalvik_c_abs="667"      // OPT, MB, dalvik used absolute critical abnormal watermark
+
+                fk_rss_bd="6000"      // OPT, rss abnormal force kill watermark used with pss, os15+
+                fk_pss="5000"         // OPT, pss abnormal force kill watermark
+                fk_gpu="2000"         // OPT, gpu abnormal force kill watermark
+                fk_ion="2000"         // OPT, ion abnormal force kill watermark
+
+                tip_rss_bd="4000"     // OPT, rss abnormal tip watermark used with pss, os15+
+                tip_pss="3000"        // OPT, pss abnormal tip watermark
+                tip_gpu="1500"        // OPT, gpu abnormal tip watermark
+                tip_ion="1500"        // OPT, ion abnormal tip watermark
+          />
+
+          <procmem_config
+                pkg="com.android.launcher"  // MUST, package name
+                proc="com.android.launcher:push"  // MUST, process name
+
+                other keys same as appmem_config
+          />
+        -->
+        <appmem_config
+            compat_itgsa="0"
+            pkg="com.teamtalk.im"
+            tip_rss_bd="5000" tip_pss="4000"
+            fk_rss_bd="6000" fk_pss="5000"/>
+        <appmem_config
+            compat_itgsa="0"
+            pkg="com.ss.android.ugc.aweme"
+            rss_e="3000" pss_e="2000"
+            rss="3000"  pss="2000"
+            tip_rss_bd="30000" tip_pss="30000" tip_ion="30000" tip_gpu="30000" tip_dalvik="200"
+            fk_rss_bd="30000" fk_pss="30000" fk_ion="30000" fk_gpu="30000" fk_dalvik="200"/>
+        <procmem_config
+            compat_itgsa="0"
+            pkg="com.ss.android.ugc.aweme"
+            proc="com.ss.android.ugc.aweme"
+            rss_e="2000" pss_e="1500" dalvik_e="85"
+            rss="2000" pss="1500" dalvik_p="85"
+            tip_rss_bd="30000" tip_pss="30000" tip_ion="30000" tip_gpu="30000" tip_dalvik="200"
+            fk_rss_bd="30000" fk_pss="30000" fk_ion="30000" fk_gpu="30000" fk_dalvik="200"/>
+        <appmem_config
+            compat_itgsa="0"
+            pkg="com.ss.android.ugc.aweme.lite"
+            rss_e="3000" pss_e="2000"
+            rss="3000"  pss="2000"
+            tip_rss_bd="30000" tip_pss="30000" tip_ion="30000" tip_gpu="30000" tip_dalvik="200"
+            fk_rss_bd="30000" fk_pss="30000" fk_ion="30000" fk_gpu="30000" fk_dalvik="200"/>
+        <procmem_config
+            compat_itgsa="0"
+            pkg="com.ss.android.ugc.aweme.lite"
+            proc="com.ss.android.ugc.aweme.lite"
+            rss_e="2000" pss_e="1500" dalvik_e="85"
+            rss="2000" pss="1500" dalvik_p="85"
+            tip_rss_bd="30000" tip_pss="30000" tip_ion="30000" tip_gpu="30000" tip_dalvik="200"
+            fk_rss_bd="30000" fk_pss="30000" fk_ion="30000" fk_gpu="30000" fk_dalvik="200"/>
+        <appmem_config
+            pkg="com.ss.android.lark"
+            rss="3500" pss="3000"
+            tip_rss_bd="30000" tip_pss="30000" tip_ion="30000" tip_gpu="30000" tip_dalvik="200"
+            fk_rss_bd="30000" fk_pss="30000" fk_ion="30000" fk_gpu="30000" fk_dalvik="200"/>
+
+        <!-- abnormal mem watermark for system or selfapp -->
+        <!-- for classify app -->
+        <appmem_config pkg="type#native" rss="700"  pss="500" />
+        <appmem_config pkg="prefix#android.hardware.camera.provider" rss="2500"  pss="2000" ion="2000"  gpu="2000" />
+        <appmem_config pkg="prefix#vendor.qti.camera.provider" rss="1700"  pss="1100" ion="2000"  gpu="2000" />
+        <appmem_config pkg="prefix#android.hardware.media.c2" rss="5200"  pss="1400" ion="4000"  gpu="4000" />
+        <appmem_config pkg="prefix#android.hardware.graphics.allocator" rss="5200"  pss="1000" ion="4000"  gpu="4000"/>
+        <appmem_config pkg="prefix#vendor.qti.hardware.display." rss="5200"  pss="1000" ion="4000"  gpu="4000"/>
+        <appmem_config pkg="prefix#android.hardware.graphics.composer" rss="5200"  pss="1000" ion="4000"  gpu="4000"/>
+        <appmem_config pkg="prefix#vendor.oplus.hardware.virtualcamera.provider" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.oplus.hardware.extcamera" rss="1400"  pss="1200" ion="1000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.oplus.hardware.engcamera" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.oplus.hardware.display" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.pixelworks.hardware.display" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.oplus.hardware.mmdisplayfeature" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+        <appmem_config pkg="prefix#vendor.display.color" rss="1200"  pss="1000" ion="2000"  gpu="2000"/>
+
+        <appmem_config pkg="prefix#com.qti." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.qualcomm." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.mediatek." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.coloros." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.oneplus." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.oplus." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#com.oplus.autotest." rss="20000"  pss="20000" ion="20000"  gpu="20000" />
+        <appmem_config pkg="prefix#com.oppo.autotest." rss="20000"  pss="20000" ion="20000"  gpu="20000" />
+        <appmem_config pkg="prefix#com.heytap." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="prefix#android.process." rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config
+            pkg="com.google.android.aicore"
+            rss="5000"  pss="4000" ion="4000" gpu="4000"/>
+
+        <!-- for special app -->
+        <appmem_config
+            pkg="system"
+            rss="2000"  pss="1500"
+            tip_rss_bd="30000" tip_pss="30000" tip_gpu="30000" tip_ion="30000"
+            fk_rss_bd="30000" fk_pss="30000" fk_gpu="30000" fk_ion="30000" />
+        <appmem_config
+            pkg="system_server"
+            rss="2000"  pss="1500"
+            tip_rss_bd="30000" tip_pss="30000" tip_gpu="30000" tip_ion="30000"
+            fk_rss_bd="30000" fk_pss="30000" fk_gpu="30000" fk_ion="30000" />
+        <appmem_config pkg=".qtidataservices" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg=".dataservices" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="zygote" rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="zygote64" rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="camerahalserver" rss="2000"  pss="1500" ion="3000"  gpu="2000" />
+        <appmem_config pkg="cameraserver" rss="1200"  pss="1000"  rss_e="700" pss_e="500" ion="2000"  gpu="2000" />
+        <appmem_config pkg="media.codec" rss="2500"  pss="2300" ion="3000"  gpu="3000" />
+        <appmem_config pkg="media.hwcodec" rss="2500"  pss="2300" ion="3000"  gpu="3000" />
+        <appmem_config pkg="mediaserver" rss="1400"  pss="1200" ion="3000"  gpu="3000" />
+        <appmem_config pkg="android" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="se.dirac.acs" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="vendor.dpmd" rss="1700"  pss="1500" ion="1024"  gpu="1024"
+            fk_rss_bd="5000" fk_pss="4000" fk_gpu="1024" fk_ion="1024"/>
+        <appmem_config pkg="surfaceflinger" rss="5000"  pss="1000"  ion="3000"  gpu="3000" />
+        <appmem_config pkg="dex2oat" rss="3500" pss="3000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="dex2oat64" rss="3500" pss="3000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="oplus_theia" rss_e="40" pss_e="20" rss="100" pss="100" ion="100" gpu="100" />
+        <appmem_config pkg="vendor-oplus-hardware-touch-V2-service" rss="120"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="vendor.oplus.hardware.urcc-service" rss="120"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="android.hardware.audio.service" rss="160"  pss="140" ion="1024"  gpu="1024" />
+        <appmem_config pkg="android.hardware.audio.service.mediatek" rss="180"  pss="167" ion="1024"  gpu="1024" />
+        <appmem_config pkg="oplus_gaia" rss="120"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.phone" rss="600"  pss="400" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.wallpaper.livepicker" rss="800"  pss="600" ion="1024" gpu="1024" />
+        <procmem_config pkg="com.android.wallpaper.livepicker" proc="com.android.wallpaper.livepicker:wallpaperservice" rss="450"  pss="250" />
+        <appmem_config pkg="com.android.mms" rss="1000"  pss="810" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.email" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.settings" rss="1300"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.providers.calendar" rss="300"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.providers.downloads" rss="350"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.providers.media.module" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.keychain" rss="300"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.launcher" rss="1400"  pss="1200" ion="1024" gpu="1024" />
+        <appmem_config pkg="com.android.permissioncontroller" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.systemui" rss="1400"  pss="1200" ion="1024" gpu="1024" />
+        <appmem_config pkg="com.android.contacts" rss="1400"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.dlna.service" rss="3000"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.incallui" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.intentresolver" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.android.networkstack" rss="300"  pss="100" ion="300"  gpu="300" />
+
+        <appmem_config pkg="com.amap.android.location" rss="350"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.aiunit.aon" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.mobiletools.systemhelper" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.baidu.input_oppo" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.sohu.inputmethod.sogouoem" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.daemon.shelper" rss="200"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.debug.loggerui" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.dolby.daxservice" rss="200"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.finshell.fin" rss="1300"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.finshell.wallet" rss="2000"  pss="1700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.redteamobile.roaming" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.ted.number" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.redteamobile.roaming" rss="700"  pss="500" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.coloros.alarmclock" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.assistantscreen" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.weather2" rss="900"  pss="700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.smartsidebar" rss="900"  pss="650" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.gallery3d" dev_type="l" rss="2300"  pss="2012" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.gallery3d" dev_type="h" rss="2500"  pss="2100" ion="1536"  gpu="1536" />
+        <appmem_config pkg="com.coloros.gallery3d" dev_type="s" rss="3000"  pss="2500" ion="2048"  gpu="2048" />
+        <appmem_config pkg="com.coloros.operationManual" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.shortcuts" rss="700"  pss="510" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.operationtips" rss="1600"  pss="1330" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.sceneservice" rss="700"  pss="460" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.scenemode" rss="600"  pss="350" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.sharescreen" rss="450"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.digitalwellbeing" rss="400"  pss="350" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.directui" rss="750"  pss="550" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.familyguard" rss="750"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.calculator" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.codebook" rss="750"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.backuprestore" rss="800"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.filemanager" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.findmyphone" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.phonemanager" rss="900"  pss="650" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.note" rss="1500"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.ocrservice" rss="800"  pss="550" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.childrenspace" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.compass2" rss="550"  pss="450" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.favorite" rss="650"  pss="450" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.floatassistant" rss="350"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.healthcheck" rss="2500"  pss="1700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.soundrecorder" rss="850"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.ocrscanner" rss="1000"  pss="750" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.karaoke" rss="500"  pss="380" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.ocs" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.ocs.opencapabilityservice" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.oshare" rss="1500"  pss="1300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.securepay" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.translate" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.translate.engine" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.coloros.weather.service" rss="350"  pss="200" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.heytap.book" rss="1100"  pss="900" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.browser" dev_type="l" rss="3000"  pss="2100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.browser" dev_type="h" rss="3500"  pss="2600" ion="1024"  gpu="1024" />
+        <procmem_config pkg="com.heytap.browser" proc="com.heytap.browser:slide" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.cloud" rss="1200"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.health" rss="2500"  pss="1600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.market" rss="2300"  pss="2000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.mcs" rss="450"  pss="250" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.music" rss="1500"  pss="1100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.pictorial" rss="2100"  pss="1600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.quickgame" rss="2100"  pss="1600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.quicksearchbox" rss="1500"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.reader" rss="1100"  pss="900" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.smarthome" rss="2200"  pss="1700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.speechassist" rss="1600"  pss="1365" ion="1300"  gpu="1024" />
+        <appmem_config pkg="com.heytap.themestore" rss="2600"  pss="2100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.ugcvideo.praise" rss="1800"  pss="1300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.yoli" rss="2700"  pss="2380" ion="2000"  gpu="1024" />
+        <appmem_config pkg="com.heytap.xgame" dev_type="h" rss="4000"  pss="3100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.xgame" dev_type="l" rss="3300"  pss="2600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.accessory" rss="750"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.openid" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.member" rss="1200"  pss="980" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.usercenter" rss="1200"  pss="980" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.colorfulengine" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.heytap.mydevices" rss="700"  pss="500" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.nearme.instant.platform" dev_type="h" rss="3800"  pss="3100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.nearme.instant.platform" dev_type="l" rss="3300"  pss="2600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.nearme.atlas" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.nearme.gamecenter" rss="2200"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.nearme.play" rss="1800"  pss="1500" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.oneplus.deskclock" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oneplus.soundrecorder" rss="800"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oneplus.note" rss="1500"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oneplus.filemanager" rss="1000"  pss="800" ion="1024"  gpu="1024"  />
+        <appmem_config pkg="com.oneplus.gallery" dev_type="l" rss="2300"  pss="2012" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oneplus.gallery" dev_type="h" rss="2500"  pss="2100" ion="1536"  gpu="1536" />
+        <appmem_config pkg="com.oneplus.gallery" dev_type="s" rss="3000"  pss="2500" ion="2048"  gpu="2048" />
+        <appmem_config pkg="com.oneplus.member" rss="1200"  pss="980" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.opos.ads" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <!-- com.oplus.aiunit.aigc only exist on OS14 -->
+        <appmem_config pkg="com.oplus.aiunit.aigc" rss="7000" pss="6000" ion="6000" gpu="2000" />
+        <appmem_config pkg="com.oplus.aiunit" rss="7000" pss="6000" ion="6000" gpu="6000" />
+        <procmem_config
+            pkg="com.oplus.aiunit"
+            proc="^com\.oplus\.aiunit(:worker([0-9]|2[1-9]|[3-9][0-9]))?$"
+            rss="2000" pss="1500" ion="1000" gpu="1000"/>
+        <procmem_config
+            pkg="com.oplus.aiunit"
+            proc="^com\.oplus\.aiunit:worker(1[0-9]|20)$"
+            rss="5500" pss="4500" ion="4500" gpu="4500"/>
+        <appmem_config pkg="com.oplus.wifisecuredetect" rss="700"  pss="450" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.statistics.rom" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.appplatform" rss="350"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.atlas" rss="800"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.audio.effectcenter" rss="350"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.aod" rss="1600"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.battery" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.cast" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.customize.coreapp" rss="250"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.crashbox" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.gesture" rss="800"  pss="600" ion="1024"  gpu="1024"/>
+        <procmem_config pkg="com.oplus.gesture" proc="com.oplus.gesture" rss="400"  pss="200" />
+        <appmem_config pkg="com.oplus.healthservice" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.deepthinker" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.cosa" rss="550"  pss="450" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.games" rss="2500"  pss="1700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.ipspace" rss="2500"  pss="1700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.synergy" rss="220"  pss="120" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.linker" rss="850"  pss="600" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.uxdesign" rss="600"  pss="400" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.vip" rss="1200"  pss="980" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.member" rss="1200"  pss="980" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.wallpapers" rss="2300"  pss="2000" ion="1024"  gpu="2000" />
+        <appmem_config pkg="com.oplus.play" rss="1800"  pss="1500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.simsettings" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.trafficmonitor" rss="850"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.securitypermission" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.secondaryhome" rss="2000"  pss="1500" ion="1024"  gpu="1024" />
+        <procmem_config pkg="com.oplus.secondaryhome" proc="com.oplus.secondaryhome" rss="500"  pss="300" />
+        <procmem_config pkg="com.oplus.secondaryhome" proc="com.oplus.secondaryhome:ui" rss="900"  pss="550" />
+        <procmem_config pkg="com.oplus.secondaryhome" proc="com.oplus.secondaryhome:systemui" rss="800"  pss="500" />
+        <appmem_config pkg="com.oplus.portrait" rss="950"  pss="700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.ota" rss="1100"  pss="800" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.ocar" rss="1100"  pss="850" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.video" rss="1300"  pss="1100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.screenshot" rss="1700"  pss="1500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.omoji" rss="1600"  pss="1200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.videoeditor" rss="2800"  pss="2000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.camera" rss="2000"  pss="1500" ion="2000" gpu="2000" />
+        <appmem_config pkg="com.oplus.logkit" rss="1200"  pss="1000" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.melody" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.multimedia.dirac" rss="250"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.nhs" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.notificationmanager" rss="800"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.onetrace" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.powermonitor" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.sau" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.securitykeyboard" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.stdid" rss="250"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.stdsp" rss="1000"  pss="700" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.subsys" rss="400"  pss="260" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.vdc" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.onet" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.athena" rss="2600"  pss="2200" ion="1024"  gpu="1024"/>
+        <procmem_config pkg="com.oplus.athena" proc="com.oplus.athena" rss="400"  pss="200" />
+        <appmem_config pkg="com.oplus.exsystemservice" rss="1300"  pss="1000" ion="1024"  gpu="1024" />
+        <procmem_config pkg="com.oplus.exsystemservice" proc="com.oplus.exsystemservice" rss="800"  pss="500" />
+        <appmem_config pkg="com.oplus.midas" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.romupdate" rss="400"  pss="200" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.location" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.olc" rss="700"  pss="500" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.blacklistapp" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.wirelesssettings" rss="500"  pss="300" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.nas" rss="300"  pss="150" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oplus.pantanal.ums" rss="1000"  pss="800" ion="1024"  gpu="1024" />
+        <procmem_config pkg="com.oplus.pantanal.ums" proc="com.oplus.pantanal.ums" rss="400"  pss="200" />
+        <appmem_config pkg="com.oplus.safecenter" rss="500"  pss="300" ion="1024"  gpu="1024" />
+
+        <appmem_config pkg="com.oppo.instant.local.service" rss="200"  pss="100" ion="1024"  gpu="1024" />
+        <appmem_config pkg="com.oppo.store" rss="2000"  pss="1200" ion="1024"  gpu="1024" />
+        <!-- abnormal mem watermark for system or selfapp -->
+
+        <em_filter k="ps" v="1"/>
+        <em_filter k="cat" v="1"/>
+        <em_filter k="grep" v="1"/>
+        <em_filter k="ls" v="1"/>
+        <em_filter k="dmesg" v="1"/>
+        <em_filter k="dumpsys" v="1"/>
+        <em_filter k="ping" v="1"/>
+        <em_filter k="sh" v="1"/>
+        <em_filter k="sleep" v="1"/>
+        <em_filter k="top" v="1"/>
+        <em_filter k="awk" v="1"/>
+        <em_filter k="init" v="1"/>
+        <em_filter k="adbd" v="1"/>
+	<em_filter k="traced_perf" v="1"/>
+	<em_filter k="traced_probes" v="1"/>
+	<em_filter k="traced" v="1"/>
+        <em_filter p="com.oplus.autotest." v="1"/>
+        <em_filter p="com.oppo.autotest." v="1"/>
+    </abnormal_memory_monitor>
+
+    <abnormal_memory_restore>
+        <abnormal_memory type="1" label="com.heytap.mcs" strategy="1"/>
+        <abnormal_memory type="1" label="com.android.wallpaper.livepicker" strategy="1"/>
+        <abnormal_memory type="1" label="com.android.incallui" strategy="1"/>
+        <abnormal_memory type="1" label="system" strategy="2"/>
+        <abnormal_memory type="1" label="system_server" strategy="2"/>
+        <abnormal_memory type="3" label="kernel_abnormal_memory" strategy="3"/>
+        <abnormal_memory type="1" label="com.oplus.statistics.rom" strategy="1"/>
+        <abnormal_memory type="2" label="oplus_theia" strategy="1"/>
+        <abnormal_memory type="2" label="zygote" strategy="2"/>
+        <abnormal_memory type="2" label="zygote64" strategy="2"/>
+        <abnormal_memory type="2" label="cameraserver" strategy="1"/>
+        <abnormal_memory type="2" label="camerahalserver" strategy="1"/>
+        <abnormal_memory type="2" label="android.hardware.camera.provider@2.4-service_64" strategy="1"/>
+        <abnormal_memory type="2" label="vendor.qti.camera.provider@2.7-service_64" strategy="1"/>
+        <abnormal_memory type="1" label="com.oplus.powermonitor" strategy="1"/>
+        <abnormal_memory type="1" label="com.android.settings" strategy="1"/>
+        <abnormal_memory type="1" label="com.oplus.notificationmanager" strategy="1"/>
+        <abnormal_memory type="1" label="com.oplus.secondaryhome" strategy="1"/>
+        <abnormal_memory type="2" label="surfaceflinger" strategy="3"/>
+        <abnormal_memory type="2" label="vendor.dpmd" strategy="1"/>
+        <abnormal_memory type="2" label="dex2oat" strategy="1"/>
+        <abnormal_memory type="2" label="dex2oat64" strategy="1"/>
+        <abnormal_memory type="1" label="com.oplus.aiunit" strategy="4"/>
+    </abnormal_memory_restore>
+
+    <memleak_log>
+        <feature_switch key="em_debugger_version_switch_for_version_pre" val="true" />
+        <feature_switch key="em_debugger_version_switch_for_version_user" val="false" />
+        <feature_switch key="em_debugger_version_switch_for_mem_leak_test_version" val="true" />
+
+        <config_map key="version_user" type="Integer">
+            <sub key="dump_or_debug_proc_leak_type_switch" val="0" />
+            <sub key="dump_or_debug_kernel_leak_type_switch" val="0" />
+            <sub key="can_dump_logcat" val="0" />
+            <sub key="can_dump_wxlog" val="0" />
+            <sub key="min_dump_inv_hours" val="48" />
+            <sub key="dump_when_screen_on" val="0" />
+            <sub key="dump_when_screen_on_v2" val="0" />
+            <sub key="fork_dump_hprof_min_avail" val="1000" />
+            <sub key="fork_dump_skip_gc_abort" val="1" />
+        </config_map>
+
+        <config_map key="version_pre" type="Integer">
+            <sub key="dump_or_debug_proc_leak_type_switch" val="191" />
+            <sub key="dump_or_debug_kernel_leak_type_switch" val="27" />
+            <sub key="can_dump_logcat" val="1" />
+            <sub key="can_dump_wxlog" val="1" />
+            <sub key="debug_proc_size_for_one_package" val="5" />
+            <sub key="min_dump_inv_hours" val="0" />
+            <sub key="dump_when_screen_on" val="0" />
+            <sub key="dump_when_screen_on_v2" val="1" />
+            <sub key="fork_dump_hprof_min_avail" val="1000" />
+            <sub key="fork_dump_skip_gc_abort" val="1" />
+        </config_map>
+
+        <config_map key="mem_leak_test_version" type="Integer">
+            <sub key="can_dump_logcat" val="1" />
+            <sub key="can_dump_wxlog" val="1" />
+            <sub key="debug_proc_size_for_one_package" val="5" />
+            <sub key="dump_wake_lock_timeout_millis" val="120000" />
+            <sub key="dump_when_screen_on" val="1" />
+            <sub key="dump_when_screen_on_v2" val="1" />
+            <sub key="fork_dump_hprof_min_avail" val="1000" />
+            <sub key="fork_dump_skip_gc_abort" val="1" />
+        </config_map>
+
+        <!-- MEM LEAK DUMP APP LIST
+            <config_map key="key_proc_or_pkg_dump_and_debug_switch_list_for_version_pre" type="Integer">
+                <sub key="com.taobao.taobao" val="127" />
+            </config_map>
+
+            <config_map key="key_proc_or_pkg_dump_and_debug_switch_list_for_version_user" type="Integer">
+                <sub key="com.taobao.taobao" val="127" />
+            </config_map>
+        -->
+    </memleak_log>
+</filter-conf>

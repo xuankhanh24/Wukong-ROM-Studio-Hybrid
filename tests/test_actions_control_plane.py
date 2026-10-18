@@ -128,7 +128,7 @@ class ActionsControlPlaneTests(unittest.TestCase):
         self.assertEqual(first_payload["events"], [])
         self.assertEqual(
             [event["sequence"] for event in second_payload["events"]],
-            [3, 4, 5],
+            [5],  # Coalesce upload ticks; retain the newest translated sequence.
         )
         self.assertEqual(second_payload["progress"], 0.3)
 

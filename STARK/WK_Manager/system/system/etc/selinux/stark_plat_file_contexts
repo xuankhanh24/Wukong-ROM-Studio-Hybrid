@@ -1,0 +1,3 @@
++/system/bin/wukong-system-powerd u:object_r:wukong_system_powerd_exec:s0
++/system/system/bin/wukong-system-powerd u:object_r:wukong_system_powerd_exec:s0
++/dev/socket/wukong_system_power u:object_r:wukong_system_power_socket:s0

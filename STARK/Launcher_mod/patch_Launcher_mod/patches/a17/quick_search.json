@@ -1,0 +1,16 @@
+{
+  "id": "quick_search",
+  "classes": [
+    {
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "source": "FeatureOption.kt",
+      "methods": [
+        {
+          "before": ".method public static final getHasQsbAtBottomFeature()Z\n.registers 1\nsget-object v0, Lcom/android/common/config/FeatureOption;->hasQsbAtBottomFeature$delegate:Lgt/d;\ninvoke-interface {v0}, Lgt/d;->getValue()Ljava/lang/Object;\nmove-result-object v0\ncheck-cast v0, Ljava/lang/Boolean;\ninvoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z\nmove-result v0\nreturn v0\n.end method\n",
+          "after": ".method public static final getHasQsbAtBottomFeature()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isQuickSearchBoxAvailable()Z\nmove-result v0\nif-eqz v0, :mod_stock_feed\nconst/4 v0, 0x1\nreturn v0\n:mod_stock_feed\nsget-object v0, Lcom/android/common/config/FeatureOption;->hasQsbAtBottomFeature$delegate:Lgt/d;\ninvoke-interface {v0}, Lgt/d;->getValue()Ljava/lang/Object;\nmove-result-object v0\ncheck-cast v0, Ljava/lang/Boolean;\ninvoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z\nmove-result v0\nreturn v0\n.end method\n"
+        }
+      ],
+      "fields": []
+    }
+  ]
+}

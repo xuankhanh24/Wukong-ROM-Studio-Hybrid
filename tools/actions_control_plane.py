@@ -225,7 +225,7 @@ def monitor_progress(
         should_send = bool(manifest) and (
             stage_or_status_changed
             or (upload_only and now - last_upload_sent >= 5.0)
-            or progress_jump
+            or (progress_jump and not upload_only)
             or heartbeat_due
         )
         if should_send:
