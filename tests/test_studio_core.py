@@ -2500,13 +2500,25 @@ class StudioCoreTests(unittest.TestCase):
                 self.assertEqual(archive.getinfo("classes.dex").compress_type, zipfile.ZIP_STORED)
 
     def test_apktool_patch_reuses_matching_decoded_tree(self):
+        import hashlib
+        import struct
+        import zlib
+        from tests.test_smali_assembly import SmaliAssemblyTests
+
+        def fixture(payload):
+            data = SmaliAssemblyTests.valid_header_fixture() + payload
+            struct.pack_into('<I', data, 32, len(data))
+            data[12:32] = hashlib.sha1(data[32:], usedforsecurity=False).digest()
+            struct.pack_into('<I', data, 8, zlib.adler32(data[12:]))
+            return data
+
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             jar = root / "oplus-services.jar"
             first_work = root / "Fix_noti"
             second_work = root / "WK_Manager" / "oplus-services"
             with zipfile.ZipFile(jar, "w") as archive:
-                archive.writestr("classes.dex", b"stock", compress_type=zipfile.ZIP_STORED)
+                archive.writestr("classes.dex", fixture(b"stock"), compress_type=zipfile.ZIP_STORED)
 
             commands = []
 
@@ -2525,7 +2537,7 @@ class StudioCoreTests(unittest.TestCase):
 
             def patch(decoded: Path):
                 dex = decoded / "classes.dex"
-                dex.write_bytes(dex.read_bytes() + b"-patched")
+                dex.write_bytes(fixture(dex.read_bytes()[116:] + b"-patched"))
                 return {"patchedMethods": 1}
 
             with mock.patch.object(studio_core, "_run_command", side_effect=fake_command):
@@ -2542,7 +2554,7 @@ class StudioCoreTests(unittest.TestCase):
             self.assertFalse(first["decodedReused"])
             self.assertTrue(second["decodedReused"])
             with zipfile.ZipFile(jar) as archive:
-                self.assertEqual(archive.read("classes.dex"), b"stock-patched-patched")
+                self.assertEqual(archive.read("classes.dex"), fixture(b"stock-patched-patched"))
 
     def test_wk_manager_reuses_fix_noti_decode_only_for_oplus_services(self):
         with tempfile.TemporaryDirectory() as temp:

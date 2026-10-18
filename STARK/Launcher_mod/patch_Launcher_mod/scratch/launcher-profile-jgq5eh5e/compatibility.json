@@ -1,0 +1,300 @@
+{
+  "matched": 20,
+  "total": 42,
+  "rules": [
+    {
+      "feature": "bootstrap",
+      "owner": "Lcom/android/common/LauncherApplication;",
+      "method": ".method public onCreate()V",
+      "status": "unsupported",
+      "reason": "bootstrap: LauncherApplication.smali::onCreate()V has 0 semantic matches"
+    },
+    {
+      "feature": "feed",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": ".method public static final isSupportGoogleAssistant()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/touch/WorkspacePullDownDetectController;",
+      "method": ".method private startTargetApp(Lcom/android/launcher/Launcher;)Z",
+      "status": "unsupported",
+      "reason": "gestures: WorkspacePullDownDetectController.smali::startTargetApp(Lcom/android/launcher/Launcher;)Z has 0 semantic matches"
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/touch/WorkspacePullDownDetectController;",
+      "method": ".method public onResume(Landroidx/lifecycle/x;)V",
+      "status": "unsupported",
+      "reason": "gestures: WorkspacePullDownDetectController.smali::onResume(Landroidx/lifecycle/x;)V has 0 semantic matches"
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/settings/SlideDownTypeHelper;",
+      "method": ".method public static final getSlideDownType(Landroid/content/Context;Ljava/lang/String;)I",
+      "status": "unsupported",
+      "reason": "gestures: SlideDownTypeHelper.smali::getSlideDownType(Landroid/content/Context;Ljava/lang/String;)I has 0 semantic matches"
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method private final initSlideDownState(Landroid/content/Context;)V",
+      "status": "unsupported",
+      "reason": "gestures: LauncherSettingsFragment.smali::initSlideDownState(Landroid/content/Context;)V has 0 semantic matches"
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method private final onClickSlideDownPopMenuList(Ljava/lang/String;)Z",
+      "status": "unsupported",
+      "reason": "gestures: LauncherSettingsFragment.smali::onClickSlideDownPopMenuList(Ljava/lang/String;)Z has 0 semantic matches"
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method private final updateSlideDownState(Landroid/content/Context;)V",
+      "status": "unsupported",
+      "reason": "gestures: LauncherSettingsFragment.smali::updateSlideDownState(Landroid/content/Context;)V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;",
+      "method": ".method public static final isEnable()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method private final resetHolders()V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method private final updateAnimationParamsIfNeed(Z)V",
+      "status": "unsupported",
+      "reason": "recents: SwipeToRecentAnimationHelper.smali::updateAnimationParamsIfNeed(Z)V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method public final endAutoExitOverview()V",
+      "status": "unsupported",
+      "reason": "recents: SwipeToRecentAnimationHelper.smali::endAutoExitOverview()V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method public final endGoHomeRecentSpringXAnimation()V",
+      "status": "unsupported",
+      "reason": "recents: SwipeToRecentAnimationHelper.smali::endGoHomeRecentSpringXAnimation()V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method public final goHomeAnimation()V",
+      "status": "unsupported",
+      "reason": "recents: SwipeToRecentAnimationHelper.smali::goHomeAnimation()V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method public final goOverviewAnimation()V",
+      "status": "unsupported",
+      "reason": "recents: SwipeToRecentAnimationHelper.smali::goOverviewAnimation()V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": ".method public onGoHome(ZLjava/lang/String;)V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/uioverrides/OplusRecentsViewStateControllerImpl;",
+      "method": ".method private final resetRecentScroll(Lcom/android/launcher3/LauncherState;Lcom/android/launcher3/LauncherState;)V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/uioverrides/OplusRecentsViewStateControllerImpl;",
+      "method": ".method public setStateWithAnimationInternal(Lcom/android/launcher3/LauncherState;Lcom/android/launcher3/states/StateAnimationConfig;Lcom/android/launcher3/anim/PendingAnimation;)V",
+      "status": "unsupported",
+      "reason": "recents: OplusRecentsViewStateControllerImpl.smali::setStateWithAnimationInternal(Lcom/android/launcher3/LauncherState;Lcom/android/launcher3/states/StateAnimationConfig;Lcom/android/launcher3/anim/PendingAnimation;)V has 0 semantic matches"
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/delegates/GridRecentsViewDelegate;",
+      "method": ".method public interceptOnLayout(Lcom/android/quickstep/views/TaskView;)Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/statemanager/BaseState;",
+      "method": ".method public displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/uioverrides/states/BackgroundAppState;",
+      "method": ".method public displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/uioverrides/states/OverviewState;",
+      "method": ".method public displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/views/OplusTaskHeaderView;",
+      "method": ".method public final fixEllipsizeForTV()V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": ".method public static final getSIsSupportBreenoEntry()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher3/search/IndicatorEntry$Companion;",
+      "method": ".method public final getIndicatorAppLaunchIntent(Landroid/content/Context;)Landroid/content/Intent;",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher/pageindicators/OplusPageIndicator;",
+      "method": ".method public final initIndicatorResource()V",
+      "status": "unsupported",
+      "reason": "search: OplusPageIndicator.smali::initIndicatorResource()V has 0 semantic matches"
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher3/search/IndicatorEntry;",
+      "method": ".method private static final doRealStartIndicatorApp$lambda$10$lambda$9(Lcom/android/launcher3/search/IndicatorEntry;Landroid/content/Intent;Lcom/android/launcher3/model/data/BreenoItemInfo;)V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method private final initPreferences()V",
+      "status": "unsupported",
+      "reason": "settings: LauncherSettingsFragment.smali::initPreferences()V has 0 semantic matches"
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method public onResume()V",
+      "status": "unsupported",
+      "reason": "settings: LauncherSettingsFragment.smali::onResume()V has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": ".method public static final getSIsSupportDockerExpandDevice()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": ".method public static final getSIsSupportDockerExpandShowMultiRecommendApp()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/util/ScreenUtils;",
+      "method": ".method public static final isSupportDockerExpandScreenByActivity(Lcom/android/launcher3/Launcher;)Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/HotseatItemUtils;",
+      "method": ".method public static final rectifyItemCellXIfNecessary(Lcom/android/launcher3/model/BgDataModel;)V",
+      "status": "unsupported",
+      "reason": "taskbar: HotseatItemUtils.smali::rectifyItemCellXIfNecessary(Lcom/android/launcher3/model/BgDataModel;)V has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/HotseatLayoutParamsInject;",
+      "method": ".method public static final getHotseatIconVisiblePaddingHor()I",
+      "status": "unsupported",
+      "reason": "taskbar: HotseatLayoutParamsInject.smali::getHotseatIconVisiblePaddingHor()I has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandConfig;",
+      "method": ".method public static final getExpandItemMaxCount(Z)I",
+      "status": "unsupported",
+      "reason": "taskbar: ExpandConfig.smali::getExpandItemMaxCount(Z)I has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandConfig;",
+      "method": ".method public static final getHotseatNormalItemsMaxCountBy(ZZ)I",
+      "status": "unsupported",
+      "reason": "taskbar: ExpandConfig.smali::getHotseatNormalItemsMaxCountBy(ZZ)I has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandSwitchHelper;",
+      "method": ".method public static final isSwitchOn()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/taskbar/TaskbarSettingsConfig;",
+      "method": ".method public final isTaskbarExpandAreaSettingEnable()Z",
+      "status": "unsupported",
+      "reason": "taskbar: TaskbarSettingsConfig.smali::isTaskbarExpandAreaSettingEnable()Z has 0 semantic matches"
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": ".method private final updateExpandDockEntry()V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "dock",
+      "owner": "Lcom/android/launcher3/OplusHotseat;",
+      "method": ".method public setDockerBackground()V",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "dock_support",
+      "owner": "Lcom/android/common/util/ScreenUtils;",
+      "method": ".method public static final isSupportDockerExpandScreen()Z",
+      "status": "matched",
+      "reason": null
+    },
+    {
+      "feature": "ram",
+      "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
+      "method": ".method private judgeWhetherAllowMemoDisplay()V",
+      "status": "unsupported",
+      "reason": "ram: MemoryInfoManager.smali::judgeWhetherAllowMemoDisplay()V has 0 semantic matches"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "tools": {
+    "apktool": {
+      "file": "apktool.jar",
+      "version": "3.0.2",
+      "sha256": "eee4669a704a14e0623407e6701b0b91887e61e1e4049cb7a82833e14ae8b5fd",
+      "license": "Apache-2.0"
+    },
+    "smali": {
+      "file": "smali.jar",
+      "version": "3.0.9",
+      "sha256": "b5e2aa019c49ddaf7b2cace80f60ebbfd61f7ac18e7a3dea1075bec8779cc37a",
+      "license": "BSD-3-Clause"
+    },
+    "baksmali": {
+      "file": "baksmali.jar",
+      "version": "3.0.9",
+      "sha256": "1b206070701b2145bd1e6204abd6c14fea877f335486845cd4df149bf5f79c2e",
+      "license": "BSD-3-Clause"
+    }
+  }
+}

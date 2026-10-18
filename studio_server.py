@@ -29,6 +29,8 @@ from flask import Flask, Response, abort, jsonify, request, send_from_directory
 
 from studio_env import load_local_env
 from studio_core import (
+    APKTOOL_JAR,
+    _stark_archive_helper,
     DUAL_PHASE_STEPS,
     DUAL_SHARED_STEPS,
     JOBS_DIR,
@@ -122,7 +124,9 @@ TELEGRAM_PROGRESS_LOCK = threading.RLock()
 TELEGRAM_PROGRESS_HISTORY: dict[str, dict[str, Any]] = {}
 UI_LOG_TAIL_BYTES = 192 * 1024
 UI_LOG_BATCH_LINES = 100
-PROCESS_LOG_FLUSH_BYTES = 64 * 1024
+# Publish each received line, including a lone progress line before a long task.
+# flush() reaches the OS cache; it does not fsync the disk for every line.
+PROCESS_LOG_FLUSH_BYTES = 1
 PROCESS_LOG_FLUSH_INTERVAL = 0.1
 ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 ARTIFACT_VERSION_RE = re.compile(
@@ -1026,6 +1030,8 @@ def create_job(spec_payload: dict[str, Any]) -> dict[str, Any]:
         mod_names=spec.selected_mod_names(),
         mod_version=spec.modVersion,
         debloat_paths=spec.debloatPaths,
+        launcher_features=spec.launcherFeatures,
+        fix_noti_features=spec.fixNotiFeatures,
         required_steps=requested_steps,
     )
     if not preflight["ok"]:
@@ -1092,6 +1098,9 @@ def create_job(spec_payload: dict[str, Any]) -> dict[str, Any]:
         "romSha256": spec.romSha256,
         "specFingerprint": spec.specFingerprint,
         "resumePreset": spec.resumePreset,
+        "wkManagerPatches": spec.wkManagerPatches,
+        "launcherFeatures": spec.launcherFeatures,
+        "fixNotiFeatures": spec.fixNotiFeatures,
         "versionName": version_name,
         "productName": metadata.get("product_name"),
         "deviceName": (preflight.get("device") or {}).get("name"),
@@ -1834,9 +1843,10 @@ def diagnostics() -> dict[str, Any]:
         except (OSError, subprocess.TimeoutExpired, IndexError):
             return "unavailable"
 
+    java = _stark_archive_helper().find_tool('java')
     return {
         "python": sys.version.split()[0],
-        "java": version(["java", "-version"]),
+        "java": version([java, "-version"]) if java else 'unavailable',
         "sevenZip": seven_zip or "Python zipfile fallback",
         "disk": {"free": disk.free, "total": disk.total},
         "binaries": binaries,
@@ -1845,8 +1855,8 @@ def diagnostics() -> dict[str, Any]:
         "unsignedBinaryWarning": True,
         "md5AuthenticityWarning": True,
         "apktool": {
-            "ready": (bin_dir / "apktool_3.0.2.jar").is_file(),
-            "path": str(bin_dir / "apktool_3.0.2.jar"),
+            "ready": APKTOOL_JAR.is_file(),
+            "path": str(APKTOOL_JAR),
         },
     }
 
@@ -2595,6 +2605,8 @@ def create_app(*, start_queue: bool = True) -> Flask:
             mod_names=spec.selected_mod_names(),
             mod_version=spec.modVersion,
             debloat_paths=spec.debloatPaths,
+        launcher_features=spec.launcherFeatures,
+        fix_noti_features=spec.fixNotiFeatures,
             required_steps=requested_steps,
         )
         if "notify_telegram" in requested_steps and not _telegram_configured():

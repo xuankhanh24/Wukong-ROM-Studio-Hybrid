@@ -1,0 +1,311 @@
+{
+  "modified_classes": 24,
+  "modified_methods": 42,
+  "added_native_methods": 0,
+  "features": {
+    "bootstrap": 1,
+    "feed": 1,
+    "gestures": 3,
+    "recents": 16,
+    "search": 4,
+    "settings": 6,
+    "taskbar": 9,
+    "dock": 2
+  },
+  "changes": [
+    {
+      "feature": "bootstrap",
+      "owner": "Lcom/android/common/LauncherApplication;",
+      "method": "onCreate()V",
+      "added_lines": 1,
+      "removed_lines": 0
+    },
+    {
+      "feature": "feed",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": "isSupportGoogleAssistant()Z",
+      "added_lines": 18,
+      "removed_lines": 12
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/touch/WorkspacePullDownDetectController;",
+      "method": "startTargetApp(Lcom/android/launcher/Launcher;)Z",
+      "added_lines": 13,
+      "removed_lines": 4
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/touch/WorkspacePullDownDetectController;",
+      "method": "onResume(Landroidx/lifecycle/x;)V",
+      "added_lines": 1,
+      "removed_lines": 0
+    },
+    {
+      "feature": "gestures",
+      "owner": "Lcom/android/launcher/settings/SlideDownTypeHelper;",
+      "method": "getSlideDownType(Landroid/content/Context;Ljava/lang/String;)I",
+      "added_lines": 15,
+      "removed_lines": 10
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;",
+      "method": "isEnable()Z",
+      "added_lines": 1,
+      "removed_lines": 13
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "resetHolders()V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "updateAnimationParamsIfNeed(Z)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "endAutoExitOverview()V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "endGoHomeRecentSpringXAnimation()V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "goHomeAnimation()V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "goOverviewAnimation()V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/touch/SwipeToRecentAnimationHelper;",
+      "method": "onGoHome(ZLjava/lang/String;)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/uioverrides/OplusRecentsViewStateControllerImpl;",
+      "method": "resetRecentScroll(Lcom/android/launcher3/LauncherState;Lcom/android/launcher3/LauncherState;)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/quickstep/uioverrides/OplusRecentsViewStateControllerImpl;",
+      "method": "setStateWithAnimationInternal(Lcom/android/launcher3/LauncherState;Lcom/android/launcher3/states/StateAnimationConfig;Lcom/android/launcher3/anim/PendingAnimation;)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/delegates/GridRecentsViewDelegate;",
+      "method": "interceptOnLayout(Lcom/android/quickstep/views/TaskView;)Z",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/statemanager/BaseState;",
+      "method": "displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "added_lines": 7,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/uioverrides/states/BackgroundAppState;",
+      "method": "displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "added_lines": 7,
+      "removed_lines": 1
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/android/launcher3/uioverrides/states/OverviewState;",
+      "method": "displayOverviewTasksAsGrid(Lcom/android/launcher3/DeviceProfile;)Z",
+      "added_lines": 15,
+      "removed_lines": 9
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/views/OplusTaskHeaderView;",
+      "method": "fixEllipsizeForTV()V",
+      "added_lines": 1,
+      "removed_lines": 93
+    },
+    {
+      "feature": "recents",
+      "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
+      "method": "judgeWhetherAllowMemoDisplay()V",
+      "added_lines": 3,
+      "removed_lines": 61
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": "getSIsSupportBreenoEntry()Z",
+      "added_lines": 6,
+      "removed_lines": 0
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher3/search/IndicatorEntry$Companion;",
+      "method": "getIndicatorAppLaunchIntent(Landroid/content/Context;)Landroid/content/Intent;",
+      "added_lines": 11,
+      "removed_lines": 6
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher/pageindicators/OplusPageIndicator;",
+      "method": "initIndicatorResource()V",
+      "added_lines": 1,
+      "removed_lines": 0
+    },
+    {
+      "feature": "search",
+      "owner": "Lcom/android/launcher3/search/IndicatorEntry;",
+      "method": "doRealStartIndicatorApp$lambda$10$lambda$9(Lcom/android/launcher3/search/IndicatorEntry;Landroid/content/Intent;Lcom/android/launcher3/model/data/BreenoItemInfo;)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "initPreferences()V",
+      "added_lines": 3,
+      "removed_lines": 0
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "onResume()V",
+      "added_lines": 3,
+      "removed_lines": 0
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "initSlideDownState(Landroid/content/Context;)V",
+      "added_lines": 1,
+      "removed_lines": 0
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "onClickSlideDownPopMenuList(Ljava/lang/String;)Z",
+      "added_lines": 20,
+      "removed_lines": 13
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "updateSlideDownState(Landroid/content/Context;)V",
+      "added_lines": 3,
+      "removed_lines": 0
+    },
+    {
+      "feature": "settings",
+      "owner": "Lcom/android/launcher/settings/LauncherSettingsFragment;",
+      "method": "updateExpandDockEntry()V",
+      "added_lines": 16,
+      "removed_lines": 10
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": "getSIsSupportDockerExpandDevice()Z",
+      "added_lines": 6,
+      "removed_lines": 0
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/config/FeatureOption;",
+      "method": "getSIsSupportDockerExpandShowMultiRecommendApp()Z",
+      "added_lines": 6,
+      "removed_lines": 0
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/common/util/ScreenUtils;",
+      "method": "isSupportDockerExpandScreenByActivity(Lcom/android/launcher3/Launcher;)Z",
+      "added_lines": 10,
+      "removed_lines": 4
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/HotseatItemUtils;",
+      "method": "rectifyItemCellXIfNecessary(Lcom/android/launcher3/model/BgDataModel;)V",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/HotseatLayoutParamsInject;",
+      "method": "getHotseatIconVisiblePaddingHor()I",
+      "added_lines": 1,
+      "removed_lines": 1
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandConfig;",
+      "method": "getExpandItemMaxCount(Z)I",
+      "added_lines": 17,
+      "removed_lines": 10
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandConfig;",
+      "method": "getHotseatNormalItemsMaxCountBy(ZZ)I",
+      "added_lines": 13,
+      "removed_lines": 8
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/hotseat/expand/ExpandSwitchHelper;",
+      "method": "isSwitchOn()Z",
+      "added_lines": 6,
+      "removed_lines": 0
+    },
+    {
+      "feature": "taskbar",
+      "owner": "Lcom/android/launcher3/taskbar/TaskbarSettingsConfig;",
+      "method": "isTaskbarExpandAreaSettingEnable()Z",
+      "added_lines": 22,
+      "removed_lines": 16
+    },
+    {
+      "feature": "dock",
+      "owner": "Lcom/android/common/util/ScreenUtils;",
+      "method": "isSupportDockerExpandScreen()Z",
+      "added_lines": 10,
+      "removed_lines": 4
+    },
+    {
+      "feature": "dock",
+      "owner": "Lcom/android/launcher3/OplusHotseat;",
+      "method": "setDockerBackground()V",
+      "added_lines": 2,
+      "removed_lines": 0
+    }
+  ]
+}

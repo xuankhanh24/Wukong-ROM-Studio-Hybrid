@@ -385,10 +385,10 @@ def upload_changed_packs(
 
 def assert_publishable(index: Mapping[str, Any]) -> None:
     validate_content_index(index)
-    missing = [str(pack["id"]) for pack in index["packs"] if not isinstance(pack.get("archive"), Mapping)]
+    missing = [str(pack["id"]) for pack in index["packs"] if not isinstance(pack.get("archive"), Mapping) and pack.get('source') != 'git']
     if missing:
         raise ValueError(
-            "Upload changed packs to Drive before publishing the GitHub manifest: " + ", ".join(missing)
+            "Upload changed packs before publishing the GitHub manifest: " + ", ".join(missing)
         )
 
 
@@ -399,6 +399,7 @@ def publish_index_to_github(
     token: str,
     branch: str = "main",
     api_base: str = "https://api.github.com",
+    merge_pack_ids: set[str] | None = None,
 ) -> str:
     if repository.count("/") != 1 or not all(part.strip() for part in repository.split("/")):
         raise ValueError("GitHub repository must be owner/name")
@@ -417,13 +418,23 @@ def publish_index_to_github(
     current_sha: str | None = None
     try:
         with urlopen(Request(f"{endpoint}?ref={quote(branch)}", headers=headers), timeout=30) as response:
-            current_sha = str(json.loads(response.read())["sha"])
+            current = json.loads(response.read())
+            current_sha = str(current['sha'])
+            if merge_pack_ids is not None:
+                remote_index = json.loads(base64.b64decode(current['content']))
+                validate_content_index(remote_index)
+                replacing = set(merge_pack_ids) | {'STARK/common'}
+                index = {**index, 'packs': sorted(
+                    [pack for pack in remote_index['packs'] if pack['id'] not in replacing]
+                    + [pack for pack in index['packs'] if pack['id'] in replacing],
+                    key=lambda pack: pack['id'])}
+                assert_publishable(index)
     except HTTPError as exc:
         if exc.code != 404:
             raise
     body: dict[str, Any] = {
         "message": "chore(content): sync verified platform packs",
-        "content": base64.b64encode(index_path.read_bytes()).decode("ascii"),
+        "content": base64.b64encode((json.dumps(index, indent=2, sort_keys=True) + '\n').encode()).decode("ascii"),
         "branch": branch,
     }
     if current_sha:
@@ -436,4 +447,6 @@ def publish_index_to_github(
     )
     with urlopen(request, timeout=60) as response:
         payload = json.loads(response.read())
+    if merge_pack_ids is not None:
+        _atomic_write_index(index_path, index)
     return str(payload.get("commit", {}).get("sha") or "")

@@ -230,6 +230,10 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 function updateSummary() {
   const wkPatches = $("#wk-manager-patches");
   if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
+  const launcherFeatures = $("#launcher-features");
+  if (launcherFeatures) launcherFeatures.hidden = !selectedMods().includes("Launcher_mod");
+  const fixNotiFeatures = $("#fix-noti-features");
+  if (fixNotiFeatures) fixNotiFeatures.hidden = !selectedMods().includes("Fix_noti");
   const selectionSummary = $("#config-summary");
   if (selectionSummary) selectionSummary.textContent = t("selectionSummary", { mods: selectedMods().length, steps: $$("#steps input:checked").length });
   const selectedDevice = $("#device")?.value || "";
@@ -480,6 +484,7 @@ function saveDebloatPaths() {
 
 function resetJobDraft() {
   $$("#wk-manager-patches input").forEach((input) => { input.checked = input.defaultChecked; });
+  $$("#launcher-features input, #fix-noti-features input").forEach((input) => { input.checked = input.defaultChecked; });
   const source = $("#source-uri");
   if (source) {
     source.value = "";
@@ -509,6 +514,8 @@ function buildRecipe() {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
       wkManagerPatches: $$("#wk-manager-patches input:checked").map((input) => input.value),
+      launcherFeatures: $$("#launcher-features input:checked").map((input) => input.value),
+      fixNotiFeatures: $$("#fix-noti-features input:checked").map((input) => input.value),
       enabledSteps: $$("#steps input:checked").map((input) => input.value)
         .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),
       package: $("#package").checked, notifyTelegram: $("#notify").checked

@@ -1,0 +1,51 @@
+{
+  "schema": 2,
+  "id": "coloros-a16-adapter",
+  "features": [
+    "bootstrap.json",
+    "feed.json",
+    "gestures.json",
+    "recents.json",
+    "search.json",
+    "settings.json",
+    "taskbar.json",
+    "dock.json",
+    "quick_search.json",
+    "dock_support.json",
+    "ram.json"
+  ],
+  "type_sources": {},
+  "validation": "build-only",
+  "dependencies": {
+    "settings": [
+      "bootstrap"
+    ],
+    "recents": [
+      "settings"
+    ],
+    "feed": [
+      "settings"
+    ],
+    "dock": [
+      "settings",
+      "dock_support"
+    ],
+    "taskbar": [
+      "settings",
+      "dock_support"
+    ],
+    "search": [
+      "settings"
+    ],
+    "quick_search": [
+      "settings"
+    ],
+    "gestures": [
+      "settings"
+    ],
+    "dock_support": [
+      "bootstrap"
+    ],
+    "ram": []
+  }
+}

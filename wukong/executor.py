@@ -12,7 +12,7 @@ from .artifacts import PreparedArtifact, prepare_artifact
 from .adapters import RcloneStorageAdapter, SourceIntegrityError, sha256_file, source_adapter_for
 from .artifact_mirror import ArtifactMirrorPublisher, DCloudMirrorConfig, attach_mirror
 from .cloud_sync import CloudJobSync
-from .content_packs import ContentPackManager, validate_content_index
+from .content_packs import ContentPackManager, validate_content_index, load_content_index
 from .models import ArtifactRecord, BuildRecipe, JobManifest, JobStatus, preset_edition_label
 from .orchestrator import JobStore, OrchestrationError
 from .pipeline import CHECKPOINT_PIPELINE_STEPS
@@ -220,8 +220,9 @@ class LocalJobExecutor:
         self.rclone_config = rclone_config
         self.build_workspace_root = (build_workspace_root or WORKSPACE_ROOT).resolve()
         self.content_root = (content_root or CONTENT_ROOT).resolve()
-        self.content_index = (
-            content_index or SCRIPT_ROOT / "content-packs" / "index.json"
+        synced_index = self.content_root.parent / 'Data' / 'ContentSync' / 'index.json'
+        self.content_index = (content_index or
+            (synced_index if synced_index.is_file() else SCRIPT_ROOT / "content-packs" / "index.json")
         ).resolve()
         self.actions_ui = actions_ui or GitHubActionsUI()
         if mirror_publisher is not None:
@@ -810,7 +811,7 @@ class LocalJobExecutor:
             )
         import json
 
-        index = json.loads(self.content_index.read_text(encoding="utf-8"))
+        index = load_content_index(self.content_index)
         validate_content_index(index)
         from .rom_family import required_content_packs
         required = required_content_packs(recipe.build.mod_version)
@@ -835,7 +836,7 @@ class LocalJobExecutor:
                     else (),
                 )
             except (FileNotFoundError, SourceIntegrityError):
-                if not self.rclone_config:
+                if not self.rclone_config and not str((pack.get('archive') or {}).get('uri', '')).startswith('https://'):
                     raise OrchestrationError(
                         f"Content-pack {pack_id} is missing or invalid under {target} "
                         "and rclone is not configured (set WUKONG_RCLONE_CONFIG)."

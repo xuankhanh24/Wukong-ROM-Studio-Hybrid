@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_alwaysalive_config_list</filter-name>
+
+    <config key="always_alive_enabled" type="Boolean"  val="false"/>
+    <config key="always_alive_dcs_enabled" type="Boolean"  val="false"/>
+    <config key="only_enable_whitelist_package" type="Boolean"  val="true"/>
+
+    <config key="always_alive_clean_type" type="Integer" val="3"/>
+    <config key="always_alive_upload_threshold" type="Integer" val="400"/>
+
+    <config_list key="disable_always_alive_packages" type="String">
+        <sub val="android" />
+    </config_list>
+
+</filter-conf>

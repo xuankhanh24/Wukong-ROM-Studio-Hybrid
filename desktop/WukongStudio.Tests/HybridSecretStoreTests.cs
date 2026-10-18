@@ -5,6 +5,16 @@ namespace WukongStudio.Tests;
 public sealed class HybridSecretStoreTests
 {
     [Fact]
+    public void GitHubReleaseUploadsDoNotRequireDriveCredentials()
+    {
+        using var workspace = new TestWorkspace();
+        var store = new HybridSecretStore(workspace.Layout);
+        var credentials = new HybridCredentials("owner/repository", "fixture-github-token", "");
+        store.Save(credentials);
+        Assert.Equal(credentials, store.Load());
+    }
+
+    [Fact]
     public void DpapiRoundTripDoesNotStorePlaintext()
     {
         using var workspace = new TestWorkspace();

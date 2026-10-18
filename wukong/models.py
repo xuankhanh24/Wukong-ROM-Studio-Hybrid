@@ -11,6 +11,8 @@ from typing import Any, Mapping
 from urllib.parse import parse_qsl, urlparse
 
 from .pipeline import PIPELINE_STEP_NAMES
+from .wk_features import normalize_patches
+from .mod_features import normalize_features
 from .mod_release_versions import SAFE_RELEASE_LABEL, default_mod_release_version
 from .rom_family import is_oxygen_product, oxygen_mod_version
 
@@ -256,6 +258,9 @@ class BuildOptions:
     debloat_paths: tuple[str, ...] | None = None
     package: bool = True
     notify_telegram: bool = False
+    wk_manager_patches: tuple[str, ...] | None = None
+    launcher_features: tuple[str, ...] | None = None
+    fix_noti_features: tuple[str, ...] | None = None
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any] | None) -> "BuildOptions":
@@ -300,6 +305,12 @@ class BuildOptions:
                     raise RecipeValidationError("Edition label must be 1–64 filename-safe characters")
                 edition_labels[name] = label
         raw_debloat = data.get("debloatPaths")
+        try:
+            patches = normalize_patches(data.get("wkManagerPatches"))
+            launcher = normalize_features(data.get('launcherFeatures'), 'launcherFeatures')
+            noti = normalize_features(data.get('fixNotiFeatures'), 'fixNotiFeatures')
+        except ValueError as exc:
+            raise RecipeValidationError(str(exc)) from exc
         debloat = None
         if raw_debloat is not None:
             if not isinstance(raw_debloat, list):
@@ -315,6 +326,9 @@ class BuildOptions:
             debloat_paths=debloat,
             package=_boolean(data, "package", True),
             notify_telegram=_boolean(data, "notifyTelegram", False),
+            wk_manager_patches=tuple(patches) if patches is not None else None,
+            launcher_features=tuple(launcher) if launcher is not None else None,
+            fix_noti_features=tuple(noti) if noti is not None else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -332,6 +346,11 @@ class BuildOptions:
             result["enabledSteps"] = list(self.enabled_steps)
         if self.debloat_paths is not None:
             result["debloatPaths"] = list(self.debloat_paths)
+        if self.wk_manager_patches is not None:
+            result["wkManagerPatches"] = list(self.wk_manager_patches)
+        for field, values in (('launcherFeatures', self.launcher_features), ('fixNotiFeatures', self.fix_noti_features)):
+            if values is not None:
+                result[field] = list(values)
         if self.notify_telegram:
             result["notifyTelegram"] = True
         return result
@@ -515,6 +534,11 @@ class BuildRecipe:
             result["editionLabels"] = dict(self.build.edition_labels)
         if self.build.debloat_paths is not None:
             result["debloatPaths"] = list(self.build.debloat_paths)
+        if self.build.wk_manager_patches is not None:
+            result["wkManagerPatches"] = list(self.build.wk_manager_patches)
+        for field, values in (('launcherFeatures', self.build.launcher_features), ('fixNotiFeatures', self.build.fix_noti_features)):
+            if values is not None:
+                result[field] = list(values)
         return result
 
 

@@ -14,6 +14,17 @@ from wukong.content_sync import refresh_content_index
 
 
 class SyncPlatformContentCliTests(unittest.TestCase):
+    def test_release_upload_needs_github_token_not_rclone_and_publishes_catalog(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            argv = ['sync_platform_content', '--install-root', str(root), '--index', str(root / 'index.json'),
+                    '--target', 'release', '--repository', 'owner/repository']
+            with patch.object(sys, 'argv', argv), patch('wukong.github_content.publish_release_packs',
+                    return_value={'tag': 'new', 'packs': ['MOD/Test']}) as publish, redirect_stdout(io.StringIO()):
+                self.assertEqual(sync_platform_content.main(), 0)
+            self.assertTrue(publish.call_args.kwargs['publish_catalog'])
+            self.assertIsNone(publish.call_args.kwargs['pack_ids'])
+
     def test_preview_reports_file_diff_without_credentials_or_index_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             install = Path(root)

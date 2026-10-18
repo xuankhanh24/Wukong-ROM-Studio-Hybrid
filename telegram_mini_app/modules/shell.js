@@ -179,6 +179,15 @@ function bindEvents() {
   $("#preset").addEventListener("change", () => renderMods());
   $("#execution").addEventListener("change", updateSummary);
   $("#device").addEventListener("change", updateSummary);
+  $("#launcher-features")?.addEventListener("change", updateSummary);
+  $("#fix-noti-features")?.addEventListener("change", (event) => {
+    if (event.target.matches('input[type="checkbox"]') && event.target.checked) {
+      $$("#fix-noti-features input").forEach((input) => {
+        if (input !== event.target) input.checked = false;
+      });
+    }
+    updateSummary();
+  });
   $("#mod-list").addEventListener("change", (event) => {
     if (event.target.matches('input[type="checkbox"]')) {
       if (event.target.checked && enforceExclusiveMods(event.target.value)) {

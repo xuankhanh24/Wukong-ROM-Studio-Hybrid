@@ -1,0 +1,1707 @@
+<?xml version="1.0" encoding="utf-8"?>
+<filter-conf>
+    <version>9999123199</version>
+    <filter-name>sys_athena_config_list</filter-name>
+    <auto_cleanup_mem_threshold k="10" v="1024"/>
+    <auto_cleanup_mem_threshold k="8" v="1024"/>
+    <auto_cleanup_mem_threshold k="6" v="1024"/>
+    <auto_cleanup_mem_threshold k="4" v="800"/>
+    <auto_cleanup_mem_threshold k="3" v="600"/>
+    <auto_cleanup_mem_threshold k="2" v="600"/>
+    <athena_lmk_mem_threshold k="10" v="2048"/>
+    <athena_lmk_mem_threshold k="8" v="2048"/>
+    <athena_lmk_mem_threshold k="6" v="1500"/>
+    <athena_lmk_mem_threshold k="4" v="1380"/>
+    <athena_lmk_mem_threshold k="3" v="1024"/>
+    <athena_lmk_mem_threshold k="2" v="600"/>
+    <athena_lmk_adj_threshold>300</athena_lmk_adj_threshold>
+    <athena_lmk_trigger_inv_second>10</athena_lmk_trigger_inv_second>
+    <sapp_killer_mem_threshold k="10" v="800"/>
+    <sapp_killer_mem_threshold k="8" v="800"/>
+    <sapp_killer_mem_threshold k="6" v="800"/>
+    <sapp_killer_mem_threshold k="4" v="600"/>
+    <sapp_killer_mem_threshold k="3" v="400"/>
+    <sapp_killer_mem_threshold k="2" v="400"/>
+    <sapp_should_be_kill k="com.tencent.mm" v="400"/>
+    <sapp_should_be_kill k="com.eg.android.AlipayGphone" v="200"/>
+    <sapp_should_be_kill k="com.tencent.mobileqq" v="400"/>
+    <sapp_should_be_kill k="com.feiliao.flipchat.android" v="200"/>
+    <qp_once_task_wait_ms>5000</qp_once_task_wait_ms>
+    <qp_frequent_trigger_hours>2</qp_frequent_trigger_hours>
+    <deep_clear_wait_ms>200</deep_clear_wait_ms>
+    <deep_clear_inv_hour>24</deep_clear_inv_hour>
+    <athena_app_change_max_record>200000</athena_app_change_max_record>
+    <athena_app_change_save_days>60</athena_app_change_save_days>
+    <smart_clear_enabled>1</smart_clear_enabled>
+    <smart_clear_keep_recent>3</smart_clear_keep_recent>
+    <smart_white_list_toggle>1</smart_white_list_toggle>
+    <smart_white_update_algorithm>0</smart_white_update_algorithm>
+    <smart_white_update_interval>86400000</smart_white_update_interval>
+    <smart_white_statistic_interval>1209600000</smart_white_statistic_interval>
+    <smart_white_statistic_weight>30/50/20</smart_white_statistic_weight>
+    <smart_white_active_threshold>80/60/40/0</smart_white_active_threshold>
+    <smart_white_active_app_list_num>2</smart_white_active_app_list_num>
+    <smart_white_currently_used_threshold>604800000</smart_white_currently_used_threshold>
+    <smart_memory_compress_toggle>1</smart_memory_compress_toggle>
+    <nand_swap_toggle>1</nand_swap_toggle>
+    <nand_swap_preload_toggle>1</nand_swap_preload_toggle>
+    <smart_memory_compress_monitor_interval>60000</smart_memory_compress_monitor_interval>
+    <app_usage_list_update_interval>172800000</app_usage_list_update_interval>
+    <switch_donovan_exp_force_stop>false</switch_donovan_exp_force_stop>
+    <switch_slide_stop>false</switch_slide_stop>
+    <smart_memory_compress_boot>1</smart_memory_compress_boot>
+    <smart_memory_compress_screenoff>1</smart_memory_compress_screenoff>
+    <boot_compress_delay>0</boot_compress_delay>
+    <screenoff_compress_delay>1800000</screenoff_compress_delay>
+    <screenoff_compress_min_interval>300000</screenoff_compress_min_interval>
+    <boot_compress_mem_size>50</boot_compress_mem_size>
+    <screenoff_compress_mem_size>50</screenoff_compress_mem_size>
+    <screenon_compress_max_interval>300000</screenon_compress_max_interval>
+
+    <boot_mem_optimize_switch>
+        <bmos_kill action_code="0x1" switch="1"/> <!-- DO NOT change content of action_code -->
+        <bmos_gc action_code="0x2" switch="0"/> <!-- DO NOT change content of action_code -->
+        <bmos_compress action_code="0x4" switch="1"/>  <!-- DO NOT change content of action_code -->
+        <bmos_gc_new action_code="0x8" switch="1"/> <!-- DO NOT change content of action_code -->
+    </boot_mem_optimize_switch>
+
+    <config key="screen_on_clear_enabled" type="Boolean"  val="false"/>
+    <config key="screen_off_clear_enabled" type="Boolean"  val="true"/>
+    <config key="memory_guard_enabled" type="Boolean"  val="true"/>
+
+    <config key="quick_bootup_clear_enabled" type="Boolean"  val="false"/>
+
+    <config key="abnormal_memory_trigger_threshold" type="Long"  val="6000"/>
+    <config key="silence_reboot_threshold_mem_when_abnormal_memory" type="Integer"  val="1500"/>
+    <config key="silence_reboot_threshold_mem_low_when_abnormal_memory" type="Integer"  val="1000"/>
+
+    <config key="quick_bootup_min_app" type="Integer" val="8"/>
+    <config key="quick_bootup_interval_threshold" type="Long" val="16000"/>
+    <config key="quick_bootup_interval_buffer_length" type="Integer" val="8"/>
+    <config key="quick_bootup_fg_duration_threshold" type="Long" val="8000"/>
+
+    <config key="onekey_renew_smart_memory_compress" type="Boolean" val="true"/>
+    <config key="onekey_renew_compress_mem_size" type="Integer" val="50"/>
+    <config key="onekey_renew_timeout_duration" type="Long" val="30000"/>
+
+    <!-- ref mem watermark for system or selfapp -->
+    <app_ref_mem_config pkg="prefix#com.qti." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.qualcomm." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.mediatek." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.coloros." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.oneplus." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.oplus." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#com.oplus.autotest." anon_a="20000" pss_a="20000" anon_r="20000" pss_r="20000"/>
+    <app_ref_mem_config pkg="prefix#com.heytap." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+    <app_ref_mem_config pkg="prefix#android.process." anon_a="1000" pss_a="1000" anon_r="1000" pss_r="1000"/>
+
+    <!-- restart proc: sub key = process/pkg name, val = RSS threshold (MB). Keys merged into SkipCustomProcList for Osense. -->
+    <config_map key="restart_proc_ref_mem_config" type="Integer">
+        <sub key="com.oplus.camera" val="420" />
+        <sub key="com.coloros.weather2" val="300" />
+        <sub key="com.coloros.weather.service" val="300" />
+        <sub key="com.coloros.sceneservice" val="150" />
+        <sub key="com.heytap.health" val="210" />
+        <sub key="com.heytap.health:once" val="210" />
+        <sub key="com.coloros.colordirectservice" val="150" />
+        <sub key="com.nearme.instant.platform:provider" val="150" />
+        <sub key="com.heytap.pictorial:ui" val="200" />
+        <sub key="com.oplus.account" val="150" />
+        <sub key="com.android.cellbroadcastreceiver.module" val="150" />
+        <sub key="com.oplus.romupdate" val="150" />
+        <sub key="com.mediatek.gnssdebugreport" val="150" />
+        <sub key="com.oplus.dmp:main" val="150" />
+        <sub key="com.google.android.gms.persistent" val="180" />
+        <sub key="com.oplus.aiunit" val="150" />
+        <sub key="com.oppo.instant.local.service" val="200" />
+        <sub key="com.heytap.htms:sysintegrity" val="150" />
+        <sub key="com.heytap.htms" val="150" />
+        <sub key="com.finshell.wallet:nfchost" val="150" />
+        <sub key="com.finshell.wallet" val="150" />
+    </config_map>
+
+    <!-- sub key = total RAM (GB floor tier), val = avail mem threshold (MB); enable restart_proc ref filter when avail &lt; val -->
+    <config_map key="restart_proc_kill_memavail_threshold" type="Integer">
+        <sub key="2" val="500" />
+        <sub key="3" val="600" />
+        <sub key="4" val="800" />
+        <sub key="6" val="1000" />
+        <sub key="8" val="1200" />
+        <sub key="12" val="1300" />
+        <sub key="16" val="1800" />
+        <sub key="24" val="2300" />
+    </config_map>
+
+    <memory_monitor>
+        <config_map key="memory_on_trigger_threshold" type="Long">
+            <sub key="2" val="600" />
+            <sub key="3" val="800" />
+            <sub key="4" val="1000" />
+            <sub key="6" val="1600" />
+            <sub key="8" val="2000" />
+            <sub key="12" val="3000" />
+        </config_map>
+        <config_map key="memory_on_purpose_threshold" type="Long">
+            <sub key="2" val="800" />
+            <sub key="3" val="1000" />
+            <sub key="4" val="1200" />
+            <sub key="6" val="1800" />
+            <sub key="8" val="2200" />
+            <sub key="12" val="3500" />
+        </config_map>
+
+        <config_map key="memory_on_compress_threshold" type="Long">
+            <sub key="2" val="0" />
+            <sub key="3" val="0" />
+            <sub key="4" val="0" />
+            <sub key="6" val="0" />
+            <sub key="8" val="0" />
+            <sub key="12" val="0" />
+        </config_map>
+
+    </memory_monitor>
+
+    <scene_config>
+        <sc_home_key>true</sc_home_key>
+        <sc_screen_on>true</sc_screen_on>
+        <sc_screen_off>true</sc_screen_off>
+        <sc_app_change>true</sc_app_change>
+    </scene_config>
+
+    <!-- Osense DataSync fw_* lists (OsenseKillActionMessenger); not screen-on filter masks. -->
+    <config_list key="fw_high_priority_app_list" type="String">
+    </config_list>
+
+    <config_list key="fw_middle_priority_app_list" type="String">
+        <sub val="com.tencent.mm" />
+        <sub val="com.tencent.mobileqq" />
+        <sub val="com.zing.zalo" />
+        <sub val="org.telegram.messenger" />
+        <sub val="tw.nekomimi.nekogram" />
+        <sub val="org.telegram.plus" />
+        <sub val="org.thunderdog.challegram" />
+        <sub val="com.facebook.orca" />
+        <sub val="com.facebook.katana" />
+        <sub val="com.whatsapp" />
+        <sub val="com.google.android.gm" />
+        <sub val="com.google.android.gms" />
+        <sub val="com.google.android.gsf" />
+        <sub val="com.google.android.deskclock" />
+        <sub val="com.android.deskclock" />
+        <sub val="com.oneplus.deskclock" />
+    </config_list>
+
+    <config_list key="fw_low_priority_app_list" type="String">
+    </config_list>
+
+    <config_list key="super_critical_kill_target_list" type="String">
+        <sub val="com.heytap.themestore" />
+        <sub val="com.coloros.smartsidebar" />
+        <sub val="com.heytap.pictorial" />
+        <sub val="com.coloros.colordirectservice" />
+        <sub val="com.coloros.sceneservice" />
+        <sub val="com.coloros.floatassistant" />
+        <sub val="com.heytap.openid" />
+        <sub val="com.opos.ads" />
+        <sub val="com.coloros.assistantscreen" />
+    </config_list>
+
+    <config_list key="skip_kill_system_audio_list" type="String">
+        <sub val="com.oplus.ocar" />
+    </config_list>
+
+    <config_list key="swipe_up_protect_app_list" type="String">
+        <sub val="com.tencent.mm" />
+        <sub val="com.tencent.mobileqq" />
+        <sub val="com.zing.zalo" />
+        <sub val="org.telegram.messenger" />
+        <sub val="tw.nekomimi.nekogram" />
+        <sub val="org.telegram.plus" />
+        <sub val="org.thunderdog.challegram" />
+        <sub val="com.facebook.orca" />
+        <sub val="com.facebook.katana" />
+        <sub val="com.whatsapp" />
+        <sub val="com.google.android.gm" />
+        <sub val="com.google.android.gms" />
+        <sub val="com.google.android.gsf" />
+        <sub val="com.google.android.deskclock" />
+        <sub val="com.android.deskclock" />
+        <sub val="com.oneplus.deskclock" />
+    </config_list>
+
+    <config_list key="swipe_up_force_stop_app_list" type="String">
+        <sub val="com.zing.mp3" />
+        <sub val="com.spotify.music" />
+    </config_list>
+
+    <config_list key="swipe_up_protect_fgs_list" type="String">
+        <sub val="com.tencent.mm/com.tencent.mm.plugin.voip.widget.VoipNewForegroundService" />
+        <sub val="com.tencent.mobileqq/com.tencent.av.service.AVServiceForQQ" />
+    </config_list>
+
+    <config_list key="onekey_renew_compress_white_list" type="String">
+        <sub val="com.coloros.phonemanager" />
+        <sub val="com.oplus.phonemanager" />
+    </config_list>
+
+    <clear_config>
+        <cc_name>athena_lmk</cc_name>
+        <cc_skip_athena_white>259</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>65536</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>   <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>           <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>         <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: false -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>deep_clear</cc_name>
+        <cc_skip_athena_white>4</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>131072</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>true</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>app_level_periodic_deep_clear</cc_name>
+        <cc_skip_athena_white>4</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>131072</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>true</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>sys_level_periodic_deep_clear</cc_name>
+        <cc_skip_athena_white>4</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>131072</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>true</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>deep_clear_excessive_mem_app</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>1</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>false</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>smart_clear</cc_name>
+        <cc_skip_athena_white>259</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>65536</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>   <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>           <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>         <!-- default: true -->
+        <cc_skip_perceptible>true</cc_skip_perceptible>         <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>screen_off_clear_excessive_mem_app</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>1</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>false</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_skip_native>true</cc_skip_native>                   <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_system>true</cc_skip_system>                   <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>swipeup_forcestop_clear</cc_name>
+        <cc_skip_athena_white>512</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>262144</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>true</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_1</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.childrenspace</caller_name>
+            <caller_name>com.oplus.battery.appspowerissue</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_2</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>true</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.recents</caller_name> <!-- the feature merge into launcher, but contine to use the old name -->
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_3</cc_name>
+        <cc_skip_athena_white>3</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>   <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>           <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>         <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>         <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.athena.scroffclear</caller_name>
+            <caller_name>com.oplus.athena.lightclear</caller_name>
+            <caller_name>com.oplus.games</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_4</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.findmyphone</caller_name>
+            <caller_name>com.heytap.speechassist</caller_name>
+            <caller_name>com.oplus.daydreamvideo.scroffclear</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_5</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>3</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.lowmem</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_6</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>  <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                  <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.hightemperature</caller_name>
+            <caller_name>com.oplus.battery.thermalcontrol_highlevel</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_7</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.highperform</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_8</cc_name>
+        <cc_skip_athena_white>2048</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>524288</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>
+        <cc_skip_audio>false</cc_skip_audio>
+        <cc_skip_downloading>false</cc_skip_downloading>
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.safecenter</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_9</cc_name>
+        <cc_skip_athena_white>4096</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>1048576</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>
+        <cc_skip_audio>false</cc_skip_audio>
+        <cc_skip_downloading>false</cc_skip_downloading>
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.athena.supersavingpowerscroffclear</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_10</cc_name>
+        <cc_skip_athena_white>259</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>   <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>           <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>         <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: false -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oneplus.camera</caller_name>
+            <caller_name>com.oplus.camera</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_11</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>   <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                     <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>           <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>         <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>         <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.athena.bootclear</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_12</cc_name>
+        <cc_skip_athena_white>131073</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_high_priority_count>-1</cc_skip_high_priority_count>
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.powersavemode</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_13</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>true</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.themestore</caller_name>  <!-- the feature merge into launcher, but contine to use the old name -->
+            <caller_name>com.oplus.ipspace</caller_name>  <!-- the feature merge into launcher, but contine to use the old name -->
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_14</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>true</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.coloros.phonemanager</caller_name>
+            <caller_name>com.oplus.phonemanager</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_15</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.games.tournamentmode</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_16</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>  <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                  <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.safety.hightemperature</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_17</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.coloros.phonemanager.systemopt</caller_name>  <!-- the feature merge into phonemanager, but contine to use the old name -->
+            <caller_name>com.oplus.phonemanager.systemopt</caller_name>  <!-- the feature merge into phonemanager, but contine to use the old name -->
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>one_key#config_18</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>true</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_allow_caller>
+            <caller_name>com.oplus.phonemanager.onekeyrenew</caller_name>
+            <caller_name>com.coloros.phonemanager.onekeyrenew</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>abnormal_memory_clear</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>2</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>false</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_visible_window>true</cc_skip_visible_window>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>abnormal_memory_periodic_clear</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>2</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>false</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_skip_native>true</cc_skip_native>                   <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_visible_window>true</cc_skip_visible_window>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>memory_guard</cc_name>
+        <cc_skip_athena_white>8451</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>2162688</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>-1</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>memory_guard_2</cc_name>
+        <cc_skip_athena_white>8192</cc_skip_athena_white>        <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x200000</cc_skip_athena_white_new>        <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>        <!-- default: true -->
+        <cc_skip_super_alive_game>false</cc_skip_super_alive_game>  <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>          <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>             <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_preload_protect>false</cc_skip_preload_protect>           <!-- default: false -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_accessibility_service>true</cc_skip_accessibility_service><!-- default: false -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>quick_bootup_clear</cc_name>
+        <cc_skip_athena_white>1</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_athena_white_new>0x10000</cc_skip_athena_white_new>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>1</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                         <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>   <!-- default: false -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec_common</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>8</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_skip_important_app>true</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#android.preload_kill.forcestop</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>true</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.preload_kill.forcestop</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <!--  Add a filter policy that only filter foreground and persistent app -->
+    <clear_config>
+        <cc_name>clear_spec#clear_spec_all_kill_common</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>-10001</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.ams.provider</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_1</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.oguard.kill</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_1</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.oguard.abnormalAudio.kill</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_1</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_backup>false</cc_skip_backup>                  <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>100</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.oguard.gameInFocus.kill</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#com.oplus.battery.safety.hightemperature</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>false</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.battery.safety.hightemperature</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_android.bbds</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_skip_important_app>true</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.bbds.thread_kill</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_android.bbds</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>true</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_skip_important_app>true</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>android.bbds.lowmem_kill</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_com.coloros.remoteguardservice</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>false</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>false</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>false</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>false</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>false</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>false</cc_skip_protected_game>
+        <cc_skip_important_app>false</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>200</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>com.coloros.remoteguardservice</caller_name>
+            <caller_name>com.coloros.remoteguardservice_stop</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_com.coloros.phonemanager</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>0</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>false</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_widget>false</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_bluetooth>false</cc_skip_bluetooth>            <!-- default: true -->
+        <cc_skip_vpn>false</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>false</cc_skip_pip>                        <!-- default: true -->
+        <cc_skip_audio>false</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>false</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>false</cc_skip_appmanager>           <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>            <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>              <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_allow_caller>
+            <caller_name>com.coloros.phonemanager.networkdetect</caller_name>
+            <caller_name>com.oplus.phonemanager.networkdetect</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <clear_config>
+        <cc_name>clear_spec#config_com.oplus.camera</cc_name>
+        <cc_skip_athena_white>0</cc_skip_athena_white>          <!-- default: 0 -->
+        <cc_skip_recent_used_num>3</cc_skip_recent_used_num>    <!-- default: -1(by system) -->
+        <cc_skip_recent_lock>true</cc_skip_recent_lock>         <!-- default: true -->
+        <cc_skip_inputmethod>true</cc_skip_inputmethod>         <!-- default: true -->
+        <cc_skip_foreground>true</cc_skip_foreground>           <!-- default: true -->
+        <cc_skip_live_wallpaper>true</cc_skip_live_wallpaper>   <!-- default: true -->
+        <cc_skip_bluetooth>true</cc_skip_bluetooth>             <!-- default: true -->
+        <cc_skip_widget>true</cc_skip_widget>                   <!-- default: true -->
+        <cc_skip_home>true</cc_skip_home>                       <!-- default: true -->
+        <cc_skip_keyguard>true</cc_skip_keyguard>               <!-- default: true -->
+        <cc_skip_vpn>true</cc_skip_vpn>                        <!-- default: true -->
+        <cc_skip_pip>true</cc_skip_pip>                         <!-- default: true -->
+        <cc_skip_audio>true</cc_skip_audio>                    <!-- default: true -->
+        <cc_skip_navigating>true</cc_skip_navigating>          <!-- default: true -->
+        <cc_skip_downloading>false</cc_skip_downloading>        <!-- default: true -->
+        <cc_skip_perceptible>false</cc_skip_perceptible>        <!-- default: true -->
+        <cc_skip_persistent>true</cc_skip_persistent>           <!-- default: true -->
+        <cc_skip_appmanager>true</cc_skip_appmanager>          <!-- default: false -->
+        <cc_do_remove_task>false</cc_do_remove_task>             <!-- default: false -->
+        <cc_do_clear_trash>false</cc_do_clear_trash>            <!-- default: false -->
+        <cc_do_show_toast>false</cc_do_show_toast>               <!-- default: false -->
+        <cc_skip_background_protect>false</cc_skip_background_protect> <!-- default: true -->
+        <cc_skip_foreground_service>false</cc_skip_foreground_service> <!-- default: true -->
+        <cc_skip_protected_game>true</cc_skip_protected_game>
+        <cc_skip_important_app>true</cc_skip_important_app>      <!-- default: false -->
+        <cc_skip_system_process_max_adj>99</cc_skip_system_process_max_adj>      <!-- default: 200 -->
+        <cc_allow_caller>
+            <caller_name>com.oplus.camera.fallback.kill</caller_name>
+            <caller_name>com.oplus.camera.fallback.kill.uid</caller_name>
+            <caller_name>com.oplus.camera.fallback.kill.pid</caller_name>
+            <caller_name>com.oplus.camera.fallback.kill.forcestop</caller_name>
+        </cc_allow_caller>
+    </clear_config>
+
+    <nand_swap_config>
+        <feature_switch key="nand_swap_toggle" val="true" /> 
+        <feature_switch key="nand_swap_preload_toggle" val="true" />
+        <config key="continue_start_app_number_list" type="Integer" val="0" />
+        <config key="continue_start_time_list" type="Long" val="180000" /> 
+        <config key="app_usage_list_update_interval" type="Long" val="172800000" /> 
+    </nand_swap_config>
+
+    <fast_clear_config>
+        <fast_clear_scene_config name="com.oplus.camera.camera_startup" code="2003" delta="400" recent_keep="3"/>
+        <fast_clear_scene_config name="com.oplus.camera.camera_mode_changed" code="2004" delta="500" recent_keep="3"/>
+        <fast_clear_scene_config name="com.oplus.camera.camera_video_recorder" code="2005" delta="500" recent_keep="3"/>
+        <fast_clear_scene_config name="com.oplus.games.game_startup" code="2009" delta="100" recent_keep="3"/>
+        <fast_clear_activity name="com.tencent.mm.plugin.recordvideo.activity.MMRecordUI" delta="300" recent_keep="3"/>
+        <fast_clear_scene_config name="com.realme.aiengine.ai_engine_clear" code="2011" delta="400" recent_keep="3"/>
+        <config key="athena_lmk_fast_clear_only_use_kill" type="Boolean" val="false" />
+    </fast_clear_config>
+
+    <!-- external_clear_policy -->
+    <external_clear_policy pkg="android.preload_kill" module="android.preload_kill.forcestop" strategy="0" type="500" />
+
+    <external_clear_policy pkg="android.ams.provider" module="android.ams.provider" strategy="1" type="501" />
+
+    <external_clear_policy pkg="android.oguard" module="android.oguard.kill" strategy="3" type="502" />
+
+    <external_clear_policy pkg="android.oguard" module="android.oguard.abnormalAudio.kill" strategy="3" type="502" />
+
+    <external_clear_policy pkg="android.oguard" module="android.oguard.gameInFocus.kill" strategy="1" type="502" />
+
+    <external_clear_policy pkg="com.oplus.battery" module="com.oplus.battery.safety.hightemperature" strategy="0" type="504" />
+
+    <external_clear_policy pkg="android.bbds" module="android.bbds.thread_kill" strategy="2" type="505" />
+
+    <external_clear_policy pkg="android.bbds" module="android.bbds.lowmem_kill" strategy="2" type="507" />
+
+    <external_clear_policy pkg="com.coloros.remoteguardservice" module="com.coloros.remoteguardservice" strategy="4" type="508" />
+    <external_clear_policy pkg="com.coloros.remoteguardservice" module="com.coloros.remoteguardservice_stop" strategy="1" type="509" />
+
+    <external_clear_policy pkg="com.coloros.phonemanager" module="com.coloros.phonemanager.networkdetect" strategy="4" type="514" />
+    <external_clear_policy pkg="com.oplus.phonemanager" module="com.oplus.phonemanager.networkdetect" strategy="4" type="514" />
+
+    <external_clear_policy pkg="com.oplus.camera" module="com.oplus.camera.fallback.kill" strategy="4" type="516" />
+    <external_clear_policy pkg="com.oplus.camera" module="com.oplus.camera.fallback.kill.uid" strategy="3" type="516" />
+    <external_clear_policy pkg="com.oplus.camera" module="com.oplus.camera.fallback.kill.pid" strategy="2" type="516" />
+    <external_clear_policy pkg="com.oplus.camera" module="com.oplus.camera.fallback.kill.forcestop" strategy="1" type="516" />
+
+
+    <config_map key="external_clear_recently_used_min_threshold_minute" type="Integer">
+        <!--sub key = prefix(clear_spec) + # + caller_name /-->
+        <sub key="clear_spec#android.bbds.lowmem_kill" val="0" />
+        <sub key="clear_spec#com.oplus.camera.fallback.kill" val="0" />
+        <sub key="clear_spec#com.oplus.camera.fallback.kill.uid" val="0" />
+        <sub key="clear_spec#com.oplus.camera.fallback.kill.pid" val="0" />
+        <sub key="clear_spec#com.oplus.camera.fallback.kill.forcestop" val="0" />
+    </config_map>
+
+    <!--    <external_clear_policy pkg="com.oplus.athena" module="com.oplus.athena.forcestop" strategy="0" type="520" />-->
+    <!--    <external_clear_policy pkg="com.oplus.athena" module="com.oplus.athena.killpid" strategy="2" type="521" />-->
+
+    <!--    <config_map key="external_clear_recently_used_max_threshold_minute" type="Integer">-->
+    <!--        <sub key="clear_spec_common" val="360" />-->
+    <!--    </config_map>-->
+
+    <!--    <config_map key="external_clear_recently_used_min_threshold_minute" type="Integer">-->
+    <!--        <sub key="clear_spec_common" val="30" />-->
+    <!--    </config_map>-->
+
+    <!-- 8/12/16/24G and all os level -->
+    <config match="0xf0-0x7" key="high_prior_recently_used_app_range" type="String" val="1:3" />
+    <config match="0xf0-0x7" key="middle_prior_recently_used_app_range" type="String" val="4:4" />
+    <config match="0xf0-0x7" key="low_prior_recently_used_app_range" type="String" val="5:6" />
+    <config match="0xf0-0x7" key="protected_recently_used_mini_program_global_range" type="String" val="1:3" />
+
+    <!-- proactive clean config -->
+    <config key="enableProactiveClean" type="Boolean" val="true"/>
+    <config key="enableProactiveCleanBlackList" type="Boolean" val="true"/>
+    <config_list key="proactiveCleanProcessList" type="String">
+        <sub val="com.tencent.mm" />
+        <sub val="com.ss.android.ugc.aweme" />
+        <sub val="com.ss.android.ugc.aweme.lite" />
+        <sub val="com.android.settings" />
+        <sub val="com.ss.android.lark" />
+        <sub val="com.smile.gifmaker" />
+        <sub val="com.sina.weibo" />
+        <sub val="com.tencent.wework" />
+        <sub val="com.tencent.mobileqq" />
+        <sub val="com.xingin.xhs" />
+    </config_list>
+    <config match="0xf0-0x7" key="recently_used_hot_game_threshold" type="Long" val="300000"/>
+    <config key="print_svelte_meminfo_switch" type="Integer" val="1"/>
+    <config match="0xf0-0x7" key="middle_prior_recently_used_app_time_threshold" type="Long" val="180000"/>
+    <config match="0xf0-0x7" key="high_prior_recently_used_locked_app_time_threshold" type="Long" val="180000"/>
+</filter-conf>

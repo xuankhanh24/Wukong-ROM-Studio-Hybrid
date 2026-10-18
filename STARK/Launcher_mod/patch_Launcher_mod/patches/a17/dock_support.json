@@ -1,0 +1,16 @@
+{
+  "id": "dock_support",
+  "classes": [
+    {
+      "owner": "Lcom/android/common/util/ScreenUtils;",
+      "source": "ScreenUtils.kt",
+      "methods": [
+        {
+          "before": ".method public static final isSupportDockerExpandScreen()Z\n.registers 1\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isDockerExpandDisabled()Z\nmove-result v0\nif-eqz v0, :cond_a\nconst/4 v0, 0x0\nreturn v0\n:cond_a\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nif-eqz v0, :cond_12\nconst/4 v0, 0x1\nreturn v0\n:cond_12\ninvoke-static {}, Lcom/android/common/util/ScreenUtils;->isFoldScreenExpanded()Z\nmove-result v0\nreturn v0\n.end method\n",
+          "after": ".method public static final isSupportDockerExpandScreen()Z\n.registers 1\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkDockBlurEnabled()Z\nmove-result v0\nif-eqz v0, :cond_8\nconst/4 v0, 0x1\nreturn v0\n:cond_8\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isDockerExpandDisabled()Z\nmove-result v0\nif-eqz v0, :cond_12\nconst/4 v0, 0x0\nreturn v0\n:cond_12\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nif-eqz v0, :cond_1a\nconst/4 v0, 0x1\nreturn v0\n:cond_1a\ninvoke-static {}, Lcom/android/common/util/ScreenUtils;->isFoldScreenExpanded()Z\nmove-result v0\nreturn v0\n.end method\n"
+        }
+      ],
+      "fields": []
+    }
+  ]
+}

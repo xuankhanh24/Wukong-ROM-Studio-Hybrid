@@ -1,0 +1,17 @@
+{
+  "profile": "coloros-a16-adapter",
+  "requested_features": null,
+  "resolved_features": [
+    "bootstrap",
+    "feed",
+    "gestures",
+    "recents",
+    "search",
+    "settings",
+    "taskbar",
+    "dock",
+    "quick_search",
+    "dock_support",
+    "ram"
+  ]
+}

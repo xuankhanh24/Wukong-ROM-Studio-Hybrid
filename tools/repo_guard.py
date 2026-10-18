@@ -58,7 +58,8 @@ def main() -> int:
         path = Path(relative)
         if path.parts and path.parts[0] in FORBIDDEN_ROOTS:
             problems.append(f"Tracked content/runtime path: {relative}")
-        if path.name == "Auto_Build_WK_3.0.zip" or path.suffix.casefold() in {".apk", ".apex", ".img"}:
+        shared_stark = bool(path.parts and path.parts[0] == 'STARK')
+        if path.name == "Auto_Build_WK_3.0.zip" or (path.suffix.casefold() in {".apk", ".apex", ".img"} and not shared_stark):
             problems.append(f"Tracked large content file: {relative}")
         if path.is_file():
             size = path.stat().st_size

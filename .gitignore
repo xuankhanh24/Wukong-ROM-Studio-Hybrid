@@ -14,8 +14,10 @@ Auto_Build_WK_*.zip
 /Logs/
 /Data/
 /MOD/
-/STARK/WK_Manager/
-/STARK/WK_Installer/
+# STARK is the complete shared mod source/payload, versioned with the code.
+# Only generated scratch/cache files are excluded (never mod payloads).
+/STARK/**/_patch_temp/
+/STARK/**/.scratch/
 /copy-image/
 /OFX/
 /TWRP/

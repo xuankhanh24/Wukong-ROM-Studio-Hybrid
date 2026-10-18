@@ -41,6 +41,42 @@ async function seedApprovedUser(subject: string, credits: number): Promise<void>
 }
 
 describe("atomic Accepted Job creation", () => {
+  it("keeps Launcher and the selected Fix_noti level and rejects two levels", async () => {
+    await seedApprovedUser("43981", 3);
+    const headers = await tmaHeaders(43981);
+    const build = { ...recipe.build, launcherFeatures: ["global_region", "ram"], fixNotiFeatures: ["level1"] };
+    const created = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: { ...headers, "Idempotency-Key": "launcher-noti-features" },
+      body: JSON.stringify({ ...recipe, build })
+    });
+    expect(created.status).toBe(201);
+    const job = await created.json() as { job_id: string };
+    const snapshot = await (await SELF.fetch(`https://worker.example/v1/sync?jobId=${job.job_id}`, { headers })).json() as any;
+    expect(snapshot.activeJob.recipe.build.launcherFeatures).toEqual(["global_region", "ram"]);
+    expect(snapshot.activeJob.recipe.build.fixNotiFeatures).toEqual(["level1"]);
+    const rejected = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: { ...headers, "Idempotency-Key": "noti-two-levels" },
+      body: JSON.stringify({ ...recipe, build: { ...build, fixNotiFeatures: ["level1", "level2"] } })
+    });
+    expect(rejected.status).toBe(400);
+  });
+  it("preserves explicit WK feature selection and rejects unknown patches", async () => {
+    await seedApprovedUser("43980", 3);
+    const headers = await tmaHeaders(43980);
+    const selected = { ...recipe, build: { ...recipe.build, wkManagerPatches: ["multi_window", "power_button_remap", "black_window", "multi_audio"] } };
+    const created = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: { ...headers, "Idempotency-Key": "wk-feature-selection" }, body: JSON.stringify(selected)
+    });
+    expect(created.status).toBe(201);
+    const job = await created.json() as { job_id: string };
+    const snapshot = await (await SELF.fetch(`https://worker.example/v1/sync?jobId=${job.job_id}`, { headers })).json() as any;
+    expect(snapshot.activeJob.recipe.build.wkManagerPatches).toEqual(["multi_window", "power_button_remap", "black_window", "multi_audio"]);
+    const rejected = await SELF.fetch("https://worker.example/v1/jobs", {
+      method: "POST", headers: { ...headers, "Idempotency-Key": "wk-invalid-selection" },
+      body: JSON.stringify({ ...recipe, build: { ...recipe.build, wkManagerPatches: ["unknown"] } })
+    });
+    expect(rejected.status).toBe(400);
+  });
   it("lets admins inspect a user's job and identity while isolating other users", async () => {
     await seedApprovedUser("42991", 2);
     await seedApprovedUser("42992", 2);

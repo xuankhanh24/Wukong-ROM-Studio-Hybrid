@@ -144,7 +144,26 @@
           <p id="config-summary" class="config-summary" aria-live="polite"></p><details class="build-advanced" id="build-advanced" hidden><summary data-i18n="advancedBuild">Tùy chọn nâng cao</summary></details><div class="selection-bar"><div><strong data-i18n="mods">MOD áp dụng</strong><small id="mod-count">0 đã chọn</small></div><div><button id="select-defaults" type="button" data-i18n="defaults">Mặc định</button><button id="select-all" type="button" data-i18n="selectAll">Tất cả</button><button id="clear-mods" type="button" data-i18n="clear">Bỏ chọn</button></div></div>
           <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
           <div class="mod-list" id="mod-list" aria-live="polite"></div>
-          <fieldset id="wk-manager-patches" hidden>
+          <fieldset id="launcher-features" class="mod-feature-options" hidden>
+            <legend>Launcher_mod · Chọn chức năng / Features</legend>
+            <label><input type="checkbox" value="global_region" checked> Bỏ giới hạn CN / Global region</label>
+            <label><input type="checkbox" value="recents"> Đa nhiệm máy tính bảng / Tablet recents</label>
+            <label><input type="checkbox" value="dock"> Làm mờ thanh dock / Dock blur</label>
+            <label><input type="checkbox" value="taskbar"> Mở rộng thanh tác vụ / Expanded taskbar</label>
+            <label><input type="checkbox" value="feed"> Google Feed</label>
+            <label><input type="checkbox" value="search"> Thanh tìm kiếm tùy chỉnh / Custom search bar</label>
+            <label><input type="checkbox" value="quick_search"> Tìm kiếm nhanh Google / Google QSB</label>
+            <label><input type="checkbox" value="gestures"> Cử chỉ vuốt xuống / Swipe-down gestures</label>
+            <label><input type="checkbox" value="ram"> Hiển thị RAM đa nhiệm / Recents RAM</label>
+            <p>Các tính năng APK cần JDK + Android SDK trên runner. / APK features require JDK + Android SDK.</p>
+          </fieldset>
+          <fieldset id="fix-noti-features" class="mod-feature-options" hidden>
+            <legend>Fix_noti · Chọn cấp độ / Level</legend>
+            <label><input type="checkbox" value="level1"> LV1 · Global baseline — cân bằng pin / Balanced</label>
+            <label><input type="checkbox" value="level2" checked> LV2 · Fix thông báo đầy đủ / Full notification fix</label>
+            <p>Chọn một mức, không áp dụng đồng thời. / Select one level only.</p>
+          </fieldset>
+          <fieldset id="wk-manager-patches" class="mod-feature-options" hidden>
             <legend>WK Manager · Patch tùy chọn / Optional patches</legend>
             <label><input type="checkbox" value="keybox_manager" checked> Quản lý Keybox / Keybox manager</label>
             <label><input type="checkbox" value="play_integrity_spoof" checked> Play Integrity Spoof</label>

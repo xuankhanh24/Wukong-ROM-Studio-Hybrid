@@ -1,11 +1,11 @@
 import os
 import sys
-import subprocess
 import zipfile
 import shutil
 import argparse
 import re
 from pathlib import Path
+from studio_core import _stark_archive_helper
 
 class FrameworkTool:
     def __init__(self, jar_or_dir, tools_dir=None, base_out="framework-cooker"):
@@ -14,14 +14,12 @@ class FrameworkTool:
         if not path.is_absolute():
             path = self.work_dir / path
 
-        # Locate tools
-        if tools_dir:
-            self.tools_dir = Path(tools_dir).absolute()
-        else:
-            self.tools_dir = self.work_dir / "framework_mod_v3"
-            
-        self.baksmali_jar = self.tools_dir / "baksmali.jar"
-        self.smali_jar = self.tools_dir / "smali.jar"
+        self.toolchain = _stark_archive_helper()
+        self.tools_dir = self.toolchain.toolchain_dir()
+        if tools_dir and Path(tools_dir).resolve() != self.tools_dir.resolve():
+            raise ValueError('Use WUKONG_STUDIO_TOOLCHAIN_DIR to select one shared toolchain for all patches')
+        self.baksmali_jar = Path(self.toolchain.require_tool('baksmali'))
+        self.smali_jar = Path(self.toolchain.require_tool('smali'))
         
         if path.is_file():
             # If input is a JAR file, create a dedicated folder inside base_out
@@ -94,8 +92,8 @@ class FrameworkTool:
                 smali_out = self.unpack_dir / folder_name
                 
                 print(f"    - {dex.name} -> {smali_out.name}")
-                cmd = ["java", "-Xmx2G", "-jar", str(self.baksmali_jar), "d", str(dex), "-o", str(smali_out)]
-                res = subprocess.run(cmd, capture_output=True, text=True)
+                cmd = [self.toolchain.require_tool('java'), "-Xmx2G", "-jar", str(self.baksmali_jar), "d", str(dex), "-o", str(smali_out)]
+                res = self.toolchain.run_tool(cmd, capture_output=True, text=True)
                 if res.returncode != 0:
                     print(f"      [!] Error disassembling {dex.name}:\n{res.stderr}")
                     return False
@@ -122,8 +120,7 @@ class FrameworkTool:
         
         try:
             # 1. Clear old DEX files in root to prepare for new ones
-            for dex in self.unpack_dir.glob("*.dex"):
-                dex.unlink()
+            replacements = {}
 
             # 2. Detect ALL smali directories
             smali_dirs = [d for d in self.unpack_dir.iterdir() if d.is_dir() and (d.name.startswith("smali") or (d / "android").exists() or (d / "com").exists())]
@@ -155,13 +152,14 @@ class FrameworkTool:
                 dex_out = self.unpack_dir / dex_name
                 print(f"    - {smali_dir.name} -> {dex_name}", end=" ", flush=True)
                 
-                cmd = ["java", "-Xmx2G", "-jar", str(self.smali_jar), "a", str(smali_dir), "-o", str(dex_out), "--api", "33"]
-                res = subprocess.run(cmd, capture_output=True, text=True)
+                cmd = [self.toolchain.require_tool('java'), "-Xmx2G", "-jar", str(self.smali_jar), "a", str(smali_dir), "-o", str(dex_out), "--api", "33"]
+                res = self.toolchain.run_tool(cmd, capture_output=True, text=True)
                 
                 if res.returncode != 0 or not dex_out.exists():
                     print(f"\n[!] Failed to assemble {dex_name}. Error:\n{res.stderr}")
                     return False
                 print(f"({os.path.getsize(dex_out)} bytes)")
+                replacements[dex_name] = dex_out
                 
             # 3. Create backup (Disabled by user request)
             # backup_jar = self.jar_path.with_suffix(".jar.bak")
@@ -171,21 +169,9 @@ class FrameworkTool:
 
             # 4. ZIP everything back
             print(f"[*] Building final JAR...")
-            with zipfile.ZipFile(self.jar_path, 'w', zipfile.ZIP_DEFLATED) as new_zip:
-                for root, dirs, files in os.walk(self.unpack_dir):
-                    rel_root = Path(root).relative_to(self.unpack_dir)
-                    # Exclude smali source folders
-                    if any(part.startswith("smali") for part in rel_root.parts):
-                        continue
-                    
-                    for file in files:
-                        # Exclude metadata and backups
-                        if file == ".source" or file.endswith(".jar.bak"):
-                            continue
-                            
-                        file_path = Path(root) / file
-                        arcname = file_path.relative_to(self.unpack_dir)
-                        new_zip.write(file_path, arcname)
+            if not replacements:
+                raise ValueError('No smali trees were assembled; original JAR is unchanged')
+            self.toolchain.rewrite_archive(self.jar_path, self.jar_path, replacements)
             
             print(f"[*] SUCCESS: Updated JAR at {self.jar_path}")
             return True

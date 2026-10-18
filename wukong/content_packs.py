@@ -11,9 +11,12 @@ import tarfile
 import tempfile
 import time
 import uuid
+import warnings
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any, Callable, Iterable, Mapping, Sequence
+from urllib.request import Request, urlopen
+from urllib.parse import urlsplit
 
 from .adapters import SourceIntegrityError, sha256_file
 
@@ -259,6 +262,8 @@ def validate_content_index(index: Mapping[str, Any]) -> None:
             raise ValueError(f"Invalid or duplicate content-pack ID: {pack_id}")
         _relative_parts(target, label="content-pack target")
         ids.add(pack_id)
+        if pack.get('source') == 'git' and (pack_id != 'STARK/common' or target != 'STARK' or pack.get('archive')):
+            raise ValueError('Only STARK/common may be owned by the Git checkout')
         seen: set[str] = set()
         total = 0
         for item in pack.get("files", []):
@@ -290,6 +295,20 @@ def validate_content_index(index: Mapping[str, Any]) -> None:
                 or size < 0
             ):
                 raise ValueError(f"Invalid content-pack archive: {pack_id}")
+            parts = archive.get('parts')
+            if parts is not None:
+                if not isinstance(parts, list) or not parts:
+                    raise ValueError(f"Invalid content-pack archive parts: {pack_id}")
+                total_parts = 0
+                for part in parts:
+                    if (not isinstance(part, Mapping) or urlsplit(str(part.get('uri', ''))).scheme != 'https'
+                        or int(part.get('sizeBytes', -1)) < 0
+                        or len(str(part.get('sha256', ''))) != 64
+                        or any(c not in '0123456789abcdef' for c in str(part.get('sha256', '')))):
+                        raise ValueError(f"Invalid content-pack archive part: {pack_id}")
+                    total_parts += int(part['sizeBytes'])
+                if total_parts != size:
+                    raise ValueError(f"Content-pack archive parts size mismatch: {pack_id}")
 
 
 def _archive_tar_filter(member: tarfile.TarInfo) -> tarfile.TarInfo:
@@ -518,6 +537,59 @@ def _extract_content_pack_archive(
             temporary_tar.unlink(missing_ok=True)
 
 
+def download_http_archive(archive: Mapping[str, Any], destination: Path) -> None:
+    """Reassemble versioned HTTPS assets, enforcing part size and SHA-256."""
+    parts = archive.get('parts') or [archive]
+    with destination.open('wb') as output:
+        for part in parts:
+            uri = str(part['uri'])
+            if urlsplit(uri).scheme != 'https':
+                raise ValueError('Content archive downloads require HTTPS')
+            expected_size = int(part['sizeBytes'])
+            digest = hashlib.sha256()
+            count = 0
+            request = Request(uri, headers={'User-Agent': 'Wukong-ROM-Studio/1'})
+            with urlopen(request, timeout=180) as response:
+                while chunk := response.read(ARCHIVE_CHUNK_SIZE):
+                    count += len(chunk)
+                    if count > expected_size:
+                        raise SourceIntegrityError('Content-pack download exceeds declared size')
+                    digest.update(chunk)
+                    output.write(chunk)
+            if count != expected_size or digest.hexdigest() != str(part['sha256']).casefold():
+                raise SourceIntegrityError('Content-pack download size or checksum mismatch')
+
+
+def load_content_index(path: Path) -> dict[str, Any]:
+    """Refresh a release catalog once per consumer operation; pin its snapshot.
+
+    Offline builds may continue using their last catalog because old assets are
+    never overwritten. Malformed remote metadata is an error, not a reason to
+    silently disable validation.
+    """
+    index = json.loads(path.read_text(encoding='utf-8'))
+    validate_content_index(index)
+    channel = index.get('catalogUri')
+    if channel:
+        parsed = urlsplit(str(channel))
+        if parsed.scheme != 'https' or parsed.hostname != 'raw.githubusercontent.com':
+            raise ValueError('Catalog channel must be hosted on raw.githubusercontent.com')
+        request = Request(str(channel) + '?wk=' + str(int(time.time())),
+                          headers={'User-Agent': 'Wukong-ROM-Studio/1', 'Cache-Control': 'no-cache'})
+        try:
+            with urlopen(request, timeout=20) as response:
+                data = response.read(32 * 1024 * 1024 + 1)
+            if len(data) > 32 * 1024 * 1024:
+                raise ValueError('Content catalog exceeds its safe size')
+        except OSError:
+            warnings.warn('Cannot refresh content catalog; using the last verified release snapshot', RuntimeWarning)
+            return index
+        current = json.loads(data)
+        validate_content_index(current)
+        return current
+    return index
+
+
 class ContentPackManager:
     def __init__(
         self,
@@ -541,6 +613,10 @@ class ContentPackManager:
         pack = next((item for item in index["packs"] if item["id"] == pack_id), None)
         if not pack:
             raise KeyError(f"Unknown content-pack: {pack_id}")
+        if pack.get('source') == 'git':
+            target = self.content_root / 'STARK'
+            self.verify(target, pack)
+            return target
         self.content_root.mkdir(parents=True, exist_ok=True)
         staging = Path(tempfile.mkdtemp(prefix="wukong-pack-", dir=self.content_root))
         archive_path: Path | None = None
@@ -552,11 +628,14 @@ class ContentPackManager:
             archive = pack.get("archive")
             if archive:
                 archive_uri = str(archive["uri"])
-                suffix = ".tar.zst" if archive_uri.casefold().endswith((".tar.zst", ".tzst")) else ".tar"
+                suffix = ".tar.zst" if archive.get('format') == 'tar.zst' or archive_uri.casefold().endswith((".tar.zst", ".tzst")) else ".tar"
                 archive_path = staging.with_name(staging.name + suffix)
-                self.run_command(
-                    self._rclone("copyto", archive_uri, str(archive_path), "--retries", "3")
-                )
+                if archive_uri.startswith('https://'):
+                    download_http_archive(archive, archive_path)
+                else:
+                    self.run_command(
+                        self._rclone("copyto", archive_uri, str(archive_path), "--retries", "3")
+                    )
                 expected_size = int(archive["sizeBytes"])
                 actual_size = archive_path.stat().st_size
                 if actual_size != expected_size:
@@ -610,6 +689,12 @@ class ContentPackManager:
         *,
         allowed_extra_prefixes: tuple[str, ...] = (),
     ) -> None:
+        if pack.get('source') == 'git':
+            if pack.get('id') != 'STARK/common' or pack.get('target') != 'STARK':
+                raise SourceIntegrityError('Invalid Git-owned content-pack')
+            if not root.is_dir() or not any(path.is_file() for path in root.rglob('*')):
+                raise SourceIntegrityError('Shared STARK is missing; restore the Git checkout or reinstall Studio')
+            return
         expected = {str(item["path"]): item for item in pack.get("files", [])}
         actual = {
             path.relative_to(root).as_posix(): path

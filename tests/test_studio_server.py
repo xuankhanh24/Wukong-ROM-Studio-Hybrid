@@ -629,6 +629,12 @@ class StudioServerTests(unittest.TestCase):
         self.assertIn("-STA", run.call_args.args[0])
         self.assertNotIn("-WindowStyle", run.call_args.args[0])
 
+    def test_job_spec_persists_wk_manager_patch_selection(self):
+        with mock.patch.object(studio_server, "inspect_rom", return_value={"ok": True, "errors": []}):
+            job = studio_server.create_job({"romPath": str(self.root / "fixture.zip"),
+                                            "wkManagerPatches": ["multi_window"]})
+        self.assertEqual(job["spec"]["wkManagerPatches"], ["multi_window"])
+
     def test_artifact_history_keeps_missing_output_file(self):
         with mock.patch.object(
             studio_server, "inspect_rom", return_value={"ok": True, "errors": []}

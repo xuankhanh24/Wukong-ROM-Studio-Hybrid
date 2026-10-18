@@ -403,6 +403,138 @@
                                                     </StackPanel>
                                                 </Grid>
                                                 <Grid x:Name="ModsPanel" ColumnSpacing="8" RowSpacing="8" SizeChanged="ModsPanelSizeChanged" />
+                                                <Border x:Name="LauncherFeaturesPanel" Style="{StaticResource SubtlePanelStyle}" Margin="0,6,0,0" Visibility="Collapsed">
+                                                    <StackPanel Spacing="8">
+                                                        <TextBlock Text="Launcher_mod · Chọn chức năng / Features" FontWeight="SemiBold" />
+                                                        <TextBlock Text="Ngoài bỏ giới hạn CN, các tính năng sẽ patch APK stock và cần JDK + Android SDK. / APK features require JDK + Android SDK." TextWrapping="Wrap" Foreground="{ThemeResource MutedBrush}" FontSize="12" />
+                                                        <StackPanel x:Name="LauncherFeatureChecks" Spacing="4" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <Border x:Name="FixNotiFeaturesPanel" Style="{StaticResource SubtlePanelStyle}" Margin="0,6,0,0" Visibility="Collapsed">
+                                                    <StackPanel Spacing="8">
+                                                        <TextBlock Text="Fix_noti · Chọn chức năng / Features" FontWeight="SemiBold" />
+                                                        <TextBlock Text="Chọn một mức. LV1 và LV2 không áp dụng đồng thời. / Select one level only." TextWrapping="Wrap" Foreground="{ThemeResource MutedBrush}" FontSize="12" />
+                                                        <StackPanel x:Name="FixNotiFeatureChecks" Spacing="4" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <Border x:Name="WkManagerPatchesPanel" Style="{StaticResource SubtlePanelStyle}" Margin="0,6,0,0" Visibility="Collapsed">
+                                                    <StackPanel Spacing="10">
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                                <TextBlock Text="WK Manager · Hook tùy chọn" FontWeight="SemiBold" FontSize="13" />
+                                                                <Border Background="{ThemeResource BadgeBackgroundBrush}" CornerRadius="10" Padding="8,3" VerticalAlignment="Center">
+                                                                    <TextBlock x:Name="WkPatchesSummaryText" Text="10 / 10 đã chọn" Foreground="{ThemeResource PrimaryBrush}" FontWeight="SemiBold" FontSize="11" />
+                                                                </Border>
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                                                <Button Content="Chọn tất cả" FontSize="11" Padding="8,4" Click="SelectAllWkPatchesClick" />
+                                                                <Button Content="Bỏ chọn" FontSize="11" Padding="8,4" Click="ClearWkPatchesClick" />
+                                                            </StackPanel>
+                                                        </Grid>
+
+                                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8" RowSpacing="6">
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+
+                                                            <!-- Row 0 -->
+                                                            <Border Grid.Row="0" Grid.Column="0" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkKeyboxManagerCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Quản lý Keybox" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="keybox_manager · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                            <Border Grid.Row="0" Grid.Column="1" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkPlayIntegritySpoofCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Play Integrity Spoof" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="play_integrity_spoof · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+
+                                                            <!-- Row 1 -->
+                                                            <Border Grid.Row="1" Grid.Column="0" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkGameSpoofCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Game Spoof (Mở khóa FPS)" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="gamespoof · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                            <Border Grid.Row="1" Grid.Column="1" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkHmaPrivacySpoofCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="HMA Quyền riêng tư" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="hma_privacy_spoof · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+
+                                                            <!-- Row 2 -->
+                                                            <Border Grid.Row="2" Grid.Column="0" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkKernelManagerCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Trình quản lý Kernel &amp; Power" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="kernel_manager · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                            <Border Grid.Row="2" Grid.Column="1" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkPowerRemapCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Remap nút nguồn" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="power_button_remap · framework &amp; oplus" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+
+                                                            <!-- Row 3 -->
+                                                            <Border Grid.Row="3" Grid.Column="0" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkMultiWindowCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Đa cửa sổ nổi không giới hạn" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="multi_window · framework &amp; oplus" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                            <Border Grid.Row="3" Grid.Column="1" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkDisableFlagSecureCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Tắt cờ bảo mật (Chụp màn hình)" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="disable_flag_secure · framework &amp; oplus" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+
+                                                            <!-- Row 4 -->
+                                                            <Border Grid.Row="4" Grid.Column="0" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkBlackWindowCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Tương thích cửa sổ nổi" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="black_window · framework &amp; oplus" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                            <Border Grid.Row="4" Grid.Column="1" Background="{ThemeResource CardBackgroundBrush}" BorderBrush="{ThemeResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                                                                <CheckBox x:Name="WkMultiAudioCheck" IsChecked="True" Checked="ConfigurationOptionChanged" Unchecked="ConfigurationOptionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Text="Âm thanh nhiều ứng dụng" FontWeight="SemiBold" FontSize="12" />
+                                                                        <TextBlock Text="multi_audio · framework.jar" FontSize="10" Foreground="{ThemeResource MutedBrush}" />
+                                                                    </StackPanel>
+                                                                </CheckBox>
+                                                            </Border>
+                                                        </Grid>
+
+                                                        <TextBlock Text="* Chỉ áp dụng các hook được chọn vào framework.jar và oplus-services.jar khi đóng gói WK Manager." Foreground="{ThemeResource MutedBrush}" FontSize="11" />
+                                                    </StackPanel>
+                                                </Border>
                                             </StackPanel>
                                         </Expander>
                                     </Border>
@@ -676,8 +808,8 @@
                                 <Border Style="{StaticResource SubtlePanelStyle}" Padding="14">
                                     <StackPanel Spacing="10">
                                         <TextBlock Text="Đồng bộ nội dung đa nền tảng" Style="{StaticResource SectionTitleStyle}" />
-                                        <TextBlock Text="Content là nguồn chuẩn duy nhất. Chọn một thư mục để tạo lại toàn bộ content-pack tương ứng và thay thế binary trên Drive. Công bố manifest GitHub là bước riêng." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" />
-                                        <TextBlock x:Name="ContentSyncSelectionText" Text="Chọn thư mục trong Content; Content\STARK chứa WK_Manager và com." Style="{StaticResource MutedTextStyle}" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" />
+                                        <TextBlock Text="STARK dùng chung được cập nhật qua Git và bộ cài. Các pack MOD được upload lên GitHub Releases; hash và manifest tự cập nhật sau khi xác minh, không ghi đè bản đang được job sử dụng." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="ContentSyncSelectionText" Text="Chọn Content\MOD\&lt;phiên bản&gt; để upload một pack, hoặc upload tất cả MOD." Style="{StaticResource MutedTextStyle}" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" />
                                         <Grid x:Name="ContentSyncActionsGrid" ColumnSpacing="8">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -687,8 +819,8 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
-                                            <Button x:Name="SyncContentDriveButton" Content="Chọn thư mục và thay thế trên Drive" Style="{StaticResource AccentButtonStyle}" Click="SyncContentToDriveClick" HorizontalAlignment="Stretch" />
-                                            <Button x:Name="PublishContentManifestButton" Grid.Column="1" Content="Công bố manifest lên GitHub" Click="PublishContentManifestClick" HorizontalAlignment="Stretch" />
+                                            <Button x:Name="SyncContentDriveButton" Content="Chọn pack và upload GitHub" Style="{StaticResource AccentButtonStyle}" Click="SyncContentToDriveClick" HorizontalAlignment="Stretch" />
+                                            <Button x:Name="PublishContentManifestButton" Grid.Column="1" Content="Upload tất cả pack MOD" Click="UploadAllModPacksClick" HorizontalAlignment="Stretch" />
                                         </Grid>
                                         <Border x:Name="ContentSyncProgressPanel" Background="{ThemeResource CardBackgroundBrush}" CornerRadius="8" Padding="12" Visibility="Collapsed">
                                             <StackPanel Spacing="9">
@@ -1076,7 +1208,7 @@
                                 <TextBlock Text="GitHub Actions và Google Drive" Style="{StaticResource SectionTitleStyle}" />
                                 <TextBlock Text="Token GitHub và rclone.conf được mã hóa bằng Windows DPAPI và không hiển thị lại." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" />
                                 <TextBox x:Name="HybridRepositoryBox" Header="GitHub repository" Text="xuankhanh24/Wukong-ROM-Studio-Hybrid" />
-                                <PasswordBox x:Name="HybridGitHubTokenBox" Header="Fine-grained GitHub token" PlaceholderText="Actions write, Metadata read, Administration read" />
+                                <PasswordBox x:Name="HybridGitHubTokenBox" Header="Fine-grained GitHub token" PlaceholderText="Contents write (Releases + manifest), Actions write, Metadata read" />
                                 <TextBox x:Name="HybridRcloneConfigBox" Header="Nội dung rclone.conf" AcceptsReturn="True" TextWrapping="NoWrap" MinHeight="120" FontFamily="Consolas" />
                                 <Button Content="Mã hóa cấu hình hybrid và khởi động lại backend" HorizontalAlignment="Right" Click="ConfigureHybridSecretsClick" />
                             </StackPanel>

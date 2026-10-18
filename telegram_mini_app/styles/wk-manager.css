@@ -1,4 +1,4 @@
-#wk-manager-patches {
+.mod-feature-options {
   min-inline-size: 0;
   margin: 16px 0 0;
   padding: 14px;
@@ -7,8 +7,8 @@
   display: grid;
   gap: 10px;
 }
-#wk-manager-patches[hidden] { display: none; }
-#wk-manager-patches legend { font-size: 13px; font-weight: 650; }
-#wk-manager-patches label { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-#wk-manager-patches input { width: 18px; height: 18px; min-height: 0; flex-shrink: 0; margin: 0; accent-color: var(--accent); }
-#wk-manager-patches p { margin: 0; color: var(--muted); font-size: 12px; }
+.mod-feature-options[hidden] { display: none; }
+.mod-feature-options legend { font-size: 13px; font-weight: 650; }
+.mod-feature-options label { display: flex; align-items: center; gap: 10px; font-size: 13px; min-height: 44px; }
+.mod-feature-options input { width: 18px; height: 18px; min-height: 0; flex-shrink: 0; margin: 0; accent-color: var(--accent); }
+.mod-feature-options p { margin: 0; color: var(--muted); font-size: 12px; }

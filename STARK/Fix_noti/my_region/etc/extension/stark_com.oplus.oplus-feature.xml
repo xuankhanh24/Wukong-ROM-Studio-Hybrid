@@ -1,0 +1,4 @@
+-	<oplus-feature name="oplus.software.startup_strategy_restrict"/>
+-	<oplus-feature name="oplus.software.pms_app_frozen"/>
+-	<oplus-feature name="oplus.software.hans_restriction"/>
++	<oplus-feature name="oplus.software.hans_restriction_exp"/>

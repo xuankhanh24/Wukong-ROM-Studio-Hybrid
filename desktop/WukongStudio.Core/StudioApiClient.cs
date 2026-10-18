@@ -120,7 +120,10 @@ public sealed record StudioBuildSpec(
     string Preset,
     IReadOnlyList<string> EnabledSteps,
     bool NotifyTelegram,
-    string? ResumeFromJobId = null);
+    string? ResumeFromJobId = null,
+    IReadOnlyList<string>? WkManagerPatches = null,
+    IReadOnlyList<string>? LauncherFeatures = null,
+    IReadOnlyList<string>? FixNotiFeatures = null);
 public sealed record StudioInspectResult(
     bool Ok,
     IReadOnlyList<string> Errors,

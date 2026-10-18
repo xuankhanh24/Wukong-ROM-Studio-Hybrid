@@ -67,6 +67,8 @@ def main() -> int:
     manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
     if manifest.get("schemaVersion") != 1 or manifest.get("platform") != "Linux/x86_64":
         raise RuntimeError("Unsupported Linux tool manifest")
+    from wukong.patch_tools import toolchain_report
+    toolchain_report(probe=True)
     destination = Path(args.destination).resolve()
     destination.mkdir(parents=True, exist_ok=True)
     for tool in manifest["tools"]:

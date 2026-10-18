@@ -47,6 +47,19 @@ if (-not $SkipTests) {
             tests.test_telegram_progress `
             tests.test_uploader `
             tests.test_wk_manager_patcher `
+            tests.test_wk_manager_features `
+            tests.test_stark_archive `
+            tests.test_patch_toolchain `
+            tests.test_command_logging `
+            tests.test_smali_io `
+            tests.test_smali_assembly `
+            tests.test_keystore_request_binding `
+            tests.test_patch_execution `
+            tests.test_installer_stark `
+            tests.test_mod_features `
+            tests.test_github_content `
+            tests.test_content_sync `
+            tests.test_sync_platform_content_cli `
             tests.test_wukong_hybrid
         if ($LASTEXITCODE -ne 0) {
             throw 'Python test gate failed.'
