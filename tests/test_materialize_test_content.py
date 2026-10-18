@@ -38,6 +38,14 @@ class MaterializeTestContentSafetyTests(unittest.TestCase):
                     materialize_test_content.main()
 
             self.assertEqual(daemon.read_bytes(), b"real-daemon")
+            with mock.patch.multiple(
+                materialize_test_content, INDEX=index, MOD_ROOT=mod_root, MARKER=mod_marker,
+                STARK_ROOT=root / 'STARK', SHARED_WK_ROOT=shared_root,
+                SHARED_WK_MARKER=shared_root / '.wukong-test-fixture',
+            ):
+                self.assertEqual(materialize_test_content.main(preserve_shared=True), 0)
+            self.assertEqual(daemon.read_bytes(), b'real-daemon')
+            self.assertFalse((shared_root / '.wukong-test-fixture').exists())
 
     def test_preserves_bundled_shared_fake_lock_content(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
