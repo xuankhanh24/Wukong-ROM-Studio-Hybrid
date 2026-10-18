@@ -560,6 +560,19 @@ def download_http_archive(archive: Mapping[str, Any], destination: Path) -> None
                 raise SourceIntegrityError('Content-pack download size or checksum mismatch')
 
 
+def preferred_content_index(content_root: Path, bundled: Path) -> Path:
+    synced = content_root.parent / 'Data' / 'ContentSync' / 'index.json'
+    if synced.is_file():
+        try:
+            metadata = json.loads(synced.read_text(encoding='utf-8'))
+            # Do not let a pre-migration Drive sync shadow the new installer.
+            if metadata.get('releaseTag') and metadata.get('catalogUri'):
+                return synced
+        except (ValueError, OSError):
+            pass
+    return bundled
+
+
 def load_content_index(path: Path) -> dict[str, Any]:
     """Refresh a release catalog once per consumer operation; pin its snapshot.
 

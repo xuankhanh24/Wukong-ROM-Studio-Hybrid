@@ -140,6 +140,18 @@ class GitHubContentTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     load_content_index(index)
 
+    def test_legacy_drive_sync_index_does_not_shadow_new_installer_catalog(self):
+        from wukong.content_packs import preferred_content_index
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundled = root / 'Runtime/Scripts/content-packs/index.json'
+            synced = root / 'Data/ContentSync/index.json'
+            synced.parent.mkdir(parents=True)
+            synced.write_text(json.dumps({'schemaVersion': 1, 'packs': []}))
+            self.assertEqual(preferred_content_index(root / 'Content', bundled), bundled)
+            synced.write_text(json.dumps({'releaseTag': 'new', 'catalogUri': 'https://raw.githubusercontent.com/test/repo/main/content-packs/index.json'}))
+            self.assertEqual(preferred_content_index(root / 'Content', bundled), synced)
+
     def test_github_manifest_publish_merges_unselected_packs_and_uses_cas(self):
         import base64
         from wukong.content_sync import publish_index_to_github

@@ -12,7 +12,7 @@ from .artifacts import PreparedArtifact, prepare_artifact
 from .adapters import RcloneStorageAdapter, SourceIntegrityError, sha256_file, source_adapter_for
 from .artifact_mirror import ArtifactMirrorPublisher, DCloudMirrorConfig, attach_mirror
 from .cloud_sync import CloudJobSync
-from .content_packs import ContentPackManager, validate_content_index, load_content_index
+from .content_packs import ContentPackManager, validate_content_index, load_content_index, preferred_content_index
 from .models import ArtifactRecord, BuildRecipe, JobManifest, JobStatus, preset_edition_label
 from .orchestrator import JobStore, OrchestrationError
 from .pipeline import CHECKPOINT_PIPELINE_STEPS
@@ -220,10 +220,8 @@ class LocalJobExecutor:
         self.rclone_config = rclone_config
         self.build_workspace_root = (build_workspace_root or WORKSPACE_ROOT).resolve()
         self.content_root = (content_root or CONTENT_ROOT).resolve()
-        synced_index = self.content_root.parent / 'Data' / 'ContentSync' / 'index.json'
-        self.content_index = (content_index or
-            (synced_index if synced_index.is_file() else SCRIPT_ROOT / "content-packs" / "index.json")
-        ).resolve()
+        self.content_index = (content_index or preferred_content_index(
+            self.content_root, SCRIPT_ROOT / 'content-packs' / 'index.json')).resolve()
         self.actions_ui = actions_ui or GitHubActionsUI()
         if mirror_publisher is not None:
             self.mirror_publisher = mirror_publisher
