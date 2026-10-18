@@ -3,6 +3,7 @@
   "buildCommand": "npm ci --prefix telegram_mini_app && python -m tools.build_vercel_mini_app",
   "outputDirectory": ".vercel-static",
   "framework": null,
+  "regions": ["hkg1"],
   "functions": {
     "api/source-transport.ts": {
       "maxDuration": 60
