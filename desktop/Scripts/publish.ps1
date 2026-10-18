@@ -49,6 +49,7 @@ if (-not $SkipTests) {
             tests.test_wk_manager_patcher `
             tests.test_wk_manager_features `
             tests.test_wk_manager_module_layout `
+            tests.test_wk_manager_force_policy `
             tests.test_stark_archive `
             tests.test_patch_toolchain `
             tests.test_command_logging `

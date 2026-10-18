@@ -3172,6 +3172,7 @@ def _validate_wk_manager_power_policy_types(
     *,
     additional_policies: Iterable[Path] = (),
     allowed_missing_symbols: Iterable[str] = (),
+    enforce_symbols: bool = True,
 ) -> set[str]:
     if not policy.is_file():
         raise StudioError(f"WK_Manager platform SELinux policy is missing: {policy}")
@@ -3214,10 +3215,15 @@ def _validate_wk_manager_power_policy_types(
             details.append(f"attributes: {', '.join(unresolved_attributes)}")
         if unresolved_symbols:
             details.append(f"types/attributes: {', '.join(unresolved_symbols)}")
-        raise StudioError(
+        message = (
             "WK_Manager system-power policy is incompatible with this ROM; "
             f"missing SELinux {'; '.join(details)}"
         )
+        if enforce_symbols:
+            raise StudioError(message)
+        print(f"[!] {message}", flush=True)
+        print("[!] WK_Manager owner-policy mode: keeping and applying every source rule. "
+              "SELinux compilation and device boot compatibility are NOT verified.", flush=True)
     return missing
 
 
@@ -3297,17 +3303,12 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
     vendor_policy, vendor_policy_probe = _stock_vendor_sepolicy_for_validation(
         rom_unpack
     )
-    fallback_policy = WK_MANAGER_TRACKED_SYSTEM_POLICY_FALLBACK
-    has_distinct_fallback = (
-        fallback_policy.is_file()
-        and fallback_policy.resolve() != policy_patch.resolve()
-    )
     try:
-        skipped_policy_symbols = _validate_wk_manager_power_policy_types(
+        unresolved_policy_symbols = _validate_wk_manager_power_policy_types(
             policy,
             policy_patch,
             additional_policies=(vendor_policy,) if vendor_policy else (),
-            allowed_missing_symbols=("virtualizationmanager",),
+            enforce_symbols=False,
         )
     finally:
         if vendor_policy_probe is not None:
@@ -3331,11 +3332,8 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
             apply_stark_patch(
                 source,
                 target,
-                skip_symbols=skipped_policy_symbols,
             ).values()
         )
-    if has_distinct_fallback:
-        patched += sum(apply_stark_patch(fallback_policy, policy).values())
     patched += _ensure_wk_manager_art_runtime_policy(policy)
 
     config = rom_unpack / "system_unpacked" / "config"
@@ -3356,7 +3354,9 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         "metadata": metadata,
         "daemon": str(system / WK_MANAGER_POWER_DAEMON_RELATIVE),
         "service": str(system / WK_MANAGER_POWER_RC_RELATIVE),
-        "skippedPolicySymbols": sorted(skipped_policy_symbols),
+        "skippedPolicySymbols": [],
+        "unresolvedPolicySymbols": sorted(unresolved_policy_symbols),
+        "policyValidation": "warning-only",
     }
 
 
