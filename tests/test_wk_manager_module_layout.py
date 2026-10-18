@@ -67,6 +67,8 @@ class WkManagerModuleLayoutTests(unittest.TestCase):
             service.parent.mkdir(parents=True)
             service.write_text("user root\n", encoding="utf-8")
             with mock.patch.object(studio_core, "STARK_ROOT", root), mock.patch.object(
+                studio_core, "normalize_mod_version", return_value="fixture"
+            ), mock.patch.object(
                 studio_core, "validate_mods", return_value=[{"name": "WK_Manager"}]
             ), mock.patch.object(studio_core, "_partition_destination") as destination:
                 with self.assertRaisesRegex(studio_core.StudioError, "init service is invalid"):
