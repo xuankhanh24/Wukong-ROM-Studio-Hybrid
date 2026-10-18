@@ -193,7 +193,10 @@ def publish_release_packs(
                 for part in archive_parts(archive_path):
                     report("upload", bytes=0, totalBytes=part.stat().st_size, percent=0)
                     asset = client.upload(release, part, lambda values: report("upload", **values))
-                    parts.append({"uri": asset["browser_download_url"], "sizeBytes": asset["size"],
+                    # Draft assets may return an /untagged-.../ URL which changes
+                    # on publication. Persist the final tag/name URL instead.
+                    final_uri = f"https://github.com/{repository}/releases/download/{quote(tag, safe='')}/{quote(str(asset.get('name') or part.name), safe='')}"
+                    parts.append({"uri": final_uri, "sizeBytes": asset["size"],
                                   "sha256": str(asset["digest"]).removeprefix("sha256:")})
                 uploaded_archives[str(record['sha256'])] = parts
             record.update(uri=parts[0]["uri"], format="tar.zst", parts=parts)
