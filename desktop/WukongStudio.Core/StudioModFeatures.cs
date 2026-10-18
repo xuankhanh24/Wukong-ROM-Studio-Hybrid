@@ -16,7 +16,7 @@ public static class StudioModFeatures
         new("ram", "Hiển thị RAM đa nhiệm / Recents RAM", false)
     ];
     public static IReadOnlyList<StudioModFeature> FixNoti { get; } = [
-        new("level1", "LV1 · Global baseline — cân bằng pin / Balanced", false),
-        new("level2", "LV2 · Fix thông báo đầy đủ / Full notification fix", true)
+        new("level1", "LV1 · Global baseline — cân bằng pin / Balanced", true),
+        new("level2", "LV2 · Fix thông báo đầy đủ / Full notification fix", false)
     ];
 }

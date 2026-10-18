@@ -5,6 +5,13 @@ namespace WukongStudio.Tests;
 public sealed class StudioBuildProfileTests
 {
     [Fact]
+    public void FixNotiDefaultsToLevelOneOnly()
+    {
+        Assert.Equal(new[] { "level1" }, StudioModFeatures.FixNoti
+            .Where(feature => feature.DefaultSelected).Select(feature => feature.Id));
+    }
+
+    [Fact]
     public void FixNotiLevelsAreExclusiveAndEmptySelectionIsPreserved()
     {
         Assert.Throws<InvalidDataException>(() => StudioBuildProfile.Create(
