@@ -142,7 +142,11 @@ class _MiniAppFixtureHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        self.wfile.write(payload)
+        try:
+            self.wfile.write(payload)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            # Browser navigation/teardown can cancel an in-flight fixture read.
+            pass
 
     def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler contract
         path = urlsplit(self.path).path
@@ -300,7 +304,7 @@ window.addEventListener('load', () => {{
     }}
     else {{ input.value = {json.dumps(self.source_uri)}; input.dispatchEvent(new Event('input', {{ bubbles: true }})); }}
   }};
-  setTimeout(fill, 50);
+  setTimeout(fill, {self.source_fill_delay_ms});
   if ({str(self.click_job_log).lower()}) {{
     const openLog = () => {{
       const button = document.querySelector('.job-log-toggle');
@@ -1080,6 +1084,7 @@ def _render_mini_app_in_chrome(
     telegram_authenticated: bool = True,
     click_paste: bool = False,
     source_uri: str = OPLUS_TEST_URI,
+    source_fill_delay_ms: int = 50,
     clipboard_fallback: bool = False,
     clipboard_gesture_only: bool = False,
     telegram_hash_authenticated: bool = False,
@@ -1131,6 +1136,7 @@ def _render_mini_app_in_chrome(
             "telegram_authenticated": telegram_authenticated,
             "click_paste": click_paste,
             "source_uri": source_uri,
+            "source_fill_delay_ms": source_fill_delay_ms,
             "clipboard_fallback": clipboard_fallback,
             "clipboard_gesture_only": clipboard_gesture_only,
             "pairing_recovery": pairing_recovery,
@@ -1197,6 +1203,18 @@ def _render_mini_app_in_chrome(
                     page.wait_for_function("document.body.dataset.dockExerciseComplete === 'true'", timeout=20000)
                 else:
                     page.wait_for_timeout(6000 if admin_job_scenario else 2200)
+                if (api_enabled and not pending_user and not maintenance_enabled
+                        and source_uri.startswith(('http://', 'https://'))
+                        and (telegram_authenticated or signed_launch_authenticated or telegram_hash_authenticated or pairing_recovery)):
+                    # Source filling, catalog load and the debounced probe are
+                    # asynchronous. Wait for any terminal result, not specific
+                    # successful metadata: negative/partial assertions must still fail.
+                    page.wait_for_function("""() => {
+                        const node = document.querySelector('#source-state');
+                        return node && ['analyzed', 'preview-only', 'probe-limited',
+                            'probe-failed', 'probe-deferred', 'backend-offline']
+                            .some(status => node.classList.contains(status));
+                    }""", timeout=15000)
                 if exercise_batch_controls:
                     page.wait_for_function("Number(document.body.dataset.batchDevicesSelected) > 0 && Number(document.body.dataset.batchModsSelected) > 0", timeout=15000)
                 if api_enabled and jobs_fixture and initial_view == "jobs" and not click_other_job:
@@ -2001,6 +2019,10 @@ class TelegramMiniAppTests(unittest.TestCase):
         submit_tag = dom.split('id="submit-recipe"', 1)[1].split(">", 1)[0]
         self.assertNotIn("disabled", submit_tag)
         self.assertGreater(screenshot_size, 10_000)
+
+    def test_metadata_fixture_waits_for_delayed_source_analysis(self) -> None:
+        dom, _ = _render_mini_app_in_chrome(api_enabled=True, source_fill_delay_ms=4000)
+        self.assertTrue('OP5D2BL1' in dom, 'Fixture snapshot raced delayed source analysis')
 
     def test_optional_rom_headers_do_not_mark_core_metadata_as_incomplete(self) -> None:
         metadata = {
