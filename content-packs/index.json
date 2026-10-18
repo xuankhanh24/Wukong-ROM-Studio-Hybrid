@@ -1,13 +1,21 @@
 {
-  "catalogUri": "https://raw.githubusercontent.com/luukhanh24/Wukong-ROM-Studio-Hybrid/main/content-packs/index.json",
-  "generatedAt": "2026-10-18T18:10:33.983854+00:00",
+  "catalogUri": "https://raw.githubusercontent.com/xuankhanh24/Wukong-ROM-Studio-Hybrid/main/content-packs/index.json",
+  "generatedAt": "2026-10-18T18:13:54.914753+00:00",
   "packs": [
     {
       "archive": {
-        "md5": "63ed4263542749351caf9eeb4c896ceb",
-        "sha256": "a2c03fe466cd0c247ff41fecc63917b43839938fd66877ed5de7fed2492e793a",
-        "sizeBytes": 31907084,
-        "uri": "wukong-gdrive:WukongROM/content-packs/Flash_script/common.tar.zst"
+        "format": "tar.zst",
+        "md5": "c8f7985babeace4f10a5bc12236873e1",
+        "parts": [
+          {
+            "sha256": "2410a1488b9a007af4c413607b82af4f55a663b20ed40d3b8fda675e9bbc8788",
+            "sizeBytes": 31910498,
+            "uri": "https://github.com/xuankhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-181331-4097d7ed/Flash_script-common.tar.zst"
+          }
+        ],
+        "sha256": "2410a1488b9a007af4c413607b82af4f55a663b20ed40d3b8fda675e9bbc8788",
+        "sizeBytes": 31910498,
+        "uri": "https://github.com/xuankhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-181331-4097d7ed/Flash_script-common.tar.zst"
       },
       "files": [
         {
@@ -17,28 +25,28 @@
         },
         {
           "path": "META-INF/com/google/android/update-binary",
-          "sha256": "1c702afe7186afdc6f008462ec1776023dc93da2ff42946702332cd8fc7f09d0",
-          "sizeBytes": 5481
+          "sha256": "cd495299090cb175d77599bb4386fb7592467d769090c4fa43a1ea4a64c0e2c8",
+          "sizeBytes": 7473
         },
         {
           "path": "META-INF/com/google/android/updater-script",
-          "sha256": "30429ff2966e67ef9f14f5f85a12b98de497d27fb4103fcdac83647be8a5196d",
-          "sizeBytes": 10
+          "sha256": "ce73b804d4fdc57f08758d92e5919ebbe34c6b40793b8b5b707defda1ff816a7",
+          "sizeBytes": 11
         },
         {
           "path": "Wukong_Flashing_Tool_Linux.sh",
-          "sha256": "ef73823afbdac8cf4c6e24ca0defb6787b15754136d01e20d1027897ed87f744",
-          "sizeBytes": 11018
+          "sha256": "f9b1b76fd3d1f0130736be6ec97d1bed3c34083c49e103789f0f7f53d825b042",
+          "sizeBytes": 12187
         },
         {
           "path": "Wukong_Flashing_Tool_MacOS.sh",
-          "sha256": "747d641da367de284c0688fb9f38d99ae5134694e620844a7e29c329b8d63f83",
-          "sizeBytes": 12344
+          "sha256": "0bfa3bf2262600f0bc1a88bf5ce5b98350d66e457f8f98f5f420c11c50c21b4e",
+          "sizeBytes": 13508
         },
         {
           "path": "Wukong_Flashing_Tool_Windows.bat",
-          "sha256": "4b8ec067b13842bf5270742060b8223058741b4d41de33284953662ba565cdf6",
-          "sizeBytes": 9691
+          "sha256": "44648ce3607a10eec5890e9663a08f7cf01a6a6eca540b127c94b4f062e31902",
+          "sizeBytes": 10436
         },
         {
           "path": "bin/linux/NOTICE.txt",
@@ -237,18 +245,18 @@
         },
         {
           "path": "tao_md5.bat",
-          "sha256": "53f0025a7886829b31b183a738611ef6ac596d72cdcaa788291905b8eb0e3232",
-          "sizeBytes": 1564
+          "sha256": "30072cdf6bef26244e95d875786939c02b1ce72b27ba6324f3fc3c4ab1f0836e",
+          "sizeBytes": 1571
         },
         {
           "path": "wukong_md5_hashes.txt",
-          "sha256": "574534b0352456f1b22a1b16369b6af9ce95d530571e355e4fd72b95239e6acc",
-          "sizeBytes": 1686
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sizeBytes": 0
         }
       ],
       "id": "Flash_script/common",
-      "remote": "wukong-gdrive:WukongROM/content-packs/Flash_script/common",
-      "sizeBytes": 79363957,
+      "remote": "https://github.com/xuankhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-181331-4097d7ed/Flash_script/common",
+      "sizeBytes": 79367349,
       "target": "Flash_script"
     },
     {
@@ -4078,6 +4086,6 @@
       "target": "copy-image"
     }
   ],
-  "releaseTag": "content-20261018-180730-0a2d3d52",
+  "releaseTag": "content-20261018-181331-4097d7ed",
   "schemaVersion": 1
 }

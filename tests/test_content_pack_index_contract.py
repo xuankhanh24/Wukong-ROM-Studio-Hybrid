@@ -17,6 +17,13 @@ SPLIT_SHARED_MOD_PACKS = {
 
 
 class ContentPackIndexContractTests(unittest.TestCase):
+    def test_flash_scripts_use_versioned_release_not_mutable_drive_archive(self) -> None:
+        payload = json.loads(INDEX.read_text(encoding="utf-8"))
+        pack = next(pack for pack in payload["packs"] if pack["id"] == "Flash_script/common")
+        archive = pack["archive"]
+        self.assertRegex(archive["uri"], r"^https://github\.com/[^/]+/[^/]+/releases/download/content-[^/]+/")
+        self.assertEqual(sum(part["sizeBytes"] for part in archive["parts"]), archive["sizeBytes"])
+
     def test_split_coloros_packs_do_not_duplicate_shared_mods(self) -> None:
         payload = json.loads(INDEX.read_text(encoding="utf-8"))
         versioned = [

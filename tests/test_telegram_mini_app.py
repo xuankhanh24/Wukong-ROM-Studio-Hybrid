@@ -623,6 +623,7 @@ window.addEventListener('load', () => {{
         document.body.dataset.activeDockTab = document.querySelector('.bottom-nav [aria-current="page"]')?.dataset.nav || '';
         document.body.dataset.greetingRotated = String(greeting.textContent !== document.body.dataset.greetingInitial);
         document.body.dataset.brokenAssets = String([...document.images].filter((image) => image.complete && image.naturalWidth === 0).length);
+        document.body.dataset.dockExerciseComplete = 'true';
       }}, 6500);
     }};
     setTimeout(exerciseDockHeader, 350);
@@ -1190,8 +1191,12 @@ def _render_mini_app_in_chrome(
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(launch_url, wait_until="networkidle")
-                wait_ms = 7000 if exercise_dock_header else 6000 if admin_job_scenario else 2200
-                page.wait_for_timeout(wait_ms)
+                if exercise_dock_header:
+                    # Fixture timers start only once the authenticated dock is ready.
+                    # A fixed delay from navigation races slow Windows CI runners.
+                    page.wait_for_function("document.body.dataset.dockExerciseComplete === 'true'", timeout=20000)
+                else:
+                    page.wait_for_timeout(6000 if admin_job_scenario else 2200)
                 if exercise_batch_controls:
                     page.wait_for_function("Number(document.body.dataset.batchDevicesSelected) > 0 && Number(document.body.dataset.batchModsSelected) > 0", timeout=15000)
                 if api_enabled and jobs_fixture and initial_view == "jobs" and not click_other_job:
@@ -2157,6 +2162,7 @@ class TelegramMiniAppTests(unittest.TestCase):
             api_enabled=True,
             telegram_authenticated=False,
             signed_launch_authenticated=True,
+            page_action=lambda page: page.get_by_text("14/14 thông số", exact=False).wait_for(timeout=15000),
         )
 
         self.assertIn("14/14 thông số", dom)
