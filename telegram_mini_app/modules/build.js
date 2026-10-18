@@ -103,11 +103,21 @@ function renderMods(reset = true) {
       const input = document.createElement("input"); input.type = "checkbox"; input.value = name; input.checked = current.has(name);
       const span = document.createElement("span"); span.title = name;
       const text = document.createElement("b"); text.textContent = name;
+      appendSharedModBadge(text, name);
       span.append(selectionMark(), text); label.append(input, span); items.append(label);
     });
     list.append(section);
   });
   updateSummary();
+}
+
+function appendSharedModBadge(container, name) {
+  if (!state.catalog?.sharedMods?.includes(name)) return;
+  const badge = document.createElement("small");
+  badge.className = "shared-mod-badge";
+  badge.textContent = t("sharedMod");
+  badge.title = t("sharedModHint");
+  container.append(badge);
 }
 
 function renderPipelineSteps(reset = true) {
@@ -136,7 +146,8 @@ function renderCatalog() {
     row.append(copy); return row;
   }));
   $("#catalog-mod-list").replaceChildren(...mods.map((name) => {
-    const item = document.createElement("span"); item.textContent = name; return item;
+    const item = document.createElement("span"); item.textContent = name;
+    appendSharedModBadge(item, name); return item;
   }));
   if (!devices.length && !mods.length) {
     const empty = document.createElement("span"); empty.className = "catalog-empty"; empty.textContent = t("noCatalogMatches");

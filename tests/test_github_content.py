@@ -181,6 +181,7 @@ class GitHubContentTests(unittest.TestCase):
                 catalog = exporter.export_catalog(
                     repository / 'content-packs/index.json', repository / 'devices_sizes.json', root / 'catalog.json')
             self.assertTrue(catalog['modVersions'])
+            self.assertEqual(set(catalog['sharedMods']), SHARED_MOD_NAMES)
             for version, mods in catalog['modsByVersion'].items():
                 self.assertFalse(SHARED_MOD_NAMES - set(mods), f'{version} missing shared mods')
 

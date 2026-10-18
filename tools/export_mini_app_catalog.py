@@ -112,6 +112,7 @@ def export_catalog(
             for version in sorted(mods_by_version, key=str.casefold)
         },
         "modsByVersion": mods_by_version,
+        "sharedMods": sorted(shared_mods, key=str.casefold),
         "pipelineSteps": [
             {"id": step_id, "label": label, "default": step_id in DEFAULT_PIPELINE_STEPS}
             for step_id, label, _required in PIPELINE_STEP_DEFINITIONS
