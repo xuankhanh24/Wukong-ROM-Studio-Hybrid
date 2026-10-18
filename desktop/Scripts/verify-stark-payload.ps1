@@ -29,6 +29,14 @@ foreach ($file in @(Get-PayloadFiles $sourceStark)) {
 }
 if ($expected.Count -eq 0) { throw 'Shared STARK source is empty.' }
 $actual = @{}
+$stagedCache = @(Get-ChildItem -LiteralPath $stagedStark -Recurse -File | Where-Object {
+    $relative = [IO.Path]::GetRelativePath($stagedStark, $_.FullName).Replace('\', '/')
+    $relative -match '(^|/)(__pycache__|scratch|\.scratch|_patch_temp|dist)(/|$)' -or
+        $_.Extension -in @('.pyc', '.pyo')
+})
+if ($stagedCache.Count -gt 0) {
+    throw 'Installer STARK contains generated caches or build scratch; rebuild a clean payload.'
+}
 foreach ($file in @(Get-PayloadFiles $stagedStark)) {
     $actual[$file.Relative] = (Get-FileHash -LiteralPath $file.File -Algorithm SHA256).Hash
 }

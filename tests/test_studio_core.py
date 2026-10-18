@@ -1363,8 +1363,9 @@ class StudioCoreTests(unittest.TestCase):
                 "service wukong-system-powerd /system/bin/wukong-system-powerd\n"
                 "    class late_start\n"
                 "    disabled\n"
-                "    user system\n"
+                "    user root\n"
                 "    group system everybody\n"
+                "    capabilities DAC_OVERRIDE DAC_READ_SEARCH FOWNER\n"
                 "    socket wukong_system_power stream 0660 system everybody "
                 "u:object_r:wukong_system_power_socket:s0\n"
                 "on property:sys.boot_completed=1\n"
@@ -1421,7 +1422,8 @@ class StudioCoreTests(unittest.TestCase):
             daemon = system / "bin" / "wukong-system-powerd"
             service = system / "etc" / "init" / "wukong-system-powerd.rc"
             self.assertEqual(daemon.read_bytes(), bytes(elf))
-            self.assertIn("user system", service.read_text(encoding="utf-8"))
+            self.assertIn("user root", service.read_text(encoding="utf-8"))
+            self.assertIn("capabilities DAC_OVERRIDE DAC_READ_SEARCH FOWNER", service.read_text(encoding="utf-8"))
             self.assertEqual(first["copied"], 2)
             self.assertEqual(second["copied"], 0)
             self.assertEqual(run.call_count, 2)

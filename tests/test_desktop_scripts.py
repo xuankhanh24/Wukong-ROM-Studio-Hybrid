@@ -6,6 +6,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class DesktopScriptTests(unittest.TestCase):
+    def test_runtime_never_overwrites_stark_policy_from_config(self):
+        content = (ROOT / 'desktop/Scripts/build-runtime.ps1').read_text(encoding='utf-8')
+        self.assertNotIn('$trackedWkPolicy', content)
+        self.assertIn("Copy-Tree (Join-Path $source 'STARK')", content)
+        self.assertIn("Assert-FileHashMatch $sourceWkPolicy $contentWkPolicy", content)
+
+    def test_publish_rejects_legacy_catalog_that_can_restore_old_stark(self):
+        content = (ROOT / 'desktop/Scripts/publish.ps1').read_text(encoding='utf-8')
+        self.assertIn("'https://github.com/*/releases/download/*'", content)
+        self.assertIn("$starkSourceProperty.Value -ne 'git'", content)
+        self.assertLess(content.index('Installer catalog is stale'), content.index('$manifestFiles ='))
+
     def test_script_path_defaults_are_resolved_after_parameter_binding(self):
         for relative_path in (
             "desktop/Scripts/publish.ps1",

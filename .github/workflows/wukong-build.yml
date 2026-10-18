@@ -293,7 +293,6 @@ jobs:
         with:
           path: |
             MOD
-            STARK
             Flash_script
             copy-image
             OFX
