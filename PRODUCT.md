@@ -26,6 +26,9 @@ The chat wizard gathers the complete task envelope. The Mini App is build-focuse
 
 ## Product constraints
 
+- Mini App build controls include all nine Launcher features, the two mutually exclusive Fix_noti levels (LV1 by default), and ten WK Manager patches. VI/EN labels, responsive touch targets, and the review summary reflect the current selection. Explicitly clearing both notification levels skips APK patching; saved choices are not silently replaced.
+- Shared STARK is versioned in Git. MOD packs are published as immutable GitHub Release assets with a refreshed, checksum-verified catalog. Publishing local pack directories is a Windows app operation, not a Mini App browser filesystem operation.
+
 - The orchestration package remains the single source of truth for validation, routing, status, ownership, cancel, and resume.
 - Telegram callback data is short, versioned, and never grants access by itself.
 - Mini App requests are capped at Telegram's 4096-byte `sendData` limit and ownership always comes from the authenticated Telegram sender, never from browser payload fields.

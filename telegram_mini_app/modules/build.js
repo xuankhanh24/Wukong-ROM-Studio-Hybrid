@@ -228,12 +228,25 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 }
 
 function updateSummary() {
+  const selected = selectedMods();
   const wkPatches = $("#wk-manager-patches");
-  if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
+  if (wkPatches) wkPatches.hidden = !selected.includes("WK_Manager");
   const launcherFeatures = $("#launcher-features");
-  if (launcherFeatures) launcherFeatures.hidden = !selectedMods().includes("Launcher_mod");
+  if (launcherFeatures) launcherFeatures.hidden = !selected.includes("Launcher_mod");
   const fixNotiFeatures = $("#fix-noti-features");
-  if (fixNotiFeatures) fixNotiFeatures.hidden = !selectedMods().includes("Fix_noti");
+  if (fixNotiFeatures) fixNotiFeatures.hidden = !selected.includes("Fix_noti");
+  const featureSummary = $("#mod-feature-summary");
+  if (featureSummary) {
+    const parts = [];
+    if (selected.includes("Launcher_mod")) parts.push(t("launcherSelection", { count: $$("#launcher-features input:checked").length }));
+    if (selected.includes("Fix_noti")) {
+      const level = $("#fix-noti-features input:checked")?.value;
+      parts.push(`Fix_noti: ${level === "level1" ? "LV1" : level === "level2" ? "LV2" : t("noApkPatch")}`);
+    }
+    if (selected.includes("WK_Manager")) parts.push(t("wkSelection", { count: $$("#wk-manager-patches input:checked").length }));
+    featureSummary.hidden = parts.length === 0;
+    featureSummary.textContent = parts.join(" · ");
+  }
   const selectionSummary = $("#config-summary");
   if (selectionSummary) selectionSummary.textContent = t("selectionSummary", { mods: selectedMods().length, steps: $$("#steps input:checked").length });
   const selectedDevice = $("#device")?.value || "";

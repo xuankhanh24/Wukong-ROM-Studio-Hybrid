@@ -180,6 +180,7 @@ function bindEvents() {
   $("#execution").addEventListener("change", updateSummary);
   $("#device").addEventListener("change", updateSummary);
   $("#launcher-features")?.addEventListener("change", updateSummary);
+  $("#wk-manager-patches")?.addEventListener("change", updateSummary);
   $("#fix-noti-features")?.addEventListener("change", (event) => {
     if (event.target.matches('input[type="checkbox"]') && event.target.checked) {
       $$("#fix-noti-features input").forEach((input) => {

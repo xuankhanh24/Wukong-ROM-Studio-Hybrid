@@ -81,6 +81,15 @@ if (fromHash) {
 
 const translations = {
   vi: {
+    launcherFeaturesTitle: "Launcher_mod · Chọn chức năng", fixNotiFeaturesTitle: "Fix_noti · Chọn cấp độ",
+    wkFeaturesTitle: "WK Manager · Patch tùy chọn", wkFeaturesHint: "Chỉ áp dụng các hook được chọn ở trên.",
+    featureKeybox: "Quản lý Keybox", featureHma: "HMA Quyền riêng tư", featureKernel: "Trình quản lý Kernel & Nguồn", featurePower: "Remap nút nguồn",
+    featureMultiWindow: "Đa cửa sổ nổi", featureSecure: "Tắt cờ bảo mật", featureBlackWindow: "Tương thích cửa sổ nổi", featureMultiAudio: "Âm thanh nhiều ứng dụng",
+    featureGlobalRegion: "Bỏ giới hạn CN", featureRecents: "Đa nhiệm máy tính bảng", featureDock: "Làm mờ thanh dock", featureTaskbar: "Mở rộng thanh tác vụ",
+    featureSearch: "Thanh tìm kiếm tùy chỉnh", featureQuickSearch: "Tìm kiếm nhanh Google", featureGestures: "Cử chỉ vuốt xuống", featureRam: "Hiển thị RAM đa nhiệm",
+    featureLevel1: "LV1 · Global baseline — cân bằng pin", featureLevel2: "LV2 · Fix thông báo đầy đủ",
+    launcherFeaturesHint: "Các tính năng APK cần JDK + Android SDK trên runner.", fixNotiFeaturesHint: "Mặc định LV1. Chỉ chọn một mức; bỏ cả hai để không patch APK.",
+    launcherSelection: "Launcher: {count}/9 chức năng", wkSelection: "WK Manager: {count}/10 patch", noApkPatch: "không patch APK",
     connected: "BOT ĐÃ KẾT NỐI", buildTitle: "Wukong Studio", buildIntro: "Cấu hình, khởi chạy và theo dõi ROM ngay trong Mini App.",
     routePolicy: "ĐỊNH TUYẾN", sourceTitle: "ROM nguồn", sourceHint: "Dùng URL trực tiếp, link OPlus chưa resolve hoặc trang build Daniel Springer.",
     taskBuild: "Build đầy đủ", sourceUrl: "Dán link ROM", sourceSecure: "URL ký tạm thời được che khỏi bản tóm tắt và log.",
@@ -107,6 +116,15 @@ const translations = {
     runtimePipeline: "PIPELINE", runtimeWaiting: "Chờ recipe hợp lệ", runtimeReady: "Recipe sẵn sàng gửi", runtimeLastBuild: "BUILD GẦN NHẤT", runtimeJobs: "Xem trong Jobs", checklistSource: "Nguồn ROM", checklistSourcePending: "Chưa có URL hợp lệ", checklistSourceDone: "Đã nhận diện nguồn", checklistDevice: "Thiết bị đích", checklistDevicePending: "Cần chọn thủ công", checklistDeviceDone: "Đã chọn thiết bị", checklistRunner: "Tuyến thực thi", checklistRunnerDone: "Đã cấu hình runner", readinessProgress: "{done}/3 điều kiện", pipelinePending: "Chưa chạy", pipelineRunning: "Đang chạy", pipelineComplete: "Hoàn tất", pipelineFailed: "Lỗi", pipelineSkipped: "Bỏ qua", modGroupGoogle: "Google & ứng dụng", modGroupCamera: "Camera & hình ảnh", modGroupInterface: "Giao diện hệ thống", modGroupSecurity: "Bảo mật & quyền", modGroupCore: "Hệ thống & công cụ", modGroupOther: "Khác", modExclusiveNotice: "Disable_flag_secure và WK_Manager không thể dùng cùng nhau."
   },
   en: {
+    launcherFeaturesTitle: "Launcher_mod · Features", fixNotiFeaturesTitle: "Fix_noti · Level",
+    wkFeaturesTitle: "WK Manager · Optional patches", wkFeaturesHint: "Only the selected hooks are applied.",
+    featureKeybox: "Keybox manager", featureHma: "HMA privacy spoof", featureKernel: "Kernel & Power manager", featurePower: "Power button remap",
+    featureMultiWindow: "Floating multi-window", featureSecure: "Disable FLAG_SECURE", featureBlackWindow: "Floating window compatibility", featureMultiAudio: "Multiple app audio",
+    featureGlobalRegion: "Global region", featureRecents: "Tablet recents", featureDock: "Dock blur", featureTaskbar: "Expanded taskbar",
+    featureSearch: "Custom search bar", featureQuickSearch: "Google quick search", featureGestures: "Swipe-down gestures", featureRam: "Recents RAM",
+    featureLevel1: "LV1 · Global baseline — balanced", featureLevel2: "LV2 · Full notification fix",
+    launcherFeaturesHint: "APK features require JDK + Android SDK on the runner.", fixNotiFeaturesHint: "LV1 is the default. Select one level; clear both to skip APK patching.",
+    launcherSelection: "Launcher: {count}/9 features", wkSelection: "WK Manager: {count}/10 patches", noApkPatch: "no APK patch",
     connected: "BOT CONNECTED", buildTitle: "Wukong Studio", buildIntro: "Configure, launch and monitor a ROM directly in the Mini App.",
     routePolicy: "ROUTING", sourceTitle: "Source ROM", sourceHint: "Use a direct URL, unresolved OPlus link, or Daniel Springer build page.",
     taskBuild: "Full build", sourceUrl: "Paste a ROM link", sourceSecure: "Short-lived signed URLs are hidden from summaries and logs.",

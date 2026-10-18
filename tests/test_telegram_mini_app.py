@@ -532,7 +532,7 @@ window.addEventListener('load', () => {{
       const clearDevices = document.querySelector('#batch-clear-devices');
       const selectMods = document.querySelector('#batch-select-all-mods');
       const clearMods = document.querySelector('#batch-clear-mods');
-      if (!open || !selectDevices || !clearDevices || !selectMods || !clearMods) {{ setTimeout(exerciseBatchControls, 50); return; }}
+      if (!open || open.hidden || open.disabled || !document.querySelector('#mod-list input') || !selectDevices || !clearDevices || !selectMods || !clearMods) {{ setTimeout(exerciseBatchControls, 50); return; }}
       open.click();
       selectDevices.click();
       document.body.dataset.batchDevicesSelected = String(document.querySelectorAll('#batch-devices input:checked').length);
@@ -1189,6 +1189,10 @@ def _render_mini_app_in_chrome(
                 page.goto(launch_url, wait_until="networkidle")
                 wait_ms = 7000 if exercise_dock_header else 6000 if admin_job_scenario else 2200
                 page.wait_for_timeout(wait_ms)
+                if exercise_batch_controls:
+                    page.wait_for_function("Number(document.body.dataset.batchDevicesSelected) > 0 && Number(document.body.dataset.batchModsSelected) > 0", timeout=15000)
+                if api_enabled and jobs_fixture and initial_view == "jobs" and not click_other_job:
+                    page.wait_for_function("Number(document.querySelector('#job-count-active')?.textContent) > 0", timeout=15000)
                 if page_action:
                     page_action(page)
                 assert page.evaluate("innerWidth") == window_width, "Browser viewport must match the test case"
