@@ -211,7 +211,6 @@
 +(allow wukong_manager_app mediaextractor (binder (call transfer)))
 +(allow mediaextractor wukong_manager_app (binder (transfer)))
 +(allow mediaextractor wukong_manager_app (fd (use)))
-+(allow wukong_manager_app audiopolicy_service (service_manager (find)))
 +(allow servicemanager wukong_manager_app (dir (search)))
 +(allow servicemanager wukong_manager_app (file (read open getattr map)))
 +(allow servicemanager wukong_manager_app (process (getattr)))

@@ -19,6 +19,12 @@ BUNDLE = ROOT / "STARK" / "WK_Manager" / "patch_WK_Manager"
 
 
 class WkManagerModuleLayoutTests(unittest.TestCase):
+    def test_shipped_audio_policy_uses_existing_rom_service_type(self):
+        policy = BUNDLE.parent / 'system/system/etc/selinux/stark_plat_sepolicy.cil'
+        content = policy.read_text(encoding='utf-8')
+        self.assertNotIn('audiopolicy_service', content)
+        self.assertIn('+(allow wukong_manager_app audioserver_service (service_manager (find list)))', content)
+
     def test_shipped_power_service_matches_runtime_contract(self):
         service = BUNDLE.parent / "system/system/etc/init/wukong-system-powerd.rc"
         studio_core._validate_wk_manager_power_rc(service)
