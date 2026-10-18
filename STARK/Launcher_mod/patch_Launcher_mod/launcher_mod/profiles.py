@@ -1,5 +1,6 @@
 """Decode affected DEX files by source metadata, then apply independent patches."""
 import json
+import hashlib
 import re
 from pathlib import Path
 import struct
@@ -13,6 +14,14 @@ from .toolchain import run_tool, find_tool
 
 
 def choose_profile(apk):
+    # Exact stock fingerprint selects reviewed OEM variants. Never adapt an
+    # unknown instruction graph automatically or lower compatibility coverage.
+    with open(apk, 'rb') as stream:
+        apk_digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+    for path in sorted((ROOT / 'patches').glob('*/profile.json')):
+        metadata = json.loads(path.read_text(encoding='utf-8'))
+        if metadata.get('apk_sha256') == apk_digest:
+            return path
     with zipfile.ZipFile(apk) as archive:
         inventory = {owner: source for name in archive.namelist() if name.endswith('.dex')
                      for owner, source in dex_inventory(archive.read(name)).items()}

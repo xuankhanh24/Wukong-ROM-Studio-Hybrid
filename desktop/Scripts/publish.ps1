@@ -57,6 +57,8 @@ if (-not $SkipTests) {
             tests.test_patch_execution `
             tests.test_installer_stark `
             tests.test_mod_features `
+            tests.test_launcher_profiles `
+            tests.test_stark_payload_gate `
             tests.test_github_content `
             tests.test_content_sync `
             tests.test_sync_platform_content_cli `
@@ -93,6 +95,8 @@ if ($LASTEXITCODE -ne 0) {
     throw 'WinUI publish failed.'
 }
 Copy-Item -Path (Join-Path $publishRoot '*') -Destination (Join-Path $staging 'App') -Recurse -Force
+
+& (Join-Path $scriptRoot 'verify-stark-payload.ps1') -SourceRoot $sourceRoot -StagingRoot $staging
 
 $manifestFiles = Get-ChildItem -LiteralPath $staging -Recurse -File |
     Where-Object { $_.Name -ne 'release-manifest.json' } |
