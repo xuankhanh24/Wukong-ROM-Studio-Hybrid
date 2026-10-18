@@ -1203,7 +1203,11 @@ def _render_mini_app_in_chrome(
                     page.wait_for_function("document.body.dataset.dockExerciseComplete === 'true'", timeout=20000)
                 else:
                     page.wait_for_timeout(6000 if admin_job_scenario else 2200)
-                if (api_enabled and not pending_user and not maintenance_enabled
+                if exercise_custom_recipe:
+                    # Submission clears the source form and cancels its probe.
+                    # The recipe capture, not metadata, is this scenario's end.
+                    page.wait_for_function("Boolean(document.body.dataset.customReleaseRecipe)", timeout=15000)
+                elif (api_enabled and not pending_user and not maintenance_enabled
                         and source_uri.startswith(('http://', 'https://'))
                         and (telegram_authenticated or signed_launch_authenticated or telegram_hash_authenticated or pairing_recovery)):
                     # Source filling, catalog load and the debounced probe are
