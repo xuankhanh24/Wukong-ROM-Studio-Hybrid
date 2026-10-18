@@ -1,6 +1,6 @@
 {
   "catalogUri": "https://raw.githubusercontent.com/luukhanh24/Wukong-ROM-Studio-Hybrid/main/content-packs/index.json",
-  "generatedAt": "2026-10-18T17:22:36.487190+00:00",
+  "generatedAt": "2026-10-18T18:02:46.420043+00:00",
   "packs": [
     {
       "archive": {
@@ -2896,17 +2896,17 @@
     {
       "archive": {
         "format": "tar.zst",
-        "md5": "261047dd08704bb17ec86d2eeaa8dd01",
+        "md5": "5eb3c77df0f78e6d1379e5f735f4783d",
         "parts": [
           {
-            "sha256": "86711cce09e841afdcb21b09c78043ce21e93adbf91962e331087f9af1294d26",
-            "sizeBytes": 1179210282,
-            "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-170156-1800fa62/MOD-ColorOS_16.0.9.tar.zst"
+            "sha256": "9962ca4823fc7305bb4ed46e5e0d5ea9c924c31c084097b078fd14fb9b27f30f",
+            "sizeBytes": 1221696717,
+            "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-175954-6bfe16c4/MOD-ColorOS_16.0.9.tar.zst"
           }
         ],
-        "sha256": "86711cce09e841afdcb21b09c78043ce21e93adbf91962e331087f9af1294d26",
-        "sizeBytes": 1179210282,
-        "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-170156-1800fa62/MOD-ColorOS_16.0.9.tar.zst"
+        "sha256": "9962ca4823fc7305bb4ed46e5e0d5ea9c924c31c084097b078fd14fb9b27f30f",
+        "sizeBytes": 1221696717,
+        "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-175954-6bfe16c4/MOD-ColorOS_16.0.9.tar.zst"
       },
       "files": [
         {
@@ -3335,6 +3335,36 @@
           "sizeBytes": 92
         },
         {
+          "path": "Launcher_mod/my_region/etc/extension/stark_com.oplus.app-features.xml",
+          "sha256": "a7336567c8a579fb85c49c6342546dcf2bb28bf5129bd669e53e81340bd79138",
+          "sizeBytes": 130
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/OplusLauncher.apk",
+          "sha256": "fed83ae9653025ebcace427181362750b17b8d10c164433f5e0bcf8e33ffcd80",
+          "sizeBytes": 77599987
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/OplusLauncher.apk.prof",
+          "sha256": "81f3778fc96eed2b50c427ed47b76d17646cc6fd7d248406dae198256bc15a80",
+          "sizeBytes": 25493
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.art",
+          "sha256": "a83efd1a8e7ad7a7bfab21065d8d44b22d8ef566d3973ecec6f1e71f6280c623",
+          "sizeBytes": 484512
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.odex",
+          "sha256": "c9fa2f8f8bb3de47dcd596b391c2b4b459e2e252c5e229e6e8c2d550ac70cf28",
+          "sizeBytes": 10460248
+        },
+        {
+          "path": "Launcher_mod/system_ext/priv-app/OplusLauncher/oat/arm64/OplusLauncher.vdex",
+          "sha256": "c4eda6f561ec528ed96c4a724b26e52d36e7226416dd736c2c60d0f9a457ef1f",
+          "sizeBytes": 920488
+        },
+        {
           "path": "Theme_cr/my_stock/priv-app/KeKeThemeSpace/KeKeThemeSpace.apk",
           "sha256": "5bc4d3e2586039ec909003cd41aef5e9851455f575a6eadda6575bb8c94edf38",
           "sizeBytes": 120576228
@@ -3456,8 +3486,8 @@
         }
       ],
       "id": "MOD/ColorOS_16.0.9",
-      "remote": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-170156-1800fa62/MOD/ColorOS_16.0.9",
-      "sizeBytes": 2280796872,
+      "remote": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261018-175954-6bfe16c4/MOD/ColorOS_16.0.9",
+      "sizeBytes": 2370287730,
       "target": "MOD/ColorOS_16.0.9"
     },
     {
@@ -4018,6 +4048,6 @@
       "target": "copy-image"
     }
   ],
-  "releaseTag": "content-20261018-170156-1800fa62",
+  "releaseTag": "content-20261018-175954-6bfe16c4",
   "schemaVersion": 1
 }
