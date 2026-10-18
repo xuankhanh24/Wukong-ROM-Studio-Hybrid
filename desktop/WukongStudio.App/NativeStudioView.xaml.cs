@@ -2962,6 +2962,28 @@ public sealed partial class NativeStudioView : UserControl
             ["Metadata sẽ được kiểm tra khi job preflight tải nguồn riêng tư."] = "Metadata will be checked when preflight fetches the private source.",
             ["File local sẽ được kiểm tra quyền truy cập và checksum trước khi build."] = "The local file will be checked for access and checksum before building.",
             ["Đồng bộ nội dung đa nền tảng"] = "Cross-platform content sync",
+            ["Chọn pack và upload GitHub"] = "Choose pack and upload to GitHub",
+            ["Upload tất cả pack MOD"] = "Upload all MOD packs",
+            ["Upload tất cả pack MOD lên GitHub?"] = "Upload all MOD packs to GitHub?",
+            ["Upload tất cả"] = "Upload all",
+            ["Nguồn"] = "Source",
+            ["STARK dùng chung được cập nhật qua Git và bộ cài. Các pack MOD được upload lên GitHub Releases; hash và manifest tự cập nhật sau khi xác minh, không ghi đè bản đang được job sử dụng."] = "Shared STARK is updated through Git and the installer. MOD packs are uploaded to GitHub Releases; hashes and the manifest update after verification without overwriting versions used by jobs.",
+            ["Chọn Content\\MOD\\<phiên bản> để upload một pack, hoặc upload tất cả MOD."] = "Choose Content\\MOD\\<version> to upload one pack, or upload all MOD packs.",
+            ["Upload phiên bản pack mới lên GitHub?"] = "Publish a new pack version to GitHub?",
+            ["Pack sẽ công bố phiên bản mới"] = "Pack receiving a new published version",
+            ["Tạo một GitHub Release mới. Bản cũ được giữ nguyên; chỉ công bố manifest sau khi mọi asset đã xác minh SHA-256."] = "Create a new GitHub Release. Previous versions are retained; publish the manifest only after every asset passes SHA-256 verification.",
+            ["Upload và công bố"] = "Upload and publish",
+            ["Tạo Release mới cho tất cả phiên bản MOD, xác minh SHA-256 rồi tự công bố manifest. Không sửa hoặc xóa pack cục bộ; không ghi đè asset cũ."] = "Create a new Release for all MOD versions, verify SHA-256, then publish the manifest automatically. Local packs and previous assets are not modified or deleted.",
+            ["Đang upload tất cả MOD lên GitHub Releases…"] = "Uploading all MOD packs to GitHub Releases…",
+            ["Đã upload tất cả MOD và công bố manifest mới."] = "All MOD packs uploaded and the new manifest published.",
+            ["Đang upload GitHub Releases và xác minh SHA-256…"] = "Uploading to GitHub Releases and verifying SHA-256…",
+            ["GitHub Release và manifest đã công bố. Các job mới sẽ dùng pack mới; bản cũ vẫn được giữ nguyên."] = "GitHub Release and manifest published. New jobs will use the new pack; previous versions are retained.",
+            ["Đã công bố phiên bản pack mới"] = "New pack version published",
+            ["Đã upload và công bố manifest cho Actions và Telegram."] = "Uploaded and published the manifest for Actions and Telegram.",
+            ["Đang upload lên GitHub Releases"] = "Uploading to GitHub Releases",
+            ["Đang xác minh dung lượng và SHA-256 trên GitHub"] = "Verifying size and SHA-256 on GitHub",
+            ["STARK được quản lý bằng Git"] = "STARK is managed through Git",
+            ["Commit/push thư mục STARK trong mã nguồn rồi build bộ cài; không upload một bản STARK riêng đè lên bản dùng chung."] = "Commit/push the STARK source directory, then build the installer; do not upload a separate STARK pack over the shared version.",
             ["Content là nguồn chuẩn duy nhất. Chọn một thư mục để tạo lại toàn bộ content-pack tương ứng và thay thế binary trên Drive. Công bố manifest GitHub là bước riêng."] = "Content is the single source of truth. Choose a folder to rebuild its complete content pack and replace the Drive binary. Publishing the GitHub manifest is a separate step.",
             ["Chọn thư mục trong Content; Content\\STARK chứa WK_Manager và com."] = "Choose a folder inside Content; Content\\STARK contains WK_Manager and com.",
             ["Đồng bộ binary lên Drive"] = "Sync binaries to Drive",
@@ -3386,7 +3408,7 @@ public sealed partial class NativeStudioView : UserControl
         var selection = _contentSyncFolderSelection!;
         if (selection.PackId == "STARK/common")
         {
-            ShowMessage("STARK được quản lý bằng Git", "Commit/push thư mục STARK trong mã nguồn rồi build bộ cài; không upload một bản STARK riêng đè lên bản dùng chung.", InfoBarSeverity.Informational);
+            ShowMessage(Localized("STARK được quản lý bằng Git"), Localized("Commit/push thư mục STARK trong mã nguồn rồi build bộ cài; không upload một bản STARK riêng đè lên bản dùng chung."), InfoBarSeverity.Informational);
             return;
         }
         ContentSyncPreviewSnapshot preview;
@@ -3416,7 +3438,7 @@ public sealed partial class NativeStudioView : UserControl
         var confirmed = await ConfirmDialogAsync(
             Localized("Upload phiên bản pack mới lên GitHub?"),
             $"{Localized("Thư mục đã chọn")}:\n{selection.SelectedFolder}\n\n" +
-            $"{Localized("Content-pack sẽ bị thay thế toàn bộ")}:\n{selection.PackId}\n\n" +
+            $"{Localized("Pack sẽ công bố phiên bản mới")}:\n{selection.PackId}\n\n" +
             $"{FormatContentSyncPreview(preview, includePaths: false)}\n\n" +
             (requestedModReleaseVersion is null
                 ? string.Empty
@@ -3460,7 +3482,7 @@ public sealed partial class NativeStudioView : UserControl
                 ContentSyncStatusText.Text = Localized("GitHub Release và manifest đã công bố. Các job mới sẽ dùng pack mới; bản cũ vẫn được giữ nguyên.");
                 CompleteContentSyncProgress();
                 ShowMessage(
-                    Localized("Đã thay thế content-pack"),
+                    Localized("Đã công bố phiên bản pack mới"),
                     $"{selection.PackId} · {Localized("Đã upload và công bố manifest cho Actions và Telegram.")}",
                     InfoBarSeverity.Success);
             }
@@ -3486,22 +3508,22 @@ public sealed partial class NativeStudioView : UserControl
     private async void UploadAllModPacksClick(object sender, RoutedEventArgs e)
     {
         if (_layout is null) return;
-        if (!await ConfirmDialogAsync("Upload tất cả pack MOD lên GitHub?",
-            $"Nguồn: {Path.Combine(_layout.ContentRoot, "MOD")}\n\nTạo Release mới cho tất cả phiên bản MOD, xác minh SHA-256 rồi tự công bố manifest. Không sửa hoặc xóa pack cục bộ; không ghi đè asset cũ.",
-            "Upload tất cả")) return;
+        if (!await ConfirmDialogAsync(Localized("Upload tất cả pack MOD lên GitHub?"),
+            $"{Localized("Nguồn")}: {Path.Combine(_layout.ContentRoot, "MOD")}\n\n" + Localized("Tạo Release mới cho tất cả phiên bản MOD, xác minh SHA-256 rồi tự công bố manifest. Không sửa hoặc xóa pack cục bộ; không ghi đè asset cũ."),
+            Localized("Upload tất cả"))) return;
         _contentSyncCancellation = new CancellationTokenSource();
         try
         {
             await RunBusyActionAsync(async () =>
             {
                 BeginContentSyncProgress();
-                ContentSyncStatusText.Text = "Đang upload tất cả MOD lên GitHub Releases…";
+                ContentSyncStatusText.Text = Localized("Đang upload tất cả MOD lên GitHub Releases…");
                 try
                 {
                     HybridResultBox.Text = await RunPlatformContentSyncAsync("release", cancellationToken: _contentSyncCancellation.Token);
                     _contentSyncUploadedChanges = true;
                     CompleteContentSyncProgress();
-                    ContentSyncStatusText.Text = "Đã upload tất cả MOD và công bố manifest mới.";
+                    ContentSyncStatusText.Text = Localized("Đã upload tất cả MOD và công bố manifest mới.");
                 }
                 catch (OperationCanceledException) { CancelContentSyncProgress(); throw; }
                 catch { FailContentSyncProgress(); throw; }
