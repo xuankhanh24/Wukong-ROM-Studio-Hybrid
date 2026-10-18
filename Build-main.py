@@ -8,6 +8,7 @@ import re
 import json
 import hashlib
 import tempfile
+from pathlib import Path
 from studio_paths import (
     CONFIG_ROOT,
     CONTENT_ROOT,
@@ -16,6 +17,7 @@ from studio_paths import (
     DESKTOP_MODE,
     OUTPUT_ROOT,
     SCRIPT_ROOT,
+    STARK_ROOT,
 )
 from partition_config import (
     sync_all_partition_configs as safe_sync_all_partition_configs,
@@ -69,6 +71,7 @@ def link_or_copy_file(src, dst):
 
 SCRIPT_DIR = str(SCRIPT_ROOT)
 MOD_DIR = str(CONTENT_ROOT / "MOD")
+STARK_DIR = str(STARK_ROOT)
 DEBLOAT_CONFIG_PATH = str(CONFIG_ROOT / "debloat.json")
 COPY_IMAGE_DIR = str(COPY_IMAGE_ROOT)
 ROM_BUILD_DONE_DIR = str(OUTPUT_ROOT)
@@ -928,17 +931,25 @@ def select_mod_folder():
     Liệt kê các thư mục MOD có trong \MOD và cho người dùng chọn.
     Trả về đường dẫn đầy đủ tới thư mục MOD đã chọn, hoặc None nếu bỏ qua.
     """
-    if not os.path.isdir(MOD_DIR):
-        print(f"[!] Thư mục MOD không tồn tại: {MOD_DIR}")
-        return None
+    from studio_core import INTEGRATED_PATCH_MODS
 
-    mod_folders = sorted(set([
-        d for d in os.listdir(MOD_DIR)
-        if os.path.isdir(os.path.join(MOD_DIR, d))
-    ]) | VIRTUAL_MODS)
+    mod_paths = {}
+    if os.path.isdir(MOD_DIR):
+        mod_paths.update({
+            name: os.path.join(MOD_DIR, name)
+            for name in os.listdir(MOD_DIR)
+            if os.path.isdir(os.path.join(MOD_DIR, name))
+        })
+    if os.path.isdir(STARK_DIR):
+        for name in INTEGRATED_PATCH_MODS:
+            shared_path = os.path.join(STARK_DIR, name)
+            if os.path.isdir(shared_path):
+                mod_paths.setdefault(name, shared_path)
+    mod_paths.update({name: name for name in VIRTUAL_MODS})
+    mod_folders = sorted(mod_paths)
 
     if not mod_folders:
-        print("[!] Không tìm thấy MOD nào trong thư mục MOD/")
+        print("[!] Không tìm thấy MOD nào trong MOD/ hoặc STARK/")
         return None
 
     print(f"\n[*] Danh sách MOD có sẵn:")
@@ -956,7 +967,7 @@ def select_mod_folder():
             idx = int(choice) - 1
             if 0 <= idx < len(mod_folders):
                 selected = mod_folders[idx]
-                selected_path = selected if selected in VIRTUAL_MODS else os.path.join(MOD_DIR, selected)
+                selected_path = mod_paths[selected]
                 print(f"[★] Đã chọn MOD: {selected}")
                 return selected_path
             else:
@@ -991,6 +1002,26 @@ def apply_mod(mod_path, rom_unpack_dir, device_db=None, vbmeta_digest=None):
     Ghi đè file đã tồn tại.
     """
     mod_name = os.path.basename(mod_path)
+    from studio_core import INTEGRATED_PATCH_MODS, apply_selected_mods
+
+    if mod_name in INTEGRATED_PATCH_MODS:
+        print(f"[*] Chạy patcher STARK tích hợp cho: {mod_name}")
+        result = apply_selected_mods(
+            [mod_name],
+            Path(rom_unpack_dir),
+            device_db,
+            Path(rom_unpack_dir).parent,
+            fake_lock_vbmeta_digest=vbmeta_digest,
+            # The legacy CLI had no feature picker and historically installed
+            # the complete Fix_noti payload, which corresponds to level 2.
+            fix_noti_features=["level2"] if mod_name == "Fix_noti" else None,
+        )
+        print(
+            "[*] STARK hoàn tất: "
+            f"{result['copied']} file đã copy, {result['patched']} thay đổi đã patch."
+        )
+        return int(result["copied"]) + int(result["patched"])
+
     print(f"[*] Áp dụng MOD: {mod_name}")
     print(f"[*] Nguồn : {mod_path}")
     print(f"[*] Đích  : {rom_unpack_dir}\n")

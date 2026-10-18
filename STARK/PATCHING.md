@@ -102,17 +102,35 @@ overwrite the shared Settings APK as a side effect.
 
 The seven feature modules above, plus WK Manager/Fake Lock/WK Installer, use the
 shared STARK catalog for Windows and Telegram. Shared location/catalog visibility
-does not make a prebuilt OEM APK compatible with every firmware. Existing ROM
-assembly still copies prepared partition payloads for legacy recipes. Explicit
-`launcherFeatures` selections run the Launcher patcher on the ROM's stock APK for
+does not make a prebuilt OEM APK compatible with every firmware. ROM assembly runs
+the stock-archive patchers for Camera, Chat Bubbles, CTS/Gemini, Hasselblad and
+Settings; Launcher, Fix Notification and WK Manager retain their specialized
+dispatchers. A coverage test fails when a new top-level `patch_*` directory is added
+without a pipeline registration.
+
+The archive owned by a patcher is never copied back from an old prepared payload,
+so a successful patch cannot be overwritten later in the same MOD pass. Stale
+`oat`, `.prof`, `.dm`, `.art`, `.odex` and `.vdex` companions are removed after the
+patched archive is atomically published. Other files under marker partition folders
+such as `my_region` and `my_product` are still copied or applied as `stark_*` line
+patches. A marker payload targeting a partition that was not unpacked now stops the
+build instead of being silently skipped. When a shared module contains only its
+patcher, an installed version-specific marker payload can still supply the non-owned
+files.
+
+This integration increments the workspace pipeline version, so an old resume
+workspace cannot silently reuse a pre-fix Apply MOD result.
+
+Explicit `launcherFeatures` selections run the Launcher patcher on the ROM's stock APK for
 the selected APK features; `global_region` alone only applies the region XML patch.
 APK features require JDK (`javac`) and Android SDK (`d8`, `android.jar`) on the runner.
 Explicit `fixNotiFeatures` accepts only `level1` or `level2`, never both. Each level
-runs Athena with its matching 15 XML configs. LV2 also applies the existing external
-notification whitelist/feature patches and UID observer hook; LV1 leaves those
-additional heavy-duty patches untouched. An empty selection skips that mod's work.
-Missing fields preserve legacy behavior. Other prepared payloads must still match
-the stock firmware before use on another ROM.
+runs Athena with its matching 15 XML configs. Both levels apply the external
+notification marker payloads and patch the UID observer branch in
+`oplus-services.jar` to two `nop` instructions, including when combined with
+WK Manager or Disable Flag Secure. An empty selection skips that mod's work.
+Missing fields preserve legacy behavior. Non-archive prepared payloads must still
+match the stock firmware before use on another ROM.
 No device boot, ART verification or feature performance guarantee follows from a
 successful script build alone.
 

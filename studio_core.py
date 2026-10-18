@@ -93,7 +93,7 @@ APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
 WORKSPACE_MARKER_KIND = "wukong-rom-studio-workspace"
-WORKSPACE_PIPELINE_VERSION = 24
+WORKSPACE_PIPELINE_VERSION = 26
 ROM_STUDIO_VERSION = DEFAULT_MOD_RELEASE_VERSION
 MOD_VERSION_STUDIO_VERSIONS = DEFAULT_MOD_RELEASE_VERSIONS
 # A release label is presentation metadata, not a directory or a semantic
@@ -143,6 +143,57 @@ PATCH_ONLY_MODS = {
     "Block_ota": "Remove ota, update or com.oplusos.sau lines from app-features.xml (OxygenOS: my_region; other ROMs: my_stock)",
     "Disable_flag_secure": "Patch services.jar and oplus-services.jar to disable FLAG_SECURE screen-capture blocking",
 }
+SCRIPT_ARCHIVE_PATCH_SPECS: dict[str, dict[str, Any]] = {
+    "Camera_mod": {
+        "partition": "my_product",
+        "relativeTarget": "app/OplusCamera/OplusCamera.apk",
+        "script": "Camera_mod/patch_Camera_mod/patch_camera.py",
+        "arguments": ("-i", "{input}", "-o", "{output}", "--no-interactive"),
+    },
+    "Chat_bubbles": {
+        "partition": "system_ext",
+        "relativeTarget": "app/NotificationCenter/NotificationCenter.apk",
+        "script": "Chat_bubbles/patch_Chat_bubbles/patch_chat_bubbles.py",
+        "arguments": ("-i", "{input}", "-o", "{output}", "--no-interactive"),
+    },
+    "Cts_Gemini": {
+        "partition": "system_ext",
+        "relativeTarget": "priv-app/SystemUI/SystemUI.apk",
+        "script": "Cts_Gemini/patch_Cts_Gemini/patch_cts_gemini.py",
+        "arguments": ("-i", "{input}", "-o", "{output}", "--no-interactive"),
+    },
+    "Hasselblad_filter": {
+        "partition": "my_product",
+        "relativeTarget": "product_overlay/framework/com.oplus.camera.unit.sdk.jar",
+        "script": "Hasselblad_filter/patch_Hasselblad_filter/patch_hasselblad.py",
+        "arguments": ("{input}", "{output}"),
+    },
+    "Settings_mod": {
+        "partition": "system_ext",
+        "relativeTarget": "priv-app/Settings/Settings.apk",
+        "script": "Settings_mod/patch_Settings_mod/patch_settings.py",
+        "arguments": (
+            "{input}",
+            "-o",
+            "{output}",
+            "--work-dir",
+            "{scratch}",
+            "--no-module",
+        ),
+    },
+}
+SPECIAL_PATCH_MODS = frozenset({"Fix_noti", "Launcher_mod", "WK_Manager"})
+INTEGRATED_PATCH_MODS = frozenset(SCRIPT_ARCHIVE_PATCH_SPECS).union(SPECIAL_PATCH_MODS)
+PATCHED_PAYLOAD_ROOTS: dict[str, tuple[str, Path]] = {
+    name: (str(spec["partition"]), Path(str(spec["relativeTarget"])).parent)
+    for name, spec in SCRIPT_ARCHIVE_PATCH_SPECS.items()
+}
+PATCHED_PAYLOAD_ROOTS.update(
+    {
+        "Fix_noti": ("system_ext", Path("app/Athena")),
+        "Launcher_mod": ("system_ext", Path("priv-app/OplusLauncher")),
+    }
+)
 MUTUALLY_EXCLUSIVE_MODS = frozenset({"Disable_flag_secure", "WK_Manager"})
 BLOCK_OTA_FEATURE_KEYWORDS = ("ota", "update", "com.oplusos.sau")
 MY_STOCK_UNPACK_DIR_NAMES = ("my_stock_unpacked", "my_stock_a", "my_stock_b")
@@ -1366,6 +1417,9 @@ def _mod_special_actions(name: str) -> list[str]:
         actions.append(PATCH_ONLY_MODS[name])
     if name == "Fix_noti":
         actions.append("Patch oplus-services.jar with apktool")
+    if name in SCRIPT_ARCHIVE_PATCH_SPECS:
+        target = Path(str(SCRIPT_ARCHIVE_PATCH_SPECS[name]["relativeTarget"])).name
+        actions.append(f"Patch stock {target} with the shared STARK patcher")
     if name == "Global_props":
         actions.append("Upsert US timezone, region and locale properties")
     if name == "Ai_global":
@@ -1441,13 +1495,30 @@ def list_mods(mod_version: str | None = None, *, mod_root: Path | None = None) -
                     continue
                 if mod_dir.name in seen:
                     continue
-                patch_only = mod_dir.name in PATCH_ONLY_MODS
                 directories = sorted(path.name for path in mod_dir.iterdir() if path.is_dir())
                 compatible = [name for name in directories if name in MOD_PARTITIONS]
-                # Upgrades install patch scripts independently of prepared APKs.
-                # A script-only shared directory must not shadow an existing
-                # version-specific payload until shared payloads are available.
-                if shared and not compatible and not patch_only:
+                integrated_patch = mod_dir.name in INTEGRATED_PATCH_MODS
+                has_partition_payload = any(
+                    any(path.is_file() for path in (mod_dir / name).rglob("*"))
+                    for name in compatible
+                )
+                if shared and integrated_patch and not has_partition_payload:
+                    version_mod_dir = collection_dir / mod_dir.name
+                    version_has_payload = version_mod_dir.is_dir() and any(
+                        any(path.is_file() for path in partition_dir.rglob("*"))
+                        for partition_dir in version_mod_dir.iterdir()
+                        if partition_dir.is_dir() and partition_dir.name in MOD_PARTITIONS
+                    )
+                    if version_has_payload:
+                        # The shared patcher still runs by MOD name, while an
+                        # installed version payload supplies any marker files.
+                        continue
+                patch_only = mod_dir.name in PATCH_ONLY_MODS or (
+                    integrated_patch and not has_partition_payload
+                )
+                # Integrated patchers operate on the stock ROM and are canonical
+                # even when they intentionally ship no prepared partition payload.
+                if shared and not compatible and not patch_only and not integrated_patch:
                     continue
                 skipped = [name for name in directories if name not in MOD_PARTITIONS]
                 root_files = sorted(path.name for path in mod_dir.iterdir() if path.is_file())
@@ -1648,7 +1719,7 @@ def inspect_rom(
         except StudioError as exc:
             errors.append(str(exc))
     jar_patch_mods = {"Fix_noti", "WK_Manager", "Disable_flag_secure"}.intersection(selected_mod_names)
-    if fix_noti_features is not None and 'level2' not in fix_noti_features:
+    if fix_noti_features == []:
         jar_patch_mods.discard('Fix_noti')
     if 'apply_mod' in requested_steps and 'Fix_noti' in selected_mod_names and fix_noti_features:
         try:
@@ -3374,7 +3445,7 @@ def _refresh_plat_sepolicy_hash(rom_unpack: Path) -> dict[str, str]:
     }
 
 
-def _publish_patched_apk(stock: Path, output: Path, rom_unpack: Path) -> str:
+def _publish_patched_archive(stock: Path, output: Path, rom_unpack: Path) -> str:
     if not output.is_file():
         raise StudioError(f'APK patcher did not produce {output.name}')
     with tempfile.TemporaryDirectory(prefix='.apk-publish-', dir=stock.parent) as directory:
@@ -3382,9 +3453,42 @@ def _publish_patched_apk(stock: Path, output: Path, rom_unpack: Path) -> str:
         shutil.copy2(output, staged)
         with zipfile.ZipFile(staged) as archive:
             if archive.testzip():
-                raise StudioError('Patched APK failed CRC validation')
+                raise StudioError('Patched archive failed CRC validation')
         os.replace(staged, stock)
+    shutil.rmtree(stock.parent / "oat", ignore_errors=True)
+    for suffix in (".prof", ".dm"):
+        Path(f"{stock}{suffix}").unlink(missing_ok=True)
+    for suffix in (".art", ".odex", ".vdex"):
+        (stock.parent / f"{stock.stem}{suffix}").unlink(missing_ok=True)
     return stock.relative_to(rom_unpack).parts[0].removesuffix('_unpacked')
+
+
+def _patch_selected_stark_archive(mod_name: str, rom_unpack: Path, workspace: Path) -> str:
+    try:
+        spec = SCRIPT_ARCHIVE_PATCH_SPECS[mod_name]
+    except KeyError as exc:
+        raise StudioError(f"No scripted archive patch is registered for {mod_name}") from exc
+    partition = str(spec["partition"])
+    relative_target = _safe_relative_path(str(spec["relativeTarget"]))
+    stock = rom_unpack / f"{partition}_unpacked" / partition / relative_target
+    if not stock.is_file():
+        raise StudioError(f"{mod_name} requires stock {stock.name}: {stock}")
+    script = STARK_ROOT / str(spec["script"])
+    if not script.is_file():
+        raise StudioError(f"{mod_name} patcher is missing: {script}")
+    work = workspace / "mod-tools" / mod_name
+    scratch = work / "scratch"
+    scratch.mkdir(parents=True, exist_ok=True)
+    output = work / stock.name
+    output.unlink(missing_ok=True)
+    substitutions = {
+        "input": str(stock),
+        "output": str(output),
+        "scratch": str(scratch),
+    }
+    arguments = [str(value).format(**substitutions) for value in spec["arguments"]]
+    _run_command([sys.executable, str(script), *arguments])
+    return _publish_patched_archive(stock, output, rom_unpack)
 
 
 def _patch_selected_noti(rom_unpack: Path, workspace: Path, selected: list[str]) -> str | None:
@@ -3402,7 +3506,7 @@ def _patch_selected_noti(rom_unpack: Path, workspace: Path, selected: list[str])
     level = '1' if selected == ['level1'] else '2'
     _run_command([sys.executable, str(script), '-i', str(stock), '-o', str(output),
                   '-l', level, '--no-interactive'])
-    return _publish_patched_apk(stock, output, rom_unpack)
+    return _publish_patched_archive(stock, output, rom_unpack)
 
 
 def _patch_selected_launcher(rom_unpack: Path, workspace: Path, selected: list[str]) -> str | None:
@@ -3421,7 +3525,23 @@ def _patch_selected_launcher(rom_unpack: Path, workspace: Path, selected: list[s
     _run_command([sys.executable, str(script), str(stock), '--no-install',
                   '--features', ','.join(features), '--output', str(output),
                   '--module-output', str(work / 'Launcher-module.zip')])
-    return _publish_patched_apk(stock, output, rom_unpack)
+    return _publish_patched_archive(stock, output, rom_unpack)
+
+
+def _patcher_owns_payload(
+    mod_name: str,
+    partition: str,
+    relative: Path,
+    *,
+    fix_noti_features: list[str] | None,
+) -> bool:
+    if mod_name == "Fix_noti" and fix_noti_features is None:
+        return False
+    owner = PATCHED_PAYLOAD_ROOTS.get(mod_name)
+    if not owner or owner[0] != partition:
+        return False
+    owned_root = owner[1]
+    return relative == owned_root or owned_root in relative.parents
 
 
 def apply_selected_mods(
@@ -3439,9 +3559,31 @@ def apply_selected_mods(
     launcher_features = normalize_mod_features(launcher_features, 'launcherFeatures')
     fix_noti_features = normalize_mod_features(fix_noti_features, 'fixNotiFeatures')
     launcher_selected = list(DEFAULT_LAUNCHER_FEATURES) if launcher_features is None else launcher_features
-    noti_selected = set(['level2'] if fix_noti_features is None else fix_noti_features)
     version = normalize_mod_version(mod_version)
-    mods = validate_mods(mod_names, mod_version=version)
+    validated_mods = validate_mods(mod_names, mod_version=version)
+    mods = [
+        mod
+        for mod in validated_mods
+        if not (
+            (mod["name"] == "Fix_noti" and fix_noti_features == [])
+            or (mod["name"] == "Launcher_mod" and launcher_features == [])
+        )
+    ]
+    if validated_mods and not mods:
+        return {
+            "mods": [],
+            "modVersion": version,
+            "copied": 0,
+            "copiedBytes": 0,
+            "patched": 0,
+            "stockOtaFeatureLines": 0,
+            "themeCrRemoved": 0,
+            "aiGlobalAiunitRemoved": 0,
+            "jarReports": [],
+            "systemPower": None,
+            "platSepolicyHash": None,
+            "modifiedPartitions": [],
+        }
     # Validate shared service inputs before any MOD copy or expensive JAR patch.
     if any(mod["name"] == "WK_Manager" for mod in mods):
         power_root = STARK_ROOT / WK_MANAGER_POWER_RELATIVE_ROOT
@@ -3476,6 +3618,10 @@ def apply_selected_mods(
     for index, mod in enumerate(mods, start=1):
         emit_progress(int((index - 1) * 35 / total_mods), f"MOD {index}/{len(mods)} · {mod['name']}")
         mod_dir = (STARK_ROOT if mod.get("shared") else _mod_collection_dir(version)) / mod["name"]
+        if mod['name'] in SCRIPT_ARCHIVE_PATCH_SPECS:
+            partition = _patch_selected_stark_archive(mod['name'], rom_unpack, workspace)
+            modified_partitions.add(partition)
+            patched += 1
         if mod['name'] == 'Launcher_mod':
             partition = _patch_selected_launcher(rom_unpack, workspace, launcher_selected)
             if partition:
@@ -3487,20 +3633,28 @@ def apply_selected_mods(
                 modified_partitions.add(partition)
                 patched += 1
         for partition in mod["partitions"]:
+            partition_source = mod_dir / partition
             destination_info = _partition_destination(rom_unpack, partition, device)
             if not destination_info:
+                if any(path.is_file() for path in partition_source.rglob("*")):
+                    raise StudioError(
+                        f"{mod['name']} payload targets unavailable ROM partition: {partition}"
+                    )
                 continue
             target_partition, partition_destination = destination_info
-            partition_source = mod_dir / partition
             for source in partition_source.rglob("*"):
                 if not source.is_file():
                     continue
                 relative = _safe_relative_path(str(source.relative_to(partition_source)))
+                if _patcher_owns_payload(
+                    mod['name'],
+                    partition,
+                    relative,
+                    fix_noti_features=fix_noti_features,
+                ):
+                    continue
                 if mod['name'] == 'Launcher_mod' and launcher_features is not None:
                     if 'global_region' not in launcher_selected or source.suffix == '.apk':
-                        continue
-                if mod['name'] == 'Fix_noti' and fix_noti_features is not None:
-                    if 'level2' not in noti_selected:
                         continue
                 if source.name.startswith("stark_"):
                     if (
@@ -3523,7 +3677,9 @@ def apply_selected_mods(
                 copied_bytes += source.stat().st_size
                 modified_partitions.add(target_partition)
         if mod["name"] == "Fix_noti":
-            fix_noti_selected = 'level2' in noti_selected
+            # Both Athena levels retain the shared notification UID observer hook.
+            # Explicit empty selections were filtered out before this loop.
+            fix_noti_selected = True
         if mod["name"] == "WK_Manager":
             wk_manager_mod_dir = mod_dir
         if mod["name"] == "Disable_flag_secure":
