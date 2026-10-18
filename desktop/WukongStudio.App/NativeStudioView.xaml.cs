@@ -4092,6 +4092,12 @@ public sealed partial class NativeStudioView : UserControl
 
     private void RefreshContentSyncLocalization()
     {
+        // Collapsed pages may not have a realized visual tree during startup.
+        // Set the upload surface explicitly so locale survives first navigation.
+        SyncContentDriveButton.Content = Localized("Chọn pack và upload GitHub");
+        PublishContentManifestButton.Content = Localized("Upload tất cả pack MOD");
+        ContentSyncDescriptionText.Text = Localized("STARK dùng chung được cập nhật qua Git và bộ cài. Các pack MOD được upload lên GitHub Releases; hash và manifest tự cập nhật sau khi xác minh, không ghi đè bản đang được job sử dụng.");
+        ContentSyncStatusText.Text = Localized(ContentSyncStatusText.Text);
         RenderContentSyncSelection();
         if (ContentSyncProgressPanel.Visibility != Visibility.Visible)
         {
