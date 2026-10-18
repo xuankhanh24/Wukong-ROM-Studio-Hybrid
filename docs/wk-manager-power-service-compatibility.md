@@ -49,3 +49,11 @@ whole-directory backup/replacement and failure rollback, not a partial overlay.
 GitHub ROM builds must use the checked-out STARK source, never content cache.
 The ROM workflow excludes STARK from cache paths and uses content-cache v3,
 preventing restoration of v2 archives that still contain older STARK files.
+
+Owner-requested WK Manager mode: preserve the source policy byte-for-byte and
+apply every rule to the ROM. Missing SELinux symbols are reported as warnings
+instead of aborting this installer. No missing types are invented, no rules
+are skipped or renamed, and the legacy Config policy is not overlaid. Reports
+list `unresolvedPolicySymbols` and `policyValidation: warning-only`; successful
+copy/application does not establish SELinux compilation or device boot safety.
+Other direct users of the symbol validator retain strict validation by default.
