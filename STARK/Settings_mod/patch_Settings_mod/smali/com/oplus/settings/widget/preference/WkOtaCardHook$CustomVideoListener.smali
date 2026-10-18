@@ -27,7 +27,6 @@
 .field private audioFocusRequest:Landroid/media/AudioFocusRequest;
 
 .field private audioManager:Landroid/media/AudioManager;
-
 .field private final context:Landroid/content/Context;
 
 .field private cover:Landroid/widget/ImageView;
@@ -41,7 +40,6 @@
 .field private final revision:J
 
 .field private final soundEnabled:Z
-
 .field private surface:Landroid/view/Surface;
 
 .field private final uri:Landroid/net/Uri;

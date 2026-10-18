@@ -4570,7 +4570,6 @@ public sealed partial class NativeStudioView : UserControl
             Grid.SetColumn(child, index % columns);
         }
     }
-
     private static void RestoreModFeatures(Dictionary<string, CheckBox> checks,
         IReadOnlyList<string>? selected, IReadOnlyList<StudioModFeature> definitions)
     {

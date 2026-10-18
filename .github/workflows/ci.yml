@@ -47,6 +47,8 @@ jobs:
           npm test --prefix telegram_mini_app
       - name: Materialize private content test fixtures
         run: python tools/materialize_test_content.py --preserve-shared
+      - name: Regenerate Mini App catalog from current pack manifest
+        run: python -m tools.export_mini_app_catalog --output telegram_mini_app/catalog.json
       - name: Run Python contract and regression tests
         run: python -m unittest discover -s tests -v
 

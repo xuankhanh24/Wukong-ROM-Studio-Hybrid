@@ -14,7 +14,6 @@
 
 # static fields
 .field private static final ASYNC_RELEASE_EXECUTOR:Ljava/util/concurrent/ExecutorService;
-
 .field private static final CONFIG_URI:Landroid/net/Uri;
 
 .field private static final MAX_IMAGE_DIMENSION:I = 0x500
@@ -42,7 +41,6 @@
 .field private static cachedSnapshot:Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
 .field private static volatile savedPlaybackPosition:I
-
 .field private static snapshotLoadElapsed:J
 
 .field private static snapshotLoaded:Z
@@ -118,7 +116,6 @@
     const/4 v0, 0x0
 
     sput v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
     return-void
 .end method
 
@@ -1550,7 +1547,6 @@
     invoke-virtual {v1, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
     move-result-object v1
-
     invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
 
     move-result-object v1

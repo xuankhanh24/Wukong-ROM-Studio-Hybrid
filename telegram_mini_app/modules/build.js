@@ -103,11 +103,21 @@ function renderMods(reset = true) {
       const input = document.createElement("input"); input.type = "checkbox"; input.value = name; input.checked = current.has(name);
       const span = document.createElement("span"); span.title = name;
       const text = document.createElement("b"); text.textContent = name;
+      appendSharedModBadge(text, name);
       span.append(selectionMark(), text); label.append(input, span); items.append(label);
     });
     list.append(section);
   });
   updateSummary();
+}
+
+function appendSharedModBadge(container, name) {
+  if (!state.catalog?.sharedMods?.includes(name)) return;
+  const badge = document.createElement("small");
+  badge.className = "shared-mod-badge";
+  badge.textContent = t("sharedMod");
+  badge.title = t("sharedModHint");
+  container.append(badge);
 }
 
 function renderPipelineSteps(reset = true) {
@@ -136,7 +146,8 @@ function renderCatalog() {
     row.append(copy); return row;
   }));
   $("#catalog-mod-list").replaceChildren(...mods.map((name) => {
-    const item = document.createElement("span"); item.textContent = name; return item;
+    const item = document.createElement("span"); item.textContent = name;
+    appendSharedModBadge(item, name); return item;
   }));
   if (!devices.length && !mods.length) {
     const empty = document.createElement("span"); empty.className = "catalog-empty"; empty.textContent = t("noCatalogMatches");
@@ -228,6 +239,7 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 }
 
 function updateSummary() {
+  const selected = selectedMods();
   const wkPatches = $("#wk-manager-patches");
   if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
   const launcherFeatures = $("#launcher-features");
@@ -239,6 +251,20 @@ function updateSummary() {
   if (bundledHint) bundledHint.hidden = patchLauncher;
   const fixNotiFeatures = $("#fix-noti-features");
   if (fixNotiFeatures) fixNotiFeatures.hidden = !selectedMods().includes("Fix_noti");
+  const featureSummary = $("#mod-feature-summary");
+  if (featureSummary) {
+    const parts = [];
+    if (selected.includes("Launcher_mod")) parts.push(patchLauncher
+      ? t("launcherSelection", { count: $$('#launcher-features input[type="checkbox"]:checked').length })
+      : `Launcher: ${t("launcherBundled")}`);
+    if (selected.includes("Fix_noti")) {
+      const level = $("#fix-noti-features input:checked")?.value;
+      parts.push(`Fix_noti: ${level === "level2" ? "LV2" : level === "level1" ? "LV1" : t("noApkPatch")}`);
+    }
+    if (selected.includes("WK_Manager")) parts.push(t("wkSelection", { count: $$("#wk-manager-patches input:checked").length }));
+    featureSummary.hidden = parts.length === 0;
+    featureSummary.textContent = parts.join(" · ");
+  }
   const selectionSummary = $("#config-summary");
   if (selectionSummary) selectionSummary.textContent = t("selectionSummary", { mods: selectedMods().length, steps: $$("#steps input:checked").length });
   const selectedDevice = $("#device")?.value || "";

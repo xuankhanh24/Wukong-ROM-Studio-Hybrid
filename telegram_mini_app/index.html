@@ -145,7 +145,7 @@
           <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
           <div class="mod-list" id="mod-list" aria-live="polite"></div>
           <fieldset id="launcher-features" class="mod-feature-options" hidden>
-            <legend>Launcher mod</legend>
+            <legend data-i18n="launcherFeaturesTitle">Launcher_mod · Chọn chức năng</legend>
             <div class="launcher-mode-selector" role="radiogroup" aria-label="Launcher mod">
               <label><input type="radio" name="launcher-mode" value="bundled" checked><span data-i18n="launcherBundled">MOD có sẵn</span></label>
               <label><input type="radio" name="launcher-mode" value="patch"><span data-i18n="launcherPatch">Patch</span></label>
@@ -154,37 +154,37 @@
             <div id="launcher-patch-options" hidden>
             <p data-i18n="launcherPatchHint">Patch trên Launcher gốc của ROM. Các tính năng APK cần JDK và Android SDK trên runner.</p>
             <div class="launcher-feature-grid">
-            <label><input type="checkbox" value="global_region" checked> Bỏ giới hạn CN / Global region</label>
-            <label><input type="checkbox" value="recents"> Đa nhiệm máy tính bảng / Tablet recents</label>
-            <label><input type="checkbox" value="dock"> Làm mờ thanh dock / Dock blur</label>
-            <label><input type="checkbox" value="taskbar"> Mở rộng thanh tác vụ / Expanded taskbar</label>
-            <label><input type="checkbox" value="feed"> Google Feed</label>
-            <label><input type="checkbox" value="search"> Thanh tìm kiếm tùy chỉnh / Custom search bar</label>
-            <label><input type="checkbox" value="quick_search"> Tìm kiếm nhanh Google / Google QSB</label>
-            <label><input type="checkbox" value="gestures"> Cử chỉ vuốt xuống / Swipe-down gestures</label>
-            <label><input type="checkbox" value="ram"> Hiển thị RAM đa nhiệm / Recents RAM</label>
+            <label><input type="checkbox" value="global_region" checked><span data-i18n="featureGlobalRegion">Bỏ giới hạn CN</span></label>
+            <label><input type="checkbox" value="recents"><span data-i18n="featureRecents">Đa nhiệm máy tính bảng</span></label>
+            <label><input type="checkbox" value="dock"><span data-i18n="featureDock">Làm mờ thanh dock</span></label>
+            <label><input type="checkbox" value="taskbar"><span data-i18n="featureTaskbar">Mở rộng thanh tác vụ</span></label>
+            <label><input type="checkbox" value="feed"><span>Google Feed</span></label>
+            <label><input type="checkbox" value="search"><span data-i18n="featureSearch">Thanh tìm kiếm tùy chỉnh</span></label>
+            <label><input type="checkbox" value="quick_search"><span data-i18n="featureQuickSearch">Tìm kiếm nhanh Google</span></label>
+            <label><input type="checkbox" value="gestures"><span data-i18n="featureGestures">Cử chỉ vuốt xuống</span></label>
+            <label><input type="checkbox" value="ram"><span data-i18n="featureRam">Hiển thị RAM đa nhiệm</span></label>
             </div>
             </div>
           </fieldset>
           <fieldset id="fix-noti-features" class="mod-feature-options" hidden>
-            <legend>Fix_noti · Chọn cấp độ / Level</legend>
-            <label><input type="checkbox" value="level1" checked> LV1 · Global baseline — cân bằng pin / Balanced</label>
-            <label><input type="checkbox" value="level2"> LV2 · Fix thông báo đầy đủ / Full notification fix</label>
-            <p>Chọn một mức, không áp dụng đồng thời. / Select one level only.</p>
+            <legend data-i18n="fixNotiFeaturesTitle">Fix_noti · Chọn cấp độ</legend>
+            <label><input type="checkbox" value="level1" checked><span data-i18n="featureLevel1">LV1 · Global baseline — cân bằng pin</span></label>
+            <label><input type="checkbox" value="level2"><span data-i18n="featureLevel2">LV2 · Fix thông báo đầy đủ</span></label>
+            <p data-i18n="fixNotiFeaturesHint">Mặc định LV1. Chỉ chọn một mức; bỏ cả hai để không patch APK.</p>
           </fieldset>
           <fieldset id="wk-manager-patches" class="mod-feature-options" hidden>
-            <legend>WK Manager · Patch tùy chọn / Optional patches</legend>
-            <label><input type="checkbox" value="keybox_manager" checked> Quản lý Keybox / Keybox manager</label>
+            <legend data-i18n="wkFeaturesTitle">WK Manager · Patch tùy chọn</legend>
+            <label><input type="checkbox" value="keybox_manager" checked><span data-i18n="featureKeybox">Quản lý Keybox</span></label>
             <label><input type="checkbox" value="play_integrity_spoof" checked> Play Integrity Spoof</label>
             <label><input type="checkbox" value="gamespoof" checked> Game Spoof</label>
-            <label><input type="checkbox" value="hma_privacy_spoof" checked> HMA Quyền riêng tư / HMA privacy spoof</label>
-            <label><input type="checkbox" value="kernel_manager" checked> Trình quản lý Kernel & Nguồn / Kernel & Power manager</label>
-            <label><input type="checkbox" value="power_button_remap" checked> Remap nút nguồn / Power button remap</label>
-            <label><input type="checkbox" value="multi_window" checked> Đa cửa sổ nổi / Floating multi-window</label>
-            <label><input type="checkbox" value="disable_flag_secure" checked> Tắt cờ bảo mật / Disable FLAG_SECURE</label>
-            <label><input type="checkbox" value="black_window" checked> Tương thích cửa sổ nổi / Floating window compatibility</label>
-            <label><input type="checkbox" value="multi_audio" checked> Âm thanh nhiều ứng dụng / Multiple app audio</label>
-            <p>Chỉ áp dụng các hook được chọn ở trên / Only selected hooks are applied.</p>
+            <label><input type="checkbox" value="hma_privacy_spoof" checked><span data-i18n="featureHma">HMA Quyền riêng tư</span></label>
+            <label><input type="checkbox" value="kernel_manager" checked><span data-i18n="featureKernel">Trình quản lý Kernel & Nguồn</span></label>
+            <label><input type="checkbox" value="power_button_remap" checked><span data-i18n="featurePower">Remap nút nguồn</span></label>
+            <label><input type="checkbox" value="multi_window" checked><span data-i18n="featureMultiWindow">Đa cửa sổ nổi</span></label>
+            <label><input type="checkbox" value="disable_flag_secure" checked><span data-i18n="featureSecure">Tắt cờ bảo mật</span></label>
+            <label><input type="checkbox" value="black_window" checked><span data-i18n="featureBlackWindow">Tương thích cửa sổ nổi</span></label>
+            <label><input type="checkbox" value="multi_audio" checked><span data-i18n="featureMultiAudio">Âm thanh nhiều ứng dụng</span></label>
+            <p data-i18n="wkFeaturesHint">Chỉ áp dụng các hook được chọn ở trên.</p>
           </fieldset>
           <details class="advanced"><summary><span data-i18n="advanced">Pipeline nâng cao</span><b id="pipeline-count">0/0</b></summary><div class="advanced-body"><div class="steps" id="steps"></div><section class="debloat-control"><header><div><strong data-i18n="debloatPaths">Đường dẫn cần xóa</strong><small data-i18n="debloatPathsHint">Danh sách tùy chỉnh chỉ dùng cho job hiện tại và tự khôi phục sau khi gửi build.</small></div><button id="edit-debloat-paths" type="button" data-i18n="editDebloatPaths">Tùy chỉnh</button></header><div class="debloat-summary" id="debloat-summary"><strong id="debloat-path-count">0 đường dẫn</strong><small id="debloat-path-state" data-i18n="debloatDefaultState">Đang dùng danh sách mặc định</small></div><div class="debloat-editor" id="debloat-editor" hidden><label class="field field-wide"><span data-i18n="debloatEditorHint">Mỗi dòng là một đường dẫn tương đối</span><textarea id="debloat-paths" rows="10" spellcheck="false" placeholder="my_stock\app\Browser"></textarea></label><footer><button id="cancel-debloat-paths" type="button" data-i18n="cancelDialog">Hủy</button><button class="primary compact" id="save-debloat-paths" type="button" data-i18n="saveDebloatPaths">Lưu cho job này</button></footer></div></section></div></details>
         <section class="dossier-section delivery-section">
@@ -195,6 +195,7 @@
         <aside class="dispatch-docket incomplete">
           <header><small id="readiness-label" data-i18n="incompleteLabel">HỒ SƠ CHƯA ĐỦ</small><span id="readiness-count">1/4 điều kiện</span></header>
           <strong id="launch-summary">— / PLUS / GITHUB AUTO</strong>
+          <p id="mod-feature-summary" class="mod-feature-summary" aria-live="polite" hidden></p>
           <ol class="readiness-checklist">
             <li id="check-source"><i aria-hidden="true"></i><span><b data-i18n="checklistSource">Nguồn ROM</b><small data-i18n="checklistSourcePending">Chưa có URL hợp lệ</small></span></li>
             <li id="check-device"><i aria-hidden="true"></i><span><b data-i18n="checklistDevice">Thiết bị đích</b><small data-i18n="checklistDevicePending">Cần chọn thủ công</small></span></li>

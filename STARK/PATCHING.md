@@ -111,7 +111,6 @@ while the master switch is on, retaining its original fallback when off.
 Workspace pipeline 28 requires a fresh build instead of resuming a previous
 oplus-services-owned power bridge. Run the real OEM and assembly tests below against
 the `WK_FW/test_baksmali` class to validate the updated hook without flashing.
-
 ## Settings CLI
 
 ```powershell
@@ -131,7 +130,6 @@ returns from `onBindViewHolder`. A range invoke supports high parameter register
 without allocating scratch registers. The stock video methods, OTA controller,
 listener and resource IDs are no longer patched independently. Missing bind
 callbacks fail explicitly. Workspace pipeline 29 invalidates old resume results.
-
 ## Shared catalog and compatibility
 
 The seven feature modules above, plus WK Manager/Fake Lock/WK Installer, use the

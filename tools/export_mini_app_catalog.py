@@ -56,6 +56,12 @@ def export_catalog(
     for pack in index["packs"]:
         pack_id = str(pack.get("id") or "")
         archive = pack.get("archive")
+        if pack_id == "STARK/common" and pack.get("source") == "git":
+            # Web deploys deliberately exclude APK/ROM payload directories.
+            # The Git-owned toolchain contract, not the web build filesystem
+            # or the legacy archive inventory, declares these shared mods.
+            shared_mods.update(SHARED_MOD_NAMES)
+            continue
         if pack_id == "STARK/common" and isinstance(archive, dict) and archive.get("sha256"):
             shared_partitions: dict[str, set[str]] = {}
             for item in pack.get("files", []):
@@ -106,6 +112,7 @@ def export_catalog(
             for version in sorted(mods_by_version, key=str.casefold)
         },
         "modsByVersion": mods_by_version,
+        "sharedMods": sorted(shared_mods, key=str.casefold),
         "pipelineSteps": [
             {"id": step_id, "label": label, "default": step_id in DEFAULT_PIPELINE_STEPS}
             for step_id, label, _required in PIPELINE_STEP_DEFINITIONS

@@ -16,9 +16,10 @@ import shutil
 import zipfile
 import tempfile
 import argparse
-import subprocess
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from patch_common import run_tool, rewrite_archive, align_apk, find_tool as shared_tool, require_tool
 # Đảm bảo in tiếng Việt không bị lỗi charmap trên terminal Windows
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -32,86 +33,6 @@ TARGET_KEYS = [
 ]
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-BIN_DIR = SCRIPT_DIR / "bin"
-
-# Tích hợp bộ công cụ dùng chung hoặc tự cung cấp (Standalone Fallback)
-try:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-    from patch_common import run_tool, rewrite_archive, align_apk, find_tool as shared_tool, require_tool
-except Exception:
-    def find_tool(name: str):
-        # 1. Tìm trong thư mục bin cục bộ
-        local_candidates = [
-            BIN_DIR / f"{name}.jar",
-            BIN_DIR / f"{name}.exe",
-            BIN_DIR / name,
-        ]
-        for c in local_candidates:
-            if c.is_file():
-                return str(c)
-
-        # 2. Tìm trong PATH
-        which = shutil.which(name)
-        if which:
-            return which
-
-        # 3. Tìm các JAR thường dùng trong Downloads
-        downloads = Path.home() / "Downloads"
-        if downloads.is_dir():
-            for jar in downloads.glob(f"*{name}*.jar"):
-                return str(jar)
-        return None
-
-    def require_tool(name: str):
-        tool = find_tool(name)
-        if not tool:
-            raise FileNotFoundError(f"Không tìm thấy công cụ bắt buộc: {name}")
-        return tool
-
-    def shared_tool(name: str):
-        return find_tool(name)
-
-    def run_tool(cmd, **kwargs):
-        return subprocess.run(cmd, **kwargs)
-
-    def rewrite_archive(original, output, replacements, *, store_dex=True):
-        original, output = Path(original), Path(output)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        fd, temp_file = tempfile.mkstemp(prefix="patch_zip_", suffix=".tmp", dir=output.parent)
-        os.close(fd)
-        try:
-            with zipfile.ZipFile(original, "r") as zin, zipfile.ZipFile(temp_file, "w", allowZip64=True) as zout:
-                for item in zin.infolist():
-                    if item.filename in replacements:
-                        val = replacements[item.filename]
-                        data = val if isinstance(val, bytes) else Path(val).read_bytes()
-                        zinfo = zipfile.ZipInfo(item.filename)
-                        if store_dex and re.fullmatch(r"classes(?:\d+)?\.dex", item.filename):
-                            zinfo.compress_type = zipfile.ZIP_STORED
-                        else:
-                            zinfo.compress_type = item.compress_type
-                        zout.writestr(zinfo, data)
-                    else:
-                        data = zin.read(item.filename)
-                        zout.writestr(item, data)
-                # Thêm file mới nếu chưa có
-                for name, val in replacements.items():
-                    if name not in zin.namelist():
-                        data = val if isinstance(val, bytes) else Path(val).read_bytes()
-                        zinfo = zipfile.ZipInfo(name)
-                        zinfo.compress_type = zipfile.ZIP_STORED if store_dex else zipfile.ZIP_DEFLATED
-                        zout.writestr(zinfo, data)
-            shutil.move(temp_file, str(output))
-        finally:
-            Path(temp_file).unlink(missing_ok=True)
-
-    def align_apk(zipalign_bin, in_apk, out_apk):
-        if zipalign_bin and Path(zipalign_bin).is_file():
-            cmd = [str(zipalign_bin), "-f", "-p", "4", str(in_apk), str(out_apk)]
-            res = subprocess.run(cmd, capture_output=True)
-            if res.returncode == 0:
-                return
-        shutil.copyfile(in_apk, out_apk)
 
 def clean_path_input(raw: str) -> str:
     """Loại bỏ dấu nháy kép, khoảng trắng thừa khi kéo thả file từ Windows Explorer."""
@@ -220,12 +141,15 @@ def patch_smali_directory(smali_dir: Path) -> tuple[int, int]:
 
 def patch_archive(input_file: Path, output_file: Path) -> bool:
     """Xử lý decompile -> vá smali -> recompile -> đóng gói JAR/APK/DEX."""
+    if input_file.resolve() == output_file.resolve():
+        raise ValueError("Output must not overwrite the source archive")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     baksmali_bin = shared_tool("baksmali")
     smali_bin = shared_tool("smali")
 
     if not baksmali_bin or not smali_bin:
-        print("[-] Lỗi: Không tìm thấy smali/baksmali!")
-        print(f"    Vui lòng kiểm tra thư mục 'bin/' hoặc PATH hệ thống.")
+        print("[-] Thiếu smali/baksmali dùng chung; kiểm tra bin/Java hoặc Runtime/Bin/Java.")
+        print("    Kiểm tra bộ công cụ dùng chung bin/Java/toolchain.json.")
         return False
 
     temp_dir = Path(tempfile.mkdtemp(prefix="hasselblad_patch_"))
@@ -260,10 +184,8 @@ def patch_archive(input_file: Path, output_file: Path) -> bool:
             if input_file.suffix.lower() == ".apk":
                 align_apk(shared_tool("zipalign"), intermediate, output_file)
             else:
-                shutil.copyfile(intermediate, output_file)
-            print(f"\n[OK] ĐÃ VÁ THÀNH CÔNG:")
-            print(f"     -> {total_keys} keys / {total_files} classes / {len(replacements)} DEX")
-            print(f"     -> Xuất ra: {output_file.resolve()}\n")
+                os.replace(intermediate, output_file)
+            print(f"[OK] {total_keys} keys / {total_files} classes / {len(replacements)} DEX -> {output_file}")
             return True
 
         print(f"[*] Đang giải nén và phân tích bytecode (baksmali): {input_file.name}...")
@@ -286,6 +208,10 @@ def patch_archive(input_file: Path, output_file: Path) -> bool:
             print(f"[-] Lỗi khi chạy smali:\n{res_smali.stderr}")
             return False
 
+        # Đóng gói file kết quả
+        suffix = input_file.suffix.lower()
+        print(f"[*] Đang đóng gói file xuất xưởng: {output_file.name}...")
+
         shutil.copyfile(out_dex, output_file)
         print("\n" + "="*60)
         print(f"[OK] VÁ THÀNH CÔNG! ĐÃ XUẤT RA:")
@@ -298,11 +224,10 @@ def patch_archive(input_file: Path, output_file: Path) -> bool:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 def main():
-    parser = argparse.ArgumentParser(description='OPlus Camera Hasselblad Feature Auto Patcher')
-    parser.add_argument('input', nargs='?', help='File (.jar, .apk, .dex) hoặc thư mục smali')
-    parser.add_argument('output', nargs='?', help='Đường dẫn file xuất ra (tùy chọn)')
+    parser = argparse.ArgumentParser(description='Patch Hasselblad using the shared Java toolchain')
+    parser.add_argument('input', nargs='?')
+    parser.add_argument('output', nargs='?')
     args = parser.parse_args()
-
     print("="*68)
     print("   OPLUS CAMERA HASSELBLAD FILTER & WATERMARK AUTO PATCHER")
     print("="*68)

@@ -6,7 +6,6 @@
 > phạm vi `public/private/static/final` của `getTargetIntentStatic` và các method
 > video OEM. Những hướng dẫn chèn nhiều hook bên dưới là tài liệu của bản cũ,
 > không áp dụng đồng thời với patch universal. Xem [hợp đồng patch hiện tại](../../PATCHING.md#settings-cli).
-
 **Tác giả:** KhanhStark & Antigravity  
 **Phiên bản tài liệu:** v17.0 Universal  
 **Áp dụng cho:** Tất cả các phiên bản Settings APK ColorOS / OxygenOS từ Android 14, 15, 16 đến Android 17 (OnePlus Ace 5, OPPO Find series, Realme...).

@@ -1,6 +1,6 @@
 import { bindViewport } from "./viewport.js";
 import { $, $$, miniApiEndpoint, runtime, state, t, themeMedia } from "./state.js";
-import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
+import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, selectionMark, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
 import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
@@ -59,6 +59,12 @@ function options(select, entries, preferred) {
 }
 
 function bindEvents() {
+  $$(".mod-feature-options label").forEach((label) => {
+    if (label.querySelector(".feature-checkmark")) return;
+    const mark = selectionMark();
+    mark.classList.add("feature-checkmark");
+    label.querySelector("input")?.after(mark);
+  });
   $("#confirm-submit")?.addEventListener("click", () => submitRecipe().catch(error => toast(error.message, true)));
   $("#language").addEventListener("click", () => { state.language = state.language === "vi" ? "en" : "vi"; localStorage.setItem("wukong-language", state.language); applyLanguage(); });
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => navigate(button.dataset.nav)));
@@ -180,6 +186,7 @@ function bindEvents() {
   $("#execution").addEventListener("change", updateSummary);
   $("#device").addEventListener("change", updateSummary);
   $("#launcher-features")?.addEventListener("change", updateSummary);
+  $("#wk-manager-patches")?.addEventListener("change", updateSummary);
   $("#fix-noti-features")?.addEventListener("change", (event) => {
     if (event.target.matches('input[type="checkbox"]') && event.target.checked) {
       $$("#fix-noti-features input").forEach((input) => {

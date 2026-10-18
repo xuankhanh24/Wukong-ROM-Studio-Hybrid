@@ -130,7 +130,6 @@ class FeatureTests(unittest.TestCase):
             with patch.object(studio_core, "_patch_jar_with_apktool", return_value={}) as rebuild:
                 studio_core._patch_wk_manager_jars(root, root, selected_patches=["power_button_remap"])
             self.assertEqual([call.args[0].name for call in rebuild.call_args_list], ["framework.jar", "oplus-services.jar"])
-
     def test_power_legacy_callbacks_keep_stock_and_are_idempotent(self):
         text = ('.class public Lfixture/Rule;\n.super Lfixture/Base;\n'
                 '.method onLongPress(J)V\n    .locals 0\n    return-void\n.end method\n'
@@ -163,7 +162,6 @@ class FeatureTests(unittest.TestCase):
             self.assertIn('invoke-static/range {v0 .. v0}', updated)
             self.assertNotIn('invoke-static {p0, v0}', updated)
             self.assertIn('const/4 v0, 0x4', updated)
-
     def test_power_rejects_primitive_gesture_instead_of_passing_it_as_object(self):
         text = ('.class public Lfixture/Rule;\n.super Lfixture/Base;\n'
                 '.method onKeyGesture(IJ)V\n    .locals 1\n    return-void\n.end method\n')

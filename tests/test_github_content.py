@@ -120,7 +120,6 @@ class GitHubContentTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'redirect limit'):
                 GitHubReleases('test/repo', 'secret').create('test')
         self.assertEqual(api.call_count, 6)
-
     def test_split_assets_roundtrip_and_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'archive.tar.zst'

@@ -48,7 +48,6 @@ class ModFeatureTests(unittest.TestCase):
                 with self.assertRaisesRegex(core.StudioError, 'chọn Patch'):
                     core.apply_selected_mods(['Launcher_mod'], root, {}, root, launcher_features=None)
                 patcher.assert_not_called()
-
     def test_mini_app_defaults_to_level_one_only(self):
         from html.parser import HTMLParser
 

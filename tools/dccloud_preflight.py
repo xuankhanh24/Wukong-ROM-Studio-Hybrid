@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
+import sys
 import subprocess
 import tempfile
 import time
@@ -252,7 +254,7 @@ def _native_canary(client: CloudreveClient, mirror_root: str, size_mib: int) -> 
             raise RuntimeError("DC Cloud native canary cleanup failed") from cleanup_errors[0]
 
 
-def main() -> int:
+def _preflight() -> int:
     parser = argparse.ArgumentParser(description="Preflight the DC Cloud mirror")
     parser.add_argument("--config", type=Path)
     parser.add_argument("--write-test", action="store_true")
@@ -365,6 +367,24 @@ def main() -> int:
         result.update(_multipart_canary(storage, config.root, args.multipart_canary_mib))
     print(json.dumps(result))
     return 0
+
+
+def main() -> int:
+    optional = "--optional" in sys.argv
+    if optional:
+        sys.argv.remove("--optional")
+    try:
+        return _preflight()
+    except (Exception, SystemExit) as exc:
+        if not optional or isinstance(exc, SystemExit) and exc.code in (None, 0):
+            raise
+        # Never emit API responses/tokens. Only this build's secondary mirror is disabled.
+        print(f"::warning title=DC Cloud mirror unavailable::{type(exc).__name__}; continuing with Google Drive.")
+        env_path = os.environ.get("GITHUB_ENV")
+        if env_path:
+            with open(env_path, "a", encoding="utf-8") as handle:
+                handle.write("WUKONG_DCCLOUD_PREFLIGHT_FAILED=1\n")
+        return 0
 
 
 if __name__ == "__main__":
