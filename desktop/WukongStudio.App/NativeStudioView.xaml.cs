@@ -101,6 +101,7 @@ public sealed partial class NativeStudioView : UserControl
         InitializeComponent();
         AddModFeatureChecks(LauncherFeatureChecks, _launcherFeatureChecks, StudioModFeatures.Launcher);
         AddModFeatureChecks(FixNotiFeatureChecks, _fixNotiFeatureChecks, StudioModFeatures.FixNoti);
+        LauncherModeSelector.SelectionChanged += LauncherModeChanged;
         JobsList.ItemsSource = _jobItems;
         RomRenamerList.ItemsSource = _romRenameItems;
         DevicesList.ItemsSource = _deviceItems;
@@ -1582,7 +1583,7 @@ public sealed partial class NativeStudioView : UserControl
             steps,
             NotifyTelegramCheckBox.IsChecked == true,
             WkManagerPatches: SelectedWkManagerPatches(),
-            LauncherFeatures: SelectedModFeatures(_launcherFeatureChecks),
+            LauncherFeatures: SelectedLauncherFeatures(),
             FixNotiFeatures: SelectedModFeatures(_fixNotiFeatureChecks));
     }
 
@@ -4502,7 +4503,7 @@ public sealed partial class NativeStudioView : UserControl
         });
     }
 
-    private void AddModFeatureChecks(StackPanel panel, Dictionary<string, CheckBox> checks,
+    private void AddModFeatureChecks(Panel panel, Dictionary<string, CheckBox> checks,
         IReadOnlyList<StudioModFeature> features)
     {
         foreach (var feature in features)
@@ -4531,6 +4532,44 @@ public sealed partial class NativeStudioView : UserControl
 
     private static string[] SelectedModFeatures(Dictionary<string, CheckBox> checks) =>
         checks.Where(item => item.Value.IsChecked == true).Select(item => item.Key).ToArray();
+
+    // null uses the bundled MOD payload; an explicit list patches the stock Launcher.
+    private string[]? SelectedLauncherFeatures() => LauncherModeSelector.SelectedIndex == 1
+        ? SelectedModFeatures(_launcherFeatureChecks) : null;
+
+    private void LauncherModeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateLauncherMode();
+        ConfigurationOptionChanged(sender, new RoutedEventArgs());
+        ScheduleBuildSectionLayoutUpdate();
+    }
+
+    private void UpdateLauncherMode()
+    {
+        var patch = LauncherModeSelector.SelectedIndex == 1;
+        LauncherPatchOptions.Visibility = patch ? Visibility.Visible : Visibility.Collapsed;
+        LauncherModeDescription.Text = patch
+            ? "Tùy chỉnh tính năng trên Launcher gốc của ROM."
+            : "Dùng Launcher từ gói MOD của phiên bản đã chọn.";
+    }
+
+    private void LauncherFeatureChecksSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var columns = e.NewSize.Width >= 640 ? 2 : 1;
+        if (LauncherFeatureChecks.ColumnDefinitions.Count == columns) return;
+        LauncherFeatureChecks.ColumnDefinitions.Clear();
+        LauncherFeatureChecks.RowDefinitions.Clear();
+        for (var column = 0; column < columns; column++)
+            LauncherFeatureChecks.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        for (var row = 0; row < (LauncherFeatureChecks.Children.Count + columns - 1) / columns; row++)
+            LauncherFeatureChecks.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        for (var index = 0; index < LauncherFeatureChecks.Children.Count; index++)
+        {
+            var child = (FrameworkElement)LauncherFeatureChecks.Children[index];
+            Grid.SetRow(child, index / columns);
+            Grid.SetColumn(child, index % columns);
+        }
+    }
 
     private static void RestoreModFeatures(Dictionary<string, CheckBox> checks,
         IReadOnlyList<string>? selected, IReadOnlyList<StudioModFeature> definitions)
@@ -4597,7 +4636,7 @@ public sealed partial class NativeStudioView : UserControl
         _stepChecks.Where(item => item.Value.IsChecked == true).Select(item => item.Key),
         NotifyTelegramCheckBox.IsChecked == true,
         SelectedWkManagerPatches(),
-        SelectedModFeatures(_launcherFeatureChecks),
+        SelectedLauncherFeatures(),
         SelectedModFeatures(_fixNotiFeatureChecks));
 
     private (int UnknownMods, int UnknownSteps) ApplyBuildProfile(StudioBuildProfile profile)
@@ -4640,6 +4679,8 @@ public sealed partial class NativeStudioView : UserControl
             WkBlackWindowCheck.IsChecked = profile.WkManagerPatches?.Contains("black_window") ?? true;
             WkMultiAudioCheck.IsChecked = profile.WkManagerPatches?.Contains("multi_audio") ?? true;
             RestoreModFeatures(_launcherFeatureChecks, profile.LauncherFeatures, StudioModFeatures.Launcher);
+            LauncherModeSelector.SelectedIndex = profile.LauncherFeatures is null ? 0 : 1;
+            UpdateLauncherMode();
             RestoreModFeatures(_fixNotiFeatureChecks, profile.FixNotiFeatures, StudioModFeatures.FixNoti);
             foreach (var (stepId, check) in _stepChecks)
             {

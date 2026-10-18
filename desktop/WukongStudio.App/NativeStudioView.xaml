@@ -405,9 +405,17 @@
                                                 <Grid x:Name="ModsPanel" ColumnSpacing="8" RowSpacing="8" SizeChanged="ModsPanelSizeChanged" />
                                                 <Border x:Name="LauncherFeaturesPanel" Style="{StaticResource SubtlePanelStyle}" Margin="0,6,0,0" Visibility="Collapsed">
                                                     <StackPanel Spacing="8">
-                                                        <TextBlock Text="Launcher_mod · Chọn chức năng / Features" FontWeight="SemiBold" />
-                                                        <TextBlock Text="Ngoài bỏ giới hạn CN, các tính năng sẽ patch APK stock và cần JDK + Android SDK. / APK features require JDK + Android SDK." TextWrapping="Wrap" Foreground="{ThemeResource MutedBrush}" FontSize="12" />
-                                                        <StackPanel x:Name="LauncherFeatureChecks" Spacing="4" />
+                                                        <TextBlock Text="Launcher mod" FontWeight="SemiBold" />
+                                                        <RadioButtons x:Name="LauncherModeSelector" MaxColumns="2" SelectedIndex="0" AutomationProperties.Name="Cách áp dụng Launcher mod">
+                                                            <RadioButton Content="MOD có sẵn" MinHeight="44" />
+                                                            <RadioButton Content="Patch" MinHeight="44" />
+                                                        </RadioButtons>
+                                                        <TextBlock x:Name="LauncherModeDescription" Text="Dùng Launcher từ gói MOD của phiên bản đã chọn." TextWrapping="Wrap" Foreground="{ThemeResource MutedBrush}" FontSize="12" />
+                                                        <StackPanel x:Name="LauncherPatchOptions" Spacing="8" Visibility="Collapsed">
+                                                            <TextBlock Text="Chọn tính năng cần patch" FontWeight="SemiBold" FontSize="13" Margin="0,8,0,0" />
+                                                            <TextBlock Text="Patch trên Launcher gốc của ROM. Các tính năng APK cần JDK và Android SDK." TextWrapping="Wrap" Foreground="{ThemeResource MutedBrush}" FontSize="12" />
+                                                            <Grid x:Name="LauncherFeatureChecks" ColumnSpacing="16" RowSpacing="4" SizeChanged="LauncherFeatureChecksSizeChanged" />
+                                                        </StackPanel>
                                                     </StackPanel>
                                                 </Border>
                                                 <Border x:Name="FixNotiFeaturesPanel" Style="{StaticResource SubtlePanelStyle}" Margin="0,6,0,0" Visibility="Collapsed">

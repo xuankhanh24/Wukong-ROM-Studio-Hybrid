@@ -25,6 +25,13 @@ dotnet build WukongStudio.App\WukongStudio.App.csproj -c Release
 The executable is named `WukongStudio.exe`. A development build still needs a
 prepared `C:\WukongROMStudio\Runtime` tree before the backend can start.
 
+When Launcher_mod is selected, choose **MOD có sẵn** to install the prepared
+Launcher from the selected version's content pack, or **Patch** to reveal
+individual features for the ROM's stock Launcher. Feature selections are kept
+while switching modes; build profiles preserve the chosen mode. APK patch
+features require the patch toolchain. Missing prepared Launcher payloads report
+an error with the option to install the content pack or choose Patch.
+
 ## Publish And Installer
 
 Runtime versions and SHA-256 values are locked in

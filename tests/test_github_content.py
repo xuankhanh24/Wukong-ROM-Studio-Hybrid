@@ -1,14 +1,19 @@
 import hashlib
+import http.client
 import io
 import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
+from urllib.request import HTTPSHandler, ProxyHandler, build_opener
 
 from wukong.adapters import SourceIntegrityError
 from wukong.content_packs import ContentPackManager, create_content_pack_archive, validate_content_index
-from wukong.github_content import archive_parts, publish_release_packs
+from wukong.github_content import GitHubReleases, archive_parts, publish_release_packs
 
 
 class FakeReleases:
@@ -34,6 +39,88 @@ class FakeReleases:
 
 
 class GitHubContentTests(unittest.TestCase):
+    def test_create_release_through_real_urllib_redirect_handling(self):
+        from wukong.github_http import _NoRedirect
+        received = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                received.append((self.path, self.rfile.read(int(self.headers['Content-Length'])),
+                                 self.headers['Authorization']))
+                if self.path.startswith('/repos/'):
+                    self.send_response(307)
+                    self.send_header('Location', '/repositories/123/releases')
+                    self.end_headers()
+                else:
+                    self.send_response(201)
+                    self.end_headers()
+                    self.wfile.write(b'{"id":42}')
+
+            def log_message(self, *args):
+                pass
+
+        with HTTPServer(('127.0.0.1', 0), Handler) as server:
+            class LocalTransport(HTTPSHandler):
+                def https_open(self, request):
+                    return self.do_open(
+                        lambda host, **kwargs: http.client.HTTPConnection('127.0.0.1', server.server_port, **kwargs),
+                        request)
+
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+            try:
+                opener = build_opener(ProxyHandler({}), _NoRedirect(), LocalTransport())
+                with patch('wukong.github_http._opener', opener):
+                    self.assertEqual(GitHubReleases('test/repo', 'secret').create('test')['id'], 42)
+            finally:
+                server.shutdown()
+                worker.join()
+        self.assertEqual([row[0] for row in received], ['/repos/test/repo/releases', '/repositories/123/releases'])
+        self.assertEqual(received[0][1:], received[1][1:])
+
+    def test_create_release_follows_307_preserving_post_and_payload(self):
+        destination = 'https://api.github.com/repositories/123/releases'
+        redirect = HTTPError('https://api.github.com/repos/test/repo/releases', 307,
+                             'Temporary Redirect', {'Location': destination}, io.BytesIO())
+        with patch('wukong.github_http._opener.open', side_effect=[redirect, io.BytesIO(b'{"id":42}')]) as api:
+            self.assertEqual(GitHubReleases('test/repo', 'secret').create('content-test')['id'], 42)
+        original = api.call_args_list[0].args[0]
+        redirected = api.call_args_list[1].args[0]
+        self.assertEqual(redirected.full_url, destination)
+        self.assertEqual(redirected.get_method(), 'POST')
+        self.assertEqual(redirected.data, original.data)
+        self.assertEqual(redirected.get_header('Authorization'), 'Bearer secret')
+
+    def test_release_redirects_preserve_write_methods(self):
+        for status in (301, 302, 307, 308):
+            for method in ('POST', 'PATCH', 'PUT', 'DELETE'):
+                with self.subTest(status=status, method=method):
+                    redirect = HTTPError('https://api.github.com/repos/test/repo/releases', status,
+                                         'Redirect', {'Location': '/repositories/123/releases'}, io.BytesIO())
+                    with patch('wukong.github_http._opener.open', side_effect=[redirect, io.BytesIO(b'{}')]) as api:
+                        GitHubReleases('test/repo', 'secret').request('releases', {'draft': False}, method=method)
+                    request = api.call_args.args[0]
+                    self.assertEqual(request.get_method(), method)
+                    self.assertEqual(json.loads(request.data), {'draft': False})
+
+    def test_release_redirect_rejects_unsafe_destinations_and_loops(self):
+        for destination in ('https://evil.example/releases', 'http://api.github.com/releases',
+                            'https://api.github.com:444/releases', 'https://user@api.github.com/releases', None):
+            with self.subTest(destination=destination):
+                headers = {} if destination is None else {'Location': destination}
+                redirect = HTTPError('https://api.github.com/repos/test/repo/releases', 307,
+                                     'Redirect', headers, io.BytesIO())
+                with patch('wukong.github_http._opener.open', side_effect=redirect) as api:
+                    with self.assertRaises(RuntimeError):
+                        GitHubReleases('test/repo', 'secret').create('test')
+                self.assertEqual(api.call_count, 1)
+        def loop(*args, **kwargs):
+            raise HTTPError(args[0].full_url, 307, 'Redirect', {'Location': '/loop'}, io.BytesIO())
+        with patch('wukong.github_http._opener.open', side_effect=loop) as api:
+            with self.assertRaisesRegex(RuntimeError, 'redirect limit'):
+                GitHubReleases('test/repo', 'secret').create('test')
+        self.assertEqual(api.call_count, 6)
+
     def test_split_assets_roundtrip_and_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'archive.tar.zst'

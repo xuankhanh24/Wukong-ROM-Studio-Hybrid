@@ -14,14 +14,13 @@ Tính năng chính:
      - Hỗ trợ mở hộp thoại File Picker GUI hoặc gõ đường dẫn tùy ý.
   2. Tự động nhận diện công cụ (Java, Apktool, Zipalign) trong Auto_Build_WK và Android SDK.
   3. Quét Multi-Dex cực nhanh bằng In-Memory DEX Parser:
-     - Xác định chính xác DEX chứa AboutDeviceOtaUpdatePreference, OtaUpdateController, setupTopVideo$1.
-     - Chỉ decompile và build lại đúng các DEX cần thiết (tiết kiệm thời gian, chỉ mất 15-20s thay vì 5 phút).
+     - Xác định chính xác DEX chứa AboutDeviceOtaUpdatePreference.
+     - Chỉ decompile và build lại DEX chứa OTA preference; giữ các DEX khác nguyên bản.
   4. Vá bytecode Smali thích ứng (Adaptive Hooks):
-     - applyHeaderColors: Tự động đổi màu chữ sang trắng qua duyệt đệ quy cây View, không phụ thuộc
-       vào việc Android 17 đổi tên trường mDeviceName -> mModelName.
-     - getTargetIntent: Chuyển hướng Intent sang Telegram Ace 5 Port độc lập, an toàn.
-     - Video Hooks: Tích hợp phát video lặp vô tận, custom cover, tự động pause khi đổi app.
-     - BẢO VỆ THANH GHI ART BYTECODE VERIFIER (v2, v4): Khắc phục triệt để VerifyError trên Android 17.
+     - Gọi WkOtaCardHook.onBind tại cuối onBindViewHolder, không dùng thanh ghi tạm.
+     - Giữ nguyên public/private/static/final của getTargetIntentStatic trên A16/A17.
+     - Bộ helper xử lý ảnh/video/audio, màu chữ, tap play/pause và vòng đời player.
+     - Giữ nguyên các method video nội bộ, controller, listener và resource ID của OEM.
   5. Lưu dữ liệu khối ký OEM (không xác nhận chữ ký còn hợp lệ):
      - Trích xuất khối APK Signing Block 42 từ Stock APK gốc.
      - Căn chỉnh và kiểm tra zipalign -P 16.
@@ -181,348 +180,54 @@ def inject_apk_signing_block(input_apk, block, output_apk):
 # ------------------------------------------------------------------------------
 # 4. THAO TÁC VÁ BYTECODE SMALI THÍCH ỨNG
 # ------------------------------------------------------------------------------
-def patch_ota_controller(ctrl_file_path):
-    """Vá getTargetIntentStatic trong OtaUpdateController hoặc Companion"""
-    log(f"Đang vá Target Intent tại: {os.path.basename(ctrl_file_path)}")
-    with open(ctrl_file_path, 'r', encoding='utf-8') as f:
-        code = f.read()
-
-    # Kiểm tra phương thức có modifier static hay không
-    pattern_static = r'\.method public static final getTargetIntentStatic\(\)Landroid/content/Intent;[\s\S]*?\.end method'
-    pattern_member = r'\.method public final getTargetIntentStatic\(\)Landroid/content/Intent;[\s\S]*?\.end method'
-
-    new_static = """.method public static final getTargetIntentStatic()Landroid/content/Intent;
-    .locals 1
-    .annotation runtime Lkotlin/jvm/JvmStatic;
-    .end annotation
-
-    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getTargetIntent()Landroid/content/Intent;
-
-    move-result-object v0
-
-    return-object v0
-.end method"""
-
-    new_member = """.method public final getTargetIntentStatic()Landroid/content/Intent;
-    .locals 1
-    .annotation runtime Lkotlin/jvm/JvmStatic;
-    .end annotation
-
-    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getTargetIntent()Landroid/content/Intent;
-
-    move-result-object v0
-
-    return-object v0
-.end method"""
-
-    patched = False
-    if re.search(pattern_static, code):
-        code = re.sub(pattern_static, new_static, code, count=1)
-        patched = True
-    elif re.search(pattern_member, code):
-        code = re.sub(pattern_member, new_member, code, count=1)
-        patched = True
-
-    if patched:
-        with open(ctrl_file_path, 'w', encoding='utf-8') as f:
-            f.write(code)
-        log_ok("  -> Đã vá getTargetIntentStatic() thành công!")
-        return True
-    else:
-        log_warn("  -> Không tìm thấy phương thức getTargetIntentStatic trong file này (có thể ở file Companion).")
-        return False
-
-def patch_top_video_listener(listener_path):
-    """Vá setCustomVideoDataSource trong AboutDeviceOtaUpdatePreference$setupTopVideo$1"""
-    log(f"Đang vá setupTopVideo listener tại: {os.path.basename(listener_path)}")
-    with open(listener_path, 'r', encoding='utf-8') as f:
-        code = f.read()
-
-    # Tìm lệnh MediaPlayer->setDataSource
-    pattern = r'invoke-virtual \{([vp]\d+), ([vp]\d+)\}, Landroid/media/MediaPlayer;->setDataSource\(Ljava/lang/String;\)V'
-    match = re.search(pattern, code)
-    if match:
-        mp_reg = match.group(1)
-        str_reg = match.group(2)
-        hook = f"""invoke-virtual {{p2}}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v2
-
-    invoke-static {{v2, {mp_reg}}}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setCustomVideoDataSource(Landroid/content/Context;Landroid/media/MediaPlayer;)Z
-
-    move-result v2
-
-    if-nez v2, :cond_wk_custom_ds
-
-    invoke-static {{p2}}, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->access$getMCachedVideoPath$p(Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;)Ljava/lang/String;
-
-    move-result-object {str_reg}
-
-    invoke-virtual {{{mp_reg}, {str_reg}}}, Landroid/media/MediaPlayer;->setDataSource(Ljava/lang/String;)V
-
-    :cond_wk_custom_ds"""
-
-        code = re.sub(pattern, hook, code, count=1)
-        with open(listener_path, 'w', encoding='utf-8') as f:
-            f.write(code)
-        log_ok("  -> Đã vá hook setCustomVideoDataSource thành công!")
-        return True
-    else:
-        log_warn("  -> Không tìm thấy pattern setDataSource trong setupTopVideo listener.")
-        return False
-
 def patch_ota_preference(pref_path):
-    """Vá đầy đủ các hook trong AboutDeviceOtaUpdatePreference.smali kèm bảo vệ thanh ghi ART"""
-    log(f"Đang vá AboutDeviceOtaUpdatePreference tại: {os.path.basename(pref_path)}")
-    with open(pref_path, 'r', encoding='utf-8') as f:
-        code = f.read()
-
-    # 1. getTargetIntentStatic
-    new_pref_intent = """.method private final getTargetIntentStatic()Landroid/content/Intent;
-    .locals 1
-
-    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getTargetIntent()Landroid/content/Intent;
-
-    move-result-object v0
-
-    return-object v0
-.end method"""
-    pattern_intent = r'\.method (?:private|public) (?:static )?final getTargetIntentStatic\(\)Landroid/content/Intent;[\s\S]*?\.end method'
-    code = re.sub(pattern_intent, new_pref_intent, code, count=1)
-    log_ok("  [1/8] Đã vá getTargetIntentStatic()")
-
-    # 2. isSupportTopVideo
-    pattern_is_support = r'(\.method (?:private|public) final isSupportTopVideo\(\)Z\s*\.locals \d+)'
-    hook_is_support = """
-
-    invoke-virtual {p0}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->mode(Landroid/content/Context;)I
-
-    move-result v0
-
-    if-eqz v0, :cond_wk_stock_video_support
-
-    const/4 v1, 0x2
-
-    if-ne v0, v1, :cond_wk_not_video
-
-    const/4 v0, 0x1
-
-    return v0
-
-    :cond_wk_not_video
-    const/4 v0, 0x0
-
-    return v0
-
-    :cond_wk_stock_video_support"""
-    code = re.sub(pattern_is_support, r'\1' + hook_is_support, code, count=1)
-    log_ok("  [2/8] Đã vá isSupportTopVideo()")
-
-    # 3. getColorOSVideoPath
-    pattern_video_path = r'(\.method (?:private|public) final getColorOSVideoPath\(\)Ljava/lang/String;\s*\.locals \d+)'
-    hook_video_path = """
-
-    invoke-virtual {p0}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->customVideoMarker(Landroid/content/Context;)Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_wk_stock_video_path
-
-    return-object v0
-
-    :cond_wk_stock_video_path"""
-    code = re.sub(pattern_video_path, r'\1' + hook_video_path, code, count=1)
-    log_ok("  [3/8] Đã vá getColorOSVideoPath()")
-
-    # 4. applyVideoTransform
-    pattern_transform = r'(\.method (?:private|public) final applyVideoTransform\(Landroid/view/TextureView;\)V\s*\.locals \d+)'
-    hook_transform = """
-
-    invoke-virtual/range {p0 .. p0}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    move-object/from16 v1, p1
-
-    invoke-static {v0, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyCustomVideoTransform(Landroid/content/Context;Landroid/view/TextureView;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_wk_stock_video_transform
-
-    return-void
-
-    :cond_wk_stock_video_transform"""
-    code = re.sub(pattern_transform, r'\1' + hook_transform, code, count=1)
-    log_ok("  [4/8] Đã vá applyVideoTransform()")
-
-    # 5. setupTopVideo
-    pattern_setup = r'(\.method (?:private|public) final setupTopVideo\(\)V\s*\.locals )(\d+)'
-    def repl_setup(m):
-        loc_count = max(3, int(m.group(2)))
-        return f"""{m.group(1)}{loc_count}
-
-    iget-object v0, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopVideoBg:Landroid/view/TextureView;
-
-    iget-object v1, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceVideoMask:Landroid/widget/ImageView;
-
-    iget-object v2, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopBg:Landroid/widget/ImageView;
-
-    invoke-static {{v0, v1, v2}}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupCustomVideo(Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_wk_stock_setup_top_video
-
-    return-void
-
-    :cond_wk_stock_setup_top_video
-    iget-object v1, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceVideoMask:Landroid/widget/ImageView;
-
-    invoke-static {{v0, v1}}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyVideoStyle(Landroid/view/TextureView;Landroid/widget/ImageView;)V"""
-    code = re.sub(pattern_setup, repl_setup, code, count=1)
-    log_ok("  [5/8] Đã vá setupTopVideo()")
-
-    # 6. getTopDrawableBg
-    pattern_top_bg = r'(\.method (?:private|public) final getTopDrawableBg\(Ljava/lang/String;\)V\s*\.locals \d+)'
-    hook_top_bg = """
-
-    invoke-virtual {p0}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    iget-object v1, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopBg:Landroid/widget/ImageView;
-
-    invoke-static {v0, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyImage(Landroid/content/Context;Landroid/widget/ImageView;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_wk_stock_bg
-
-    return-void
-
-    :cond_wk_stock_bg"""
-    code = re.sub(pattern_top_bg, r'\1' + hook_top_bg, code, count=1)
-    log_ok("  [6/8] Đã vá getTopDrawableBg()")
-
-    # 7. showEasterEggVideo
-    pattern_egg = r'(invoke-direct \{p0, [vp]\d+\}, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->getTopDrawableBg\(Ljava/lang/String;\)V)'
-    hook_egg = r"""\1
-
-    if-eqz p1, :cond_wk_easter_egg
-
-    iget-object v0, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopBg:Landroid/widget/ImageView;
-
-    if-eqz v0, :cond_wk_easter_egg
-
-    const/16 v1, 0x8
-
-    invoke-virtual {v0, v1}, Landroid/view/View;->setVisibility(I)V
-
-    :cond_wk_easter_egg"""
-    code = re.sub(pattern_egg, hook_egg, code, count=1)
-    log_ok("  [7/8] Đã vá showEasterEggVideo()")
-
-    # 8. onBindViewHolder: Header Colors & Custom Video & ART Verifier Protection
-    # 8a: Header Colors (duyệt đệ quy cây view động, độc lập với tên trường mDeviceName / mModelName)
-    pattern_bind_build = r'(iput-object [vp]\d+, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->(?:mModelBuildNumber|mDeviceBuildNumber):Landroid/widget/TextView;)'
-    hook_bind_build = r"""\1
-
-    invoke-virtual {p0}, Landroidx/preference/Preference;->getContext()Landroid/content/Context;
-
-    move-result-object v2
-
-    iget-object v3, p1, Landroidx/recyclerview/widget/RecyclerView$ViewHolder;->itemView:Landroid/view/View;
-
-    invoke-static {v2, v3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyHeaderColors(Landroid/content/Context;Landroid/view/View;)V"""
-    code = re.sub(pattern_bind_build, hook_bind_build, code, count=1)
-
-    # 8b: Custom Video Hook & ART Verifier Protection (v2, v4)
-    # Xác định vị trí gọi isSupportTopVideo bên trong onBindViewHolder
-    m_bind = re.search(r'\.method public onBindViewHolder\(Landroidx/preference/PreferenceViewHolder;\)V', code)
-    if m_bind:
-        bind_start = m_bind.start()
-        m_end = re.search(r'\.end method', code[bind_start:])
-        bind_end = bind_start + m_end.end()
-        bind_code = code[bind_start:bind_end]
-
-        m_vid = re.search(r'invoke-direct \{p0\}, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->isSupportTopVideo\(\)Z', bind_code)
-        if m_vid:
-            vid_offset = bind_start + m_vid.start()
-            # Tìm dòng lệnh ngay trước đó
-            line_start = code.rfind('\n', 0, vid_offset) + 1
-
-            video_hook_clean = """    iget-object v0, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopVideoBg:Landroid/view/TextureView;
-
-    iget-object v5, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceVideoMask:Landroid/widget/ImageView;
-
-    iget-object v4, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mAboutDeviceTopBg:Landroid/widget/ImageView;
-
-    invoke-static {v0, v5, v4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupCustomVideo(Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)Z
-
-    move-result v5
-
-    if-eqz v5, :cond_wk_not_custom_video
-
-    iget-boolean v5, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mIsTopMediaPlayerInitialized:Z
-
-    if-eqz v5, :cond_wk_rel_mp
-
-    invoke-direct {p0}, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->releaseAllMediaPlayers()V
-
-    :cond_wk_rel_mp
-    const/4 v5, 0x0
-
-    iput-boolean v5, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mIsTopMediaPlayerInitialized:Z
-
-    sget-object v5, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference$VideoPlayState;->IDLE:Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference$VideoPlayState;
-
-    iput-object v5, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mVideoState:Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference$VideoPlayState;
-
-    const v2, 0x7f0600bf
-
-    const/4 v4, 0x0
-
-    iput-boolean v4, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mIsFirstBind:Z
-
-    goto :goto_2
-
-    :cond_wk_not_custom_video
-    const v2, 0x7f0600bf
-
-    const/4 v4, 0x0\n\n"""
-            code = code[:line_start] + video_hook_clean + code[line_start:]
-
-            # Bảo vệ thanh ghi v2 (Resource ID màu nền thẻ) khi gọi getColor(I)I
-            pattern_color = r'(if-eqz [vp]\d+, :cond_\w+\s+iget-object [vp]\d+, p0, Lcom/oplus/settings/widget/preference/SettingJumpPreference;->mContext:Landroid/content/Context;\s+)(invoke-virtual \{[vp]\d+, v2\}, Landroid/content/Context;->getColor\(I\)I)'
-            code = re.sub(pattern_color, r'\1const v2, 0x7f0600bf\n\n    \2', code, count=1)
-
-            # Bảo vệ thanh ghi v4 (boolean false) cho mPlayWhenBind
-            pattern_play = r'(if-eqz [vp]\d+, :cond_\w+\s+)(iput-boolean v4, p0, Lcom/oplus/settings/widget/preference/AboutDeviceOtaUpdatePreference;->mPlayWhenBind:Z)'
-            code = re.sub(pattern_play, r'\1const/4 v4, 0x0\n\n    \2', code, count=1)
-
-            log_ok("  [8/8] Đã vá onBindViewHolder (Header Colors & Video Hook & Bảo vệ thanh ghi v2/v4)")
-        else:
-            log_warn("  [8/8] Cảnh báo: Không tìm thấy isSupportTopVideo bên trong onBindViewHolder!")
-    else:
-        log_warn("  [8/8] Cảnh báo: Không tìm thấy onBindViewHolder!")
-
-    with open(pref_path, 'w', encoding='utf-8') as f:
-        f.write(code)
-    log_ok("Lưu thành công AboutDeviceOtaUpdatePreference.smali!")
+    """Use the universal onBind helper while retaining OEM method visibility."""
+    path = Path(pref_path)
+    original = path.read_text(encoding="utf-8")
+    bind_pattern = re.compile(
+        r"(?ms)^\.method[^\n]*\sonBindViewHolder\(Landroidx/preference/PreferenceViewHolder;\)V[ \t]*\n.*?^\.end method[ \t]*$"
+    )
+    matches = list(bind_pattern.finditer(original))
+    if len(matches) != 1:
+        raise ValueError(f"Expected one onBindViewHolder callback, found {len(matches)}")
+    bind = matches[0].group()
+    if re.search(r"\b(static|abstract|native)\b", bind.splitlines()[0]):
+        raise ValueError("onBindViewHolder must be an instance method with a body")
+    bridge = "Lcom/oplus/settings/widget/preference/WkOtaCardHook;"
+    if bridge + "->onBind" not in bind:
+        hook = (
+            "    # WUKONG UNIVERSAL OTA MEDIA CARD\n"
+            f"    invoke-static/range {{p0 .. p1}}, {bridge}->onBind(Ljava/lang/Object;Ljava/lang/Object;)V\n"
+        )
+        bind, count = re.subn(
+            r"(?m)^([ \t]*)return-void[ \t]*$",
+            lambda match: hook + match.group(),
+            bind,
+        )
+        if not count:
+            raise ValueError("onBindViewHolder has no normal return")
+    code = original[:matches[0].start()] + bind + original[matches[0].end():]
+
+    # Keep public/private/static/final exactly as supplied by the stock ABI.
+    intent_pattern = re.compile(
+        r"(?ms)^(?P<header>\.method[^\n]*\sgetTargetIntentStatic\(\)Landroid/content/Intent;)[ \t]*\n.*?^\.end method[ \t]*$"
+    )
+    intents = list(intent_pattern.finditer(code))
+    if len(intents) > 1:
+        raise ValueError("Duplicate getTargetIntentStatic methods")
+    if intents:
+        match = intents[0]
+        if re.search(r"\b(abstract|native)\b", match["header"]):
+            raise ValueError("Unsupported getTargetIntentStatic declaration")
+        body = (
+            match["header"] + "\n    .locals 1\n\n"
+            f"    invoke-static {{}}, {bridge}->getTargetIntent()Landroid/content/Intent;\n"
+            "    move-result-object v0\n    return-object v0\n.end method"
+        )
+        code = code[:match.start()] + body + code[match.end():]
+    path.write_bytes(code.encode("utf-8"))
+    log_ok("Universal OTA onBind hook applied; OEM visibility and video methods preserved.")
     return True
-
-# ------------------------------------------------------------------------------
-# 5. ĐÓNG GÓI MODULE FLASH MAGISK / KERNELSU
-# ------------------------------------------------------------------------------
 def package_magisk_module(patched_apk_path, output_zip_path):
     """Đóng gói module flash qua Magisk / KernelSU / APatch"""
     log("Đang đóng gói Module Magisk / KernelSU...")
@@ -728,15 +433,9 @@ def _run_patch_pipeline(input_apk, scratch_dir, output_apk, package_module, depl
     # 3. Quét Multi-Dex
     dex_mapping = scan_apk_for_target_dex(input_apk)
     pref_dex = dex_mapping['pref_dex']
-    ctrl_dex = dex_mapping['ctrl_dex']
-    listener_dex = dex_mapping['listener_dex']
 
     # Tập hợp các DEX duy nhất cần sửa đổi
     target_dex_set = set([pref_dex])
-    if ctrl_dex:
-        target_dex_set.add(ctrl_dex)
-    if listener_dex:
-        target_dex_set.add(listener_dex)
 
     log_ok(f"Các file DEX cần giải nén & vá: {sorted(list(target_dex_set))}")
 
@@ -773,13 +472,13 @@ def _run_patch_pipeline(input_apk, scratch_dir, output_apk, package_module, depl
             # Áp dụng các thay đổi tùy theo vai trò của DEX
             # Vai trò 1: DEX chứa AboutDeviceOtaUpdatePreference
             if dex_name == pref_dex:
-                # Sao chép 5 class WkOtaCard* vào smali/com/oplus/settings/widget/preference/
+                # Copy the complete universal helper family, including nested listeners.
                 target_pref_pkg = os.path.join(smali_out, "smali", "com", "oplus", "settings", "widget", "preference")
                 os.makedirs(target_pref_pkg, exist_ok=True)
                 for f_smali in os.listdir(custom_smali_dir):
                     if f_smali.endswith(".smali"):
                         shutil.copy2(os.path.join(custom_smali_dir, f_smali), os.path.join(target_pref_pkg, f_smali))
-                log_ok(f"  -> Đã tích hợp 5 class WkOtaCard* vào {dex_name}")
+                log_ok(f"  -> Đã tích hợp bộ class WkOtaCard* vào {dex_name}")
 
                 # Vá AboutDeviceOtaUpdatePreference.smali
                 pref_smali_file = os.path.join(target_pref_pkg, "AboutDeviceOtaUpdatePreference.smali")
@@ -787,22 +486,6 @@ def _run_patch_pipeline(input_apk, scratch_dir, output_apk, package_module, depl
                     patch_ota_preference(pref_smali_file)
                 else:
                     raise FileNotFoundError(f"Không tìm thấy {pref_smali_file}")
-
-            # Vai trò 2: DEX chứa OtaUpdateController / Companion
-            if dex_name == ctrl_dex:
-                ctrl_pkg = os.path.join(smali_out, "smali", "com", "oplus", "settings", "feature", "deviceinfo", "controller")
-                comp_file = os.path.join(ctrl_pkg, "OtaUpdateController$Companion.smali")
-                ctrl_file = os.path.join(ctrl_pkg, "OtaUpdateController.smali")
-                if os.path.isfile(comp_file):
-                    patch_ota_controller(comp_file)
-                if os.path.isfile(ctrl_file):
-                    patch_ota_controller(ctrl_file)
-
-            # Vai trò 3: DEX chứa setupTopVideo$1
-            if dex_name == listener_dex:
-                listener_file = os.path.join(smali_out, "smali", "com", "oplus", "settings", "widget", "preference", "AboutDeviceOtaUpdatePreference$setupTopVideo$1.smali")
-                if os.path.isfile(listener_file):
-                    patch_top_video_listener(listener_file)
 
             # Biên dịch lại DEX
             rebuilt_apk = os.path.join(scratch_dir, f"rebuilt_{dex_name}.apk")

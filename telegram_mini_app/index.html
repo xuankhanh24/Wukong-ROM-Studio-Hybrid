@@ -145,7 +145,15 @@
           <label class="field mod-search"><span data-i18n="searchMods">Lọc MOD để chọn</span><input id="mod-search" type="search" placeholder="Gapps / Camera / WK…"></label>
           <div class="mod-list" id="mod-list" aria-live="polite"></div>
           <fieldset id="launcher-features" class="mod-feature-options" hidden>
-            <legend>Launcher_mod · Chọn chức năng / Features</legend>
+            <legend>Launcher mod</legend>
+            <div class="launcher-mode-selector" role="radiogroup" aria-label="Launcher mod">
+              <label><input type="radio" name="launcher-mode" value="bundled" checked><span data-i18n="launcherBundled">MOD có sẵn</span></label>
+              <label><input type="radio" name="launcher-mode" value="patch"><span data-i18n="launcherPatch">Patch</span></label>
+            </div>
+            <p id="launcher-bundled-hint" data-i18n="launcherBundledHint">Dùng Launcher từ gói MOD của phiên bản đã chọn.</p>
+            <div id="launcher-patch-options" hidden>
+            <p data-i18n="launcherPatchHint">Patch trên Launcher gốc của ROM. Các tính năng APK cần JDK và Android SDK trên runner.</p>
+            <div class="launcher-feature-grid">
             <label><input type="checkbox" value="global_region" checked> Bỏ giới hạn CN / Global region</label>
             <label><input type="checkbox" value="recents"> Đa nhiệm máy tính bảng / Tablet recents</label>
             <label><input type="checkbox" value="dock"> Làm mờ thanh dock / Dock blur</label>
@@ -155,7 +163,8 @@
             <label><input type="checkbox" value="quick_search"> Tìm kiếm nhanh Google / Google QSB</label>
             <label><input type="checkbox" value="gestures"> Cử chỉ vuốt xuống / Swipe-down gestures</label>
             <label><input type="checkbox" value="ram"> Hiển thị RAM đa nhiệm / Recents RAM</label>
-            <p>Các tính năng APK cần JDK + Android SDK trên runner. / APK features require JDK + Android SDK.</p>
+            </div>
+            </div>
           </fieldset>
           <fieldset id="fix-noti-features" class="mod-feature-options" hidden>
             <legend>Fix_noti · Chọn cấp độ / Level</legend>

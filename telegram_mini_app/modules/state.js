@@ -552,6 +552,17 @@ Object.assign(translations.vi, { requestTimedOut: "Yêu cầu quá thời gian c
 
 Object.assign(translations.en, { requestTimedOut: "The request timed out. Please retry.", confirmingJob: "Confirming your job. Use Confirm again to check the same request; the submitted configuration is preserved.", confirmAgain: "Confirm again", metadataDetails: "Technical details", advancedBuild: "Advanced options", latestUpdate: "Last updated", previousEvents: "Previous log page", nextEvents: "Next log page", logPage: "Log page {page}" });
 
+Object.assign(translations.vi, {
+  launcherBundled: "MOD có sẵn", launcherPatch: "Patch",
+  launcherBundledHint: "Dùng Launcher từ gói MOD của phiên bản đã chọn.",
+  launcherPatchHint: "Patch trên Launcher gốc của ROM. Các tính năng APK cần JDK và Android SDK trên runner."
+});
+Object.assign(translations.en, {
+  launcherBundled: "Prebuilt MOD", launcherPatch: "Patch",
+  launcherBundledHint: "Use the Launcher from the selected version's MOD pack.",
+  launcherPatchHint: "Patch the ROM's stock Launcher. APK features require JDK and Android SDK on the runner."
+});
+
 const state = {
   language: localStorage.getItem("wukong-language") || "vi",
   theme: localStorage.getItem("wukong-theme") || "system",

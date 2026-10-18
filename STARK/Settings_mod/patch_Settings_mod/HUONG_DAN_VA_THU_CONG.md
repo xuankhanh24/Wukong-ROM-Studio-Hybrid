@@ -1,4 +1,12 @@
 # HƯỚNG DẪN VÁ THỦ CÔNG SETTINGS MOD (COLOROS / OXYGENOS ANDROID 14 - 17+)
+
+> Cập nhật 18/10/2026: `patch_settings.py` đã chuyển sang bộ 10 class universal
+> từ `mod_stark/settings/patch_universal/smali`. Hook mới gọi
+> `WkOtaCardHook.onBind(Object,Object)` tại cuối `onBindViewHolder`, giữ nguyên
+> phạm vi `public/private/static/final` của `getTargetIntentStatic` và các method
+> video OEM. Những hướng dẫn chèn nhiều hook bên dưới là tài liệu của bản cũ,
+> không áp dụng đồng thời với patch universal. Xem [hợp đồng patch hiện tại](../../PATCHING.md#settings-cli).
+
 **Tác giả:** KhanhStark & Antigravity  
 **Phiên bản tài liệu:** v17.0 Universal  
 **Áp dụng cho:** Tất cả các phiên bản Settings APK ColorOS / OxygenOS từ Android 14, 15, 16 đến Android 17 (OnePlus Ace 5, OPPO Find series, Realme...).

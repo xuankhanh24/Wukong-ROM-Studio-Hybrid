@@ -93,7 +93,7 @@ APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
 WORKSPACE_MARKER_KIND = "wukong-rom-studio-workspace"
-WORKSPACE_PIPELINE_VERSION = 26
+WORKSPACE_PIPELINE_VERSION = 29
 ROM_STUDIO_VERSION = DEFAULT_MOD_RELEASE_VERSION
 MOD_VERSION_STUDIO_VERSIONS = DEFAULT_MOD_RELEASE_VERSIONS
 # A release label is presentation metadata, not a directory or a semantic
@@ -3618,11 +3618,21 @@ def apply_selected_mods(
     for index, mod in enumerate(mods, start=1):
         emit_progress(int((index - 1) * 35 / total_mods), f"MOD {index}/{len(mods)} · {mod['name']}")
         mod_dir = (STARK_ROOT if mod.get("shared") else _mod_collection_dir(version)) / mod["name"]
+        if mod['name'] == 'Launcher_mod' and launcher_features is None:
+            # Prepared launchers belong to the selected version, while shared
+            # STARK supplies the patcher and may contain only region XML.
+            version_payload = _mod_collection_dir(version) / 'Launcher_mod'
+            if version_payload.is_dir():
+                mod_dir = version_payload
+            if not any(mod_dir.rglob('OplusLauncher.apk')):
+                raise StudioError('Launcher MOD có sẵn không có trong gói phiên bản này. Cài gói MOD hoặc chọn Patch.')
+            mod = {**mod, 'partitions': sorted(path.name for path in mod_dir.iterdir()
+                                              if path.is_dir() and path.name in MOD_PARTITIONS)}
         if mod['name'] in SCRIPT_ARCHIVE_PATCH_SPECS:
             partition = _patch_selected_stark_archive(mod['name'], rom_unpack, workspace)
             modified_partitions.add(partition)
             patched += 1
-        if mod['name'] == 'Launcher_mod':
+        if mod['name'] == 'Launcher_mod' and launcher_features is not None:
             partition = _patch_selected_launcher(rom_unpack, workspace, launcher_selected)
             if partition:
                 modified_partitions.add(partition)
@@ -3646,7 +3656,7 @@ def apply_selected_mods(
                 if not source.is_file():
                     continue
                 relative = _safe_relative_path(str(source.relative_to(partition_source)))
-                if _patcher_owns_payload(
+                if not (mod['name'] == 'Launcher_mod' and launcher_features is None) and _patcher_owns_payload(
                     mod['name'],
                     partition,
                     relative,

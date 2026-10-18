@@ -16,11 +16,12 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 from urllib.error import HTTPError
 from urllib.parse import quote, urlencode, urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from .adapters import SourceIntegrityError, sha256_file
 from .content_packs import ContentPackManager, create_content_pack_archive, validate_content_index
 from .content_sync import _atomic_write_index, discover_pack_sources, publish_index_to_github
+from .github_http import urlopen
 
 DEFAULT_REPOSITORY = "xuankhanh24/Wukong-ROM-Studio-Hybrid"
 MAX_ASSET_BYTES = 1800 * 1024 * 1024

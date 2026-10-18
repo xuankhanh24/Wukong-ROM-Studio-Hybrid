@@ -112,6 +112,25 @@ class FeatureTests(unittest.TestCase):
             FEATURES.patch_decoded(root, ["power_button_remap"])
             self.assertIn("invoke-super {p0}, Lcom/android/server/policy/PhoneWindowManager$PowerKeyRule;", rule.read_text())
 
+    def test_power_calls_stay_in_oplus_and_updated_bridge_is_framework_only(self):
+        import studio_core
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rule = power_fixture(root)
+            FEATURES.patch_decoded(root, ["power_button_remap"])
+            bridges = list(root.rglob("WukongPowerKeyBridge.smali"))
+            self.assertEqual(bridges, [])
+            self.assertIn("->handleGesture", rule.read_text())
+            self.assertEqual(FEATURES.patch_decoded(root, ["power_button_remap"])["importedSmali"], 0)
+            framework = root / "framework"
+            self.assertEqual(FEATURES.install_framework_bridges(framework, ["power_button_remap"])["importedSmali"], 1)
+            sources = ROOT / "STARK/WK_Manager/patch_WK_Manager/com/wukong/manager/WukongPowerKeyBridge.smali"
+            self.assertEqual(list(framework.rglob("WukongPowerKeyBridge.smali"))[0].read_bytes(), sources.read_bytes())
+            self.assertEqual(FEATURES.install_framework_bridges(framework, ["power_button_remap"])["importedSmali"], 0)
+            with patch.object(studio_core, "_patch_jar_with_apktool", return_value={}) as rebuild:
+                studio_core._patch_wk_manager_jars(root, root, selected_patches=["power_button_remap"])
+            self.assertEqual([call.args[0].name for call in rebuild.call_args_list], ["framework.jar", "oplus-services.jar"])
+
     def test_power_legacy_callbacks_keep_stock_and_are_idempotent(self):
         text = ('.class public Lfixture/Rule;\n.super Lfixture/Base;\n'
                 '.method onLongPress(J)V\n    .locals 0\n    return-void\n.end method\n'
@@ -124,6 +143,26 @@ class FeatureTests(unittest.TestCase):
         self.assertIn('->onTriplePress(Ljava/lang/Object;)Z', updated)
         self.assertIn('const/4 v0, 0x1', updated)
         self.assertEqual(FEATURES._power(updated), updated)
+
+    def test_power_long_press_support_keeps_stock_when_master_is_disabled(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rule = power_fixture(Path(tmp))
+            original = rule.read_text() + (
+                '.method public supportLongPress()Z\n    .locals 0\n'
+                '    const/4 p0, 0x0\n    return p0\n.end method\n')
+            updated = FEATURES._power(original)
+            self.assertIn('->isMasterEnabled(Ljava/lang/Object;)Z', updated)
+            self.assertIn(':wk_power_support_original\n\n    const/4 p0, 0x0', updated)
+            self.assertEqual(FEATURES._power(updated), updated)
+
+    def test_power_max_count_uses_range_for_high_registers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            rule = power_fixture(Path(tmp))
+            original = rule.read_text().replace('.locals 1', '.locals 20')
+            updated = FEATURES._power(original)
+            self.assertIn('invoke-static/range {v0 .. v0}', updated)
+            self.assertNotIn('invoke-static {p0, v0}', updated)
+            self.assertIn('const/4 v0, 0x4', updated)
 
     def test_power_rejects_primitive_gesture_instead_of_passing_it_as_object(self):
         text = ('.class public Lfixture/Rule;\n.super Lfixture/Base;\n'

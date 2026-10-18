@@ -60,6 +60,27 @@ on:
         required: false
         default: ""
         type: string
+      launcher_mode:
+        description: "Launcher_mod: prepared MOD pack or patch stock Launcher (select Launcher_mod in MODs)"
+        required: false
+        default: "bundled"
+        type: choice
+        options: [bundled, patch]
+      launcher_features:
+        description: "Patch: global_region,recents,dock,taskbar,feed,search,quick_search,gestures,ram; none skips"
+        required: false
+        default: "global_region"
+        type: string
+      fix_noti_features:
+        description: "Fix_noti: level1 or level2; empty uses legacy default; none skips"
+        required: false
+        default: "level1"
+        type: string
+      wk_manager_patches:
+        description: "WK_Manager hook IDs, comma-separated; empty uses all defaults; none skips optional hooks"
+        required: false
+        default: ""
+        type: string
       debloat_paths:
         description: "Optional comma-separated partition-relative paths to remove"
         required: false
@@ -159,6 +180,10 @@ jobs:
           WUKONG_INPUT_MOD_VERSION: ${{ inputs.mod_version }}
           WUKONG_INPUT_PRESET: ${{ inputs.preset }}
           WUKONG_INPUT_MODS: ${{ inputs.mods }}
+          WUKONG_INPUT_LAUNCHER_MODE: ${{ inputs.launcher_mode }}
+          WUKONG_INPUT_LAUNCHER_FEATURES: ${{ inputs.launcher_features }}
+          WUKONG_INPUT_FIX_NOTI_FEATURES: ${{ inputs.fix_noti_features }}
+          WUKONG_INPUT_WK_MANAGER_PATCHES: ${{ inputs.wk_manager_patches }}
           WUKONG_INPUT_ENABLED_STEPS: ${{ inputs.enabled_steps }}
           WUKONG_INPUT_DEBLOAT_PATHS: ${{ inputs.debloat_paths }}
           WUKONG_INPUT_EXECUTION_TARGET: ${{ inputs.execution_target }}
@@ -255,7 +280,7 @@ jobs:
           temp-reserve-mb: 8192
           swap-size-mb: 2048
           remove-dotnet: 'true'
-          remove-android: 'true'
+          remove-android: 'false'
           remove-haskell: 'true'
           remove-codeql: 'true'
           remove-docker-images: 'true'

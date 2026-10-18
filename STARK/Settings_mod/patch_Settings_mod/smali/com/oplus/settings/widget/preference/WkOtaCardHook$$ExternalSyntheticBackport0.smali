@@ -1,11 +1,13 @@
 .class public final synthetic Lcom/oplus/settings/widget/preference/WkOtaCardHook$$ExternalSyntheticBackport0;
 .super Ljava/lang/Object;
+.source "D8$$SyntheticClass"
 
 
 # direct methods
 .method public static synthetic m(Ljava/lang/Throwable;Ljava/lang/Throwable;)V
-    .registers 8
+    .locals 6
 
+    .line 0
     :try_start_0
     const-class v0, Ljava/lang/Throwable;
 

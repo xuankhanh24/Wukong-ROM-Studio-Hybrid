@@ -88,6 +88,30 @@ both known callback families, preserves OEM fallback behavior and is idempotent.
 Unknown callback signatures stop with an error instead of passing primitive values
 to an object bridge. The legacy multi-press count is `p3`; `p4` is the display ID.
 
+## WK_FW power remap update
+
+The canonical power helper is the operator-updated
+`WK_Manager/patch_WK_Manager/com/wukong/manager/WukongPowerKeyBridge.smali`.
+The patcher imports that file as supplied; it does not overwrite it from WK_FW.
+It reads the master switch, long/double/triple actions and vibration settings from
+Settings.Global, with the helper's Settings.System compatibility fallback. No
+`power_remap.prop` file is needed. Existing app actions, camera/keyguard handling,
+torch, screenshot and Circle to Search come from this single helper.
+
+All `com/wukong/...` helper and hook implementations belong in `framework.jar`,
+including the power bridge. `oplus-services.jar` retains only the small OEM
+call-site edits in `SinglePowerKeyMonitor$OplusPowerKeyRule`; it must not contain
+an injected copy of the power bridge. Selecting only `power_button_remap` patches
+framework and oplus-services, leaving `services.jar` unchanged. Legacy full-MOD
+imports use the same framework ownership. Both
+object-gesture and legacy callbacks remain supported. Existing OEM max-count
+logic is preserved, and an existing `supportLongPress()` override is enabled only
+while the master switch is on, retaining its original fallback when off.
+
+Workspace pipeline 28 requires a fresh build instead of resuming a previous
+oplus-services-owned power bridge. Run the real OEM and assembly tests below against
+the `WK_FW/test_baksmali` class to validate the updated hook without flashing.
+
 ## Settings CLI
 
 ```powershell
@@ -97,6 +121,16 @@ python STARK/Settings_mod/patch_Settings_mod/patch_settings.py stock.apk -o out/
 Every invocation uses isolated scratch and cleans it on failure. Updating shared
 STARK content requires explicit `--deploy-to-stark`; unattended execution does not
 overwrite the shared Settings APK as a side effect.
+
+The Settings OTA/media helper family is synchronized from the operator's
+`mod_stark/settings/patch_universal/smali` sources, including all ten nested/helper
+classes. The pipeline rebuilds only the DEX defining
+`AboutDeviceOtaUpdatePreference`, preserves the stock access/static modifiers of
+`getTargetIntentStatic`, and calls `WkOtaCardHook.onBind(Object,Object)` at normal
+returns from `onBindViewHolder`. A range invoke supports high parameter registers
+without allocating scratch registers. The stock video methods, OTA controller,
+listener and resource IDs are no longer patched independently. Missing bind
+callbacks fail explicitly. Workspace pipeline 29 invalidates old resume results.
 
 ## Shared catalog and compatibility
 

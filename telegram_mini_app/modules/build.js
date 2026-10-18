@@ -232,6 +232,11 @@ function updateSummary() {
   if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
   const launcherFeatures = $("#launcher-features");
   if (launcherFeatures) launcherFeatures.hidden = !selectedMods().includes("Launcher_mod");
+  const patchLauncher = $('#launcher-features input[name="launcher-mode"]:checked')?.value === "patch";
+  const launcherOptions = $("#launcher-patch-options");
+  if (launcherOptions) launcherOptions.hidden = !patchLauncher;
+  const bundledHint = $("#launcher-bundled-hint");
+  if (bundledHint) bundledHint.hidden = patchLauncher;
   const fixNotiFeatures = $("#fix-noti-features");
   if (fixNotiFeatures) fixNotiFeatures.hidden = !selectedMods().includes("Fix_noti");
   const selectionSummary = $("#config-summary");
@@ -514,7 +519,8 @@ function buildRecipe() {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
       wkManagerPatches: $$("#wk-manager-patches input:checked").map((input) => input.value),
-      launcherFeatures: $$("#launcher-features input:checked").map((input) => input.value),
+      launcherFeatures: $('#launcher-features input[name="launcher-mode"]:checked')?.value === "patch"
+        ? $$('#launcher-features input[type="checkbox"]:checked').map((input) => input.value) : null,
       fixNotiFeatures: $$("#fix-noti-features input:checked").map((input) => input.value),
       enabledSteps: $$("#steps input:checked").map((input) => input.value)
         .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),
