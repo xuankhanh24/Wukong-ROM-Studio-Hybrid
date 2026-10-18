@@ -12,6 +12,13 @@ from wukong.artifacts import prepare_artifact
 
 
 class BuildOptimizationTests(unittest.TestCase):
+    def test_rom_workflow_never_restores_git_owned_stark_from_old_content_cache(self):
+        workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/wukong-build.yml').read_text(encoding='utf-8')
+        cache_step = workflow.split('04 · Khôi phục content cache', 1)[1].split('- name:', 1)[0]
+        self.assertNotIn('\n            STARK\n', cache_step)
+        index = {"packs": [{"id": name, "files": []} for name in [*SHARED_PACKS, "MOD/selected"]]}
+        self.assertTrue(content_cache_key(index, "selected", b"tools").startswith("wukong-content-v3-"))
+
     def test_prepared_artifact_reuses_digest_only_while_file_is_unchanged(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "rom.zip"

@@ -48,6 +48,7 @@ if (-not $SkipTests) {
             tests.test_uploader `
             tests.test_wk_manager_patcher `
             tests.test_wk_manager_features `
+            tests.test_wk_manager_module_layout `
             tests.test_stark_archive `
             tests.test_patch_toolchain `
             tests.test_command_logging `
@@ -97,6 +98,21 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item -Path (Join-Path $publishRoot '*') -Destination (Join-Path $staging 'App') -Recurse -Force
 
 & (Join-Path $scriptRoot 'verify-stark-payload.ps1') -SourceRoot $sourceRoot -StagingRoot $staging
+
+# A stale branch catalog must not download a Drive snapshot over shared STARK.
+$packCatalog = Get-Content -LiteralPath (Join-Path $staging 'Runtime/Scripts/content-packs/index.json') -Raw | ConvertFrom-Json
+$releaseModPacks = @($packCatalog.packs | Where-Object { $_.id -like 'MOD/*' })
+if ($releaseModPacks.Count -eq 0 -or @($releaseModPacks | Where-Object {
+    $_.archive.uri -notlike 'https://github.com/*/releases/download/*'
+}).Count -gt 0) {
+    throw 'Installer catalog is stale. Use the published main GitHub Release catalog, not legacy Drive MOD entries.'
+}
+$starkCatalogPacks = @($packCatalog.packs | Where-Object { $_.id -eq 'STARK/common' })
+if ($starkCatalogPacks.Count -ne 1) { throw 'Shared STARK catalog entry is missing.' }
+$starkSourceProperty = $starkCatalogPacks[0].PSObject.Properties['source']
+if ($null -eq $starkSourceProperty -or $starkSourceProperty.Value -ne 'git') {
+    throw 'Installer catalog must mark STARK/common as Git-owned; remote STARK overlays are not allowed.'
+}
 
 $manifestFiles = Get-ChildItem -LiteralPath $staging -Recurse -File |
     Where-Object { $_.Name -ne 'release-manifest.json' } |

@@ -1692,6 +1692,14 @@ def inspect_rom(
             required = power_root / relative
             if not required.is_file():
                 errors.append(f"Missing WK_Manager system-power asset: {required}")
+            else:
+                try:
+                    if relative == WK_MANAGER_POWER_RC_RELATIVE:
+                        _validate_wk_manager_power_rc(required)
+                    else:
+                        _validate_wk_manager_power_daemon(required)
+                except StudioError as error:
+                    errors.append(str(error))
 
     oxygen = is_oxygen_product(metadata.get("product_name"))
     missing_bins = [str(path) for path in _required_binary_paths()
@@ -3043,17 +3051,56 @@ def _validate_wk_manager_power_rc(path: Path) -> None:
         content = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise StudioError(f"WK_Manager system-power init service cannot be read: {path}") from exc
-    required = (
-        "service wukong-system-powerd /system/bin/wukong-system-powerd",
-        "user system",
-        "socket wukong_system_power stream 0660 system everybody ",
-        "u:object_r:wukong_system_power_socket:s0",
-        "start wukong-system-powerd",
-    )
-    missing = [value for value in required if value not in content]
-    if missing or "user root" in content:
-        detail = ", ".join(missing) if missing else "service must not run as root"
-        raise StudioError(f"WK_Manager system-power init service is invalid: {detail}")
+    # Validate actual init sections, not substrings in comments/other services.
+    # Current daemon maintenance commands require euid 0; keep the original
+    # bounded root capability set and still accept legacy system-only bundles.
+    service_header = "service wukong-system-powerd /system/bin/wukong-system-powerd"
+    boot_header = "on property:sys.boot_completed=1"
+    section = ""
+    headers: list[str] = []
+    options: list[str] = []
+    boot_commands: list[str] = []
+    for raw in content.splitlines():
+        line = " ".join(raw.split("#", 1)[0].split())
+        if not line:
+            continue
+        if not raw[0].isspace():
+            section = line
+            headers.append(line)
+        elif section == service_header:
+            options.append(line)
+        elif section == boot_header:
+            boot_commands.append(line)
+
+    problems = []
+    if [header for header in headers if header.startswith("service ")] != [service_header]:
+        problems.append("expected exactly one Wukong service with the original executable")
+    def values(name: str) -> list[str]:
+        return [line for line in options if line.split()[0] == name]
+
+    users = values("user")
+    if users not in (["user root"], ["user system"]):
+        problems.append("expected one user root or legacy user system directive")
+    if values("group") != ["group system everybody"]:
+        problems.append("expected group system everybody")
+    socket = ("socket wukong_system_power stream 0660 system everybody "
+              "u:object_r:wukong_system_power_socket:s0")
+    if values("socket") != [socket]:
+        problems.append("invalid Wukong socket permissions or label")
+    capabilities = values("capabilities")
+    if users == ["user root"]:
+        expected = {"DAC_OVERRIDE", "DAC_READ_SEARCH", "FOWNER"}
+        if (len(capabilities) != 1 or len(capabilities[0].split()) != 4
+                or set(capabilities[0].split()[1:]) != expected):
+            problems.append("root profile requires exactly DAC_OVERRIDE DAC_READ_SEARCH FOWNER")
+    elif capabilities:
+        problems.append("legacy system profile must not request capabilities")
+    if values("seclabel"):
+        problems.append("service must use its executable SELinux domain transition")
+    if "start wukong-system-powerd" not in boot_commands:
+        problems.append("missing boot-completed start command")
+    if problems:
+        raise StudioError("WK_Manager system-power init service is invalid: " + "; ".join(problems))
 
 
 def _copy_if_changed(source: Path, destination: Path) -> int:
@@ -3403,6 +3450,11 @@ def apply_selected_mods(
     noti_selected = set(['level2'] if fix_noti_features is None else fix_noti_features)
     version = normalize_mod_version(mod_version)
     mods = validate_mods(mod_names, mod_version=version)
+    # Validate shared service inputs before any MOD copy or expensive JAR patch.
+    if any(mod["name"] == "WK_Manager" for mod in mods):
+        power_root = STARK_ROOT / WK_MANAGER_POWER_RELATIVE_ROOT
+        _validate_wk_manager_power_rc(power_root / WK_MANAGER_POWER_RC_RELATIVE)
+        _validate_wk_manager_power_daemon(power_root / WK_MANAGER_POWER_DAEMON_RELATIVE)
     copied = patched = copied_bytes = 0
     applied = []
     stock_ota_feature_lines = 0

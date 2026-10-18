@@ -24,7 +24,9 @@ def content_cache_key(index: dict[str, Any], mod_version: str, toolchain: bytes)
         )})
     digest = hashlib.sha256(json.dumps(material, sort_keys=True, separators=(",", ":")).encode())
     digest.update(toolchain)
-    return "wukong-content-v2-" + digest.hexdigest()
+    # v2 archives included STARK and could overwrite the Git checkout even
+    # after removing it from the workflow's path list. Never restore those.
+    return "wukong-content-v3-" + digest.hexdigest()
 
 
 def main() -> None:
