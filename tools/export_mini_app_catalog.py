@@ -48,10 +48,10 @@ def export_catalog(
         name
         for name in SHARED_MOD_NAMES
         if (BUNDLED_SHARED_MOD_ROOT / name).is_dir()
-        and any(
+        and (any(
             (BUNDLED_SHARED_MOD_ROOT / name / partition).is_dir()
             for partition in MODIFIABLE_PARTITIONS
-        )
+        ) or any((BUNDLED_SHARED_MOD_ROOT / name).rglob('*.py')))
     }
     for pack in index["packs"]:
         pack_id = str(pack.get("id") or "")

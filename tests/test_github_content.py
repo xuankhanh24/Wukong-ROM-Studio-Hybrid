@@ -152,6 +152,24 @@ class GitHubContentTests(unittest.TestCase):
             synced.write_text(json.dumps({'releaseTag': 'new', 'catalogUri': 'https://raw.githubusercontent.com/test/repo/main/content-packs/index.json'}))
             self.assertEqual(preferred_content_index(root / 'Content', bundled), synced)
 
+    def test_git_checkout_catalog_includes_patch_only_shared_mods_without_empty_directories(self):
+        from tools import export_mini_app_catalog as exporter
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            patcher = root / 'STARK/Settings_mod/patch_Settings_mod/patch_settings.py'
+            patcher.parent.mkdir(parents=True)
+            patcher.write_text('# actual shared patch entry')
+            index = root / 'index.json'
+            index.write_text(json.dumps({'schemaVersion': 1, 'packs': [
+                {'id': 'MOD/Test', 'target': 'MOD/Test', 'files': [], 'sizeBytes': 0,
+                 'archive': {'uri': 'https://github.com/test/repo/releases/download/v1/pack.tar',
+                             'sha256': 'a'*64, 'md5': 'b'*32, 'sizeBytes': 1}}]}))
+            devices = root / 'devices.json'
+            devices.write_text('[]')
+            with patch.object(exporter, 'BUNDLED_SHARED_MOD_ROOT', root / 'STARK'):
+                catalog = exporter.export_catalog(index, devices, root / 'catalog.json')
+            self.assertIn('Settings_mod', catalog['modsByVersion']['Test'])
+
     def test_github_manifest_publish_merges_unselected_packs_and_uses_cas(self):
         import base64
         from wukong.content_sync import publish_index_to_github
