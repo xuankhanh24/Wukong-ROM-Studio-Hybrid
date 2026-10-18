@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -88,12 +89,13 @@ SHARED_WK_POWER_TEXT_FIXTURES["system/system/etc/init/hw/stark_init.rc"] = TEXT_
 ]
 
 
-def main() -> int:
+def main(*, preserve_shared: bool = False) -> int:
     if MOD_ROOT.exists() and not MARKER.is_file():
         raise SystemExit(
             f"Refusing to modify an existing content directory without the fixture marker: {MOD_ROOT}"
         )
-    if SHARED_WK_ROOT.exists() and not SHARED_WK_MARKER.is_file():
+    real_shared = SHARED_WK_ROOT.exists() and not SHARED_WK_MARKER.is_file()
+    if real_shared and not preserve_shared:
         raise SystemExit(
             "Refusing to modify an existing shared content directory without the "
             f"fixture marker: {SHARED_WK_ROOT}"
@@ -105,10 +107,11 @@ def main() -> int:
     )
     MOD_ROOT.mkdir(parents=True, exist_ok=True)
     MARKER.write_text("Generated placeholders only; never use for ROM builds.\n", encoding="utf-8")
-    SHARED_WK_ROOT.mkdir(parents=True, exist_ok=True)
-    SHARED_WK_MARKER.write_text(
-        "Generated placeholders only; never use for ROM builds.\n", encoding="utf-8"
-    )
+    if not real_shared:
+        SHARED_WK_ROOT.mkdir(parents=True, exist_ok=True)
+        SHARED_WK_MARKER.write_text(
+            "Generated placeholders only; never use for ROM builds.\n", encoding="utf-8"
+        )
     if materialize_fake_lock:
         shared_fake_lock.mkdir(parents=True, exist_ok=True)
         shared_fake_lock_marker.write_text(
@@ -134,6 +137,9 @@ def main() -> int:
                 path.write_text(text, encoding="utf-8", newline="\n")
             count += 1
     shared = SHARED_WK_ROOT
+    if real_shared:
+        print(f"Materialized {count} private-content test placeholders; preserved Git-owned STARK")
+        return 0
     for relative, text in SHARED_WK_POWER_TEXT_FIXTURES.items():
         path = shared / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -160,4 +166,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--preserve-shared', action='store_true', help='Never overwrite the shared STARK payload tracked by Git')
+    raise SystemExit(main(preserve_shared=parser.parse_args().preserve_shared))
