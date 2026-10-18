@@ -60,6 +60,15 @@ function Copy-Tree {
         throw "Required source directory is missing: $Source"
     }
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    if ((Split-Path -Leaf $Source) -eq 'STARK') {
+        # Profile analysis and resource caches are build scratch, not shared
+        # payload. Never ship cached APKs/DEX or stale decoded class trees.
+        & robocopy $Source $Destination /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP `
+            /XD __pycache__ scratch .scratch _patch_temp dist `
+            /XF *.pyc *.pyo | Out-Null
+        if ($LASTEXITCODE -ge 8) { throw 'Could not stage the shared STARK tree.' }
+        return
+    }
     Copy-Item -Path (Join-Path $Source '*') -Destination $Destination -Recurse -Force
     Get-ChildItem -LiteralPath $Destination -Recurse -Directory -Filter '__pycache__' |
         Sort-Object FullName -Descending |

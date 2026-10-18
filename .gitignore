@@ -18,6 +18,8 @@ Auto_Build_WK_*.zip
 # Only generated scratch/cache files are excluded (never mod payloads).
 /STARK/**/_patch_temp/
 /STARK/**/.scratch/
+/STARK/**/scratch/
+/STARK/**/dist/
 /copy-image/
 /OFX/
 /TWRP/

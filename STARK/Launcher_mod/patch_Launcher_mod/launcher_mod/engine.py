@@ -201,5 +201,15 @@ def apply_profile(roots, profile, source_index=None, selected=None, report_path=
 def load_profile(path):
     path = Path(path)
     profile = json.loads(path.read_text(encoding='utf-8'))
+    if profile.get('extends'):
+        base = load_profile(path.parent / profile['extends'])
+        for override in profile['overrides']:
+            rules = [rule for feature in base['features'] if feature['id'] == override['feature']
+                     for entry in feature['classes'] if entry['owner'] == override['owner']
+                     for rule in entry['methods'] if rule['before'] and signature(rule['before']) == override['method']]
+            if len(rules) != 1:
+                raise ValueError('Reviewed profile override must bind exactly one base rule')
+            rules[0].update(before=override['before'], after=override['after'], variants=override.get('variants', {}))
+        return {**base, **{key: value for key, value in profile.items() if key not in {'extends', 'overrides'}}}
     profile['features'] = [json.loads((path.parent / feature).read_text(encoding='utf-8')) for feature in profile['features']]
     return profile

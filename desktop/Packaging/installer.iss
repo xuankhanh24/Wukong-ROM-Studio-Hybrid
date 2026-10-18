@@ -10,6 +10,10 @@
   #define InstallerOutputBaseFilename "WukongStudio-Setup-x64-1.0.0-unsigned"
 #endif
 
+#if !FileExists(AddBackslash(SourceRoot) + "Content\STARK\Launcher_mod\patch_Launcher_mod\patches\pkg110_16_0_10_500\profile.json")
+  #error Shared STARK payload is stale: missing the reviewed PKG110 Launcher profile. Rebuild Content/STARK before compiling this installer.
+#endif
+
 [Setup]
 AppId={{B16B5D54-5A03-48FD-9E61-B87CF985E9A7}
 AppName={#AppName}

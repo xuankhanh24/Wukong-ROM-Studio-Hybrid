@@ -51,6 +51,14 @@ class StarkInstallerContractTests(unittest.TestCase):
 
 @unittest.skipUnless(os.name == 'nt' and COMPILER.is_file(), 'Optional Windows Inno integration')
 class StarkInstallerIntegrationTests(unittest.TestCase):
+    def test_compiler_refuses_staging_without_reviewed_launcher_profile(self):
+        with tempfile.TemporaryDirectory(prefix='wk-stale-stark-') as directory:
+            result = subprocess.run([str(COMPILER), f'/DSourceRoot={directory}',
+                                     f'/DInstallerOutputDir={directory}', str(INSTALLER)],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('Shared STARK payload is stale', result.stdout + result.stderr)
+
     def test_fresh_upgrade_repeat_and_failed_install_restore(self):
         content = INSTALLER.read_text(encoding='utf-8-sig')
         helpers = content.split('// STARK snapshot helpers begin', 1)[1].split('// STARK snapshot helpers end', 1)[0]
