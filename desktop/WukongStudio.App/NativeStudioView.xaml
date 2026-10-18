@@ -808,7 +808,7 @@
                                 <Border Style="{StaticResource SubtlePanelStyle}" Padding="14">
                                     <StackPanel Spacing="10">
                                         <TextBlock Text="Đồng bộ nội dung đa nền tảng" Style="{StaticResource SectionTitleStyle}" />
-                                        <TextBlock Text="STARK dùng chung được cập nhật qua Git và bộ cài. Các pack MOD được upload lên GitHub Releases; hash và manifest tự cập nhật sau khi xác minh, không ghi đè bản đang được job sử dụng." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="ContentSyncDescriptionText" Text="STARK dùng chung được cập nhật qua Git và bộ cài. Các pack MOD được upload lên GitHub Releases; hash và manifest tự cập nhật sau khi xác minh, không ghi đè bản đang được job sử dụng." Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" />
                                         <TextBlock x:Name="ContentSyncSelectionText" Text="Chọn Content\MOD\&lt;phiên bản&gt; để upload một pack, hoặc upload tất cả MOD." Style="{StaticResource MutedTextStyle}" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" />
                                         <Grid x:Name="ContentSyncActionsGrid" ColumnSpacing="8">
                                             <Grid.ColumnDefinitions>
