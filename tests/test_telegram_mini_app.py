@@ -1597,6 +1597,46 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertNotIn("window.confirm", script)
         self.assertGreater(screenshot_size, 10_000)
 
+    def test_admin_reset_access_has_confirmation_reason_and_keeps_audit_visible(self) -> None:
+        requests = []
+
+        def exercise_reset(page):
+            def refreshed_user(route):
+                response = route.fetch()
+                payload = response.json()
+                if requests:
+                    payload["user"].update({"accessStatus": "pending", "buildCredits": 0, "unlimited": False})
+                    payload["events"].insert(0, {"eventId": "reset-event", "type": "access_reset", "reason": "Reset for new approval"})
+                route.fulfill(response=response, json=payload)
+
+            page.route(re.compile(r"/v1/admin/users/88$"), refreshed_user)
+            page.route("**/v1/admin/users/88/reset-access", lambda route: (
+                requests.append(route.request.post_data_json),
+                route.fulfill(status=200, content_type="application/json", body=json.dumps({"user": {"accessStatus": "pending"}})),
+            ))
+            page.locator(".user-detail-actions").get_by_role("button", name="Xóa quyền", exact=True).click()
+            dialog = page.locator("#admin-action-dialog")
+            self.assertTrue(dialog.is_visible())
+            self.assertIn("Lịch sử job, hoạt động và nhật ký vẫn được lưu", page.locator("#admin-action-message").inner_text())
+            confirm = page.locator("#admin-action-confirm")
+            confirm.click()
+            self.assertTrue(page.locator("#admin-action-error").is_visible())
+            self.assertEqual([], requests)
+            page.locator("#admin-action-reason").fill("Reset for new approval")
+            confirm.click()
+            page.wait_for_function("!document.querySelector('#admin-action-dialog').open")
+            page.locator("#toast").filter(has_text="Đã cập nhật quyền").wait_for()
+            self.assertEqual([{"reason": "Reset for new approval"}], requests)
+            self.assertTrue(page.locator("#admin-user-audit-log").is_visible())
+            page.locator(".user-detail-actions").get_by_role("button", name="Duyệt + 1 lượt", exact=True).wait_for()
+            self.assertIn("Reset for new approval", page.locator("#admin-user-audit-log").inner_text())
+
+        dom, _ = _render_mini_app_in_chrome(
+            api_enabled=True, initial_view="system", admin_user=True,
+            click_admin_user=True, page_action=exercise_reset,
+        )
+        self.assertIn("Xóa quyền", dom)
+
     def test_admin_sensitive_action_uses_themed_dialog(self) -> None:
         dom, _ = _render_mini_app_in_chrome(
             api_enabled=True,

@@ -1,4 +1,4 @@
-import { $, $$, miniApiEndpoint, pipelineLabels, state, t } from "./state.js";
+import { $, $$, miniApiEndpoint, pipelineLabels, runtime, state, t } from "./state.js";
 import { renderAdminPresetLabels, renderAdminReleaseEditor } from "./admin.js";
 import { activeSignedLaunchToken, apiRequest, effectiveInitData, loadSession, miniApiAvailable, miniApiUnavailableMessageKey, telegramTransportAvailable } from "./session.js";
 import { classifySource } from "./source-rom.js";
@@ -228,6 +228,8 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 }
 
 function updateSummary() {
+  const wkPatches = $("#wk-manager-patches");
+  if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
   const selectionSummary = $("#config-summary");
   if (selectionSummary) selectionSummary.textContent = t("selectionSummary", { mods: selectedMods().length, steps: $$("#steps input:checked").length });
   const selectedDevice = $("#device")?.value || "";
@@ -286,6 +288,15 @@ function updateSummary() {
     node.textContent = t(ready ? "launch" : "finishSource");
   });
   $("#dispatch-fab")?.setAttribute("aria-label", t("fabBuild"));
+  syncTelegramMainButton(ready);
+}
+
+function syncTelegramMainButton(_ready) {
+  const tg = runtime.TelegramApp;
+  if (!tg?.MainButton) return;
+  try {
+    tg.MainButton.hide();
+  } catch (_) {}
 }
 
 function positiveInteger(input, errorKey) {
@@ -468,6 +479,7 @@ function saveDebloatPaths() {
 }
 
 function resetJobDraft() {
+  $$("#wk-manager-patches input").forEach((input) => { input.checked = input.defaultChecked; });
   const source = $("#source-uri");
   if (source) {
     source.value = "";
@@ -496,6 +508,7 @@ function buildRecipe() {
   recipe.build = {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
+      wkManagerPatches: $$("#wk-manager-patches input:checked").map((input) => input.value),
       enabledSteps: $$("#steps input:checked").map((input) => input.value)
         .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),
       package: $("#package").checked, notifyTelegram: $("#notify").checked
@@ -591,4 +604,4 @@ async function submitRecipe() {
   }
 }
 
-export { selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, enforceExclusiveMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };
+export { syncTelegramMainButton, selectedMods, defaultMods, modCategory, modCategoryLabel, selectionMark, renderMods, renderPipelineSteps, renderCatalog, filterMods, updateTelegramState, updatePipelineCount, setMods, enforceExclusiveMods, runnerLabel, updateDeliveryStates, setDeliveryState, updateChecklistItem, updateSummary, positiveInteger, sourceSpec, selectedReleaseVersion, selectedBaseModVersion, selectedModVersion, currentEditionLabels, presetLabel, presetEntries, renderPresetLabels, renderCustomPresetLabelEditor, applyCustomPresetLabelForJob, isSafePresetLabel, renderReleaseVersion, saveReleaseVersion, sameStringList, normalizedDebloatPaths, renderDebloatSummary, openDebloatEditor, closeDebloatEditor, saveDebloatPaths, resetJobDraft, buildRecipe, restorePendingSubmission, renderSubmitRecovery, submitRecipe };

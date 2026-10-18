@@ -1491,6 +1491,39 @@ class StudioCoreTests(unittest.TestCase):
             with self.assertRaisesRegex(studio_core.StudioError, "gpu_service"):
                 studio_core._validate_wk_manager_power_policy_types(policy, patch)
 
+    def test_wk_manager_power_policy_allows_and_reports_optional_missing_symbol(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            policy = root / "plat_sepolicy.cil"
+            patch = root / "stark_plat_sepolicy.cil"
+            policy.write_text(
+                "(type present)\n"
+                "(type wukong_manager_app)\n"
+                "(type privapp_data_file)\n"
+                "(type system_file)\n",
+                encoding="utf-8",
+            )
+            patch.write_text(
+                "+(allow present virtualizationmanager (process (transition)))\n",
+                encoding="utf-8",
+            )
+            missing = studio_core._validate_wk_manager_power_policy_types(
+                policy,
+                patch,
+                allowed_missing_symbols=("virtualizationmanager",),
+            )
+            self.assertEqual(missing, {"virtualizationmanager"})
+            target = root / "target.cil"
+            target.write_text("(type present)\n", encoding="utf-8")
+            self.assertEqual(
+                studio_core.apply_stark_patch(
+                    patch,
+                    target,
+                    skip_symbols=missing,
+                ),
+                {"added": 0, "removed": 0, "replaced": 0},
+            )
+
     def test_wk_manager_power_policy_accepts_allow_target_typeattribute(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

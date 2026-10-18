@@ -675,6 +675,107 @@ function renderJobParameters(job, root, reader) {
   return details;
 }
 
+function getPipelinePhases() {
+  const isVi = state.language === "vi";
+  return [
+    { id: "source", label: isVi ? "ROM nguồn" : "Source ROM" },
+    { id: "unpack", label: isVi ? "Bung nén" : "Unpack" },
+    { id: "mod", label: isVi ? "Áp dụng MOD" : "Apply MOD" },
+    { id: "package", label: isVi ? "Đóng gói" : "Packaging" },
+    { id: "publish", label: isVi ? "Xuất xưởng" : "Publishing" },
+  ];
+}
+
+function pipelinePhaseIndex(stage, status) {
+  const s = String(stage || "").toLowerCase();
+  const st = String(status || "").toLowerCase();
+  if (st === "succeeded") return 5;
+  if (["upload", "uploading", "mirror", "complete", "notify"].some((k) => s.includes(k)) || st === "uploading") return 4;
+  if (["repack", "super", "vbmeta", "vendor_boot", "package", "zip"].some((k) => s.includes(k))) return 3;
+  if (["apply_mod", "mod", "sync_config"].some((k) => s.includes(k))) return 2;
+  if (["extract", "payload", "unpack", "debloat"].some((k) => s.includes(k))) return 1;
+  return 0;
+}
+
+function renderJobStepper(job, events = []) {
+  const container = document.createElement("section");
+  container.className = "job-stepper";
+
+  const titleRow = document.createElement("div");
+  titleRow.className = "job-stepper-title";
+  const title = document.createElement("span");
+  title.textContent = state.language === "vi" ? "Tiến trình build ROM" : "Build Pipeline";
+  const stageName = document.createElement("span");
+  stageName.textContent = job.stage || statusLabel(job.status);
+  titleRow.append(title, stageName);
+  container.append(titleRow);
+
+  const phaseIndex = pipelinePhaseIndex(job.stage, job.status);
+  const isFailed = ["failed", "cancelled"].includes(String(job.status || "").toLowerCase());
+  const isSucceeded = String(job.status || "").toLowerCase() === "succeeded";
+
+  const list = document.createElement("ol");
+  list.className = "job-stepper-stages";
+
+  getPipelinePhases().forEach((phase, index) => {
+    const item = document.createElement("li");
+    let stateClass = "pending";
+    let icon = String(index + 1);
+
+    if (isSucceeded || index < phaseIndex) {
+      stateClass = "complete";
+      icon = "✓";
+    } else if (index === phaseIndex) {
+      if (isFailed) {
+        stateClass = "failed";
+        icon = "✕";
+      } else {
+        stateClass = "running";
+        icon = "●";
+      }
+    }
+
+    item.className = `stepper-stage ${stateClass}`;
+    const badge = document.createElement("span");
+    badge.className = "stepper-badge";
+    badge.textContent = icon;
+
+    const label = document.createElement("span");
+    label.className = "stepper-label";
+    label.textContent = phase.label;
+
+    item.append(badge, label);
+    list.append(item);
+  });
+  container.append(list);
+
+  if (isFailed) {
+    const errorBanner = document.createElement("div");
+    errorBanner.className = "job-error-banner";
+    const errorIcon = document.createElement("span");
+    errorIcon.textContent = "⚠️";
+    const errorText = document.createElement("div");
+    const errorTitle = document.createElement("strong");
+    errorTitle.textContent = t("pipelineFailed") || "Build không thành công";
+    const errorMsg = document.createElement("span");
+    errorMsg.textContent = job.error || "Đã xảy ra lỗi trong quá trình thực thi.";
+    errorText.append(errorTitle, errorMsg);
+    errorBanner.append(errorIcon, errorText);
+    container.append(errorBanner);
+  } else if (isSucceeded) {
+    const successBanner = document.createElement("div");
+    successBanner.className = "job-success-banner";
+    const successIcon = document.createElement("span");
+    successIcon.textContent = "🎉";
+    const successText = document.createElement("span");
+    successText.textContent = t("pipelineComplete") || "Build hoàn tất! Link tải đã sẵn sàng bên dưới.";
+    successBanner.append(successIcon, successText);
+    container.append(successBanner);
+  }
+
+  return container;
+}
+
 function renderActiveJob(job, events, inspection = null) {
   const root = inspection ? $("#admin-job-detail") : $("#active-job");
   const reader = inspection || state;
@@ -760,6 +861,7 @@ function renderActiveJob(job, events, inspection = null) {
   }
   facts.append(...factNodes);
   const artifacts = renderArtifacts(job);
+  const stepper = renderJobStepper(job, events);
   const actions = document.createElement("div"); actions.className = "job-controls";
   const jobId = job.job_id || job.jobId;
   const logExpanded = reader.expandedLogJobId === jobId;
@@ -799,7 +901,7 @@ function renderActiveJob(job, events, inspection = null) {
   const updated = document.createElement("small"); updated.className = "job-sync-time";
   updated.textContent = `${t("latestUpdate")}: ${formatDate(job.updated_at || job.updatedAt)}`;
   progress.append(updated);
-  const before = [header, creator, progress, technical];
+  const before = [header, creator, progress, stepper, technical];
   const previousLog = root.querySelector(".job-events");
   const previousTop = previousLog?.scrollTop || 0;
   const atBottom = previousLog ? previousLog.scrollHeight - previousTop - previousLog.clientHeight < 36 : true;
@@ -808,7 +910,6 @@ function renderActiveJob(job, events, inspection = null) {
   const children = [...before, ...(config ? [config] : []), artifacts, actions, log];
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index], current = root.children[index];
-    // Retain equal presentation nodes and the attached parameter reader.
     if (current === child || (index < before.length && current?.isEqualNode(child))) continue;
     if (current) root.insertBefore(child, current); else root.append(child);
     if (current && !children.includes(current)) current.remove();

@@ -1472,6 +1472,19 @@ class TelegramMiniAppAPI:
             except (PermissionError, ValueError) as exc:
                 return jsonify({"error": str(exc)}), 409
 
+        @app.post("/v1/admin/users/<telegram_id>/reset-access")
+        def admin_reset_user_access(telegram_id: str) -> Response:
+            actor = self._require_admin_identity()
+            payload = request.get_json(silent=True) or {}
+            reason = str(payload.get("reason") or "").strip()
+            if not reason:
+                return jsonify({"error": "A reason is required to reset access"}), 400
+            try:
+                self.access.reset_access(telegram_id, actor=actor, reason=reason)
+                return jsonify({"user": self.access.profile(telegram_id)})
+            except (PermissionError, ValueError) as exc:
+                return jsonify({"error": str(exc)}), 409
+
         @app.post("/v1/admin/users/<telegram_id>/allowance")
         def admin_user_allowance(telegram_id: str) -> Response:
             actor = self._require_admin_identity()

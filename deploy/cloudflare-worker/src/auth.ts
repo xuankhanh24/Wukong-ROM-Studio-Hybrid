@@ -3,6 +3,7 @@ import {
   type ObservedTelegramUser,
   type TelegramProfile,
   observeUser,
+  requestAccessAfterReset,
   profile
 } from "./state";
 
@@ -226,6 +227,7 @@ export async function authenticate(request: Request, env: Env): Promise<Authenti
   } else if (scheme === "wla") {
     subject = await validateLaunchToken(credential, env.WUKONG_TELEGRAM_BOT_TOKEN);
     currentProfile = await profile(env, subject);
+    if (currentProfile) await requestAccessAfterReset(env, currentProfile);
   } else {
     throw authError("Telegram Mini App authentication is required");
   }

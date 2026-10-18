@@ -71,6 +71,7 @@ import {
   profile,
   profileWithActivity,
   revokeUser,
+  resetUserAccess,
   updateAllowance,
   userEvents,
   userEventsSince
@@ -474,7 +475,7 @@ async function routeWithIdentity(
     }
   }
   const adminAction = path.match(
-    /^\/v1\/admin\/users\/([1-9][0-9]*)\/(approve|revoke|allowance)$/
+    /^\/v1\/admin\/users\/([1-9][0-9]*)\/(approve|revoke|reset-access|allowance)$/
   );
   if (adminAction && request.method === "POST") {
     if (auth.role !== "admin") return json({ error: "Admin access is required" }, 403);
@@ -484,11 +485,13 @@ async function routeWithIdentity(
         ? await approveUser(env, adminAction[1]!, auth.subject, String(payload.reason ?? ""))
         : adminAction[2] === "revoke"
           ? await revokeUser(env, adminAction[1]!, auth.subject, String(payload.reason ?? ""))
-          : await updateAllowance(env, adminAction[1]!, auth.subject, payload);
+          : adminAction[2] === "reset-access"
+            ? await resetUserAccess(env, adminAction[1]!, auth.subject, String(payload.reason ?? ""))
+            : await updateAllowance(env, adminAction[1]!, auth.subject, payload);
       return json({ user });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Admin update failed";
-      const status = adminAction[2] === "revoke" && !String(payload.reason ?? "").trim() ? 400 : 409;
+      const status = ["revoke", "reset-access"].includes(adminAction[2]!) && !String(payload.reason ?? "").trim() ? 400 : 409;
       return json({ error: message }, status);
     }
   }

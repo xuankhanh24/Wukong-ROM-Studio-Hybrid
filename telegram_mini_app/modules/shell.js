@@ -2,7 +2,7 @@ import { bindViewport } from "./viewport.js";
 import { $, $$, miniApiEndpoint, runtime, state, t, themeMedia } from "./state.js";
 import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods, filterMods, openDebloatEditor, renderCatalog, renderCustomPresetLabelEditor, renderDebloatSummary, renderMods, renderPipelineSteps, restorePendingSubmission, saveDebloatPaths, saveReleaseVersion, setDeliveryState, setMods, submitRecipe, updatePipelineCount, updateSummary, updateTelegramState } from "./build.js";
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
-import { runQuickAction, activeSignedLaunchToken, apiRequest, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
+import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
 import { closeBatchBuildPage, loadAdminUsers, loadBatch, openBatchBuildPage, performCacheClear, renderAdminUsers, savePermanentPresetLabels, savePermanentReleaseVersion, setBatchSelections, startBatchBuild, updateBatchSummary, updateMaintenance } from "./admin.js";
 import { clearSource, copySourceMetadata, pasteSourceFromClipboard, probeSourceInPlace, restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
@@ -37,11 +37,16 @@ function applyLanguage() {
 
 function toast(message, error = false) {
   const node = $("#toast");
-  node.textContent = message;
+  if (!node || !message) return;
+  const icon = error
+    ? '<span class="toast-badge error" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>'
+    : '<span class="toast-badge success" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  node.innerHTML = `${icon}<span class="toast-text"></span>`;
+  node.querySelector(".toast-text").textContent = message;
   node.classList.toggle("error", error);
   node.classList.add("visible");
   clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(() => node.classList.remove("visible"), 3600);
+  state.toastTimer = setTimeout(() => node.classList.remove("visible"), 3200);
   if (runtime.TelegramApp?.HapticFeedback) runtime.TelegramApp.HapticFeedback.notificationOccurred(error ? "error" : "success");
 }
 
@@ -58,6 +63,27 @@ function bindEvents() {
   $("#language").addEventListener("click", () => { state.language = state.language === "vi" ? "en" : "vi"; localStorage.setItem("wukong-language", state.language); applyLanguage(); });
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => navigate(button.dataset.nav)));
   bindLiquidBottomTabs();
+
+  if (runtime.TelegramApp?.MainButton) {
+    try { runtime.TelegramApp.MainButton.hide(); } catch (_) {}
+    runtime.TelegramApp.MainButton.onClick(() => {
+      const submitBtn = $("#submit-recipe");
+      if (submitBtn && !submitBtn.disabled) submitBtn.click();
+    });
+  }
+  if (runtime.TelegramApp?.BackButton) {
+    runtime.TelegramApp.BackButton.onClick(() => {
+      const system = $("#system");
+      if (system?.classList.contains("admin-user-open")) { closeAdminUserPage({ restoreFocus: true, scroll: true }); return; }
+      if (system?.classList.contains("admin-job-open")) { closeAdminJobPage(); return; }
+      if (!$("#admin-batch-page")?.hidden) { closeBatchBuildPage(); return; }
+      if (document.body.dataset.view && document.body.dataset.view !== "build") {
+        navigate("build");
+        return;
+      }
+      try { runtime.TelegramApp?.close?.(); } catch (_) { window.history.back(); }
+    });
+  }
   $("#cache-clear-confirm")?.addEventListener("click", () => performCacheClear());
   $$("[data-theme-value]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.themeValue, true)));
   themeMedia?.addEventListener?.("change", handleSystemThemeChange);
@@ -123,7 +149,7 @@ function bindEvents() {
   $("#connect-telegram").addEventListener("click", () => connectTelegramSession());
   $("#refresh-access").addEventListener("click", () => {
     if (!miniApiAvailable()) { connectTelegramSession(); return; }
-    loadSession({ countOpen: false }).catch((error) => toast(error.message, true));
+    loadSession({ countOpen: false }).then(() => initializeApprovedWorkspace()).catch((error) => toast(error.message, true));
   });
   $("#refresh-maintenance").addEventListener("click", () => {
     loadSession({ countOpen: false }).catch((error) => toast(error.message, true));
@@ -160,6 +186,7 @@ function bindEvents() {
       }
       $("#preset").value = "custom";
       renderCustomPresetLabelEditor();
+      try { runtime.TelegramApp?.HapticFeedback?.selectionChanged?.(); } catch (_) {}
     }
     updateSummary();
   });
@@ -274,12 +301,34 @@ function renderSessionDiagnostics() {
 function activateTelegramApp() {
   bindViewport(runtime.TelegramApp);
   try {
-    runtime.TelegramApp.ready(); runtime.TelegramApp.expand();
+    runtime.TelegramApp.ready();
+    runtime.TelegramApp.expand();
+    runtime.TelegramApp?.BackButton?.show?.();
+    if (typeof runtime.TelegramApp.requestFullscreen === "function") {
+      runtime.TelegramApp.requestFullscreen();
+    }
     if (runtime.TelegramApp.isVersionAtLeast?.("7.7")) runtime.TelegramApp.disableVerticalSwipes?.();
     if (runtime.TelegramApp.isVersionAtLeast?.("6.1")) {
       runtime.TelegramApp.setHeaderColor?.("secondary_bg_color");
       runtime.TelegramApp.setBackgroundColor?.("secondary_bg_color");
     }
+    const syncFullscreen = () => {
+      const isFs = Boolean(runtime.TelegramApp?.isFullscreen);
+      document.documentElement.classList.toggle("is-fullscreen", isFs);
+      document.body.classList.toggle("is-fullscreen", isFs);
+    };
+    runtime.TelegramApp?.onEvent?.("fullscreenChanged", syncFullscreen);
+    runtime.TelegramApp?.onEvent?.("fullscreenFailed", (err) => {
+      console.warn("Telegram requestFullscreen failed:", err);
+    });
+    syncFullscreen();
+    const ensureFsOnInteraction = () => {
+      if (!runtime.TelegramApp?.isFullscreen && typeof runtime.TelegramApp?.requestFullscreen === "function") {
+        try { runtime.TelegramApp.requestFullscreen(); } catch (_) {}
+      }
+      window.removeEventListener("pointerdown", ensureFsOnInteraction);
+    };
+    window.addEventListener("pointerdown", ensureFsOnInteraction, { once: true, passive: true });
   } catch (_) {}
 }
 
@@ -312,12 +361,7 @@ function startMiniApp() {
   applyLanguage();
   history.scrollRestoration = "manual";
   renderSessionDiagnostics();
-  ensureAutomaticTelegramConnection();
-  if (miniApiAvailable()) {
-    loadSession().then(() => {
-      initializeApprovedWorkspace();
-    }).catch((error) => toast(error.message, true));
-  } else renderAccessGate();
+  autoVerifySession();
 }
 
-export { applyLanguage, toast, options, bindEvents, renderSessionDiagnostics, activateTelegramApp, ensureAutomaticTelegramConnection, startMiniApp };
+export { applyLanguage, toast, options, bindEvents, renderSessionDiagnostics, activateTelegramApp, ensureAutomaticTelegramConnection, autoVerifySession, startMiniApp };

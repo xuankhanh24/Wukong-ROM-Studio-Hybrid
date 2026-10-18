@@ -58,6 +58,7 @@ from wukong.catalog import (
     SHARED_MOD_NAMES,
 )
 from wukong.pipeline import DEFAULT_PIPELINE_STEPS, PIPELINE_STEP_DEFINITIONS
+from wukong.wk_features import load_patcher as load_wk_feature_patcher, normalize_patches
 from wukong.rom_family import is_oxygen_product, oxygen_mod_version
 from wukong.mod_release_versions import (
     DEFAULT_MOD_RELEASE_VERSION,
@@ -90,7 +91,7 @@ APKTOOL_DECODE_MARKER_NAME = "decoded-source.json"
 WK_MANAGER_STARK_DIR = STARK_ROOT
 WORKSPACE_MARKER_NAME = ".wkstudio-workspace.json"
 WORKSPACE_MARKER_KIND = "wukong-rom-studio-workspace"
-WORKSPACE_PIPELINE_VERSION = 23
+WORKSPACE_PIPELINE_VERSION = 24
 ROM_STUDIO_VERSION = DEFAULT_MOD_RELEASE_VERSION
 MOD_VERSION_STUDIO_VERSIONS = DEFAULT_MOD_RELEASE_VERSIONS
 # A release label is presentation metadata, not a directory or a semantic
@@ -305,6 +306,7 @@ class BuildSpec:
     romSha256: str | None = None
     specFingerprint: str | None = None
     resumePreset: str | None = None
+    wkManagerPatches: list[str] | None = None
 
     def selected_mod_names(self) -> list[str]:
         names = self.modNames or ([self.modName] if self.modName else [])
@@ -393,6 +395,7 @@ class BuildSpec:
             romSha256=(str(payload.get("romSha256") or "").strip() or None),
             specFingerprint=(str(payload.get("specFingerprint") or "").strip() or None),
             resumePreset=(str(payload.get("resumePreset") or "").strip().lower() or None),
+            wkManagerPatches=normalize_patches(payload.get("wkManagerPatches")),
         )
 
 
@@ -2121,11 +2124,29 @@ def plan_steps(spec: BuildSpec, workspace: Path | None = None) -> list[str]:
     return [step for step in STEP_ORDER if step in selected]
 
 
-def _run_command(command: list[str], *, cwd: Path = ROOT_DIR) -> None:
+def _run_command(command: list[str], *, cwd: Path = ROOT_DIR, verbose: bool | None = None) -> None:
+    is_verbose = verbose if verbose is not None else (os.environ.get("WUKONG_VERBOSE_BUILD", "0") == "1")
+    cmd_name = Path(command[0]).name if command else "command"
     print(f"[*] CMD: {' '.join(command)}", flush=True)
-    result = subprocess.run(command, cwd=cwd, check=False)
+    if is_verbose:
+        result = subprocess.run(command, cwd=cwd, check=False)
+    else:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            errors="replace",
+        )
+        if result.returncode != 0:
+            if result.stdout:
+                print(f"[!] LỖI THỰC THI LỆNH ({result.returncode}):\n{result.stdout.strip()}", flush=True)
+            raise StudioError(f"Command failed with exit code {result.returncode}: {cmd_name}")
+        return
     if result.returncode != 0:
-        raise StudioError(f"Command failed with exit code {result.returncode}: {command[0]}")
+        raise StudioError(f"Command failed with exit code {result.returncode}: {cmd_name}")
 
 
 def _emit_progress(context: BuildContext, progress: int, message: str = "") -> None:
@@ -2256,7 +2277,12 @@ def _partition_destination(
     return (target_partition, destination) if destination.is_dir() else None
 
 
-def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
+def apply_stark_patch(
+    source: Path,
+    destination: Path,
+    *,
+    skip_symbols: Iterable[str] = (),
+) -> dict[str, int]:
     if not source.is_file():
         raise StudioError(f"Stark patch file is missing: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -2264,6 +2290,9 @@ def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
     lines = original.splitlines()
     added = removed = replaced = 0
 
+    skipped_symbols = tuple(
+        symbol for symbol in skip_symbols if re.fullmatch(r"[A-Za-z0-9_]+", str(symbol))
+    )
     for instruction in source.read_text(encoding="utf-8", errors="replace").splitlines():
         if not instruction.strip():
             continue
@@ -2271,6 +2300,11 @@ def apply_stark_patch(source: Path, destination: Path) -> dict[str, int]:
         payload = instruction[1:] if operation in {"+", "-", "!"} else instruction
         normalized = payload.strip()
         if not normalized:
+            continue
+        if any(
+            re.search(rf"(?<![A-Za-z0-9_]){re.escape(symbol)}(?![A-Za-z0-9_])", normalized)
+            for symbol in skipped_symbols
+        ):
             continue
         if (
             source.name == "stark_vendor_sepolicy.cil"
@@ -2443,29 +2477,39 @@ def _stark_destination(partition_destination: Path, relative: Path) -> Path:
     )
 
 
-def _preserve_zip_entry_attributes(original: Path, rebuilt: Path) -> None:
-    temporary = original.with_name(f"{original.name}.studio-tmp")
-    with zipfile.ZipFile(original, "r") as original_zip, zipfile.ZipFile(rebuilt, "r") as rebuilt_zip:
-        original_infos = {info.filename: info for info in original_zip.infolist()}
-        with zipfile.ZipFile(temporary, "w") as output:
-            written = set()
-            for rebuilt_info in rebuilt_zip.infolist():
-                info = copy.copy(rebuilt_info)
-                previous = original_infos.get(info.filename)
-                if previous:
-                    info.compress_type = previous.compress_type
-                    info.comment = previous.comment
-                    info.extra = previous.extra
-                    info.internal_attr = previous.internal_attr
-                    info.external_attr = previous.external_attr
-                    info.create_system = previous.create_system
-                    info.date_time = previous.date_time
-                output.writestr(info, rebuilt_zip.read(rebuilt_info.filename))
-                written.add(info.filename)
-            for original_info in original_zip.infolist():
-                if original_info.filename not in written:
-                    output.writestr(copy.copy(original_info), original_zip.read(original_info.filename))
-    temporary.replace(original)
+def _stark_archive_helper():
+    spec = importlib.util.spec_from_file_location("stark_archive", STARK_ROOT / "patch_common.py")
+    if spec is None or spec.loader is None:
+        raise StudioError("Shared STARK archive helper is missing")
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    return helper
+
+
+def _preserve_zip_entry_attributes(original: Path, rebuilt: Path, *, changed_dex=None) -> None:
+    helper = _stark_archive_helper()
+    helper.merge_rebuilt_archive(original, rebuilt, original, dex_only=True, changed_dex=changed_dex)
+
+
+def _smali_dex_fingerprints(decoded: Path) -> dict[str, str]:
+    fingerprints = {}
+    for folder in decoded.iterdir():
+        if not folder.is_dir():
+            continue
+        if folder.name == "smali":
+            name = "classes.dex"
+        elif match := re.fullmatch(r"smali_classes(\d+)", folder.name):
+            name = f"classes{match[1]}.dex"
+        else:
+            continue
+        digest = hashlib.sha256()
+        for path in sorted(folder.rglob("*.smali")):
+            digest.update(path.relative_to(folder).as_posix().encode("utf-8") + b"\x00")
+            # Smali files are small. Avoid allocating the 8 MiB streaming
+            # buffer used for ROM images once for every class in the tree.
+            digest.update(hashlib.sha256(path.read_bytes()).digest())
+        fingerprints[name] = digest.hexdigest()
+    return fingerprints
 
 
 def _patch_fix_noti_smali(decoded: Path) -> None:
@@ -2560,8 +2604,11 @@ def _patch_jar_with_apktool(
         _run_command(["java", "-jar", str(APKTOOL_JAR), "d", "-f", str(jar), "-o", str(decoded)])
     decode_seconds = time.perf_counter() - decode_started
 
+    before_dex = _smali_dex_fingerprints(decoded)
     patch_started = time.perf_counter()
     report = patcher(decoded)
+    after_dex = _smali_dex_fingerprints(decoded)
+    changed_dex = {name for name, digest in after_dex.items() if before_dex.get(name) != digest}
     patch_seconds = time.perf_counter() - patch_started
     for generated in (decoded / "build", decoded / "dist"):
         if generated.exists():
@@ -2569,10 +2616,24 @@ def _patch_jar_with_apktool(
     if status_callback:
         status_callback(f"Đóng gói {jar.name}")
     build_started = time.perf_counter()
-    _run_command(["java", "-jar", str(APKTOOL_JAR), "b", str(decoded), "-o", str(rebuilt)])
+    smali_tool = _stark_archive_helper().find_tool("smali")
+    selective_build = bool(before_dex or after_dex) and bool(smali_tool)
+    if selective_build:
+        # Assemble only trees changed by the selected hooks. Original OEM DEX
+        # and non-DEX local records are retained by the merge below.
+        dex_output = work_dir / "rebuilt-dex"
+        dex_output.mkdir(exist_ok=True)
+        with zipfile.ZipFile(rebuilt, "w", compression=zipfile.ZIP_STORED) as archive:
+            for name in sorted(changed_dex):
+                folder = "smali" if name == "classes.dex" else "smali_" + name[:-4]
+                output = dex_output / name
+                _run_command(["java", "-jar", str(smali_tool), "a", str(decoded / folder), "-o", str(output)])
+                archive.write(output, name)
+    else:
+        _run_command(["java", "-jar", str(APKTOOL_JAR), "b", str(decoded), "-o", str(rebuilt)])
     build_seconds = time.perf_counter() - build_started
     preserve_started = time.perf_counter()
-    _preserve_zip_entry_attributes(jar, rebuilt)
+    _preserve_zip_entry_attributes(jar, rebuilt, changed_dex=changed_dex if before_dex or after_dex else None)
     preserve_seconds = time.perf_counter() - preserve_started
     with zipfile.ZipFile(jar, "r") as archive:
         after_profile = {info.filename: info.compress_type for info in archive.infolist()}
@@ -2580,6 +2641,8 @@ def _patch_jar_with_apktool(
         name
         for name, compress_type in before_profile.items()
         if after_profile.get(name) != compress_type
+        and not (re.fullmatch(r"classes(?:\d+)?\.dex", name)
+                 and after_profile.get(name) == zipfile.ZIP_STORED)
     }
     if changed:
         raise StudioError(f"JAR compression profile changed unexpectedly: {', '.join(sorted(changed))}")
@@ -2592,6 +2655,8 @@ def _patch_jar_with_apktool(
     details.update(
         {
             "jar": jar.name,
+            "selectiveDexBuild": selective_build,
+            "changedDex": sorted(changed_dex),
             "decodedReused": decoded_reused,
             "decodeSeconds": round(decode_seconds, 3),
             "patchSeconds": round(patch_seconds, 3),
@@ -2612,6 +2677,7 @@ def _patch_wk_manager_jars(
     oplus_reuse_work_dir: Path | None = None,
     status_callback: Callable[[str], None] | None = None,
     include_fix_noti: bool = False,
+    selected_patches: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     from wk_manager_patcher import (
         WkManagerPatchError,
@@ -2621,8 +2687,10 @@ def _patch_wk_manager_jars(
     )
 
     framework_dir = rom_unpack / "system_unpacked" / "system" / "system" / "framework"
+    features = load_wk_feature_patcher(STARK_ROOT) if selected_patches is not None else None
     def patch_oplus_services(decoded: Path) -> dict[str, Any]:
-        report = patch_oplus_services_decoded(decoded)
+        report = (features.patch_decoded(decoded, selected_patches)
+                  if features else patch_oplus_services_decoded(decoded))
         if include_fix_noti:
             _patch_fix_noti_smali(decoded)
             report = {**report, "fixNotiPatched": 1}
@@ -2636,6 +2704,21 @@ def _patch_wk_manager_jars(
         ("services.jar", patch_services_decoded),
         ("oplus-services.jar", patch_oplus_services),
     ]
+    if features:
+        patchers = []
+        if selected_patches:
+            def patch_framework(decoded: Path) -> dict[str, Any]:
+                bridges_report = features.install_framework_bridges(decoded, selected_patches)
+                if set(selected_patches).intersection({"keybox_manager", "play_integrity_spoof", "gamespoof", "hma_privacy_spoof"}):
+                    fw_report = patch_framework_decoded(decoded, selected_patches=selected_patches)
+                    return {**bridges_report, **fw_report}
+                return bridges_report
+
+            patchers.append(("framework.jar", patch_framework))
+        if set(selected_patches).intersection(("hma_privacy_spoof", "kernel_manager", "disable_flag_secure", "multi_audio")):
+            patchers.append(("services.jar", lambda decoded: features.patch_decoded(decoded, selected_patches, "services")))
+        if set(selected_patches).intersection(("multi_window", "power_button_remap", "disable_flag_secure", "black_window")) or include_fix_noti:
+            patchers.append(("oplus-services.jar", patch_oplus_services))
     reports = []
     for jar_name, patcher in patchers:
         try:
@@ -3005,7 +3088,8 @@ def _validate_wk_manager_power_policy_types(
     patch: Path,
     *,
     additional_policies: Iterable[Path] = (),
-) -> None:
+    allowed_missing_symbols: Iterable[str] = (),
+) -> set[str]:
     if not policy.is_file():
         raise StudioError(f"WK_Manager platform SELinux policy is missing: {policy}")
     policy_paths = (policy, *tuple(additional_policies))
@@ -3033,18 +3117,25 @@ def _validate_wk_manager_power_policy_types(
             flags=re.MULTILINE,
         )
     )
-    if missing_types or missing_attributes or missing_symbols:
+    missing = set(missing_types) | set(missing_attributes) | set(missing_symbols)
+    allowed = {str(symbol) for symbol in allowed_missing_symbols}
+    unresolved = missing - allowed
+    if unresolved:
         details = []
-        if missing_types:
-            details.append(f"types: {', '.join(missing_types)}")
-        if missing_attributes:
-            details.append(f"attributes: {', '.join(missing_attributes)}")
-        if missing_symbols:
-            details.append(f"types/attributes: {', '.join(missing_symbols)}")
+        unresolved_types = sorted(set(missing_types) & unresolved)
+        unresolved_attributes = sorted(set(missing_attributes) & unresolved)
+        unresolved_symbols = sorted(set(missing_symbols) & unresolved)
+        if unresolved_types:
+            details.append(f"types: {', '.join(unresolved_types)}")
+        if unresolved_attributes:
+            details.append(f"attributes: {', '.join(unresolved_attributes)}")
+        if unresolved_symbols:
+            details.append(f"types/attributes: {', '.join(unresolved_symbols)}")
         raise StudioError(
             "WK_Manager system-power policy is incompatible with this ROM; "
             f"missing SELinux {'; '.join(details)}"
         )
+    return missing
 
 
 def _stock_vendor_sepolicy_for_validation(
@@ -3129,10 +3220,11 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         and fallback_policy.resolve() != policy_patch.resolve()
     )
     try:
-        _validate_wk_manager_power_policy_types(
+        skipped_policy_symbols = _validate_wk_manager_power_policy_types(
             policy,
             policy_patch,
             additional_policies=(vendor_policy,) if vendor_policy else (),
+            allowed_missing_symbols=("virtualizationmanager",),
         )
     finally:
         if vendor_policy_probe is not None:
@@ -3152,7 +3244,13 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         source = source_selinux / name
         if not source.is_file():
             raise StudioError(f"WK_Manager system-power SELinux patch is missing: {source}")
-        patched += sum(apply_stark_patch(source, target).values())
+        patched += sum(
+            apply_stark_patch(
+                source,
+                target,
+                skip_symbols=skipped_policy_symbols,
+            ).values()
+        )
     if has_distinct_fallback:
         patched += sum(apply_stark_patch(fallback_policy, policy).values())
     patched += _ensure_wk_manager_art_runtime_policy(policy)
@@ -3175,6 +3273,7 @@ def _install_wk_manager_power_service(rom_unpack: Path, shared_mod_dir: Path) ->
         "metadata": metadata,
         "daemon": str(system / WK_MANAGER_POWER_DAEMON_RELATIVE),
         "service": str(system / WK_MANAGER_POWER_RC_RELATIVE),
+        "skippedPolicySymbols": sorted(skipped_policy_symbols),
     }
 
 
@@ -3208,6 +3307,7 @@ def apply_selected_mods(
     mod_version: str | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
     fake_lock_vbmeta_digest: str | None = None,
+    wk_manager_patches: list[str] | None = None,
 ) -> dict[str, Any]:
     version = normalize_mod_version(mod_version)
     mods = validate_mods(mod_names, mod_version=version)
@@ -3338,6 +3438,7 @@ def apply_selected_mods(
             fix_noti_work_dir,
             emit_jar_progress,
             include_fix_noti=combined_fix_noti,
+            selected_patches=wk_manager_patches,
         )
         jar_reports.extend({"mod": "WK_Manager", **report} for report in reports)
         patched += sum(int(report.get("patchedMethods", 0)) for report in reports)
@@ -3824,6 +3925,7 @@ def _stage_apply_mod(context: BuildContext) -> dict[str, Any]:
         fake_lock_vbmeta_digest=(
             str(fake_lock_vbmeta["digest"]) if fake_lock_vbmeta else None
         ),
+        wk_manager_patches=context.spec.wkManagerPatches,
     )
     passthrough_after = _passthrough_partition_fingerprints(context.rom_unpack)
     changed_passthrough = sorted(
@@ -4381,6 +4483,7 @@ def _spec_payload(spec: BuildSpec) -> dict[str, Any]:
         "romSha256": spec.romSha256,
         "specFingerprint": spec.specFingerprint,
         "resumePreset": spec.resumePreset,
+        "wkManagerPatches": spec.wkManagerPatches,
     }
 
 
@@ -4393,6 +4496,7 @@ def build_spec_fingerprint(spec: BuildSpec) -> str:
         "debloatPaths": spec.debloatPaths,
         "preset": "lite" if spec.preset == "standard" else spec.preset,
         "enabledSteps": spec.enabledSteps,
+        "wkManagerPatches": spec.wkManagerPatches,
     }
     encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()

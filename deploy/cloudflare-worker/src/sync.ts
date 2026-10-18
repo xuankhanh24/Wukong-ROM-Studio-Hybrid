@@ -6,6 +6,7 @@ import { maintenanceState } from "./system";
 /** History is optional for new clients; the legacy response remains unchanged. */
 export async function syncJobs(env: Env, auth: AuthenticatedRequest, params: URLSearchParams) {
   const includeHistory = params.get("includeHistory") !== "0";
+  const includeEvents = params.get("includeEvents") !== "0";
   const afterText = params.get("after") || "0";
   const after = /^\d+$/.test(afterText) && Number.isSafeInteger(Number(afterText)) ? Number(afterText) : 0;
   const history = includeHistory && params.has("page") ? await listJobHistory(env, auth, params) : null;
@@ -20,7 +21,7 @@ export async function syncJobs(env: Env, auth: AuthenticatedRequest, params: URL
     if (!(error instanceof JobHttpError) || error.status !== 404) throw error;
   }
   const [eventPage, user, maintenance] = await Promise.all([
-    row ? readJobEventPage(env, row, after, Number.isSafeInteger(Number(params.get("before"))) ? Math.max(0, Number(params.get("before"))) : 0) : { events: [], eventsHasMore: false, nextEventSequence: after },
+    row && includeEvents ? readJobEventPage(env, row, after, Number.isSafeInteger(Number(params.get("before"))) ? Math.max(0, Number(params.get("before"))) : 0) : { events: [], eventsHasMore: false, nextEventSequence: after },
     profile(env, auth.subject), maintenanceState(env)
   ]);
   return {

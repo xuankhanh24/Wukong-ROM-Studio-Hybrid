@@ -37,8 +37,13 @@ function applyTheme(theme = state.theme, persist = false) {
   });
   if (persist) localStorage.setItem("wukong-theme", state.theme);
   try {
-    runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
-    runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    if (document.body.dataset.view === "profile") {
+      runtime.TelegramApp?.setHeaderColor?.("#080e1b");
+      runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
+    } else {
+      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
+      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    }
   } catch (_) {}
 }
 
@@ -48,11 +53,25 @@ function greetingName() {
 
 function greetingMessages() {
   const hour = new Date().getHours();
-  const timeKey = hour < 12 ? "greetingMorning" : hour < 18 ? "greetingAfternoon" : "greetingEvening";
+  let timeKey;
+  if (hour >= 5 && hour < 12) {
+    timeKey = (hour % 2 === 0) ? "greetingMorning" : "greetingMorning2";
+  } else if (hour >= 12 && hour < 18) {
+    timeKey = (hour % 2 === 0) ? "greetingAfternoon" : "greetingAfternoon2";
+  } else if (hour >= 18 && hour < 22) {
+    timeKey = (hour % 2 === 0) ? "greetingEvening" : "greetingEvening2";
+  } else {
+    timeKey = (hour % 2 === 0) ? "greetingNight" : "greetingNight2";
+  }
   const values = { name: greetingName(), jobs: Number(state.me?.jobCount || 0), remaining: Number(state.me?.buildCredits || 0) };
   return [
     { key: timeKey },
-    { key: "greetingWish" },
+    { key: "greetingWishSmooth" },
+    { key: "greetingWishClean" },
+    { key: "greetingWishCool" },
+    { key: "greetingWishFlash" },
+    { key: "greetingWishCustom" },
+    { key: "greetingWishMagisk" },
     { key: state.me?.unlimited ? "greetingUnlimited" : "greetingAllowance", values }
   ].map((item) => ({ ...item, text: t(item.key, { ...values, ...(item.values || {}) }) }));
 }
@@ -203,6 +222,21 @@ function navigate(name, smooth = true) {
     state.batchPollTimer = null;
   }
   document.body.dataset.view = name;
+  document.documentElement.dataset.view = name;
+  try {
+    if (name === "profile") {
+      document.documentElement.style.backgroundColor = "#080e1b";
+      document.body.style.backgroundColor = "#080e1b";
+      runtime.TelegramApp?.setHeaderColor?.("#080e1b");
+      runtime.TelegramApp?.setBackgroundColor?.("#080e1b");
+    } else {
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+      const resolved = resolvedTheme();
+      runtime.TelegramApp?.setHeaderColor?.(resolved === "dark" ? "#1d2025" : "#f8f7f2");
+      runtime.TelegramApp?.setBackgroundColor?.(resolved === "dark" ? "#17191d" : "#f3f1eb");
+    }
+  } catch (_) {}
   if ($("#system")?.classList.contains("admin-user-open")) {
     closeAdminUserPage({ restoreFocus: false, scroll: false });
   }
@@ -224,6 +258,9 @@ function navigate(name, smooth = true) {
     void bottomNav?.offsetWidth;
     bottomNav?.classList.add("is-shifting");
     setTimeout(() => bottomNav?.classList.remove("is-shifting"), 520);
+  }
+  if (runtime.TelegramApp?.BackButton) {
+    runtime.TelegramApp.BackButton.show();
   }
   history.replaceState(null, "", `#${name}`);
   window.scrollTo({ top: 0, behavior: smooth && !prefersReducedMotion() ? "smooth" : "auto" });

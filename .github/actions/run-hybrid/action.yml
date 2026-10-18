@@ -54,7 +54,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: "A · Công cụ hệ thống / System tools"
+    - name: "Công cụ hệ thống / System tools"
       shell: bash
       run: |
         set -euo pipefail
@@ -72,7 +72,7 @@ runs:
         printf '%s\n' 'WUKONG_PREPARATION_STAGE=drive-access' >> "$GITHUB_ENV"
         umask 077
         printf '%s' "$RCLONE_CONFIG_B64" | base64 --decode > .wkstudio/secrets/rclone.conf
-    - name: "B1 · Preflight DC Cloud mirror"
+    - name: "Kiểm tra kết nối DC Cloud / DC Cloud preflight"
       shell: bash
       env:
         WUKONG_DCCLOUD_MIRROR_ENABLED: ${{ inputs.dccloud_mirror_enabled }}
@@ -91,7 +91,7 @@ runs:
       shell: bash
       run: |
         printf '%s\n' 'WUKONG_ACTIONS_JOBS_ROOT=.wkstudio/Jobs/hybrid' >> "$GITHUB_ENV"
-    - name: "C · Recipe & content-pack / Fetch private build content"
+    - name: "Tải recipe & content-pack / Fetch build content"
       shell: bash
       env:
         RECIPE_REF: ${{ inputs.recipe_ref }}
@@ -112,6 +112,7 @@ runs:
           mkdir -p .wkstudio/bundled-shared
           rm -rf .wkstudio/bundled-shared/Fake_lock
           cp -a STARK/Fake_lock .wkstudio/bundled-shared/Fake_lock
+            cp -a STARK/WK_Manager/patch_WK_Manager .wkstudio/bundled-shared/wk-manager-patches
           install_pack() {
             local pack="$1"
             if python3 content_pack_tool.py verify --content-root . --index content-packs/index.json --pack "$pack" >/dev/null 2>&1; then
@@ -129,6 +130,9 @@ runs:
           # Restore its bundled canonical tree after the atomic pack install.
           rm -rf STARK/Fake_lock
           cp -a .wkstudio/bundled-shared/Fake_lock STARK/Fake_lock
+            # Keep the current patch scripts/bridges when older remote packs are installed.
+            mkdir -p STARK/WK_Manager/patch_WK_Manager
+            cp -a .wkstudio/bundled-shared/wk-manager-patches/. STARK/WK_Manager/patch_WK_Manager/
           # Validate before downloading the multi-GB ROM. Strict mode preserves
           # channel parity: a requested MOD is never silently removed.
           if [ "${WUKONG_DROP_MISSING_MODS:-0}" = 1 ]; then
@@ -140,7 +144,7 @@ runs:
         if [ '${{ inputs.self_hosted }}' != true ]; then
           python3 -m tools.runner_preflight --recipe .wkstudio/recipe.json --reserve-gib 4 --min-disk-gib 4 --min-memory-gib 0 --min-cpus 0
         fi
-    - name: "C2 · Nhận diện ROM nguồn / Identify source ROM"
+    - name: "Nhận diện ROM nguồn / Identify source ROM"
       shell: bash
       run: |
         set -euo pipefail
@@ -177,14 +181,14 @@ runs:
             fi
             ;;
         esac
-    - name: "D · Toolchain Linux / Bootstrap & smoke test"
+    - name: "Khởi tạo toolchain Linux / Linux toolchain"
       shell: bash
       run: |
         set -euo pipefail
         printf '%s\n' 'WUKONG_PREPARATION_STAGE=toolchain' >> "$GITHUB_ENV"
         python3 -m tools.bootstrap_linux
         python3 -m tools.smoke_linux
-    - name: "E · Pipeline 05–19 / Execute staged ROM build"
+    - name: "Thực thi pipeline ROM / Execute staged ROM build"
       id: execute
       shell: bash
       env:
@@ -242,7 +246,7 @@ runs:
           wait "$reporter_pid" 2>/dev/null || true
         fi
         echo "result=$result" >> "$GITHUB_OUTPUT"
-    - name: "F · Đồng bộ manifest & log / Sync result to Drive"
+    - name: "Đồng bộ manifest & log lên Drive / Sync result to Drive"
       if: always()
       shell: bash
       env:
@@ -257,7 +261,7 @@ runs:
         python3 -m tools.sync_job "$WUKONG_JOB_ID" --config "$WUKONG_RCLONE_CONFIG" --jobs-root "$WUKONG_ACTIONS_JOBS_ROOT"
         # Pre-execute failures have no local job store yet; do not fail the workflow twice.
         exit 0
-    - name: "F1 · Kiểm tra quota DC Cloud / Check mirror quota"
+    - name: "Kiểm tra quota DC Cloud / Check mirror quota"
       if: always()
       continue-on-error: true
       shell: bash
@@ -272,7 +276,7 @@ runs:
         WUKONG_DCCLOUD_CLOUDREVE_VERSION: ${{ inputs.dccloud_cloudreve_version }}
         WUKONG_RCLONE_CONFIG: ${{ github.workspace }}/.wkstudio/secrets/rclone.conf
       run: python3 -m tools.dccloud_quota
-    - name: "G · Xác nhận kết quả / Enforce terminal status"
+    - name: "Xác nhận kết quả thực thi / Enforce terminal status"
       if: always() && steps.execute.outputs.result != '0'
       shell: bash
       run: exit 1

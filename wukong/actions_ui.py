@@ -69,7 +69,6 @@ class GitHubActionsUI:
         self.close_group()
         title = STAGE_TITLES.get(stage, stage.replace("_", " ").title())
         _emit(f"::group::{title}")
-        _emit(f"::notice title={_command_text(title)}::Đang thực hiện / In progress")
         self._active_stage = stage
 
     def event(self, event: Mapping[str, Any]) -> None:
@@ -106,7 +105,7 @@ class GitHubActionsUI:
             if warning:
                 _emit(f"::warning title={_command_text(title)}::{_command_text(warning)}")
             else:
-                _emit(f"::notice title={_command_text(title)}::Hoàn thành / Completed{suffix}")
+                _emit(f"[Wukong] ✓ Hoàn thành {title}{suffix}")
             self.close_group()
         elif status == "failed":
             message = event.get("message") or "Stage failed"
