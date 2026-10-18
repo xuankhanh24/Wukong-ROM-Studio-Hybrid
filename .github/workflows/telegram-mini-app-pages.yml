@@ -83,9 +83,17 @@ jobs:
           legacy_github_owner='luukhan''h24'
           legacy_cloudflare_handle='luuxuank''hanh98'
           repository_name="${GITHUB_REPOSITORY#*/}"
-          ! grep -R -Ei \
+          if grep -R -Ei \
             "github\.com|github\.io|${GITHUB_REPOSITORY_OWNER}|${repository_name}|${legacy_github_owner}|${legacy_cloudflare_handle}|DATABASE_URL|github_pat_" \
-            .vercel-static --exclude-dir=licenses
+            .vercel-static --exclude-dir=licenses; then
+            echo "Private deployment identifiers found in public bundle." >&2
+            exit 1
+          else
+            grep_status=$?
+            if [[ "$grep_status" -ne 1 ]]; then
+              exit "$grep_status"
+            fi
+          fi
           rm -rf telegram_mini_app/node_modules bin desktop STARK platform_external_avb-master MOD Flash_script TWRP OFX Backups copy-image Updates tests .git
       - name: Clear queued or hung Vercel deployments
         if: steps.deployment-mode.outputs.mode == 'cli'
