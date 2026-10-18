@@ -25,7 +25,8 @@ class FakeReleases:
             raise RuntimeError('upload interrupted')
         data = path.read_bytes()
         self.uploads[path.name] = data
-        return {'browser_download_url': f"https://github.com/test/repo/releases/download/{release['tag_name']}/{path.name}",
+        return {'browser_download_url': f"https://github.com/test/repo/releases/download/untagged-placeholder/{path.name}",
+                'name': path.name,
                 'size': len(data), 'digest': 'sha256:' + hashlib.sha256(data).hexdigest()}
 
     def publish(self, release):
@@ -69,6 +70,7 @@ class GitHubContentTests(unittest.TestCase):
                 first = publish_release_packs(root, index, repository='test/repo', token='secret', client=client)
                 self.assertTrue(client.published)
                 old = json.loads(index.read_text())['packs'][0]
+                self.assertNotIn('untagged-', old['archive']['uri'])
                 apk.write_bytes(b'updated pack')
                 second = publish_release_packs(root, index, repository='test/repo', token='secret', client=client)
                 new = json.loads(index.read_text())['packs'][0]
