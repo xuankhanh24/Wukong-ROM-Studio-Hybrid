@@ -153,7 +153,11 @@ jobs:
             page="$(curl --fail --silent --show-error --connect-timeout 10 --max-time 20 "$domain/?release=${WUKONG_RELEASE_SHA}" || true)"
             if grep -Fq "${WUKONG_TELEGRAM_MINI_APP_API_URL%/}" <<< "$page" \
               && grep -Fq "content=\"${WUKONG_RELEASE_SHA}\"" <<< "$page"; then
-              exit 0
+              if curl --fail --silent --show-error --connect-timeout 10 --max-time 20 \
+                "$domain/catalog.json?release=${WUKONG_RELEASE_SHA}" --output "$RUNNER_TEMP/published-catalog.json" \
+                && python -c 'import json,sys; from wukong.catalog import SHARED_MOD_NAMES; c=json.load(open(sys.argv[1], encoding="utf-8")); mods=c["modsByVersion"]; assert mods and all(SHARED_MOD_NAMES <= set(names) for names in mods.values()), "Published catalog is missing Git-owned shared mods"' "$RUNNER_TEMP/published-catalog.json"; then
+                exit 0
+              fi
             fi
             sleep 5
           done

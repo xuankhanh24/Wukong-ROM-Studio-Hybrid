@@ -170,6 +170,20 @@ class GitHubContentTests(unittest.TestCase):
                 catalog = exporter.export_catalog(index, devices, root / 'catalog.json')
             self.assertIn('Settings_mod', catalog['modsByVersion']['Test'])
 
+    def test_vercel_rebuild_without_stark_keeps_all_git_owned_shared_mods(self):
+        from tools import export_mini_app_catalog as exporter
+        from wukong.catalog import SHARED_MOD_NAMES
+        repository = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            # Vercel intentionally receives no APK/ROM payload directories.
+            with patch.object(exporter, 'BUNDLED_SHARED_MOD_ROOT', root / 'absent-STARK'):
+                catalog = exporter.export_catalog(
+                    repository / 'content-packs/index.json', repository / 'devices_sizes.json', root / 'catalog.json')
+            self.assertTrue(catalog['modVersions'])
+            for version, mods in catalog['modsByVersion'].items():
+                self.assertFalse(SHARED_MOD_NAMES - set(mods), f'{version} missing shared mods')
+
     def test_github_manifest_publish_merges_unselected_packs_and_uses_cas(self):
         import base64
         from wukong.content_sync import publish_index_to_github
