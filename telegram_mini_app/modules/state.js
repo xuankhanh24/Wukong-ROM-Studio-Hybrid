@@ -81,6 +81,7 @@ if (fromHash) {
 
 const translations = {
   vi: {
+    logOnDemandHint: "Chỉ cập nhật trạng thái. Nhật ký tải khi bạn mở, không tự tải thêm.", loadNewLogEvents: "Tải nhật ký mới",
     sharedMod: "Dùng chung", sharedModHint: "Mod STARK dùng chung cho các nền MOD.",
     launcherFeaturesTitle: "Launcher_mod · Chọn chức năng", fixNotiFeaturesTitle: "Fix_noti · Chọn cấp độ",
     wkFeaturesTitle: "WK Manager · Patch tùy chọn", wkFeaturesHint: "Chỉ áp dụng các hook được chọn ở trên.",
@@ -117,6 +118,7 @@ const translations = {
     runtimePipeline: "PIPELINE", runtimeWaiting: "Chờ recipe hợp lệ", runtimeReady: "Recipe sẵn sàng gửi", runtimeLastBuild: "BUILD GẦN NHẤT", runtimeJobs: "Xem trong Jobs", checklistSource: "Nguồn ROM", checklistSourcePending: "Chưa có URL hợp lệ", checklistSourceDone: "Đã nhận diện nguồn", checklistDevice: "Thiết bị đích", checklistDevicePending: "Cần chọn thủ công", checklistDeviceDone: "Đã chọn thiết bị", checklistRunner: "Tuyến thực thi", checklistRunnerDone: "Đã cấu hình runner", readinessProgress: "{done}/3 điều kiện", pipelinePending: "Chưa chạy", pipelineRunning: "Đang chạy", pipelineComplete: "Hoàn tất", pipelineFailed: "Lỗi", pipelineSkipped: "Bỏ qua", modGroupGoogle: "Google & ứng dụng", modGroupCamera: "Camera & hình ảnh", modGroupInterface: "Giao diện hệ thống", modGroupSecurity: "Bảo mật & quyền", modGroupCore: "Hệ thống & công cụ", modGroupOther: "Khác", modExclusiveNotice: "Disable_flag_secure và WK_Manager không thể dùng cùng nhau."
   },
   en: {
+    logOnDemandHint: "Status updates only. Logs load on request, with no automatic streaming.", loadNewLogEvents: "Load new log entries",
     sharedMod: "Shared", sharedModHint: "Shared STARK mod available across MOD packs.",
     launcherFeaturesTitle: "Launcher_mod · Features", fixNotiFeaturesTitle: "Fix_noti · Level",
     wkFeaturesTitle: "WK Manager · Optional patches", wkFeaturesHint: "Only the selected hooks are applied.",

@@ -76,7 +76,7 @@ class MiniAppUpgradeTests(unittest.TestCase):
                 const original = window.fetch;
                 let release;
                 const pending = new Promise(resolve => { release = resolve; });
-                window.fetch = async (url, init) => String(url).includes('/v1/sync?') ? pending : original(url, init);
+                window.fetch = async (url, init) => String(url).includes('/v1/jobs/') ? pending : original(url, init);
                 const request = loadJobDetail(jobId).catch(() => {});
                 await new Promise(resolve => setTimeout(resolve, 30));
                 Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });

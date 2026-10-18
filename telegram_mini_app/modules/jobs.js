@@ -474,11 +474,15 @@ function renderArtifacts(job) {
 
 function renderEvents(events, expanded = false) {
   const section = document.createElement("section"); section.className = "job-events";
+  if (!expanded) {
+    const hint = document.createElement("p"); hint.textContent = t("logOnDemandHint");
+    section.append(hint);
+    return section;
+  }
   if (expanded) section.classList.add("expanded");
-  const rawPreviewEvents = events.slice(-8);
   // Keep the current DOM window bounded even when a legacy response contains
   // a very large event array. Older pages remain reachable through cursors.
-  const visibleEvents = expanded ? events.slice(-500) : compactLiveEvents(rawPreviewEvents);
+  const visibleEvents = events.slice(-500);
   const heading = document.createElement("div"); heading.className = "job-events-heading";
   const title = document.createElement("h3"); title.textContent = expanded ? t("fullLogTitle") : t("eventTimeline");
   const count = document.createElement("span"); count.textContent = t("eventsPreview", { visible: visibleEvents.length, total: events.length });
@@ -567,6 +571,7 @@ function openAdminJobPage(job) {
 
 function closeAdminJobPage({ restoreFocus = true, scroll = true, refreshUser = true } = {}) {
   requestScopes.cancel("adminJob");
+  requestScopes.cancel("adminJobLog");
   const view = state.adminJobView;
   if (!view) return;
   clearTimeout(view.timer);
@@ -593,22 +598,16 @@ async function loadAdminJobDetail() {
   clearTimeout(view.timer);
   view.timer = null;
   const requestId = ++view.requestId;
-  const after = view.events.reduce((max, event) => Math.max(max, Number(event.sequence || 0)), 0);
   const status = $("#admin-job-connection");
   try {
     const signal = requestScopes.start("adminJob");
-    const payload = view.historicalLogPage && view.events.length
-      ? { activeJob: await apiRequest(`/v1/jobs/${encodeURIComponent(view.jobId)}`, { signal }), events: [], eventsHasMore: view.jobEventsHasMore }
-      : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodeURIComponent(view.jobId)}&after=${after}`, { signal });
+    const payload = { activeJob: await apiRequest(`/v1/jobs/${encodeURIComponent(view.jobId)}`, { signal }) };
     if (state.adminJobView !== view || requestId !== view.requestId || !workspacePollingAllowed()) return;
     const job = payload.activeJob;
     if (!job || (job.job_id || job.jobId) !== view.jobId) {
       throw new Error(t("jobUnavailable"));
     }
-    const incoming = Array.isArray(payload.events) ? payload.events : [];
-    if (!view.historicalLogPage || !view.events.length) view.events = mergeEvents(view.events, incoming);
     view.job = job;
-    view.jobEventsHasMore = payload.eventsHasMore ?? incoming.length >= 500;
     const signature = JSON.stringify([job.status, job.stage, job.progress, job.updated_at || job.updatedAt, view.events.length]);
     view.unchangedPolls = signature === view.signature ? view.unchangedPolls + 1 : 0;
     view.signature = signature;
@@ -621,8 +620,8 @@ async function loadAdminJobDetail() {
     if (status.textContent !== message) status.textContent = message;
     status.classList.add("error");
   } finally {
-    if (state.adminJobView === view && requestId === view.requestId && workspacePollingAllowed()) {
-      const delay = !jobShouldPoll(view.job) || view.unchangedPolls >= 6 ? 30000 : view.unchangedPolls >= 3 ? 15000 : 10000;
+    if (state.adminJobView === view && requestId === view.requestId && workspacePollingAllowed() && jobShouldPoll(view.job)) {
+      const delay = view.unchangedPolls >= 6 ? 120000 : view.unchangedPolls >= 3 ? 60000 : 30000;
       view.timer = setTimeout(loadAdminJobDetail, delay);
     }
   }
@@ -869,19 +868,34 @@ function renderActiveJob(job, events, inspection = null) {
   logButton.dataset.jobFocus = "log-toggle";
   logButton.textContent = t(logExpanded ? "hideFullLog" : "viewFullLog");
   logButton.setAttribute("aria-expanded", String(logExpanded));
-  logButton.addEventListener("click", () => {
-    reader.expandedLogJobId = logExpanded ? "" : jobId;
-    renderActiveJob(job, events, inspection);
-    if (!logExpanded) requestAnimationFrame(() => root.querySelector(".job-events")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  logButton.addEventListener("click", async () => {
+    if (logExpanded) {
+      reader.expandedLogJobId = "";
+      renderActiveJob(job, events, inspection);
+      return;
+    }
+    logButton.disabled = true;
+    logButton.setAttribute("aria-busy", "true");
+    try {
+      reader.expandedLogJobId = jobId;
+      if (!events.length) await loadLogPage(jobId, [], "next", inspection);
+      else renderActiveJob(job, events, inspection);
+    } catch (error) {
+      if (reader.expandedLogJobId === jobId) reader.expandedLogJobId = "";
+      if (error.name !== "AbortError") toast(error.message, true);
+    } finally {
+      logButton.disabled = false;
+      logButton.removeAttribute("aria-busy");
+    }
   });
   actions.append(logButton);
-  if (reader.jobEventsHasMore) {
-    const more = document.createElement("button"); more.type = "button"; more.textContent = t("loadMoreJobEvents");
+  if (logExpanded) {
+    const more = document.createElement("button"); more.type = "button"; more.textContent = t(reader.jobEventsHasMore ? "loadMoreJobEvents" : "loadNewLogEvents");
     more.dataset.jobFocus = "load-more-events";
     more.addEventListener("click", () => { more.disabled = true; loadLogPage(jobId, events, "next", inspection).catch(error => toast(error.message, true)).finally(() => { more.disabled = false; }); });
     actions.append(more);
   }
-  if (Number(events[0]?.sequence) > 1) {
+  if (logExpanded && Number(events[0]?.sequence) > 1) {
     const previous = document.createElement("button"); previous.type = "button";
     previous.textContent = t("previousEvents"); previous.dataset.jobFocus = "previous-events";
     previous.addEventListener("click", () => loadLogPage(jobId, events, "previous", inspection).catch(error => toast(error.message, true)));
@@ -944,6 +958,7 @@ function appendJobHistoryFilters(params, { search, preset, mod, from, to } = {})
 
 function jobHistoryParams({ includePage = true, jobId = "", after = "" } = {}) {
   const params = new URLSearchParams();
+  params.set("includeEvents", "0");
   if (includePage) params.set("page", String(state.jobHistoryPage));
   if (state.jobHistoryFilter) params.set("status", state.jobHistoryFilter);
   appendJobHistoryFilters(params, {
@@ -1204,9 +1219,10 @@ function setJobsConnection(key, error = false) {
 
 async function loadLogPage(jobId, events, direction, inspection = null) {
   const parameter = direction === "previous" ? `before=${Number(events[0]?.sequence || 1)}` : `after=${eventCursor(events)}`;
-  const payload = await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodeURIComponent(jobId)}&${parameter}`, { signal: requestScopes.start(inspection ? "adminJob" : "jobDetail") });
+  const payload = await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodeURIComponent(jobId)}&${parameter}`, { signal: requestScopes.start(inspection ? "adminJobLog" : "jobLog") });
   if (inspection ? state.adminJobView !== inspection : state.activeJobId !== jobId) return;
-  const page = mergeEvents([], payload.events || []);
+  const incoming = Array.isArray(payload.events) ? payload.events : [];
+  const page = incoming.length ? mergeEvents([], incoming) : events;
   (inspection || state).historicalLogPage = direction === "previous" || Boolean(payload.eventsHasMore);
   if (inspection) { inspection.events = page; inspection.jobEventsHasMore = payload.eventsHasMore; }
   else { state.activeEvents = page; state.activeEventsJobId = jobId; state.jobEventsHasMore = payload.eventsHasMore; }
@@ -1218,19 +1234,13 @@ async function loadJobDetail(jobId) {
   requestScopes.cancel("jobs");
   const requestId = ++state.jobDetailRequestId;
   const sameJob = state.activeEventsJobId === jobId;
-  const after = sameJob
-    ? state.activeEvents.reduce((maximum, event) => Math.max(maximum, Number(event.sequence || 0)), 0)
-    : 0;
   const encodedJobId = encodeURIComponent(jobId);
   const signal = requestScopes.start("jobDetail");
-  const eventPayload = state.historicalLogPage && sameJob
-    ? { activeJob: await apiRequest(`/v1/jobs/${encodedJobId}`, { signal }), events: [], eventsHasMore: state.jobEventsHasMore }
-    : await apiRequest(`/v1/sync?includeHistory=0&jobId=${encodedJobId}&after=${after}`, { signal });
+  const eventPayload = { activeJob: await apiRequest(`/v1/jobs/${encodedJobId}`, { signal }) };
   const job = eventPayload.activeJob;
   if (requestId !== state.jobDetailRequestId || state.activeJobId !== jobId) return;
   if (!job || (job.job_id || job.jobId) !== jobId) throw new Error(t("jobUnavailable"));
   const incoming = Array.isArray(eventPayload?.events) ? eventPayload.events : [];
-  state.jobEventsHasMore = eventPayload.eventsHasMore ?? incoming.length >= 500;
   state.activeEvents = mergeEvents(sameJob ? state.activeEvents : [], incoming);
   state.activeEventsJobId = jobId;
   const index = state.jobs.findIndex((item) => (item.job_id || item.jobId) === jobId);
@@ -1241,16 +1251,14 @@ async function loadJobDetail(jobId) {
 function scheduleJobsPoll(active, changed = false) {
   clearTimeout(state.jobsPollTimer);
   state.jobsPollTimer = null;
-  if (!workspacePollingAllowed() || !privateApiAvailable() || state.adminJobView || document.body.dataset.view !== "jobs") return;
+  if (!active || !workspacePollingAllowed() || !privateApiAvailable() || state.adminJobView || document.body.dataset.view !== "jobs") return;
   if (changed) state.jobsUnchangedPolls = 0;
   else state.jobsUnchangedPolls += 1;
-  const delay = !active
-    ? 30000
-    : state.jobsUnchangedPolls >= 6
-      ? 30000
+  const delay = state.jobsUnchangedPolls >= 6
+      ? 120000
       : state.jobsUnchangedPolls >= 3
-        ? 15000
-        : 10000;
+        ? 60000
+        : 30000;
   state.jobsPollTimer = setTimeout(() => {
     state.jobsPollTimer = null;
     if (!workspacePollingAllowed() || state.adminJobView || document.body.dataset.view !== "jobs") return;
@@ -1324,10 +1332,9 @@ async function loadJobs({ force = false } = {}) {
       ? payload.activeJob
       : state.jobs.find((job) => (job.job_id || job.jobId) === state.activeJobId) || null;
     const eventsSameJob = state.activeEventsJobId === state.activeJobId;
-    const responseId = payload.activeJob?.job_id || payload.activeJob?.jobId;
-    const incoming = responseId === state.activeJobId && Array.isArray(payload.events) ? payload.events : [];
+    // Some legacy backends ignore includeEvents=0. Never adopt unsolicited logs.
+    const incoming = [];
     if (!state.historicalLogPage || !eventsSameJob) {
-      state.jobEventsHasMore = payload.eventsHasMore ?? incoming.length >= 500;
       state.activeEvents = mergeEvents(eventsSameJob ? state.activeEvents : [], incoming);
     }
     state.activeEventsJobId = state.activeJobId;

@@ -428,13 +428,13 @@ window.addEventListener('load', () => {{
         let sameJobCalls = 0;
         const priorFetch = window.fetch.bind(window);
         window.fetch = async (...args) => {{
-          const isSync = String(args[0]).includes('/v1/sync');
+          const isSync = String(args[0]).includes('/v1/jobs/archived-job');
           const number = isSync ? ++sameJobCalls : 0;
           const response = await priorFetch(...args);
           if (!isSync) return response;
           const data = await response.json();
-          data.activeJob.stage = number === 1 ? 'old-stage' : 'new-stage';
-          data.activeJob.recipe.build.debloatPaths = Array.from({{length:100}}, (_, i) => `my_stock/app/Test${{i}}`);
+          data.stage = number === 1 ? 'old-stage' : 'new-stage';
+          data.recipe.build.debloatPaths = Array.from({{length:100}}, (_, i) => `my_stock/app/Test${{i}}`);
           await new Promise(resolve => setTimeout(resolve, number === 1 ? 450 : 30));
           return new Response(JSON.stringify(data), {{status:200, headers:{{'Content-Type':'application/json'}}}});
         }};
@@ -471,7 +471,7 @@ window.addEventListener('load', () => {{
               document.body.dataset.adminJobStatusQuiet = String(statusMutations === 0);
               document.body.dataset.adminJobFocusPreserved = String(document.activeElement?.dataset.jobFocus === 'log-toggle');
               const successfulFetch = window.fetch.bind(window);
-              window.fetch = async (...args) => String(args[0]).includes('jobId=archived-job')
+              window.fetch = async (...args) => String(args[0]).includes('/v1/jobs/archived-job')
                 ? new Response(JSON.stringify({{error:'Fixture offline'}}), {{status:503, headers:{{'Content-Type':'application/json'}}}})
                 : successfulFetch(...args);
               let errorStatusMutations = 0;
@@ -897,8 +897,11 @@ window.addEventListener('load', () => {{
             ]
             self._send(json.dumps({"events": events}).encode(), "application/json")
             return
-        if path == "/v1/jobs/archived-job" and self.jobs_fixture and self.click_other_job:
-            self._send(json.dumps(self._fixture_archived_job()).encode(), "application/json")
+        if path == "/v1/jobs/archived-job" and self.jobs_fixture and (self.click_other_job or self.admin_job_scenario):
+            job = self._fixture_archived_job()
+            if self.admin_job_scenario:
+                job["createdBy"] = {"telegramId": "88", "displayName": "New User", "username": "new_user"}
+            self._send(json.dumps(job).encode(), "application/json")
             return
         if path == "/v1/jobs/archived-job/events" and self.jobs_fixture and self.click_other_job:
             self._send(json.dumps({"events": [
@@ -1192,7 +1195,7 @@ def _render_mini_app_in_chrome(
                 if exercise_batch_controls:
                     page.wait_for_function("Number(document.body.dataset.batchDevicesSelected) > 0 && Number(document.body.dataset.batchModsSelected) > 0", timeout=15000)
                 if api_enabled and jobs_fixture and initial_view == "jobs" and not click_other_job:
-                    page.wait_for_function("Number(document.querySelector('#job-count-active')?.textContent) > 0", timeout=15000)
+                    page.wait_for_function("document.querySelectorAll('.job-history-card').length > 0", timeout=15000)
                 if page_action:
                     page_action(page)
                 assert page.evaluate("innerWidth") == window_width, "Browser viewport must match the test case"
@@ -1806,7 +1809,8 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("event-group", script)
         self.assertIn("viewFullLog", script)
         self.assertIn("eventDetailEntries", script)
-        self.assertIn("events.slice(-8)", script)
+        self.assertIn('params.set("includeEvents", "0")', script)
+        self.assertIn('hint.textContent = t("logOnDemandHint")', script)
 
     def test_jobs_full_log_expands_named_steps_and_structured_details(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
@@ -1853,7 +1857,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('if (!copied) throw new Error("Clipboard copy failed")', script)
         self.assertGreater(screenshot_size, 10_000)
 
-    def test_live_upload_log_compacts_repeated_updates_into_a_progress_card(self) -> None:
+    def test_upload_log_is_on_demand_and_keeps_full_details_when_opened(self) -> None:
         dom, screenshot_size = _render_mini_app_in_chrome(
             api_enabled=True,
             initial_view="jobs",
@@ -1861,13 +1865,9 @@ class TelegramMiniAppTests(unittest.TestCase):
             upload_progress_fixture=True,
         )
 
-        self.assertEqual(1, dom.count('class="event-upload-card"'))
-        self.assertIn('data-progress-percent="100"', dom)
-        self.assertIn("8.00 MiB", dom)
-        self.assertIn("2.00 MiB/s", dom)
-        self.assertIn("DC Cloud", dom)
-        self.assertIn("4 lần cập nhật đã gộp", dom)
-        self.assertIn("5 thẻ / 8 cập nhật", dom)
+        self.assertNotIn('class="event-upload-card"', dom)
+        self.assertNotIn('class="event-upload_progress"', dom)
+        self.assertIn("Nhật ký tải khi bạn mở", dom)
         self.assertGreater(screenshot_size, 10_000)
 
         expanded, _ = _render_mini_app_in_chrome(
@@ -2305,7 +2305,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn("ARCHIVED_16.0.8.300(CN01)", dom)
         self.assertIn('class="job-history-card selected"', dom)
         self.assertIn("ColorOS_16.0.8", dom)
-        self.assertIn('data-job-detail-sync-calls="1"', dom)
+        self.assertIn('data-job-detail-sync-calls="0"', dom)
         self.assertRegex(dom, r'<details(?=[^>]*class="job-technical")(?=[^>]*data-always-open="true")(?=[^>]*open="")[^>]*>')
         jobs_source = (ROOT / "telegram_mini_app" / "modules" / "jobs.js").read_text(encoding="utf-8")
         self.assertIn('technicalTitle.addEventListener("click", (event) => event.preventDefault())', jobs_source)
