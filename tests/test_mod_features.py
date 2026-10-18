@@ -12,6 +12,23 @@ from wukong.mod_features import normalize_features, LAUNCHER_FEATURES, FIX_NOTI_
 
 
 class ModFeatureTests(unittest.TestCase):
+    def test_mini_app_defaults_to_level_one_only(self):
+        from html.parser import HTMLParser
+
+        class CheckedLevels(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.levels = []
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if tag == 'input' and attrs.get('value') in FIX_NOTI_FEATURES and 'checked' in attrs:
+                    self.levels.append(attrs['value'])
+
+        parser = CheckedLevels()
+        parser.feed((Path(__file__).resolve().parents[1] / 'telegram_mini_app/index.html').read_text(encoding='utf-8'))
+        self.assertEqual(parser.levels, ['level1'])
+
     def test_selection_validation_and_recipe_roundtrip(self):
         for field, choices in (('launcherFeatures', ['global_region', 'ram']),
                                ('fixNotiFeatures', ['level1'])):
