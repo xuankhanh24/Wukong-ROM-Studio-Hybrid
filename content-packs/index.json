@@ -11,13 +11,13 @@
         },
         {
           "path": "META-INF/com/google/android/update-binary",
-          "sha256": "85327d9871853fc7cb33d796362747cfeb2ca621aa2cd4f29e7f51ff63b9a4bd",
-          "sizeBytes": 5623
+          "sha256": "1c702afe7186afdc6f008462ec1776023dc93da2ff42946702332cd8fc7f09d0",
+          "sizeBytes": 5481
         },
         {
           "path": "META-INF/com/google/android/updater-script",
-          "sha256": "ce73b804d4fdc57f08758d92e5919ebbe34c6b40793b8b5b707defda1ff816a7",
-          "sizeBytes": 11
+          "sha256": "30429ff2966e67ef9f14f5f85a12b98de497d27fb4103fcdac83647be8a5196d",
+          "sizeBytes": 10
         },
         {
           "path": "Wukong_Flashing_Tool_Linux.sh",
@@ -31,13 +31,13 @@
         },
         {
           "path": "Wukong_Flashing_Tool_Windows.bat",
-          "sha256": "4b8ec067b13842bf5270742060b8223058741b4d41de33284953662ba565cdf6",
-          "sizeBytes": 9691
+          "sha256": "f3ac302a0cf81304e214f632d2b026e4f86bfb0349e34a92aede997e739f8e4f",
+          "sizeBytes": 9439
         },
         {
           "path": "bin/linux/NOTICE.txt",
-          "sha256": "93100d355a4944a45900b8fab37e834eb323f6fff80be1ef1ca82f562c30323a",
-          "sizeBytes": 1199731
+          "sha256": "3aaf99086d24f1546b834697950a68ecefd110aa6a4a75bdefcb30906a66001b",
+          "sizeBytes": 1177384
         },
         {
           "path": "bin/linux/adb",
@@ -81,13 +81,13 @@
         },
         {
           "path": "bin/linux/mke2fs.conf",
-          "sha256": "d49809c1c774a788f1ca36ae0081d9cce75f7ef1523f40adcf4abe5772ba34c2",
-          "sizeBytes": 1210
+          "sha256": "ad58a58dcdd24d85055814ca9cac67db89d4e67c434e96774bdce0d0a007d067",
+          "sizeBytes": 1157
         },
         {
           "path": "bin/linux/source.properties",
-          "sha256": "c31e5f21c1c22a1b048b0c9a4d1ad46fb46f0cb3866445a12cfbad8e952ad5a3",
-          "sizeBytes": 40
+          "sha256": "fbd87c8567afbc6dc78e140097fcde234f4a61fa7065e85081d43e442ccd3d24",
+          "sizeBytes": 38
         },
         {
           "path": "bin/linux/sqlite3",
@@ -96,8 +96,8 @@
         },
         {
           "path": "bin/macos/NOTICE.txt",
-          "sha256": "840cae648779952f5a107420affd14f2f0c73d1ca081193e0b284585b953e542",
-          "sizeBytes": 1175856
+          "sha256": "f74735e1636534c2165b51815c4de870a2a06c24d8fe3e8c91149c841b81d33e",
+          "sizeBytes": 1153968
         },
         {
           "path": "bin/macos/adb",
@@ -141,13 +141,13 @@
         },
         {
           "path": "bin/macos/mke2fs.conf",
-          "sha256": "d49809c1c774a788f1ca36ae0081d9cce75f7ef1523f40adcf4abe5772ba34c2",
-          "sizeBytes": 1210
+          "sha256": "ad58a58dcdd24d85055814ca9cac67db89d4e67c434e96774bdce0d0a007d067",
+          "sizeBytes": 1157
         },
         {
           "path": "bin/macos/source.properties",
-          "sha256": "c31e5f21c1c22a1b048b0c9a4d1ad46fb46f0cb3866445a12cfbad8e952ad5a3",
-          "sizeBytes": 40
+          "sha256": "fbd87c8567afbc6dc78e140097fcde234f4a61fa7065e85081d43e442ccd3d24",
+          "sizeBytes": 38
         },
         {
           "path": "bin/macos/sqlite3",
@@ -166,8 +166,8 @@
         },
         {
           "path": "bin/windows/NOTICE.txt",
-          "sha256": "04dde1b32e930319d8731f3e1aee7e0e9598ac59f1e54d0b451a0b4bf3775abb",
-          "sizeBytes": 1176763
+          "sha256": "628f43e9c88e2bf5aee9fc4c1cb672bf3931ba12dd5ef75c8170678395f3ca23",
+          "sizeBytes": 1154858
         },
         {
           "path": "bin/windows/adb.exe",
@@ -206,8 +206,8 @@
         },
         {
           "path": "bin/windows/mke2fs.conf",
-          "sha256": "d49809c1c774a788f1ca36ae0081d9cce75f7ef1523f40adcf4abe5772ba34c2",
-          "sizeBytes": 1210
+          "sha256": "ad58a58dcdd24d85055814ca9cac67db89d4e67c434e96774bdce0d0a007d067",
+          "sizeBytes": 1157
         },
         {
           "path": "bin/windows/mke2fs.exe",
@@ -216,8 +216,8 @@
         },
         {
           "path": "bin/windows/source.properties",
-          "sha256": "c31e5f21c1c22a1b048b0c9a4d1ad46fb46f0cb3866445a12cfbad8e952ad5a3",
-          "sizeBytes": 40
+          "sha256": "fbd87c8567afbc6dc78e140097fcde234f4a61fa7065e85081d43e442ccd3d24",
+          "sizeBytes": 38
         },
         {
           "path": "bin/windows/sqlite3.exe",
@@ -226,23 +226,23 @@
         },
         {
           "path": "info.txt",
-          "sha256": "3cd586a0627612f2acd59e6f6a35e7aa3f03ef6f0de0260964f618c93bb68d13",
-          "sizeBytes": 63
+          "sha256": "00a0bba124380060dc89580c71e0799515273a7bd3b70356a643c304aeeffeae",
+          "sizeBytes": 58
         },
         {
           "path": "tao_md5.bat",
-          "sha256": "53f0025a7886829b31b183a738611ef6ac596d72cdcaa788291905b8eb0e3232",
-          "sizeBytes": 1564
+          "sha256": "f78d6fd59b9fefbb4929e39ab24fc297f68fb61a73037d8b79b5be3d085abc99",
+          "sizeBytes": 1514
         },
         {
           "path": "wukong_md5_hashes.txt",
-          "sha256": "574534b0352456f1b22a1b16369b6af9ce95d530571e355e4fd72b95239e6acc",
-          "sizeBytes": 1686
+          "sha256": "f9aee8fc5d1dadadb574e258071dd37f028175acf41f48c6df6537cb177ea1dc",
+          "sizeBytes": 1651
         }
       ],
       "id": "Flash_script/common",
       "remote": "git:Flash_script",
-      "sizeBytes": 79364100,
+      "sizeBytes": 79297310,
       "source": "git",
       "target": "Flash_script"
     },

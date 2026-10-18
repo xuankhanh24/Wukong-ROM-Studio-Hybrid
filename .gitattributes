@@ -7,3 +7,5 @@
 *.img binary
 /Flash_script/** -text
 /Flash_script/**/*.sh text eol=lf
+/Flash_script/META-INF/com/google/android/update-binary text eol=lf
+/Flash_script/META-INF/com/google/android/updater-script text eol=lf
