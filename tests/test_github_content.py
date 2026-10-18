@@ -39,6 +39,39 @@ class FakeReleases:
 
 
 class GitHubContentTests(unittest.TestCase):
+    def test_git_base_content_installs_offline_and_detects_corruption(self):
+        from tools.refresh_git_content import refresh_git_content
+        from wukong.content_packs import GIT_CONTENT_PACKS
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for target in GIT_CONTENT_PACKS.values():
+                (root / target).mkdir()
+                (root / target / 'fixture.bin').write_bytes(b'verified base')
+            index_path = root / 'index.json'
+            index_path.write_text(json.dumps({'schemaVersion': 1, 'packs': [
+                {'id': 'STARK/common', 'target': 'STARK', 'source': 'git', 'files': [], 'sizeBytes': 0}
+            ]}))
+            refresh_git_content(root, index_path)
+            index = json.loads(index_path.read_text())
+            manager = ContentPackManager(root, run_command=lambda *args: self.fail('Drive must not be used'))
+            with patch('wukong.content_packs.download_http_archive', side_effect=AssertionError('No remote archive')):
+                for pack_id, target in GIT_CONTENT_PACKS.items():
+                    self.assertEqual(manager.install(index, pack_id), (root / target).resolve())
+            (root / 'OFX/fixture.bin').write_bytes(b'corrupt')
+            with self.assertRaisesRegex(SourceIntegrityError, 'checksum'):
+                manager.install(index, 'OFX/v1')
+
+    def test_catalog_refresh_preserves_base_content_from_local_git_revision(self):
+        from wukong.content_packs import load_content_index
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'index.json'
+            base = {'id': 'Flash_script/common', 'target': 'Flash_script', 'source': 'git', 'files': [], 'sizeBytes': 0}
+            local = {'schemaVersion': 1, 'catalogUri': 'https://raw.githubusercontent.com/test/repo/main/index.json', 'packs': [base]}
+            path.write_text(json.dumps(local))
+            stale = {'schemaVersion': 1, 'packs': [{**base, 'source': 'drive', 'remote': 'drive:old'}]}
+            with patch('wukong.content_packs.urlopen', return_value=io.BytesIO(json.dumps(stale).encode())):
+                self.assertEqual(load_content_index(path)['packs'], [base])
+
     def test_create_release_through_real_urllib_redirect_handling(self):
         from wukong.github_http import _NoRedirect
         received = []

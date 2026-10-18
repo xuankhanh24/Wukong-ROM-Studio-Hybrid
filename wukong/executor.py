@@ -834,6 +834,11 @@ class LocalJobExecutor:
                     else (),
                 )
             except (FileNotFoundError, SourceIntegrityError):
+                if pack.get('source') == 'git':
+                    raise OrchestrationError(
+                        f"Git-owned content {pack_id} is missing or invalid under {target}; "
+                        "restore the Git checkout or reinstall Studio. Remote overlays are disabled."
+                    ) from None
                 if not self.rclone_config and not str((pack.get('archive') or {}).get('uri', '')).startswith('https://'):
                     raise OrchestrationError(
                         f"Content-pack {pack_id} is missing or invalid under {target} "

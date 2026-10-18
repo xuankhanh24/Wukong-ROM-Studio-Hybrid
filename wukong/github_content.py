@@ -19,7 +19,7 @@ from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request
 
 from .adapters import SourceIntegrityError, sha256_file
-from .content_packs import ContentPackManager, create_content_pack_archive, validate_content_index
+from .content_packs import GIT_CONTENT_PACKS, ContentPackManager, create_content_pack_archive, validate_content_index
 from .content_sync import _atomic_write_index, discover_pack_sources, publish_index_to_github
 from .github_http import urlopen
 
@@ -166,8 +166,8 @@ def publish_release_packs(
     selected = pack_ids if pack_ids is not None else {p for p in sources if p.startswith("MOD/")}
     if not selected or not selected.issubset(sources):
         raise ValueError("Selected content-pack source is missing or empty")
-    if "STARK/common" in selected:
-        raise ValueError("STARK is shared through Git commits, not Release packs")
+    if any(not pack_id.startswith('MOD/') for pack_id in selected):
+        raise ValueError("Only MOD content is published as Release packs; base content is shared through Git commits")
     existing = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {"schemaVersion": 1, "packs": []}
     validate_content_index(existing)
     tag = "content-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:8]
@@ -210,7 +210,7 @@ def publish_release_packs(
         # The Git checkout/installer owns STARK; old Drive snapshots must not
         # overwrite scripts or manager binaries shipped with that revision.
         for pack in packs:
-            if pack["id"] == "STARK/common":
+            if pack["id"] in GIT_CONTENT_PACKS:
                 pack.pop("archive", None)
                 pack["source"] = "git"
         index = {"schemaVersion": 1, "generatedAt": datetime.now(timezone.utc).isoformat(),

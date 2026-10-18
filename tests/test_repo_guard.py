@@ -136,6 +136,13 @@ class RepositoryGuardContractTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Repository guard passed", result.stdout)
 
+    def test_accepts_checked_in_base_images_but_not_private_mod_payloads(self) -> None:
+        result = self._run_guard({"OFX/recovery.img": b"ANDROID!", "TWRP/recovery.img": b"ANDROID!",
+                                  "copy-image/device/boot.img": b"ANDROID!"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result = self._run_guard({"MOD/Test/app.apk": b"private"})
+        self.assertNotEqual(result.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

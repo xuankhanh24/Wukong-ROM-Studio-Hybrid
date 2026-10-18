@@ -4,6 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
+from wukong.content_packs import ContentPackManager
+
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "content-packs" / "index.json"
@@ -17,12 +19,17 @@ SPLIT_SHARED_MOD_PACKS = {
 
 
 class ContentPackIndexContractTests(unittest.TestCase):
-    def test_flash_scripts_use_versioned_release_not_mutable_drive_archive(self) -> None:
+    def test_non_mod_content_is_owned_by_git_without_remote_archives(self) -> None:
         payload = json.loads(INDEX.read_text(encoding="utf-8"))
-        pack = next(pack for pack in payload["packs"] if pack["id"] == "Flash_script/common")
-        archive = pack["archive"]
-        self.assertRegex(archive["uri"], r"^https://github\.com/[^/]+/[^/]+/releases/download/content-[^/]+/")
-        self.assertEqual(sum(part["sizeBytes"] for part in archive["parts"]), archive["sizeBytes"])
+        for pack in payload["packs"]:
+            with self.subTest(pack=pack["id"]):
+                if pack["id"].startswith("MOD/"):
+                    self.assertTrue(pack["archive"]["uri"].startswith("https://github.com/"))
+                else:
+                    self.assertEqual(pack.get("source"), "git")
+                    self.assertNotIn("archive", pack)
+                    self.assertTrue((ROOT / pack["target"]).is_dir())
+                    ContentPackManager.verify(ROOT / pack["target"], pack)
 
     def test_split_coloros_packs_do_not_duplicate_shared_mods(self) -> None:
         payload = json.loads(INDEX.read_text(encoding="utf-8"))

@@ -114,6 +114,14 @@ $starkSourceProperty = $starkCatalogPacks[0].PSObject.Properties['source']
 if ($null -eq $starkSourceProperty -or $starkSourceProperty.Value -ne 'git') {
     throw 'Installer catalog must mark STARK/common as Git-owned; remote STARK overlays are not allowed.'
 }
+foreach ($basePack in @($packCatalog.packs | Where-Object { $_.id -notlike 'MOD/*' })) {
+    if ($basePack.source -ne 'git' -or $null -ne $basePack.PSObject.Properties['archive']) {
+        throw "Base content must be Git-owned, not downloaded: $($basePack.id)"
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $staging "Content/$($basePack.target)"))) {
+        throw "Git-owned base content is missing from installer: $($basePack.target)"
+    }
+}
 
 $manifestFiles = Get-ChildItem -LiteralPath $staging -Recurse -File |
     Where-Object { $_.Name -ne 'release-manifest.json' } |

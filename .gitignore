@@ -23,9 +23,7 @@ Auto_Build_WK_*.zip
 /STARK/**/.scratch/
 /STARK/**/scratch/
 /STARK/**/dist/
-/copy-image/
-/OFX/
-/TWRP/
+# Base images and recovery tools are versioned with the checkout (not Drive).
 
 # Python caches and local environments
 __pycache__/

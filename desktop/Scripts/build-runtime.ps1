@@ -237,11 +237,10 @@ if (-not $rcloneExecutable) {
 Copy-Item -LiteralPath $rcloneExecutable.FullName -Destination (Join-Path $destination 'Runtime\Bin\Windows\AMD64\rclone.exe') -Force
 Remove-Item -LiteralPath $rcloneExtract -Recurse -Force
 
-if ($IncludeBaseContent) {
-    Copy-Tree (Join-Path $source 'TWRP') (Join-Path $destination 'Content\TWRP')
-    Copy-Tree (Join-Path $source 'OFX') (Join-Path $destination 'Content\OFX')
-    Copy-Tree (Join-Path $source 'copy-image') (Join-Path $destination 'Content\copy-image')
-}
+# Base content is part of every installation; only private MOD packs are remote.
+Copy-Tree (Join-Path $source 'TWRP') (Join-Path $destination 'Content\TWRP')
+Copy-Tree (Join-Path $source 'OFX') (Join-Path $destination 'Content\OFX')
+Copy-Tree (Join-Path $source 'copy-image') (Join-Path $destination 'Content\copy-image')
 
 $env:PYTHONUTF8 = '1'
 $env:PYTHONIOENCODING = 'utf-8'

@@ -267,7 +267,7 @@ def restore_incomplete_index(index_path: Path, baseline_path: Path) -> int:
         current_pack = dict(pack)
         pack_id = str(current_pack["id"])
         fallback = baseline_by_id.get(pack_id)
-        if not isinstance(current_pack.get("archive"), Mapping) and isinstance(
+        if current_pack.get('source') != 'git' and not isinstance(current_pack.get("archive"), Mapping) and isinstance(
             fallback and fallback.get("archive"), Mapping
         ):
             packs.append(fallback)
@@ -328,6 +328,11 @@ def refresh_content_index(
     for pack_id, source_root in source_items:
         generated = build_content_pack_record(source_root, remote=remote, pack_id=pack_id)
         old = old_by_id.get(pack_id)
+        if old is not None and old.get('source') == 'git':
+            # Code-owned assets must be committed, never repacked onto Drive.
+            generated.update(source='git', remote=f"git:{generated['target']}")
+            packs.append(generated)
+            continue
         if (pack_id not in forced
                 and old is not None
                 and _pack_payload_equal(old, generated)
@@ -425,7 +430,10 @@ def publish_index_to_github(
             if merge_pack_ids is not None:
                 remote_index = json.loads(base64.b64decode(current['content']))
                 validate_content_index(remote_index)
-                replacing = set(merge_pack_ids) | {'STARK/common'}
+                # A MOD publisher may be an old installer. Keep Git-owned base
+                # inventories from the current branch, not its stale local copy.
+                owned = {pack['id'] for pack in remote_index['packs'] if pack.get('source') == 'git'}
+                replacing = (set(merge_pack_ids) | {'STARK/common'}) - owned
                 index = {**index, 'packs': sorted(
                     [pack for pack in remote_index['packs'] if pack['id'] not in replacing]
                     + [pack for pack in index['packs'] if pack['id'] in replacing],

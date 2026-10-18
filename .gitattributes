@@ -4,3 +4,6 @@
 *.yaml text eol=lf
 *.py text eol=lf
 *.md text eol=lf
+*.img binary
+/Flash_script/** -text
+/Flash_script/**/*.sh text eol=lf

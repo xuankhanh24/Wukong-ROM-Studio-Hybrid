@@ -26,7 +26,8 @@ def content_cache_key(index: dict[str, Any], mod_version: str, toolchain: bytes)
     digest.update(toolchain)
     # v2 archives included STARK and could overwrite the Git checkout even
     # after removing it from the workflow's path list. Never restore those.
-    return "wukong-content-v3-" + digest.hexdigest()
+    # v3 also restored base content now owned by Git. Only MOD is cached in v4.
+    return "wukong-content-v4-" + digest.hexdigest()
 
 
 def main() -> None:

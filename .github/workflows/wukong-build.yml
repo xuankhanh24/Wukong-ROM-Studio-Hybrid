@@ -318,10 +318,6 @@ jobs:
         with:
           path: |
             MOD
-            Flash_script
-            copy-image
-            OFX
-            TWRP
           key: ${{ steps.content-fingerprint.outputs.key }}
       - name: "04.1 · Kiểm tra dung lượng runner / Verify runner disk split"
         shell: bash

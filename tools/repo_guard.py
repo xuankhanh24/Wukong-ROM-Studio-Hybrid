@@ -6,7 +6,8 @@ import zipfile
 from pathlib import Path
 
 
-FORBIDDEN_ROOTS = {"MOD", "copy-image", "OFX", "TWRP", "Workspace", "Temp", "ROM_BUILD_DONE"}
+FORBIDDEN_ROOTS = {"MOD", "Workspace", "Temp", "ROM_BUILD_DONE"}
+BASE_IMAGE_ROOTS = {"copy-image", "OFX", "TWRP"}
 SECRET_PATTERNS = (
     re.compile(rb"ghp_[A-Za-z0-9]{20,}"),
     re.compile(rb"github_pat_[A-Za-z0-9_]{20,}"),
@@ -51,6 +52,7 @@ def main() -> int:
     tracked = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
     problems: list[str] = []
     total = 0
+    base_total = 0
     for raw in tracked:
         if not raw:
             continue
@@ -59,11 +61,16 @@ def main() -> int:
         if path.parts and path.parts[0] in FORBIDDEN_ROOTS:
             problems.append(f"Tracked content/runtime path: {relative}")
         shared_stark = bool(path.parts and path.parts[0] == 'STARK')
-        if path.name == "Auto_Build_WK_3.0.zip" or (path.suffix.casefold() in {".apk", ".apex", ".img"} and not shared_stark):
+        base_image = bool(path.parts and path.parts[0] in BASE_IMAGE_ROOTS and path.suffix.casefold() == '.img')
+        if path.name == "Auto_Build_WK_3.0.zip" or (path.suffix.casefold() in {".apk", ".apex", ".img"} and not (shared_stark or base_image)):
             problems.append(f"Tracked large content file: {relative}")
         if path.is_file():
             size = path.stat().st_size
             total += size
+            if base_image:
+                base_total += size
+            if size > 100 * 1024 * 1024:
+                problems.append(f"File exceeds GitHub's 100 MiB limit: {relative}")
             if _looks_like_generated_rom(path):
                 problems.append(f"Tracked generated ROM/archive: {relative}")
             if size <= 5 * 1024 * 1024:
@@ -85,8 +92,10 @@ def main() -> int:
                                 "External action must use a 40-character commit SHA: "
                                 f"{relative}: {action.decode(errors='replace')}"
                             )
-    if total > 500 * 1024 * 1024:
-        problems.append(f"Tracked checkout is larger than 500 MiB: {total} bytes")
+    if total - base_total > 500 * 1024 * 1024:
+        problems.append(f"Tracked source checkout is larger than 500 MiB: {total - base_total} bytes")
+    if base_total > 1200 * 1024 * 1024:
+        problems.append(f"Tracked base images are larger than 1200 MiB: {base_total} bytes")
     if problems:
         raise SystemExit("\n".join(problems))
     print(f"Repository guard passed: {len(tracked) - 1} files, {total} bytes")

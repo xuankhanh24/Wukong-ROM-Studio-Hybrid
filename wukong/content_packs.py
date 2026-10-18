@@ -26,6 +26,12 @@ SHARED_RUNTIME_PACKS = {
     "STARK/common": "STARK",
     "Flash_script/common": "Flash_script",
 }
+GIT_CONTENT_PACKS = {
+    **SHARED_RUNTIME_PACKS,
+    "copy-image/v1": "copy-image",
+    "OFX/v1": "OFX",
+    "TWRP/v1": "TWRP",
+}
 RunCommand = Callable[..., str]
 ProgressCallback = Callable[[Mapping[str, object]], None]
 ARCHIVE_CHUNK_SIZE = 1024 * 1024
@@ -262,8 +268,8 @@ def validate_content_index(index: Mapping[str, Any]) -> None:
             raise ValueError(f"Invalid or duplicate content-pack ID: {pack_id}")
         _relative_parts(target, label="content-pack target")
         ids.add(pack_id)
-        if pack.get('source') == 'git' and (pack_id != 'STARK/common' or target != 'STARK' or pack.get('archive')):
-            raise ValueError('Only STARK/common may be owned by the Git checkout')
+        if pack.get('source') == 'git' and (GIT_CONTENT_PACKS.get(pack_id) != target or pack.get('archive')):
+            raise ValueError('Invalid Git-owned content-pack target or remote archive')
         seen: set[str] = set()
         total = 0
         for item in pack.get("files", []):
@@ -561,6 +567,13 @@ def download_http_archive(archive: Mapping[str, Any], destination: Path) -> None
 
 
 def preferred_content_index(content_root: Path, bundled: Path) -> Path:
+    if bundled.is_file():
+        metadata = json.loads(bundled.read_text(encoding='utf-8'))
+        if any(pack.get('source') == 'git' and pack.get('id') != 'STARK/common'
+               for pack in metadata.get('packs', [])):
+            # Updated installers own base content; legacy sync catalogs cannot
+            # replace it with mutable Drive snapshots.
+            return bundled
     synced = content_root.parent / 'Data' / 'ContentSync' / 'index.json'
     if synced.is_file():
         try:
@@ -599,6 +612,11 @@ def load_content_index(path: Path) -> dict[str, Any]:
             return index
         current = json.loads(data)
         validate_content_index(current)
+        owned = {pack['id']: pack for pack in index['packs'] if pack.get('source') == 'git'}
+        current['packs'] = sorted(
+            [pack for pack in current['packs'] if pack['id'] not in owned] + list(owned.values()),
+            key=lambda pack: pack['id'],
+        )
         return current
     return index
 
@@ -627,7 +645,7 @@ class ContentPackManager:
         if not pack:
             raise KeyError(f"Unknown content-pack: {pack_id}")
         if pack.get('source') == 'git':
-            target = self.content_root / 'STARK'
+            target = self.content_root / str(pack['target'])
             self.verify(target, pack)
             return target
         self.content_root.mkdir(parents=True, exist_ok=True)
@@ -703,11 +721,14 @@ class ContentPackManager:
         allowed_extra_prefixes: tuple[str, ...] = (),
     ) -> None:
         if pack.get('source') == 'git':
-            if pack.get('id') != 'STARK/common' or pack.get('target') != 'STARK':
+            if GIT_CONTENT_PACKS.get(str(pack.get('id'))) != pack.get('target') or pack.get('archive'):
                 raise SourceIntegrityError('Invalid Git-owned content-pack')
             if not root.is_dir() or not any(path.is_file() for path in root.rglob('*')):
-                raise SourceIntegrityError('Shared STARK is missing; restore the Git checkout or reinstall Studio')
-            return
+                raise SourceIntegrityError(f"Git-owned {pack.get('target')} is missing; restore the Git checkout or reinstall Studio")
+            # Shared patch scripts evolve with the checkout and are authoritative.
+            # Fixed base image inventories still receive full checksum validation.
+            if pack.get('id') == 'STARK/common':
+                return
         expected = {str(item["path"]): item for item in pack.get("files", [])}
         actual = {
             path.relative_to(root).as_posix(): path
@@ -746,6 +767,8 @@ def upload_content_packs(
     if pack_id is not None and not selected:
         raise KeyError(f"Unknown content-pack: {pack_id}")
     for pack_index, pack in enumerate(selected, start=1):
+        if pack.get('source') == 'git':
+            continue
         def report(phase: str, **values: object) -> None:
             if progress_callback is not None:
                 progress_callback({
