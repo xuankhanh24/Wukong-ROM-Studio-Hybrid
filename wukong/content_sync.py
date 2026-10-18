@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 from urllib.error import HTTPError
 from urllib.parse import quote
-from urllib.request import Request, urlopen
+from urllib.request import Request
+
+from .github_http import urlopen
 
 from .catalog import SHARED_MOD_NAMES
 from .content_packs import (

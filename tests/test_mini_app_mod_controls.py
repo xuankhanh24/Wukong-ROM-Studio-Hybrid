@@ -20,7 +20,9 @@ class MiniAppModControlsTests(unittest.TestCase):
                     self.assertTrue(all(text == 'Dùng chung' for text in page.locator('#mod-list .shared-mod-badge').all_text_contents()))
                     for group, count in [('launcher-features', 9), ('fix-noti-features', 2), ('wk-manager-patches', 10)]:
                         self.assertTrue(page.locator('#' + group).is_visible())
-                        self.assertEqual(page.locator('#' + group + ' input').count(), count)
+                        self.assertEqual(page.locator('#' + group + ' input[type="checkbox"]').count(), count)
+                    self.assertFalse(page.locator('#launcher-patch-options').is_visible())
+                    page.locator('#launcher-features label').filter(has=page.locator('input[value="patch"]')).click()
                     self.assertTrue(page.locator('#fix-noti-features input[value="level1"]').is_checked())
                     page.locator('#fix-noti-features label').filter(has=page.locator('input[value="level2"]')).click()
                     self.assertFalse(page.locator('#fix-noti-features input[value="level1"]').is_checked())
@@ -73,6 +75,7 @@ class MiniAppModControlsTests(unittest.TestCase):
                     }""")
                     self.assertTrue(page.locator('#fix-noti-features input[value="level1"]').is_checked())
                     self.assertFalse(page.locator('#fix-noti-features input[value="level2"]').is_checked())
+                    self.assertFalse(page.locator('#launcher-patch-options').is_visible())
                     page.locator('#fix-noti-features label').filter(has=page.locator('input[value="level1"]')).click()
                     self.assertIn('no APK patch', page.locator('#mod-feature-summary').inner_text())
 

@@ -100,7 +100,8 @@ def patch_oplus_services_decoded(
         return asdict(PatchReport(jar="oplus-services.jar"))
 
     res = patch_decoded(decoded, patches, jar="oplus-services")
-    return asdict(PatchReport(jar="oplus-services.jar", patchedMethods=res.get("patchedMethods", 0)))
+    return asdict(PatchReport(jar="oplus-services.jar", patchedMethods=res.get("patchedMethods", 0),
+                              importedSmali=res.get("importedSmali", 0)))
 
 
 def patch_disable_flag_secure_oplus_services_decoded(decoded: Path) -> dict[str, int | str]:

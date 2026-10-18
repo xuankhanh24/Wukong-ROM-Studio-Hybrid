@@ -9,6 +9,41 @@ from wukong.models import BuildRecipe, RecipeValidationError
 
 
 class WorkflowRecipeTests(unittest.TestCase):
+    def test_launcher_modes_reach_runner_spec_without_losing_other_mod_features(self):
+        inputs = {"DEVICE": "PKG110", "SOURCE_URI": "https://downloads.example/rom.zip",
+                  "MODS": "Launcher_mod,Fix_noti,WK_Manager", "PRESET": "custom",
+                  "LAUNCHER_FEATURES": "global_region,dock,ram",
+                  "FIX_NOTI_FEATURES": "level2", "WK_MANAGER_PATCHES": "keybox_manager,multi_window"}
+        for mode in ('bundled', 'patch'):
+            with self.subTest(mode=mode):
+                recipe = recipe_from_workflow_inputs({**inputs, 'LAUNCHER_MODE': mode})
+                transferred = BuildRecipe.from_dict(recipe.to_dict())
+                spec = transferred.to_legacy_spec(local_rom_path='/tmp/rom.zip')
+                self.assertEqual(spec.get('launcherFeatures'),
+                                 ['global_region', 'dock', 'ram'] if mode == 'patch' else None)
+                self.assertEqual(spec['fixNotiFeatures'], ['level2'])
+                self.assertEqual(spec['wkManagerPatches'], ['keybox_manager', 'multi_window'])
+
+    def test_launcher_patch_defaults_and_invalid_features(self):
+        inputs = {"DEVICE": "PKG110", "SOURCE_URI": "https://downloads.example/rom.zip"}
+        recipe = recipe_from_workflow_inputs({**inputs, 'LAUNCHER_MODE': 'patch'})
+        self.assertEqual(recipe.build.launcher_features, ('global_region',))
+        for values in ({'LAUNCHER_MODE': 'invalid'},
+                       {'LAUNCHER_MODE': 'patch', 'LAUNCHER_FEATURES': 'unsupported'},
+                       {'FIX_NOTI_FEATURES': 'level1,level2'}):
+            with self.subTest(values=values), self.assertRaises(RecipeValidationError):
+                recipe_from_workflow_inputs({**inputs, **values})
+
+    def test_dispatch_can_explicitly_disable_optional_mod_features(self):
+        recipe = recipe_from_workflow_inputs({
+            "DEVICE": "PKG110", "SOURCE_URI": "https://downloads.example/rom.zip",
+            "FIX_NOTI_FEATURES": "none", "WK_MANAGER_PATCHES": "none",
+            "LAUNCHER_MODE": "patch", "LAUNCHER_FEATURES": "none"})
+        spec = recipe.to_legacy_spec()
+        self.assertEqual(spec['fixNotiFeatures'], [])
+        self.assertEqual(spec['wkManagerPatches'], [])
+        self.assertEqual(spec['launcherFeatures'], [])
+
     def test_batch_artifact_root_is_path_safe_and_round_trips(self) -> None:
         payload = {
             "schemaVersion": 1, "task": "build", "device": "PKG110",

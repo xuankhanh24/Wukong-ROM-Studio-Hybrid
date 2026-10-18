@@ -87,6 +87,19 @@ def recipe_from_workflow_inputs(values: Mapping[str, str]) -> BuildRecipe:
         debloat = _items(values.get("DEBLOAT_PATHS"))
         if debloat:
             build["debloatPaths"] = debloat
+        launcher_mode = str(values.get("LAUNCHER_MODE") or "bundled").strip().casefold()
+        if launcher_mode not in {"bundled", "patch"}:
+            raise RecipeValidationError("Launcher mode must be bundled or patch")
+        if launcher_mode == "patch":
+            # Empty input uses the same region-only default as desktop/Mini App.
+            selected_launcher = str(values.get("LAUNCHER_FEATURES") or "").strip()
+            build["launcherFeatures"] = ([] if selected_launcher.casefold() == "none" else
+                                         _items(selected_launcher) or ["global_region"])
+        for input_name, field in (("FIX_NOTI_FEATURES", "fixNotiFeatures"),
+                                  ("WK_MANAGER_PATCHES", "wkManagerPatches")):
+            selected = str(values.get(input_name) or "").strip()
+            if selected:
+                build[field] = [] if selected.casefold() == "none" else _items(selected)
         payload["build"] = build
     return BuildRecipe.from_dict(payload)
 

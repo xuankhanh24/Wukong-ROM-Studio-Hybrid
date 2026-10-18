@@ -46,7 +46,7 @@
 .method static constructor <clinit>()V
     .registers 1
 
-    .line 46
+    .line 47
     new-instance v0, Ljava/util/concurrent/ConcurrentHashMap;
 
     invoke-direct {v0}, Ljava/util/concurrent/ConcurrentHashMap;-><init>()V
@@ -59,7 +59,7 @@
 .method public constructor <init>()V
     .registers 1
 
-    .line 30
+    .line 31
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -70,7 +70,7 @@
 
     const/4 v0, 0x0
 
-    .line 69
+    .line 70
     invoke-static {v0, p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->getMaxCount(Ljava/lang/Object;I)I
 
     move-result p0
@@ -81,7 +81,7 @@
 .method public static getMaxCount(Ljava/lang/Object;I)I
     .registers 3
 
-    .line 56
+    .line 57
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
 
     move-result v0
@@ -90,7 +90,7 @@
 
     goto :goto_23
 
-    .line 59
+    .line 60
     :cond_7
     const-string v0, "wukong_power_triple_press"
 
@@ -102,14 +102,14 @@
 
     const/4 p0, 0x3
 
-    .line 60
+    .line 61
     invoke-static {p1, p0}, Ljava/lang/Math;->max(II)I
 
     move-result p0
 
     return p0
 
-    .line 62
+    .line 63
     :cond_15
     const-string v0, "wukong_power_double_press"
 
@@ -121,7 +121,7 @@
 
     const/4 p0, 0x2
 
-    .line 63
+    .line 64
     invoke-static {p1, p0}, Ljava/lang/Math;->max(II)I
 
     move-result p0
@@ -138,7 +138,7 @@
 
     const/4 v0, 0x0
 
-    .line 77
+    .line 78
     invoke-static {v0, p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->getMaxCount(Ljava/lang/Object;I)I
 
     move-result p0
@@ -149,7 +149,7 @@
 .method public static getMaxMultiPressCount(Ljava/lang/Object;I)I
     .registers 2
 
-    .line 73
+    .line 74
     invoke-static {p0, p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->getMaxCount(Ljava/lang/Object;I)I
 
     move-result p0
@@ -158,98 +158,87 @@
 .end method
 
 .method public static handleGesture(Ljava/lang/Object;Ljava/lang/Object;)Z
-    .registers 9
-
-    const/4 v0, 0x0
-
-    if-nez p1, :cond_4
-
-    return v0
+    .registers 11
 
     .line 109
-    :cond_4
-    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
+    const-string v0, "WukongPowerKeyBridge"
 
-    move-result v1
+    .line 0
+    const-string v1, "handleGesture: action="
 
-    if-nez v1, :cond_b
+    const/4 v2, 0x0
 
-    return v0
+    if-nez p1, :cond_8
+
+    return v2
 
     .line 111
-    :cond_b
-    :try_start_b
+    :cond_8
+    :try_start_8
     invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
-    move-result-object v1
+    move-result-object v3
 
-    const-string v2, "getAction"
+    const-string v4, "getAction"
 
-    new-array v3, v0, [Ljava/lang/Class;
+    new-array v5, v2, [Ljava/lang/Class;
 
-    const/4 v3, 0x0
+    const/4 v5, 0x0
 
-    invoke-virtual {v1, v2, v3}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-virtual {v3, v4, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
-    move-result-object v1
+    move-result-object v3
 
     .line 112
-    invoke-virtual {v1, p1, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v3, p1, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    move-result-object v1
+    move-result-object v3
 
-    check-cast v1, Ljava/lang/Integer;
+    check-cast v3, Ljava/lang/Integer;
 
-    invoke-virtual {v1}, Ljava/lang/Integer;->intValue()I
+    invoke-virtual {v3}, Ljava/lang/Integer;->intValue()I
 
-    move-result v1
+    move-result v3
 
-    const/4 v2, 0x1
+    .line 114
+    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
-    if-eq v1, v2, :cond_26
+    move-result-object v4
 
-    return v0
+    const-string v6, "getType"
+
+    new-array v7, v2, [Ljava/lang/Class;
+
+    invoke-virtual {v4, v6, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v4
+
+    .line 115
+    invoke-virtual {v4, p1, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v4
+
+    check-cast v4, Ljava/lang/Integer;
+
+    invoke-virtual {v4}, Ljava/lang/Integer;->intValue()I
+
+    move-result v4
 
     .line 117
-    :cond_26
     invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
-    move-result-object v1
+    move-result-object v6
 
-    const-string v4, "getType"
+    const-string v7, "getPressCount"
 
-    new-array v5, v0, [Ljava/lang/Class;
+    new-array v8, v2, [Ljava/lang/Class;
 
-    invoke-virtual {v1, v4, v3}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-virtual {v6, v7, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
-    move-result-object v1
+    move-result-object v6
 
     .line 118
-    invoke-virtual {v1, p1, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v1
-
-    check-cast v1, Ljava/lang/Integer;
-
-    invoke-virtual {v1}, Ljava/lang/Integer;->intValue()I
-
-    move-result v1
-
-    .line 120
-    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v4
-
-    const-string v5, "getPressCount"
-
-    new-array v6, v0, [Ljava/lang/Class;
-
-    invoke-virtual {v4, v5, v3}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v4
-
-    .line 121
-    invoke-virtual {v4, p1, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v6, p1, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p1
 
@@ -259,70 +248,136 @@
 
     move-result p1
 
-    if-ne v1, v2, :cond_59
+    .line 120
+    new-instance v5, Ljava/lang/StringBuilder;
 
-    .line 124
-    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onLongPress(Ljava/lang/Object;)Z
+    invoke-direct {v5, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
-    move-result p0
+    invoke-virtual {v5, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
-    return p0
+    const-string v1, ", type="
 
-    :cond_59
-    if-nez v1, :cond_63
+    invoke-virtual {v5, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    const/4 v2, 0x2
+    invoke-virtual {v5, v4}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
-    if-ne p1, v2, :cond_63
+    const-string v1, ", count="
 
-    .line 126
+    invoke-virtual {v5, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v5, p1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 122
+    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-nez v1, :cond_76
+
+    .line 123
+    const-string p0, "Master disabled, bypassing gesture"
+
+    invoke-static {v0, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    return v2
+
+    :cond_76
+    const/4 v1, 0x1
+
+    if-eq v3, v1, :cond_7a
+
+    return v2
+
+    :cond_7a
+    if-eq v4, v1, :cond_9d
+
+    const/4 v1, 0x2
+
+    if-ne v4, v1, :cond_80
+
+    goto :goto_9d
+
+    :cond_80
+    if-nez v4, :cond_8e
+
+    if-ne p1, v1, :cond_8e
+
+    .line 135
+    const-string p1, "handleGesture -> dispatching onDoublePress"
+
+    invoke-static {v0, p1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 136
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onDoublePress(Ljava/lang/Object;)Z
 
     move-result p0
 
     return p0
 
-    :cond_63
-    if-nez v1, :cond_75
+    :cond_8e
+    if-nez v4, :cond_ad
 
     const/4 v1, 0x3
 
-    if-ne p1, v1, :cond_75
+    if-ne p1, v1, :cond_ad
 
-    .line 128
+    .line 138
+    const-string p1, "handleGesture -> dispatching onTriplePress"
+
+    invoke-static {v0, p1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 139
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onTriplePress(Ljava/lang/Object;)Z
 
     move-result p0
-    :try_end_6c
-    .catchall {:try_start_b .. :try_end_6c} :catchall_6d
 
     return p0
 
-    :catchall_6d
+    .line 132
+    :cond_9d
+    :goto_9d
+    const-string p1, "handleGesture -> dispatching onLongPress"
+
+    invoke-static {v0, p1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 133
+    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onLongPress(Ljava/lang/Object;)Z
+
+    move-result p0
+    :try_end_a6
+    .catchall {:try_start_8 .. :try_end_a6} :catchall_a7
+
+    return p0
+
+    :catchall_a7
     move-exception p0
 
-    .line 131
-    const-string p1, "WukongPowerKeyBridge"
+    .line 142
+    const-string p1, "Error handling gesture"
 
-    const-string v1, "Error handling gesture"
+    invoke-static {v0, p1, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    invoke-static {p1, v1, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
-
-    :cond_75
-    return v0
+    :cond_ad
+    return v2
 .end method
 
 .method private static isActionConfigured(Ljava/lang/Object;Ljava/lang/String;)Z
     .registers 2
 
-    .line 99
+    .line 100
     invoke-static {p0, p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveSetting(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object p0
 
     if-eqz p0, :cond_1e
 
-    .line 100
+    .line 101
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p1
@@ -364,7 +419,7 @@
 
     return v0
 
-    .line 549
+    .line 619
     :cond_4
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
@@ -374,7 +429,7 @@
 
     move-result-object p0
 
-    .line 550
+    .line 620
     const-string v1, "action:camera"
 
     invoke-virtual {p0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -393,7 +448,7 @@
 
     const-string v1, "com.oplus.camera"
 
-    .line 551
+    .line 621
     invoke-virtual {p0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v1
@@ -418,7 +473,7 @@
 
     const-string v1, "com.android.camera"
 
-    .line 552
+    .line 622
     invoke-virtual {p0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v1
@@ -454,7 +509,7 @@
 
     return v0
 
-    .line 539
+    .line 609
     :cond_4
     :try_start_4
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
@@ -473,10 +528,10 @@
 
     const/4 v2, 0x1
 
-    .line 540
+    .line 610
     invoke-virtual {v1, v2}, Ljava/lang/reflect/Method;->setAccessible(Z)V
 
-    .line 541
+    .line 611
     invoke-virtual {v1, p0, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p0
@@ -498,7 +553,7 @@
 .method public static isMasterEnabled(Ljava/lang/Object;)Z
     .registers 8
 
-    .line 81
+    .line 82
     const-string v0, "wukong_power_master_enabled"
 
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveContext(Ljava/lang/Object;)Landroid/content/Context;
@@ -511,7 +566,7 @@
 
     return v1
 
-    .line 84
+    .line 85
     :cond_a
     :try_start_a
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
@@ -526,7 +581,7 @@
 
     const/4 v3, 0x0
 
-    .line 85
+    .line 86
     const-string v4, "true"
 
     const-string v5, "1"
@@ -544,12 +599,12 @@
 
     if-nez v6, :cond_36
 
-    .line 86
+    .line 87
     invoke-virtual {v2}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p0
 
-    .line 87
+    .line 88
     invoke-virtual {v5, p0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v0
@@ -571,7 +626,7 @@
     :goto_35
     return v1
 
-    .line 89
+    .line 90
     :cond_36
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 
@@ -583,7 +638,7 @@
 
     if-eqz p0, :cond_5c
 
-    .line 90
+    .line 91
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v0
@@ -594,12 +649,12 @@
 
     if-nez v0, :cond_5c
 
-    .line 91
+    .line 92
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p0
 
-    .line 92
+    .line 93
     invoke-virtual {v5, p0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v0
@@ -628,7 +683,7 @@
 .method public static launch(Ljava/lang/Object;Ljava/lang/String;)V
     .registers 14
 
-    .line 286
+    .line 315
     const-string v0, "shortcut:"
 
     .line 0
@@ -638,7 +693,7 @@
 
     if-eqz p1, :cond_1c9
 
-    .line 286
+    .line 315
     invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
 
     move-result v3
@@ -655,7 +710,7 @@
 
     goto/16 :goto_1c9
 
-    .line 289
+    .line 318
     :cond_18
     new-instance v3, Ljava/lang/StringBuilder;
 
@@ -673,13 +728,13 @@
 
     invoke-static {v4, v3}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 291
+    .line 320
     :try_start_2b
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveContext(Ljava/lang/Object;)Landroid/content/Context;
 
     move-result-object v3
 
-    .line 292
+    .line 321
     const-string v5, "mKeyguardDelegate"
 
     const-string v6, "keyguardDelegate"
@@ -692,7 +747,7 @@
 
     move-result-object v5
 
-    .line 293
+    .line 322
     const-string v6, "mPowerManager"
 
     const-string v7, "powerManager"
@@ -709,14 +764,14 @@
 
     if-nez v3, :cond_51
 
-    .line 296
+    .line 325
     const-string p0, "Cannot resolve Context for power remap action"
 
     invoke-static {v4, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;)I
 
     return-void
 
-    .line 301
+    .line 330
     :cond_51
     const-string v7, "action:torch"
 
@@ -736,7 +791,7 @@
 
     goto/16 :goto_1b3
 
-    .line 307
+    .line 336
     :cond_63
     const-string v7, "action:circle_to_search"
 
@@ -756,7 +811,7 @@
 
     goto/16 :goto_1af
 
-    .line 313
+    .line 342
     :cond_75
     const-string p0, "action:screenshot"
 
@@ -781,7 +836,7 @@
     :cond_87
     if-nez v6, :cond_92
 
-    .line 321
+    .line 350
     :try_start_89
     const-string p0, "power"
 
@@ -801,7 +856,7 @@
 
     if-eqz v6, :cond_c0
 
-    .line 324
+    .line 353
     :try_start_95
     invoke-virtual {v6}, Landroid/os/PowerManager;->isInteractive()Z
 
@@ -811,7 +866,7 @@
 
     if-nez v7, :cond_c0
 
-    .line 326
+    .line 355
     :try_start_9b
     const-class v7, Landroid/os/PowerManager;
 
@@ -835,7 +890,7 @@
 
     move-result-object v7
 
-    .line 327
+    .line 356
     invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
 
     move-result-wide v8
@@ -854,7 +909,7 @@
     :try_end_c0
     .catchall {:try_start_9b .. :try_end_c0} :catchall_c0
 
-    .line 333
+    .line 362
     :catchall_c0
     :cond_c0
     :try_start_c0
@@ -884,7 +939,7 @@
 
     goto/16 :goto_172
 
-    .line 340
+    .line 369
     :cond_d9
     invoke-static {p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->isCameraTarget(Ljava/lang/String;)Z
 
@@ -892,14 +947,14 @@
 
     if-eqz p0, :cond_e5
 
-    .line 341
+    .line 370
     invoke-static {v3, v5}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveCameraIntent(Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
 
     move-result-object v7
 
     goto/16 :goto_195
 
-    .line 342
+    .line 371
     :cond_e5
     const-string p0, "action:dialer"
 
@@ -919,7 +974,7 @@
 
     goto/16 :goto_16a
 
-    .line 344
+    .line 373
     :cond_f7
     const-string p0, "action:calculator"
 
@@ -939,7 +994,7 @@
 
     goto :goto_165
 
-    .line 346
+    .line 375
     :cond_108
     const-string p0, "action:recorder"
 
@@ -959,7 +1014,7 @@
 
     goto :goto_160
 
-    .line 348
+    .line 377
     :cond_119
     const-string p0, "action:assistant"
 
@@ -979,7 +1034,7 @@
 
     goto :goto_15b
 
-    .line 352
+    .line 381
     :cond_12a
     const-string p0, "package:"
 
@@ -991,7 +1046,7 @@
 
     const/16 p0, 0x8
 
-    .line 353
+    .line 382
     invoke-virtual {p1, p0}, Ljava/lang/String;->substring(I)Ljava/lang/String;
 
     move-result-object p0
@@ -1002,7 +1057,7 @@
 
     goto :goto_150
 
-    .line 354
+    .line 383
     :cond_13d
     const-string p0, "app:"
 
@@ -1014,7 +1069,7 @@
 
     const/4 p0, 0x4
 
-    .line 355
+    .line 384
     invoke-virtual {p1, p0}, Ljava/lang/String;->substring(I)Ljava/lang/String;
 
     move-result-object p0
@@ -1028,7 +1083,7 @@
     :cond_14f
     move-object p0, p1
 
-    .line 357
+    .line 386
     :goto_150
     invoke-virtual {v3}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
@@ -1036,14 +1091,14 @@
 
     if-eqz v0, :cond_195
 
-    .line 359
+    .line 388
     invoke-virtual {v0, p0}, Landroid/content/pm/PackageManager;->getLaunchIntentForPackage(Ljava/lang/String;)Landroid/content/Intent;
 
     move-result-object v7
 
     goto :goto_195
 
-    .line 349
+    .line 378
     :cond_15b
     :goto_15b
     invoke-static {v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveAssistantIntent(Landroid/content/Context;)Landroid/content/Intent;
@@ -1052,7 +1107,7 @@
 
     goto :goto_195
 
-    .line 347
+    .line 376
     :cond_160
     :goto_160
     invoke-static {v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveRecorderIntent(Landroid/content/Context;)Landroid/content/Intent;
@@ -1061,7 +1116,7 @@
 
     goto :goto_195
 
-    .line 345
+    .line 374
     :cond_165
     :goto_165
     invoke-static {v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveCalculatorIntent(Landroid/content/Context;)Landroid/content/Intent;
@@ -1070,7 +1125,7 @@
 
     goto :goto_195
 
-    .line 343
+    .line 372
     :cond_16a
     :goto_16a
     new-instance v7, Landroid/content/Intent;
@@ -1081,7 +1136,7 @@
 
     goto :goto_195
 
-    .line 334
+    .line 363
     :cond_172
     :goto_172
     invoke-virtual {p1, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
@@ -1103,7 +1158,7 @@
     :cond_17f
     move-object v0, p1
 
-    .line 336
+    .line 365
     :goto_180
     :try_start_180
     invoke-static {v0, p0}, Landroid/content/Intent;->parseUri(Ljava/lang/String;I)Landroid/content/Intent;
@@ -1117,7 +1172,7 @@
     :catchall_185
     move-exception p0
 
-    .line 338
+    .line 367
     :try_start_186
     new-instance v6, Ljava/lang/StringBuilder;
 
@@ -1135,7 +1190,7 @@
     :goto_195
     if-nez v7, :cond_1a7
 
-    .line 364
+    .line 393
     new-instance p0, Ljava/lang/StringBuilder;
 
     invoke-direct {p0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
@@ -1150,27 +1205,27 @@
 
     goto :goto_1c9
 
-    .line 368
+    .line 397
     :cond_1a7
     invoke-static {v3, v7, v5}, Lcom/wukong/manager/WukongPowerKeyBridge;->launchIntentDirect(Landroid/content/Context;Landroid/content/Intent;Ljava/lang/Object;)V
 
     goto :goto_1c9
 
-    .line 314
+    .line 343
     :cond_1ab
     :goto_1ab
     invoke-static {v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->takeScreenshot(Landroid/content/Context;)V
 
     return-void
 
-    .line 308
+    .line 337
     :cond_1af
     :goto_1af
     invoke-static {v3, p0, v5}, Lcom/wukong/manager/WukongPowerKeyBridge;->launchCircleToSearch(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
 
     return-void
 
-    .line 302
+    .line 331
     :cond_1b3
     :goto_1b3
     invoke-static {v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->toggleTorch(Landroid/content/Context;)V
@@ -1182,7 +1237,7 @@
     :catchall_1b7
     move-exception p0
 
-    .line 370
+    .line 399
     new-instance v0, Ljava/lang/StringBuilder;
 
     const-string v1, "Error executing action: "
@@ -1203,44 +1258,122 @@
 .end method
 
 .method private static launchCircleToSearch(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
-    .registers 13
+    .registers 19
 
-    .line 375
-    const-string p1, "com.google.android.googlequicksearchbox"
+    move-object/from16 v1, p2
 
+    .line 404
     const-string v0, "Triggering Circle to Search..."
 
-    const-string v1, "WukongPowerKeyBridge"
+    const-string v2, "WukongPowerKeyBridge"
 
-    invoke-static {v1, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
 
-    const/4 v2, 0x0
+    if-nez p0, :cond_11
 
-    const/4 v3, 0x0
-
-    const/4 v4, 0x1
-
-    if-eqz p2, :cond_46
-
-    .line 379
-    :try_start_e
-    invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+    .line 407
+    invoke-static/range {p1 .. p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveContext(Ljava/lang/Object;)Landroid/content/Context;
 
     move-result-object v0
 
-    const-string v5, "isShowing"
+    move-object v3, v0
 
-    new-array v6, v3, [Ljava/lang/Class;
+    goto :goto_13
 
-    invoke-virtual {v0, v5, v2}, Ljava/lang/Class;->getDeclaredMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    :cond_11
+    move-object/from16 v3, p0
+
+    :goto_13
+    const/4 v4, 0x2
+
+    const/4 v5, 0x0
+
+    const/4 v6, 0x1
+
+    if-eqz v3, :cond_4b
+
+    .line 413
+    :try_start_18
+    const-string v0, "power"
+
+    invoke-virtual {v3, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object v0
 
-    .line 380
-    invoke-virtual {v0, v4}, Ljava/lang/reflect/Method;->setAccessible(Z)V
+    check-cast v0, Landroid/os/PowerManager;
 
-    .line 381
-    invoke-virtual {v0, p2, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    if-eqz v0, :cond_4b
+
+    .line 414
+    invoke-virtual {v0}, Landroid/os/PowerManager;->isInteractive()Z
+
+    move-result v7
+
+    if-nez v7, :cond_4b
+
+    .line 415
+    const-class v7, Landroid/os/PowerManager;
+
+    const-string v8, "wakeUp"
+
+    new-array v9, v4, [Ljava/lang/Class;
+
+    sget-object v10, Ljava/lang/Long;->TYPE:Ljava/lang/Class;
+
+    aput-object v10, v9, v5
+
+    const-class v10, Ljava/lang/String;
+
+    aput-object v10, v9, v6
+
+    invoke-virtual {v7, v8, v9}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v7
+
+    .line 416
+    invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
+
+    move-result-wide v8
+
+    invoke-static {v8, v9}, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
+
+    move-result-object v8
+
+    const-string v9, "android.policy:POWER_KEY_REMAP"
+
+    filled-new-array {v8, v9}, [Ljava/lang/Object;
+
+    move-result-object v8
+
+    invoke-virtual {v7, v0, v8}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    :try_end_4b
+    .catchall {:try_start_18 .. :try_end_4b} :catchall_4b
+
+    :catchall_4b
+    :cond_4b
+    const/4 v7, 0x0
+
+    if-eqz v1, :cond_86
+
+    .line 424
+    :try_start_4e
+    invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    move-result-object v0
+
+    const-string v8, "isShowing"
+
+    new-array v9, v5, [Ljava/lang/Class;
+
+    invoke-virtual {v0, v8, v7}, Ljava/lang/Class;->getDeclaredMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v0
+
+    .line 425
+    invoke-virtual {v0, v6}, Ljava/lang/reflect/Method;->setAccessible(Z)V
+
+    .line 426
+    invoke-virtual {v0, v1, v7}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
 
@@ -1250,565 +1383,684 @@
 
     move-result v0
 
-    if-eqz v0, :cond_46
+    if-eqz v0, :cond_86
 
-    .line 382
-    invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    const-string v5, "dismissKeyguardToLaunch"
-
-    new-array v6, v4, [Ljava/lang/Class;
-
-    const-class v7, Landroid/content/Intent;
-
-    aput-object v7, v6, v3
-
-    invoke-virtual {v0, v5, v6}, Ljava/lang/Class;->getDeclaredMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    .line 427
+    invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
     move-result-object v0
 
-    .line 383
-    invoke-virtual {v0, v4}, Ljava/lang/reflect/Method;->setAccessible(Z)V
+    const-string v8, "dismissKeyguardToLaunch"
 
-    .line 384
-    move-object v5, v2
+    new-array v9, v6, [Ljava/lang/Class;
 
-    check-cast v5, Landroid/content/Intent;
+    const-class v10, Landroid/content/Intent;
 
-    filled-new-array {v2}, [Ljava/lang/Object;
+    aput-object v10, v9, v5
 
-    move-result-object v5
-
-    invoke-virtual {v0, p2, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-    :try_end_46
-    .catchall {:try_start_e .. :try_end_46} :catchall_46
-
-    :catchall_46
-    :cond_46
-    const/4 p2, 0x2
-
-    .line 391
-    :try_start_47
-    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
-
-    move-result-object p0
-    :try_end_4b
-    .catchall {:try_start_47 .. :try_end_4b} :catchall_6b
-
-    if-eqz p0, :cond_6b
-
-    .line 395
-    :try_start_4d
-    new-instance v0, Landroid/content/ComponentName;
-
-    const-string v5, "com.google.android.apps.lens.ContextualSearchEntrypoint"
-
-    invoke-direct {v0, p1, v5}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    invoke-virtual {p0, v0, p2, v4}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
-    :try_end_57
-    .catchall {:try_start_4d .. :try_end_57} :catchall_57
-
-    .line 401
-    :catchall_57
-    :try_start_57
-    new-instance v0, Landroid/content/ComponentName;
-
-    const-string v5, "com.google.android.apps.search.omnient.host.contextualsearch.ContextualSearchServiceEntrypoint"
-
-    invoke-direct {v0, p1, v5}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    invoke-virtual {p0, v0, v4, v4}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
-    :try_end_61
-    .catchall {:try_start_57 .. :try_end_61} :catchall_61
-
-    .line 407
-    :catchall_61
-    :try_start_61
-    new-instance v0, Landroid/content/ComponentName;
-
-    const-string v5, "com.google.android.apps.search.omnient.host.externalapp.ExternalAppEntrypoint"
-
-    invoke-direct {v0, p1, v5}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    invoke-virtual {p0, v0, v4, v4}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
-    :try_end_6b
-    .catchall {:try_start_61 .. :try_end_6b} :catchall_6b
-
-    .line 417
-    :catchall_6b
-    :cond_6b
-    :try_start_6b
-    const-string p0, "android.os.ServiceManager"
-
-    invoke-static {p0}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object p0
-
-    .line 418
-    const-string v0, "getService"
-
-    new-array v5, v4, [Ljava/lang/Class;
-
-    const-class v6, Ljava/lang/String;
-
-    aput-object v6, v5, v3
-
-    invoke-virtual {p0, v0, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object p0
-
-    .line 419
-    const-string v0, "contextual_search"
-
-    filled-new-array {v0}, [Ljava/lang/Object;
+    invoke-virtual {v0, v8, v9}, Ljava/lang/Class;->getDeclaredMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
     move-result-object v0
 
-    invoke-virtual {p0, v2, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    .line 428
+    invoke-virtual {v0, v6}, Ljava/lang/reflect/Method;->setAccessible(Z)V
 
-    move-result-object p0
+    .line 429
+    move-object v8, v7
 
-    check-cast p0, Landroid/os/IBinder;
+    check-cast v8, Landroid/content/Intent;
 
-    if-eqz p0, :cond_1ac
-
-    .line 423
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Class;->getDeclaredFields()[Ljava/lang/reflect/Field;
-
-    move-result-object v0
-
-    array-length v5, v0
-
-    move v6, v3
-
-    :goto_95
-    if-ge v6, v5, :cond_a9
-
-    aget-object v7, v0, v6
-
-    .line 424
-    const-string v8, "this$0"
-
-    invoke-virtual {v7}, Ljava/lang/reflect/Field;->getName()Ljava/lang/String;
-
-    move-result-object v9
-
-    invoke-virtual {v8, v9}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v8
-
-    if-eqz v8, :cond_a6
-
-    goto :goto_aa
-
-    :cond_a6
-    add-int/lit8 v6, v6, 0x1
-
-    goto :goto_95
-
-    :cond_a9
-    move-object v7, v2
-
-    :goto_aa
-    if-eqz v7, :cond_c5
-
-    .line 430
-    invoke-virtual {v7, v4}, Ljava/lang/reflect/Field;->setAccessible(Z)V
-
-    .line 431
-    invoke-virtual {v7, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v0
-    :try_end_b3
-    .catchall {:try_start_6b .. :try_end_b3} :catchall_195
-
-    if-eqz v0, :cond_c5
-
-    .line 434
-    :try_start_b5
-    invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v5
-
-    const-string v6, "mTemporaryPackage"
-
-    invoke-virtual {v5, v6}, Ljava/lang/Class;->getDeclaredField(Ljava/lang/String;)Ljava/lang/reflect/Field;
-
-    move-result-object v5
-
-    .line 435
-    invoke-virtual {v5, v4}, Ljava/lang/reflect/Field;->setAccessible(Z)V
-
-    .line 436
-    invoke-virtual {v5, v0, p1}, Ljava/lang/reflect/Field;->set(Ljava/lang/Object;Ljava/lang/Object;)V
-    :try_end_c5
-    .catchall {:try_start_b5 .. :try_end_c5} :catchall_c5
-
-    .line 444
-    :catchall_c5
-    :cond_c5
-    :try_start_c5
-    const-string p1, "android.app.contextualsearch.ContextualSearchConfig$Builder"
-
-    invoke-static {p1}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object p1
-
-    .line 445
-    new-array v0, v3, [Ljava/lang/Class;
-
-    invoke-virtual {p1, v2}, Ljava/lang/Class;->getConstructor([Ljava/lang/Class;)Ljava/lang/reflect/Constructor;
-
-    move-result-object v0
-
-    invoke-virtual {v0, v2}, Ljava/lang/reflect/Constructor;->newInstance([Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v0
-
-    .line 446
-    const-string v5, "build"
-
-    new-array v6, v3, [Ljava/lang/Class;
-
-    invoke-virtual {p1, v5, v2}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object p1
-
-    .line 447
-    invoke-virtual {p1, v0, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v2
-    :try_end_e1
-    .catchall {:try_start_c5 .. :try_end_e1} :catchall_e2
-
-    goto :goto_f8
-
-    :catchall_e2
-    move-exception v0
-
-    move-object p1, v0
-
-    .line 449
-    :try_start_e4
-    new-instance v0, Ljava/lang/StringBuilder;
-
-    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v5, "Failed creating ContextualSearchConfig via Builder: "
-
-    invoke-virtual {v0, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-static {v1, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-
-    .line 453
-    :goto_f8
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object p1
-
-    invoke-virtual {p1}, Ljava/lang/Class;->getDeclaredMethods()[Ljava/lang/reflect/Method;
-
-    move-result-object p1
-
-    array-length v0, p1
-
-    move v5, v3
-
-    :goto_102
-    if-ge v5, v0, :cond_144
-
-    aget-object v6, p1, v5
-
-    .line 454
-    const-string v7, "startContextualSearchInternal"
-
-    invoke-virtual {v6}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
+    filled-new-array {v7}, [Ljava/lang/Object;
 
     move-result-object v8
 
-    invoke-virtual {v7, v8}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    invoke-virtual {v0, v1, v8}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    :try_end_86
+    .catchall {:try_start_4e .. :try_end_86} :catchall_86
 
-    move-result v7
+    .line 436
+    :catchall_86
+    :cond_86
+    const-string v8, "com.google.android.apps.lens.ContextualSearchEntrypoint"
 
-    if-eqz v7, :cond_141
+    const-string v9, "com.google.android.googlequicksearchbox"
 
-    .line 455
-    invoke-virtual {v6, v4}, Ljava/lang/reflect/Method;->setAccessible(Z)V
+    if-eqz v3, :cond_a4
 
-    .line 456
-    invoke-virtual {v6}, Ljava/lang/reflect/Method;->getParameterTypes()[Ljava/lang/Class;
+    .line 438
+    :try_start_8c
+    invoke-virtual {v3}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
-    move-result-object v7
+    move-result-object v0
+    :try_end_90
+    .catchall {:try_start_8c .. :try_end_90} :catchall_a4
 
-    .line 457
-    array-length v8, v7
+    if-eqz v0, :cond_a4
 
-    if-ne v8, p2, :cond_141
+    .line 442
+    :try_start_92
+    new-instance v10, Landroid/content/ComponentName;
 
-    aget-object v7, v7, v3
+    invoke-direct {v10, v9, v8}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
 
-    sget-object v8, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+    invoke-virtual {v0, v10, v6, v6}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
+    :try_end_9a
+    .catchall {:try_start_92 .. :try_end_9a} :catchall_9a
 
-    if-ne v7, v8, :cond_141
+    .line 448
+    :catchall_9a
+    :try_start_9a
+    new-instance v10, Landroid/content/ComponentName;
+
+    const-string v11, "com.google.android.apps.search.omnient.host.contextualsearch.ContextualSearchServiceEntrypoint"
+
+    invoke-direct {v10, v9, v11}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    invoke-virtual {v0, v10, v4, v6}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
+    :try_end_a4
+    .catchall {:try_start_9a .. :try_end_a4} :catchall_a4
 
     .line 458
-    invoke-static {}, Landroid/os/Binder;->clearCallingIdentity()J
+    :catchall_a4
+    :cond_a4
+    const-string v10, "startContextualSearch"
 
-    move-result-wide p1
-    :try_end_126
-    .catchall {:try_start_e4 .. :try_end_126} :catchall_195
+    const-string v11, "contextual_search"
+
+    if-eqz v3, :cond_112
 
     .line 460
-    :try_start_126
-    invoke-static {v4}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+    :try_start_aa
+    invoke-virtual {v3, v11}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object v0
 
-    filled-new-array {v0, v2}, [Ljava/lang/Object;
+    if-eqz v0, :cond_112
 
-    move-result-object v0
+    .line 463
+    invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
-    invoke-virtual {v6, p0, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    move-result-object v12
 
-    .line 461
-    const-string p0, "Triggered CTS via startContextualSearchInternal(1, config) SUCCESS!"
+    invoke-virtual {v12}, Ljava/lang/Class;->getMethods()[Ljava/lang/reflect/Method;
 
-    invoke-static {v1, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
-    :try_end_136
-    .catchall {:try_start_126 .. :try_end_136} :catchall_13b
+    move-result-object v12
+
+    array-length v13, v12
+
+    move v14, v5
+
+    :goto_ba
+    if-ge v14, v13, :cond_e0
+
+    aget-object v15, v12, v14
 
     .line 464
-    :try_start_136
-    invoke-static {p1, p2}, Landroid/os/Binder;->restoreCallingIdentity(J)V
+    invoke-virtual {v15}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
 
-    goto/16 :goto_1e3
+    move-result-object v4
 
-    :catchall_13b
-    move-exception v0
+    invoke-virtual {v10, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
-    move-object p0, v0
+    move-result v4
 
-    invoke-static {p1, p2}, Landroid/os/Binder;->restoreCallingIdentity(J)V
+    if-eqz v4, :cond_d8
 
     .line 465
-    throw p0
+    invoke-virtual {v15}, Ljava/lang/reflect/Method;->getParameterTypes()[Ljava/lang/Class;
 
-    :cond_141
-    add-int/lit8 v5, v5, 0x1
+    move-result-object v4
+    :try_end_cc
+    .catchall {:try_start_aa .. :try_end_cc} :catchall_f9
 
-    goto :goto_102
+    move/from16 p1, v5
 
-    .line 471
-    :cond_144
-    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
+    .line 466
+    :try_start_ce
+    array-length v5, v4
 
-    move-result-object p1
+    if-ne v5, v6, :cond_da
 
-    .line 472
-    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
+    aget-object v4, v4, p1
 
-    move-result-object p2
-    :try_end_14c
-    .catchall {:try_start_136 .. :try_end_14c} :catchall_195
+    sget-object v5, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+
+    if-ne v4, v5, :cond_da
+
+    goto :goto_e3
+
+    :cond_d8
+    move/from16 p1, v5
+
+    :cond_da
+    add-int/lit8 v14, v14, 0x1
+
+    move/from16 v5, p1
+
+    const/4 v4, 0x2
+
+    goto :goto_ba
+
+    :cond_e0
+    move/from16 p1, v5
+
+    move-object v15, v7
+
+    :goto_e3
+    if-eqz v15, :cond_114
+
+    .line 473
+    invoke-static {v6}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v4
+
+    filled-new-array {v4}, [Ljava/lang/Object;
+
+    move-result-object v4
+
+    invoke-virtual {v15, v0, v4}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     .line 474
-    :try_start_14c
-    const-string v0, "android.app.contextualsearch.IContextualSearchManager"
+    const-string v0, "Triggered CTS via ContextualSearchManager.startContextualSearch(1) SUCCESS!"
 
-    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeInterfaceToken(Ljava/lang/String;)V
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_f5
+    .catchall {:try_start_ce .. :try_end_f5} :catchall_f7
 
-    .line 475
-    invoke-virtual {p1, v4}, Landroid/os/Parcel;->writeInt(I)V
+    goto/16 :goto_28b
 
-    .line 476
-    invoke-virtual {p1, v3}, Landroid/os/Parcel;->writeInt(I)V
-
-    const/4 v0, 0x3
-
-    .line 477
-    invoke-interface {p0, v0, p1, p2, v3}, Landroid/os/IBinder;->transact(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
-
-    .line 478
-    invoke-virtual {p2}, Landroid/os/Parcel;->readException()V
-
-    .line 479
-    const-string p0, "Triggered CTS via binder.transact(3) SUCCESS!"
-
-    invoke-static {v1, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
-    :try_end_163
-    .catchall {:try_start_14c .. :try_end_163} :catchall_16b
-
-    .line 484
-    :try_start_163
-    invoke-virtual {p1}, Landroid/os/Parcel;->recycle()V
-
-    .line 485
-    invoke-virtual {p2}, Landroid/os/Parcel;->recycle()V
-    :try_end_169
-    .catchall {:try_start_163 .. :try_end_169} :catchall_195
-
-    goto/16 :goto_1e3
-
-    :catchall_16b
+    :catchall_f7
     move-exception v0
 
-    move-object p0, v0
+    goto :goto_fc
 
-    .line 482
+    :catchall_f9
+    move-exception v0
+
+    move/from16 p1, v5
+
+    .line 479
+    :goto_fc
+    new-instance v4, Ljava/lang/StringBuilder;
+
+    const-string v5, "ContextualSearchManager call failed: "
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+    goto :goto_114
+
+    :cond_112
+    move/from16 p1, v5
+
+    .line 485
+    :cond_114
+    :goto_114
+    :try_start_114
+    const-string v0, "android.os.ServiceManager"
+
+    invoke-static {v0}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v0
+
+    .line 486
+    const-string v4, "getService"
+
+    new-array v5, v6, [Ljava/lang/Class;
+
+    const-class v12, Ljava/lang/String;
+
+    aput-object v12, v5, p1
+
+    invoke-virtual {v0, v4, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v0
+
+    .line 487
+    filled-new-array {v11}, [Ljava/lang/Object;
+
+    move-result-object v4
+
+    invoke-virtual {v0, v7, v4}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Landroid/os/IBinder;
+
+    if-eqz v0, :cond_23f
+
+    .line 491
+    invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    move-result-object v4
+
+    invoke-virtual {v4}, Ljava/lang/Class;->getDeclaredFields()[Ljava/lang/reflect/Field;
+
+    move-result-object v4
+
+    array-length v5, v4
+
+    move/from16 v11, p1
+
+    :goto_13d
+    if-ge v11, v5, :cond_152
+
+    aget-object v12, v4, v11
+
+    .line 492
+    const-string v13, "this$0"
+
+    invoke-virtual {v12}, Ljava/lang/reflect/Field;->getName()Ljava/lang/String;
+
+    move-result-object v14
+
+    invoke-virtual {v13, v14}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v13
+
+    if-eqz v13, :cond_14f
+
+    move-object v7, v12
+
+    goto :goto_152
+
+    :cond_14f
+    add-int/lit8 v11, v11, 0x1
+
+    goto :goto_13d
+
+    :cond_152
+    :goto_152
+    if-eqz v7, :cond_16d
+
+    .line 498
+    invoke-virtual {v7, v6}, Ljava/lang/reflect/Field;->setAccessible(Z)V
+
+    .line 499
+    invoke-virtual {v7, v0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v4
+    :try_end_15b
+    .catchall {:try_start_114 .. :try_end_15b} :catchall_229
+
+    if-eqz v4, :cond_16d
+
+    .line 502
+    :try_start_15d
+    invoke-virtual {v4}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    move-result-object v5
+
+    const-string v7, "mTemporaryPackage"
+
+    invoke-virtual {v5, v7}, Ljava/lang/Class;->getDeclaredField(Ljava/lang/String;)Ljava/lang/reflect/Field;
+
+    move-result-object v5
+
+    .line 503
+    invoke-virtual {v5, v6}, Ljava/lang/reflect/Field;->setAccessible(Z)V
+
+    .line 504
+    invoke-virtual {v5, v4, v9}, Ljava/lang/reflect/Field;->set(Ljava/lang/Object;Ljava/lang/Object;)V
+    :try_end_16d
+    .catchall {:try_start_15d .. :try_end_16d} :catchall_16d
+
+    .line 510
+    :catchall_16d
+    :cond_16d
     :try_start_16d
+    invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    move-result-object v4
+
+    invoke-virtual {v4}, Ljava/lang/Class;->getDeclaredMethods()[Ljava/lang/reflect/Method;
+
+    move-result-object v4
+
+    array-length v5, v4
+
+    move/from16 v7, p1
+
+    :goto_178
+    if-ge v7, v5, :cond_1db
+
+    aget-object v11, v4, v7
+
+    .line 511
+    const-string v12, "startContextualSearchInternal"
+
+    invoke-virtual {v11}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
+
+    move-result-object v13
+
+    invoke-virtual {v12, v13}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v12
+
+    if-nez v12, :cond_192
+
+    invoke-virtual {v11}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
+
+    move-result-object v12
+
+    invoke-virtual {v10, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v12
+
+    if-eqz v12, :cond_1d8
+
+    .line 512
+    :cond_192
+    invoke-virtual {v11, v6}, Ljava/lang/reflect/Method;->setAccessible(Z)V
+
+    .line 513
+    invoke-virtual {v11}, Ljava/lang/reflect/Method;->getParameterTypes()[Ljava/lang/Class;
+
+    move-result-object v12
+
+    .line 514
+    array-length v13, v12
+
+    if-ne v13, v6, :cond_1d8
+
+    aget-object v12, v12, p1
+
+    sget-object v13, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+
+    if-ne v12, v13, :cond_1d8
+
+    .line 515
+    invoke-static {}, Landroid/os/Binder;->clearCallingIdentity()J
+
+    move-result-wide v4
+    :try_end_1a6
+    .catchall {:try_start_16d .. :try_end_1a6} :catchall_229
+
+    .line 517
+    :try_start_1a6
+    invoke-static {v6}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v6
+
+    filled-new-array {v6}, [Ljava/lang/Object;
+
+    move-result-object v6
+
+    invoke-virtual {v11, v0, v6}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    .line 518
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 
-    const-string v2, "binder.transact(3) failed: "
+    const-string v6, "Triggered CTS via binder."
 
-    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    invoke-virtual {p0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
+    invoke-virtual {v11}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
 
-    move-result-object p0
+    move-result-object v6
 
-    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v6, "(1) SUCCESS!"
+
+    invoke-virtual {v0, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    move-result-object p0
+    move-result-object v0
 
-    invoke-static {v1, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-    :try_end_185
-    .catchall {:try_start_16d .. :try_end_185} :catchall_18c
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_1ce
+    .catchall {:try_start_1a6 .. :try_end_1ce} :catchall_1d3
 
-    .line 484
-    :try_start_185
-    invoke-virtual {p1}, Landroid/os/Parcel;->recycle()V
+    .line 521
+    :try_start_1ce
+    invoke-static {v4, v5}, Landroid/os/Binder;->restoreCallingIdentity(J)V
 
-    .line 485
-    invoke-virtual {p2}, Landroid/os/Parcel;->recycle()V
+    goto/16 :goto_28b
 
-    goto :goto_1ac
-
-    :catchall_18c
+    :catchall_1d3
     move-exception v0
 
-    move-object p0, v0
+    invoke-static {v4, v5}, Landroid/os/Binder;->restoreCallingIdentity(J)V
 
-    .line 484
-    invoke-virtual {p1}, Landroid/os/Parcel;->recycle()V
+    .line 522
+    throw v0
 
-    .line 485
-    invoke-virtual {p2}, Landroid/os/Parcel;->recycle()V
+    :cond_1d8
+    add-int/lit8 v7, v7, 0x1
 
-    .line 486
-    throw p0
-    :try_end_195
-    .catchall {:try_start_185 .. :try_end_195} :catchall_195
+    goto :goto_178
 
-    :catchall_195
-    move-exception v0
+    .line 528
+    :cond_1db
+    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
 
-    move-object p0, v0
+    move-result-object v4
 
-    .line 489
-    new-instance p1, Ljava/lang/StringBuilder;
+    .line 529
+    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
 
-    const-string p2, "Direct CTS service invocation failed: "
-
-    invoke-direct {p1, p2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-
-    invoke-virtual {p0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
-
-    move-result-object p2
-
-    invoke-virtual {p1, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {p1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-static {v1, p1, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
-
-    .line 494
-    :cond_1ac
-    :goto_1ac
-    :try_start_1ac
-    invoke-static {}, Ljava/lang/Runtime;->getRuntime()Ljava/lang/Runtime;
-
-    move-result-object p0
-
-    const-string v2, "cmd"
-
-    const-string v3, "contextual_search"
-
-    const-string v4, "set"
-
-    const-string v5, "temporary-package"
-
-    const-string v6, "com.google.android.googlequicksearchbox"
-
-    const-string v7, "120000"
-
-    filled-new-array/range {v2 .. v7}, [Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-virtual {p0, p1}, Ljava/lang/Runtime;->exec([Ljava/lang/String;)Ljava/lang/Process;
-
-    .line 495
-    invoke-static {}, Ljava/lang/Runtime;->getRuntime()Ljava/lang/Runtime;
-
-    move-result-object p0
-
-    const-string v2, "service"
-
-    const-string v3, "call"
-
-    const-string v4, "contextual_search"
-
-    const-string v5, "3"
-
-    const-string v6, "i32"
-
-    const-string v7, "1"
-
-    const-string v8, "i32"
-
-    const-string v9, "0"
-
-    filled-new-array/range {v2 .. v9}, [Ljava/lang/String;
-
-    move-result-object p1
-
-    invoke-virtual {p0, p1}, Ljava/lang/Runtime;->exec([Ljava/lang/String;)Ljava/lang/Process;
-
-    .line 496
-    const-string p0, "Triggered CTS via shell fallback SUCCESS!"
-
-    invoke-static {v1, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    move-result-object v5
     :try_end_1e3
-    .catchall {:try_start_1ac .. :try_end_1e3} :catchall_1e3
+    .catchall {:try_start_1ce .. :try_end_1e3} :catchall_229
 
-    :catchall_1e3
-    :goto_1e3
+    .line 531
+    :try_start_1e3
+    const-string v7, "android.app.contextualsearch.IContextualSearchManager"
+
+    invoke-virtual {v4, v7}, Landroid/os/Parcel;->writeInterfaceToken(Ljava/lang/String;)V
+
+    .line 532
+    invoke-virtual {v4, v6}, Landroid/os/Parcel;->writeInt(I)V
+
+    move/from16 v7, p1
+
+    const/4 v6, 0x2
+
+    .line 533
+    invoke-interface {v0, v6, v4, v5, v7}, Landroid/os/IBinder;->transact(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
+
+    .line 534
+    invoke-virtual {v5}, Landroid/os/Parcel;->readException()V
+
+    .line 535
+    const-string v0, "Triggered CTS via binder.transact(2) SUCCESS!"
+
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_1f9
+    .catchall {:try_start_1e3 .. :try_end_1f9} :catchall_201
+
+    .line 540
+    :try_start_1f9
+    invoke-virtual {v4}, Landroid/os/Parcel;->recycle()V
+
+    .line 541
+    invoke-virtual {v5}, Landroid/os/Parcel;->recycle()V
+    :try_end_1ff
+    .catchall {:try_start_1f9 .. :try_end_1ff} :catchall_229
+
+    goto/16 :goto_28b
+
+    :catchall_201
+    move-exception v0
+
+    .line 538
+    :try_start_202
+    new-instance v6, Ljava/lang/StringBuilder;
+
+    invoke-direct {v6}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v7, "binder.transact(2) failed: "
+
+    invoke-virtual {v6, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v6, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v6}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_21a
+    .catchall {:try_start_202 .. :try_end_21a} :catchall_221
+
+    .line 540
+    :try_start_21a
+    invoke-virtual {v4}, Landroid/os/Parcel;->recycle()V
+
+    .line 541
+    invoke-virtual {v5}, Landroid/os/Parcel;->recycle()V
+
+    goto :goto_23f
+
+    :catchall_221
+    move-exception v0
+
+    .line 540
+    invoke-virtual {v4}, Landroid/os/Parcel;->recycle()V
+
+    .line 541
+    invoke-virtual {v5}, Landroid/os/Parcel;->recycle()V
+
+    .line 542
+    throw v0
+    :try_end_229
+    .catchall {:try_start_21a .. :try_end_229} :catchall_229
+
+    :catchall_229
+    move-exception v0
+
+    .line 545
+    new-instance v4, Ljava/lang/StringBuilder;
+
+    const-string v5, "Direct CTS service invocation failed: "
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
+
+    move-result-object v5
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-static {v2, v4, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+
+    :cond_23f
+    :goto_23f
+    if-eqz v3, :cond_26f
+
+    .line 551
+    :try_start_241
+    new-instance v0, Landroid/content/Intent;
+
+    const-string v4, "android.app.contextualsearch.action.LAUNCH_CONTEXTUAL_SEARCH"
+
+    invoke-direct {v0, v4}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+
+    .line 552
+    new-instance v4, Landroid/content/ComponentName;
+
+    invoke-direct {v4, v9, v8}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    invoke-virtual {v0, v4}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
+
+    .line 555
+    invoke-static {v3, v0, v1}, Lcom/wukong/manager/WukongPowerKeyBridge;->launchIntentDirect(Landroid/content/Context;Landroid/content/Intent;Ljava/lang/Object;)V
+
+    .line 556
+    const-string v0, "Triggered CTS via direct Activity Intent SUCCESS!"
+
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_258
+    .catchall {:try_start_241 .. :try_end_258} :catchall_259
+
+    goto :goto_28b
+
+    :catchall_259
+    move-exception v0
+
+    .line 559
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    const-string v3, "Direct Intent CTS launch failed: "
+
+    invoke-direct {v1, v3}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/lang/Throwable;->getMessage()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 565
+    :cond_26f
+    :try_start_26f
+    invoke-static {}, Ljava/lang/Runtime;->getRuntime()Ljava/lang/Runtime;
+
+    move-result-object v0
+
+    const-string v3, "service"
+
+    const-string v4, "call"
+
+    const-string v5, "contextual_search"
+
+    const-string v6, "2"
+
+    const-string v7, "i32"
+
+    const-string v8, "1"
+
+    filled-new-array/range {v3 .. v8}, [Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-virtual {v0, v1}, Ljava/lang/Runtime;->exec([Ljava/lang/String;)Ljava/lang/Process;
+
+    .line 566
+    const-string v0, "Triggered CTS via shell fallback SUCCESS!"
+
+    invoke-static {v2, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_28b
+    .catchall {:try_start_26f .. :try_end_28b} :catchall_28b
+
+    :catchall_28b
+    :goto_28b
     return-void
 .end method
 
 .method public static launchDoublePress(Ljava/lang/Object;)V
     .registers 1
 
-    .line 177
+    .line 206
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onDoublePress(Ljava/lang/Object;)Z
 
     return-void
@@ -1826,10 +2078,10 @@
     :cond_6
     const/high16 v0, 0x14000000
 
-    .line 587
+    .line 657
     invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
 
-    .line 589
+    .line 659
     const-string v0, "android.media.action.STILL_IMAGE_CAMERA_SECURE"
 
     invoke-virtual {p1}, Landroid/content/Intent;->getAction()Ljava/lang/String;
@@ -1846,7 +2098,7 @@
 
     if-nez v0, :cond_3c
 
-    .line 590
+    .line 660
     invoke-virtual {p1}, Landroid/content/Intent;->getComponent()Landroid/content/ComponentName;
 
     move-result-object v0
@@ -1869,7 +2121,7 @@
 
     if-nez v0, :cond_3c
 
-    .line 591
+    .line 661
     :cond_2f
     invoke-virtual {p1}, Landroid/content/Intent;->getPackage()Ljava/lang/String;
 
@@ -1892,13 +2144,13 @@
     :goto_3c
     move v0, v2
 
-    .line 593
+    .line 663
     :goto_3d
     invoke-static {p2}, Lcom/wukong/manager/WukongPowerKeyBridge;->isKeyguardShowing(Ljava/lang/Object;)Z
 
     move-result v3
 
-    .line 596
+    .line 666
     const-string v4, "WukongPowerKeyBridge"
 
     if-eqz v3, :cond_6f
@@ -1907,7 +2159,7 @@
 
     if-eqz p2, :cond_6f
 
-    .line 598
+    .line 668
     :try_start_49
     invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -1925,17 +2177,17 @@
 
     move-result-object v0
 
-    .line 599
+    .line 669
     invoke-virtual {v0, v2}, Ljava/lang/reflect/Method;->setAccessible(Z)V
 
-    .line 600
+    .line 670
     filled-new-array {p1}, [Ljava/lang/Object;
 
     move-result-object v3
 
     invoke-virtual {v0, p2, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 601
+    .line 671
     const-string p2, "Launched via KeyguardServiceDelegate.dismissKeyguardToLaunch"
 
     invoke-static {v4, p2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
@@ -1947,7 +2199,7 @@
     :catchall_69
     move-exception p2
 
-    .line 604
+    .line 674
     const-string v0, "dismissKeyguardToLaunch failed, fallback to startActivityAsUser"
 
     invoke-static {v4, v0, p2}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
@@ -1955,7 +2207,7 @@
     :cond_6f
     const/4 p2, 0x0
 
-    .line 611
+    .line 681
     :try_start_70
     const-class v0, Landroid/os/UserHandle;
 
@@ -1965,7 +2217,7 @@
 
     move-result-object v0
 
-    .line 612
+    .line 682
     invoke-virtual {v0, p2}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
@@ -1982,7 +2234,7 @@
     :goto_80
     if-nez v0, :cond_91
 
-    .line 616
+    .line 686
     :try_start_82
     const-class v3, Landroid/os/UserHandle;
 
@@ -1992,7 +2244,7 @@
 
     move-result-object v3
 
-    .line 617
+    .line 687
     invoke-virtual {v3, p2}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p2
@@ -2007,7 +2259,7 @@
     :cond_91
     if-eqz v0, :cond_b9
 
-    .line 623
+    .line 693
     :try_start_93
     const-class p2, Landroid/content/Context;
 
@@ -2029,14 +2281,14 @@
 
     move-result-object p2
 
-    .line 624
+    .line 694
     filled-new-array {p1, v0}, [Ljava/lang/Object;
 
     move-result-object v0
 
     invoke-virtual {p2, p0, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 625
+    .line 695
     const-string p2, "Launched via Context.startActivityAsUser"
 
     invoke-static {v4, p2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
@@ -2048,12 +2300,12 @@
     :catchall_b3
     move-exception p2
 
-    .line 628
+    .line 698
     const-string v0, "Context.startActivityAsUser failed, fallback"
 
     invoke-static {v4, v0, p2}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 633
+    .line 703
     :cond_b9
     :try_start_b9
     invoke-virtual {p0, p1}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
@@ -2065,7 +2317,7 @@
     :catchall_bd
     move-exception p0
 
-    .line 635
+    .line 705
     new-instance p2, Ljava/lang/StringBuilder;
 
     const-string v0, "Failed to start activity directly: "
@@ -2088,7 +2340,7 @@
 .method public static launchLongPress(Ljava/lang/Object;)V
     .registers 1
 
-    .line 173
+    .line 202
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onLongPress(Ljava/lang/Object;)Z
 
     return-void
@@ -2097,241 +2349,349 @@
 .method public static launchTriplePress(Ljava/lang/Object;)V
     .registers 1
 
-    .line 181
+    .line 210
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onTriplePress(Ljava/lang/Object;)Z
 
     return-void
 .end method
 
 .method public static onDoublePress(Ljava/lang/Object;)Z
-    .registers 5
+    .registers 7
 
-    .line 149
+    .line 168
+    const-string v0, "onDoublePress called!"
+
+    const-string v1, "WukongPowerKeyBridge"
+
+    invoke-static {v1, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 169
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
 
     move-result v0
 
-    const/4 v1, 0x0
+    const/4 v2, 0x0
 
-    if-nez v0, :cond_8
+    if-nez v0, :cond_f
 
-    return v1
+    return v2
 
-    .line 150
-    :cond_8
+    .line 170
+    :cond_f
     const-string v0, "double_press"
 
     invoke-static {v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->shouldThrottle(Ljava/lang/String;)Z
 
     move-result v0
 
-    const/4 v2, 0x1
+    const/4 v3, 0x1
 
-    if-eqz v0, :cond_12
+    if-eqz v0, :cond_19
 
-    return v2
+    return v3
 
-    .line 151
-    :cond_12
+    .line 171
+    :cond_19
     const-string v0, "wukong_power_double_press"
 
-    const-string v3, "com.google.android.apps.youtube.music"
+    const-string v4, "com.google.android.apps.youtube.music"
 
-    invoke-static {p0, v0, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {p0, v0, v4}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    if-eqz v0, :cond_36
+    .line 172
+    new-instance v4, Ljava/lang/StringBuilder;
 
-    .line 152
+    const-string v5, "onDoublePress target: "
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-static {v1, v4}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    if-eqz v0, :cond_4e
+
+    .line 173
     invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
 
-    move-result v3
+    move-result v1
 
-    if-nez v3, :cond_36
+    if-nez v1, :cond_4e
 
-    const-string v3, "none"
+    const-string v1, "none"
 
-    invoke-virtual {v3, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
 
-    move-result v3
+    move-result v1
 
-    if-eqz v3, :cond_2b
+    if-eqz v1, :cond_43
 
-    goto :goto_36
+    goto :goto_4e
 
-    .line 155
-    :cond_2b
+    .line 176
+    :cond_43
     const-string v1, "wukong_power_vibrate_double_press"
 
-    const-string v3, "heavy"
+    const-string v2, "heavy"
 
-    invoke-static {p0, v1, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {p0, v1, v2}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 156
+    .line 177
     invoke-static {p0, v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->launch(Ljava/lang/Object;Ljava/lang/String;)V
 
-    return v2
+    return v3
 
-    :cond_36
-    :goto_36
-    return v1
+    :cond_4e
+    :goto_4e
+    return v2
 .end method
 
 .method public static onLongPress(Ljava/lang/Object;)Z
-    .registers 5
+    .registers 7
 
-    .line 137
+    .line 148
+    const-string v0, "onLongPress called!"
+
+    const-string v1, "WukongPowerKeyBridge"
+
+    invoke-static {v1, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 149
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
 
     move-result v0
 
-    const/4 v1, 0x0
+    const/4 v2, 0x0
 
-    if-nez v0, :cond_8
+    if-nez v0, :cond_14
 
-    return v1
+    .line 150
+    const-string p0, "onLongPress: master disabled"
 
-    .line 138
-    :cond_8
+    invoke-static {v1, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    return v2
+
+    .line 153
+    :cond_14
     const-string v0, "long_press"
 
     invoke-static {v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->shouldThrottle(Ljava/lang/String;)Z
 
     move-result v0
 
-    const/4 v2, 0x1
+    const/4 v3, 0x1
 
-    if-eqz v0, :cond_12
+    if-eqz v0, :cond_23
 
-    return v2
+    .line 154
+    const-string p0, "onLongPress: throttled"
 
-    .line 139
-    :cond_12
+    invoke-static {v1, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    return v3
+
+    .line 157
+    :cond_23
     const-string v0, "wukong_power_long_press"
 
-    const-string v3, "com.google.android.youtube"
+    const-string v4, "com.google.android.youtube"
 
-    invoke-static {p0, v0, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {p0, v0, v4}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    if-eqz v0, :cond_36
+    .line 158
+    new-instance v4, Ljava/lang/StringBuilder;
 
-    .line 140
+    const-string v5, "onLongPress target: "
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-static {v1, v4}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    if-eqz v0, :cond_58
+
+    .line 159
     invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
 
-    move-result v3
+    move-result v1
 
-    if-nez v3, :cond_36
+    if-nez v1, :cond_58
 
-    const-string v3, "none"
+    const-string v1, "none"
 
-    invoke-virtual {v3, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
 
-    move-result v3
+    move-result v1
 
-    if-eqz v3, :cond_2b
+    if-eqz v1, :cond_4d
 
-    goto :goto_36
+    goto :goto_58
 
-    .line 143
-    :cond_2b
+    .line 162
+    :cond_4d
     const-string v1, "wukong_power_vibrate_long_press"
 
-    const-string v3, "click"
+    const-string v2, "click"
 
-    invoke-static {p0, v1, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {p0, v1, v2}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 144
+    .line 163
     invoke-static {p0, v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->launch(Ljava/lang/Object;Ljava/lang/String;)V
 
-    return v2
+    return v3
 
-    :cond_36
-    :goto_36
-    return v1
+    :cond_58
+    :goto_58
+    return v2
+.end method
+
+.method public static onPowerMultiPress(Ljava/lang/Object;I)Z
+    .registers 3
+
+    const/4 v0, 0x2
+
+    if-ne p1, v0, :cond_8
+
+    .line 196
+    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onDoublePress(Ljava/lang/Object;)Z
+
+    move-result p0
+
+    return p0
+
+    :cond_8
+    const/4 v0, 0x3
+
+    if-ne p1, v0, :cond_10
+
+    .line 197
+    invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->onTriplePress(Ljava/lang/Object;)Z
+
+    move-result p0
+
+    return p0
+
+    :cond_10
+    const/4 p0, 0x0
+
+    return p0
 .end method
 
 .method public static onTriplePress(Ljava/lang/Object;)Z
-    .registers 5
+    .registers 7
 
-    .line 161
+    .line 182
+    const-string v0, "onTriplePress called!"
+
+    const-string v1, "WukongPowerKeyBridge"
+
+    invoke-static {v1, v0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 183
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->isMasterEnabled(Ljava/lang/Object;)Z
 
     move-result v0
 
-    const/4 v1, 0x0
+    const/4 v2, 0x0
 
-    if-nez v0, :cond_8
+    if-nez v0, :cond_f
 
-    return v1
+    return v2
 
-    .line 162
-    :cond_8
+    .line 184
+    :cond_f
     const-string v0, "triple_press"
 
     invoke-static {v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->shouldThrottle(Ljava/lang/String;)Z
 
     move-result v0
 
-    const/4 v2, 0x1
+    const/4 v3, 0x1
 
-    if-eqz v0, :cond_12
+    if-eqz v0, :cond_19
 
-    return v2
+    return v3
 
-    .line 163
-    :cond_12
+    .line 185
+    :cond_19
     const-string v0, "wukong_power_triple_press"
 
-    const/4 v3, 0x0
+    const/4 v4, 0x0
 
-    invoke-static {p0, v0, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {p0, v0, v4}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    if-eqz v0, :cond_35
+    .line 186
+    new-instance v4, Ljava/lang/StringBuilder;
 
-    .line 164
+    const-string v5, "onTriplePress target: "
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-static {v1, v4}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    if-eqz v0, :cond_4d
+
+    .line 187
     invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
 
-    move-result v3
+    move-result v1
 
-    if-nez v3, :cond_35
+    if-nez v1, :cond_4d
 
-    const-string v3, "none"
+    const-string v1, "none"
 
-    invoke-virtual {v3, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
 
-    move-result v3
+    move-result v1
 
-    if-eqz v3, :cond_2a
+    if-eqz v1, :cond_42
 
-    goto :goto_35
+    goto :goto_4d
 
-    .line 167
-    :cond_2a
+    .line 190
+    :cond_42
     const-string v1, "wukong_power_vibrate_triple_press"
 
-    const-string v3, "heavy"
+    const-string v2, "heavy"
 
-    invoke-static {p0, v1, v3}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {p0, v1, v2}, Lcom/wukong/manager/WukongPowerKeyBridge;->triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 168
+    .line 191
     invoke-static {p0, v0}, Lcom/wukong/manager/WukongPowerKeyBridge;->launch(Ljava/lang/Object;Ljava/lang/String;)V
 
-    return v2
+    return v3
 
-    :cond_35
-    :goto_35
-    return v1
+    :cond_4d
+    :goto_4d
+    return v2
 .end method
 
 .method private static performVibration(Landroid/content/Context;Ljava/lang/String;)V
     .registers 13
 
-    .line 234
+    .line 263
     const-string v0, "heavy"
 
     if-eqz p0, :cond_110
@@ -2354,7 +2714,7 @@
 
     goto/16 :goto_110
 
-    .line 239
+    .line 268
     :cond_16
     :try_start_16
     const-string v1, "android.os.ServiceManager"
@@ -2363,7 +2723,7 @@
 
     move-result-object v1
 
-    .line 240
+    .line 269
     const-string v2, "getService"
 
     const/4 v3, 0x1
@@ -2380,7 +2740,7 @@
 
     move-result-object v1
 
-    .line 241
+    .line 270
     const-string v2, "linearmotor"
 
     filled-new-array {v2}, [Ljava/lang/Object;
@@ -2397,14 +2757,14 @@
 
     if-eqz v1, :cond_ec
 
-    .line 243
+    .line 272
     const-string v2, "com.oplus.os.ILinearmotorVibratorService$Stub"
 
     invoke-static {v2}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
 
     move-result-object v2
 
-    .line 244
+    .line 273
     const-string v5, "asInterface"
 
     new-array v7, v3, [Ljava/lang/Class;
@@ -2417,7 +2777,7 @@
 
     move-result-object v2
 
-    .line 245
+    .line 274
     filled-new-array {v1}, [Ljava/lang/Object;
 
     move-result-object v1
@@ -2426,14 +2786,14 @@
 
     move-result-object v1
 
-    .line 246
+    .line 275
     const-string v2, "com.oplus.os.LinearmotorVibrator"
 
     invoke-static {v2}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
 
     move-result-object v2
 
-    .line 248
+    .line 277
     invoke-virtual {v2}, Ljava/lang/Class;->getConstructors()[Ljava/lang/reflect/Constructor;
 
     move-result-object v2
@@ -2449,7 +2809,7 @@
 
     aget-object v9, v2, v7
 
-    .line 249
+    .line 278
     invoke-virtual {v9}, Ljava/lang/reflect/Constructor;->getParameterTypes()[Ljava/lang/Class;
 
     move-result-object v10
@@ -2458,7 +2818,7 @@
 
     if-ne v10, v8, :cond_74
 
-    .line 250
+    .line 279
     filled-new-array {p0, v1}, [Ljava/lang/Object;
 
     move-result-object v1
@@ -2480,7 +2840,7 @@
     :goto_78
     if-eqz v1, :cond_ec
 
-    .line 256
+    .line 285
     invoke-virtual {v0, p1}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
 
     move-result v2
@@ -2497,7 +2857,7 @@
 
     goto :goto_9c
 
-    .line 258
+    .line 287
     :cond_89
     const-string v2, "tick"
 
@@ -2526,7 +2886,7 @@
     :goto_9c
     move v8, v3
 
-    .line 261
+    .line 290
     :cond_9d
     :goto_9d
     const-string v2, "com.oplus.os.WaveformEffect$Builder"
@@ -2535,7 +2895,7 @@
 
     move-result-object v2
 
-    .line 262
+    .line 291
     new-array v5, v6, [Ljava/lang/Class;
 
     invoke-virtual {v2, v4}, Ljava/lang/Class;->getConstructor([Ljava/lang/Class;)Ljava/lang/reflect/Constructor;
@@ -2546,7 +2906,7 @@
 
     move-result-object v5
 
-    .line 263
+    .line 292
     const-string v7, "setEffectType"
 
     new-array v9, v3, [Ljava/lang/Class;
@@ -2559,7 +2919,7 @@
 
     move-result-object v7
 
-    .line 264
+    .line 293
     invoke-static {v8}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 
     move-result-object v8
@@ -2570,7 +2930,7 @@
 
     invoke-virtual {v7, v5, v8}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 265
+    .line 294
     const-string v7, "build"
 
     new-array v8, v6, [Ljava/lang/Class;
@@ -2579,19 +2939,19 @@
 
     move-result-object v2
 
-    .line 266
+    .line 295
     invoke-virtual {v2, v5, v4}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v2
 
-    .line 267
+    .line 296
     const-string v4, "com.oplus.os.WaveformEffect"
 
     invoke-static {v4}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
 
     move-result-object v4
 
-    .line 268
+    .line 297
     invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
     move-result-object v5
@@ -2606,7 +2966,7 @@
 
     move-result-object v3
 
-    .line 269
+    .line 298
     filled-new-array {v2}, [Ljava/lang/Object;
 
     move-result-object v2
@@ -2617,7 +2977,7 @@
 
     return-void
 
-    .line 277
+    .line 306
     :catchall_ec
     :cond_ec
     :try_start_ec
@@ -2631,14 +2991,14 @@
 
     if-eqz p0, :cond_110
 
-    .line 278
+    .line 307
     invoke-virtual {p0}, Landroid/os/Vibrator;->hasVibrator()Z
 
     move-result v1
 
     if-eqz v1, :cond_110
 
-    .line 279
+    .line 308
     invoke-virtual {v0, p1}, Ljava/lang/String;->equalsIgnoreCase(Ljava/lang/String;)Z
 
     move-result p1
@@ -2657,7 +3017,7 @@
 
     const/4 p1, -0x1
 
-    .line 280
+    .line 309
     invoke-static {v0, v1, p1}, Landroid/os/VibrationEffect;->createOneShot(JI)Landroid/os/VibrationEffect;
 
     move-result-object p1
@@ -2675,21 +3035,21 @@
 .method private static resolveAssistantIntent(Landroid/content/Context;)Landroid/content/Intent;
     .registers 3
 
-    .line 676
+    .line 746
     new-instance v0, Landroid/content/Intent;
 
     const-string v1, "android.intent.action.VOICE_COMMAND"
 
     invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    .line 677
+    .line 747
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
     move-result-object p0
 
     if-eqz p0, :cond_14
 
-    .line 678
+    .line 748
     invoke-virtual {v0, p0}, Landroid/content/Intent;->resolveActivity(Landroid/content/pm/PackageManager;)Landroid/content/ComponentName;
 
     move-result-object p0
@@ -2698,7 +3058,7 @@
 
     return-object v0
 
-    .line 681
+    .line 751
     :cond_14
     new-instance p0, Landroid/content/Intent;
 
@@ -2712,7 +3072,7 @@
 .method private static resolveCalculatorIntent(Landroid/content/Context;)Landroid/content/Intent;
     .registers 5
 
-    .line 657
+    .line 727
     const-string v0, "com.android.calculator2"
 
     const-string v1, "com.google.android.calculator"
@@ -2725,7 +3085,7 @@
 
     move-result-object v0
 
-    .line 663
+    .line 733
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
     move-result-object p0
@@ -2739,10 +3099,10 @@
 
     if-ge v1, v2, :cond_22
 
-    .line 665
+    .line 735
     aget-object v2, v0, v1
 
-    .line 666
+    .line 736
     invoke-virtual {p0, v2}, Landroid/content/pm/PackageManager;->getLaunchIntentForPackage(Ljava/lang/String;)Landroid/content/Intent;
 
     move-result-object v2
@@ -2756,7 +3116,7 @@
 
     goto :goto_13
 
-    .line 670
+    .line 740
     :cond_22
     new-instance p0, Landroid/content/Intent;
 
@@ -2764,7 +3124,7 @@
 
     invoke-direct {p0, v0}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    .line 671
+    .line 741
     const-string v0, "android.intent.category.APP_CALCULATOR"
 
     invoke-virtual {p0, v0}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
@@ -2775,14 +3135,14 @@
 .method private static resolveCameraIntent(Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
     .registers 5
 
-    .line 556
+    .line 626
     invoke-static {p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->isKeyguardShowing(Ljava/lang/Object;)Z
 
     move-result p1
 
     if-eqz p0, :cond_b
 
-    .line 557
+    .line 627
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
     move-result-object p0
@@ -2795,7 +3155,7 @@
     :goto_c
     if-eqz p1, :cond_1e
 
-    .line 561
+    .line 631
     new-instance p1, Landroid/content/Intent;
 
     const-string v0, "android.media.action.STILL_IMAGE_CAMERA_SECURE"
@@ -2804,7 +3164,7 @@
 
     if-eqz p0, :cond_1e
 
-    .line 562
+    .line 632
     invoke-virtual {p1, p0}, Landroid/content/Intent;->resolveActivity(Landroid/content/pm/PackageManager;)Landroid/content/ComponentName;
 
     move-result-object v0
@@ -2813,7 +3173,7 @@
 
     return-object p1
 
-    .line 568
+    .line 638
     :cond_1e
     new-instance p1, Landroid/content/Intent;
 
@@ -2821,7 +3181,7 @@
 
     invoke-direct {p1, v0}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    .line 569
+    .line 639
     new-instance v0, Landroid/content/ComponentName;
 
     const-string v1, "com.oplus.camera.Camera"
@@ -2832,14 +3192,14 @@
 
     invoke-virtual {p1, v0}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
 
-    .line 570
+    .line 640
     const-string v0, "android.intent.category.LAUNCHER"
 
     invoke-virtual {p1, v0}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
 
     if-eqz p0, :cond_3f
 
-    .line 571
+    .line 641
     invoke-virtual {p1, p0}, Landroid/content/Intent;->resolveActivity(Landroid/content/pm/PackageManager;)Landroid/content/ComponentName;
 
     move-result-object v0
@@ -2851,7 +3211,7 @@
     :cond_3f
     if-eqz p0, :cond_48
 
-    .line 577
+    .line 647
     invoke-virtual {p0, v2}, Landroid/content/pm/PackageManager;->getLaunchIntentForPackage(Ljava/lang/String;)Landroid/content/Intent;
 
     move-result-object p0
@@ -2860,7 +3220,7 @@
 
     return-object p0
 
-    .line 582
+    .line 652
     :cond_48
     new-instance p0, Landroid/content/Intent;
 
@@ -2874,12 +3234,12 @@
 .method private static resolveContext(Ljava/lang/Object;)Landroid/content/Context;
     .registers 7
 
-    .line 705
+    .line 775
     sget-object v0, Lcom/wukong/manager/WukongPowerKeyBridge;->sContext:Landroid/content/Context;
 
     if-eqz v0, :cond_7
 
-    .line 706
+    .line 776
     sget-object p0, Lcom/wukong/manager/WukongPowerKeyBridge;->sContext:Landroid/content/Context;
 
     return-object p0
@@ -2896,7 +3256,7 @@
 
     if-eqz p0, :cond_38
 
-    .line 710
+    .line 780
     const-string v2, "mContext"
 
     const-string v3, "context"
@@ -2909,22 +3269,22 @@
 
     move-result-object v2
 
-    .line 711
+    .line 781
     instance-of v3, v2, Landroid/content/Context;
 
     if-eqz v3, :cond_25
 
-    .line 712
+    .line 782
     check-cast v2, Landroid/content/Context;
 
     sput-object v2, Lcom/wukong/manager/WukongPowerKeyBridge;->sContext:Landroid/content/Context;
 
-    .line 713
+    .line 783
     sget-object p0, Lcom/wukong/manager/WukongPowerKeyBridge;->sContext:Landroid/content/Context;
 
     return-object p0
 
-    .line 715
+    .line 785
     :cond_25
     const-string v2, "mPolicy"
 
@@ -2949,7 +3309,7 @@
     :cond_38
     const/4 p0, 0x0
 
-    .line 718
+    .line 788
     :try_start_39
     const-string v1, "android.app.ActivityThread"
 
@@ -2957,7 +3317,7 @@
 
     move-result-object v1
 
-    .line 719
+    .line 789
     const-string v2, "currentActivityThread"
 
     new-array v3, v0, [Ljava/lang/Class;
@@ -2966,14 +3326,14 @@
 
     move-result-object v2
 
-    .line 720
+    .line 790
     invoke-virtual {v2, p0, p0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v2
 
     if-eqz v2, :cond_60
 
-    .line 722
+    .line 792
     const-string v3, "getSystemContext"
 
     new-array v0, v0, [Ljava/lang/Class;
@@ -2982,7 +3342,7 @@
 
     move-result-object v0
 
-    .line 723
+    .line 793
     invoke-virtual {v0, v2, p0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
@@ -2991,7 +3351,7 @@
 
     if-eqz v0, :cond_60
 
-    .line 725
+    .line 795
     sput-object v0, Lcom/wukong/manager/WukongPowerKeyBridge;->sContext:Landroid/content/Context;
     :try_end_5f
     .catchall {:try_start_39 .. :try_end_5f} :catchall_60
@@ -3012,7 +3372,7 @@
 
     return-object v0
 
-    .line 735
+    .line 805
     :cond_4
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -3021,12 +3381,12 @@
     :goto_8
     if-eqz v1, :cond_2b
 
-    .line 736
+    .line 806
     const-class v2, Ljava/lang/Object;
 
     if-eq v1, v2, :cond_2b
 
-    .line 737
+    .line 807
     array-length v2, p1
 
     const/4 v3, 0x0
@@ -3036,7 +3396,7 @@
 
     aget-object v4, p1, v3
 
-    .line 739
+    .line 809
     :try_start_14
     invoke-virtual {v1, v4}, Ljava/lang/Class;->getDeclaredField(Ljava/lang/String;)Ljava/lang/reflect/Field;
 
@@ -3044,10 +3404,10 @@
 
     const/4 v5, 0x1
 
-    .line 740
+    .line 810
     invoke-virtual {v4, v5}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 741
+    .line 811
     invoke-virtual {v4, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v4
@@ -3064,7 +3424,7 @@
 
     goto :goto_10
 
-    .line 745
+    .line 815
     :cond_26
     invoke-virtual {v1}, Ljava/lang/Class;->getSuperclass()Ljava/lang/Class;
 
@@ -3079,7 +3439,7 @@
 .method private static resolveRecorderIntent(Landroid/content/Context;)Landroid/content/Intent;
     .registers 5
 
-    .line 640
+    .line 710
     const-string v0, "com.android.soundrecorder"
 
     const-string v1, "com.google.android.apps.recorder"
@@ -3092,7 +3452,7 @@
 
     move-result-object v0
 
-    .line 646
+    .line 716
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
 
     move-result-object p0
@@ -3106,10 +3466,10 @@
 
     if-ge v1, v2, :cond_22
 
-    .line 648
+    .line 718
     aget-object v2, v0, v1
 
-    .line 649
+    .line 719
     invoke-virtual {p0, v2}, Landroid/content/pm/PackageManager;->getLaunchIntentForPackage(Ljava/lang/String;)Landroid/content/Intent;
 
     move-result-object v2
@@ -3123,7 +3483,7 @@
 
     goto :goto_13
 
-    .line 653
+    .line 723
     :cond_22
     new-instance p0, Landroid/content/Intent;
 
@@ -3137,14 +3497,14 @@
 .method private static resolveSetting(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
     .registers 4
 
-    .line 196
+    .line 225
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveContext(Ljava/lang/Object;)Landroid/content/Context;
 
     move-result-object p0
 
     if-eqz p0, :cond_38
 
-    .line 199
+    .line 228
     :try_start_6
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 
@@ -3156,7 +3516,7 @@
 
     if-eqz v0, :cond_1f
 
-    .line 200
+    .line 229
     invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v1
@@ -3167,14 +3527,14 @@
 
     if-nez v1, :cond_1f
 
-    .line 201
+    .line 230
     invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p0
 
     return-object p0
 
-    .line 203
+    .line 232
     :cond_1f
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 
@@ -3186,7 +3546,7 @@
 
     if-eqz p0, :cond_38
 
-    .line 204
+    .line 233
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p1
@@ -3197,7 +3557,7 @@
 
     if-nez p1, :cond_38
 
-    .line 205
+    .line 234
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object p0
@@ -3216,14 +3576,14 @@
 .method private static resolveTarget(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
     .registers 3
 
-    .line 213
+    .line 242
     invoke-static {p0, p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveSetting(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object p0
 
     if-eqz p0, :cond_d
 
-    .line 214
+    .line 243
     invoke-virtual {p0}, Ljava/lang/String;->isEmpty()Z
 
     move-result p1
@@ -3239,12 +3599,12 @@
 .method private static shouldThrottle(Ljava/lang/String;)Z
     .registers 9
 
-    .line 185
+    .line 214
     invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
 
     move-result-wide v0
 
-    .line 186
+    .line 215
     sget-object v2, Lcom/wukong/manager/WukongPowerKeyBridge;->sLastTriggerTimes:Ljava/util/Map;
 
     invoke-interface {v2, p0}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
@@ -3255,7 +3615,7 @@
 
     if-eqz v3, :cond_41
 
-    .line 187
+    .line 216
     invoke-virtual {v3}, Ljava/lang/Long;->longValue()J
 
     move-result-wide v4
@@ -3268,7 +3628,7 @@
 
     if-gez v4, :cond_41
 
-    .line 188
+    .line 217
     new-instance v2, Ljava/lang/StringBuilder;
 
     const-string v4, "Throttling duplicate trigger for "
@@ -3305,7 +3665,7 @@
 
     return p0
 
-    .line 191
+    .line 220
     :cond_41
     invoke-static {v0, v1}, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
 
@@ -3321,7 +3681,7 @@
 .method private static takeScreenshot(Landroid/content/Context;)V
     .registers 14
 
-    .line 503
+    .line 573
     const-string v0, "WukongPowerKeyBridge"
 
     const-string v1, "takeScreenshot"
@@ -3339,7 +3699,7 @@
 
     move-result-object v5
 
-    .line 504
+    .line 574
     const-string v6, "getService"
 
     new-array v7, v4, [Ljava/lang/Class;
@@ -3352,7 +3712,7 @@
 
     move-result-object v5
 
-    .line 505
+    .line 575
     const-string v6, "color_screenshot"
 
     filled-new-array {v6}, [Ljava/lang/Object;
@@ -3367,14 +3727,14 @@
 
     if-eqz v5, :cond_63
 
-    .line 507
+    .line 577
     const-string v6, "com.oplus.screenshot.IOplusScreenshotManager$Stub"
 
     invoke-static {v6}, Ljava/lang/Class;->forName(Ljava/lang/String;)Ljava/lang/Class;
 
     move-result-object v6
 
-    .line 508
+    .line 578
     const-string v7, "asInterface"
 
     new-array v8, v4, [Ljava/lang/Class;
@@ -3387,7 +3747,7 @@
 
     move-result-object v6
 
-    .line 509
+    .line 579
     filled-new-array {v5}, [Ljava/lang/Object;
 
     move-result-object v5
@@ -3398,7 +3758,7 @@
 
     if-eqz v5, :cond_63
 
-    .line 511
+    .line 581
     invoke-virtual {v5}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
     move-result-object v6
@@ -3413,7 +3773,7 @@
 
     move-result-object v6
 
-    .line 512
+    .line 582
     new-instance v7, Landroid/os/Bundle;
 
     invoke-direct {v7}, Landroid/os/Bundle;-><init>()V
@@ -3424,7 +3784,7 @@
 
     invoke-virtual {v6, v5, v7}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 513
+    .line 583
     const-string v5, "Screenshot taken via IOplusScreenshotManager"
 
     invoke-static {v0, v5}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
@@ -3433,7 +3793,7 @@
 
     return-void
 
-    .line 520
+    .line 590
     :catchall_63
     :cond_63
     :try_start_63
@@ -3443,7 +3803,7 @@
 
     move-result-object v5
 
-    .line 521
+    .line 591
     new-array v6, v4, [Ljava/lang/Class;
 
     const-class v7, Landroid/content/Context;
@@ -3462,7 +3822,7 @@
 
     move-result-object p0
 
-    .line 522
+    .line 592
     new-instance v5, Landroid/os/Handler;
 
     invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
@@ -3471,7 +3831,7 @@
 
     invoke-direct {v5, v6}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
 
-    .line 523
+    .line 593
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
     move-result-object v6
@@ -3489,7 +3849,7 @@
 
     aget-object v9, v6, v8
 
-    .line 524
+    .line 594
     invoke-virtual {v9}, Ljava/lang/reflect/Method;->getName()Ljava/lang/String;
 
     move-result-object v10
@@ -3500,12 +3860,12 @@
 
     if-eqz v10, :cond_c1
 
-    .line 525
+    .line 595
     invoke-virtual {v9}, Ljava/lang/reflect/Method;->getParameterTypes()[Ljava/lang/Class;
 
     move-result-object v10
 
-    .line 526
+    .line 596
     array-length v11, v10
 
     const/4 v12, 0x3
@@ -3524,7 +3884,7 @@
 
     if-ne v10, v11, :cond_c1
 
-    .line 527
+    .line 597
     invoke-static {v4}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 
     move-result-object v1
@@ -3535,7 +3895,7 @@
 
     invoke-virtual {v9, p0, v1}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 528
+    .line 598
     const-string p0, "Screenshot taken via ScreenshotHelper"
 
     invoke-static {v0, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
@@ -3558,7 +3918,7 @@
 .method private static toggleTorch(Landroid/content/Context;)V
     .registers 8
 
-    .line 686
+    .line 756
     const-string v0, "WukongPowerKeyBridge"
 
     :try_start_2
@@ -3574,13 +3934,13 @@
 
     goto :goto_50
 
-    .line 688
+    .line 758
     :cond_d
     invoke-virtual {p0}, Landroid/hardware/camera2/CameraManager;->getCameraIdList()[Ljava/lang/String;
 
     move-result-object v1
 
-    .line 689
+    .line 759
     array-length v2, v1
 
     const/4 v3, 0x0
@@ -3590,12 +3950,12 @@
 
     aget-object v4, v1, v3
 
-    .line 690
+    .line 760
     invoke-virtual {p0, v4}, Landroid/hardware/camera2/CameraManager;->getCameraCharacteristics(Ljava/lang/String;)Landroid/hardware/camera2/CameraCharacteristics;
 
     move-result-object v5
 
-    .line 691
+    .line 761
     sget-object v6, Landroid/hardware/camera2/CameraCharacteristics;->FLASH_INFO_AVAILABLE:Landroid/hardware/camera2/CameraCharacteristics$Key;
 
     invoke-virtual {v5, v6}, Landroid/hardware/camera2/CameraCharacteristics;->get(Landroid/hardware/camera2/CameraCharacteristics$Key;)Ljava/lang/Object;
@@ -3604,7 +3964,7 @@
 
     check-cast v5, Ljava/lang/Boolean;
 
-    .line 692
+    .line 762
     sget-object v6, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
 
     invoke-virtual {v6, v5}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
@@ -3613,19 +3973,19 @@
 
     if-eqz v5, :cond_4d
 
-    .line 693
+    .line 763
     sget-boolean v1, Lcom/wukong/manager/WukongPowerKeyBridge;->sTorchState:Z
 
     xor-int/lit8 v1, v1, 0x1
 
     sput-boolean v1, Lcom/wukong/manager/WukongPowerKeyBridge;->sTorchState:Z
 
-    .line 694
+    .line 764
     sget-boolean v1, Lcom/wukong/manager/WukongPowerKeyBridge;->sTorchState:Z
 
     invoke-virtual {p0, v4, v1}, Landroid/hardware/camera2/CameraManager;->setTorchMode(Ljava/lang/String;Z)V
 
-    .line 695
+    .line 765
     new-instance p0, Ljava/lang/StringBuilder;
 
     invoke-direct {p0}, Ljava/lang/StringBuilder;-><init>()V
@@ -3660,7 +4020,7 @@
     :catchall_51
     move-exception p0
 
-    .line 700
+    .line 770
     const-string v1, "Error toggling torch"
 
     invoke-static {v0, v1, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
@@ -3671,7 +4031,7 @@
 .method private static triggerHaptic(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
     .registers 4
 
-    .line 221
+    .line 250
     invoke-static {p0}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveContext(Ljava/lang/Object;)Landroid/content/Context;
 
     move-result-object v0
@@ -3680,7 +4040,7 @@
 
     return-void
 
-    .line 225
+    .line 254
     :cond_7
     :try_start_7
     invoke-static {p0, p1}, Lcom/wukong/manager/WukongPowerKeyBridge;->resolveSetting(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
@@ -3689,7 +4049,7 @@
 
     if-eqz p0, :cond_14
 
-    .line 226
+    .line 255
     invoke-virtual {p0}, Ljava/lang/String;->isEmpty()Z
 
     move-result p1
@@ -3700,7 +4060,7 @@
 
     move-object p2, p0
 
-    .line 230
+    .line 259
     :catchall_14
     :cond_14
     invoke-static {v0, p2}, Lcom/wukong/manager/WukongPowerKeyBridge;->performVibration(Landroid/content/Context;Ljava/lang/String;)V

@@ -146,6 +146,14 @@
           <div class="mod-list" id="mod-list" aria-live="polite"></div>
           <fieldset id="launcher-features" class="mod-feature-options" hidden>
             <legend data-i18n="launcherFeaturesTitle">Launcher_mod · Chọn chức năng</legend>
+            <div class="launcher-mode-selector" role="radiogroup" aria-label="Launcher mod">
+              <label><input type="radio" name="launcher-mode" value="bundled" checked><span data-i18n="launcherBundled">MOD có sẵn</span></label>
+              <label><input type="radio" name="launcher-mode" value="patch"><span data-i18n="launcherPatch">Patch</span></label>
+            </div>
+            <p id="launcher-bundled-hint" data-i18n="launcherBundledHint">Dùng Launcher từ gói MOD của phiên bản đã chọn.</p>
+            <div id="launcher-patch-options" hidden>
+            <p data-i18n="launcherPatchHint">Patch trên Launcher gốc của ROM. Các tính năng APK cần JDK và Android SDK trên runner.</p>
+            <div class="launcher-feature-grid">
             <label><input type="checkbox" value="global_region" checked><span data-i18n="featureGlobalRegion">Bỏ giới hạn CN</span></label>
             <label><input type="checkbox" value="recents"><span data-i18n="featureRecents">Đa nhiệm máy tính bảng</span></label>
             <label><input type="checkbox" value="dock"><span data-i18n="featureDock">Làm mờ thanh dock</span></label>
@@ -155,7 +163,8 @@
             <label><input type="checkbox" value="quick_search"><span data-i18n="featureQuickSearch">Tìm kiếm nhanh Google</span></label>
             <label><input type="checkbox" value="gestures"><span data-i18n="featureGestures">Cử chỉ vuốt xuống</span></label>
             <label><input type="checkbox" value="ram"><span data-i18n="featureRam">Hiển thị RAM đa nhiệm</span></label>
-            <p data-i18n="launcherFeaturesHint">Các tính năng APK cần JDK + Android SDK trên runner.</p>
+            </div>
+            </div>
           </fieldset>
           <fieldset id="fix-noti-features" class="mod-feature-options" hidden>
             <legend data-i18n="fixNotiFeaturesTitle">Fix_noti · Chọn cấp độ</legend>

@@ -12,6 +12,42 @@ from wukong.mod_features import normalize_features, LAUNCHER_FEATURES, FIX_NOTI_
 
 
 class ModFeatureTests(unittest.TestCase):
+    def test_launcher_bundled_copies_apk_and_patch_keeps_stock_payload(self):
+        for selected in (None, ['ram'], []):
+            with self.subTest(selected=selected), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / 'mods/Launcher_mod/system_ext/priv-app/OplusLauncher/OplusLauncher.apk'
+                source.parent.mkdir(parents=True)
+                source.write_bytes(b'bundled launcher')
+                destination = root / 'rom/system_ext/priv-app/OplusLauncher/OplusLauncher.apk'
+                destination.parent.mkdir(parents=True)
+                destination.write_bytes(b'stock launcher')
+                mod = {'name': 'Launcher_mod', 'partitions': ['system_ext'], 'shared': True}
+                with patch.object(core, 'normalize_mod_version', return_value='fixture'), \
+                     patch.object(core, 'validate_mods', return_value=[mod]), \
+                     patch.object(core, 'STARK_ROOT', root / 'empty-shared'), \
+                     patch.object(core, '_mod_collection_dir', return_value=root / 'mods'), \
+                     patch.object(core, '_partition_destination', return_value=('system_ext', root / 'rom/system_ext')), \
+                     patch.object(core, '_patch_selected_launcher', return_value='system_ext') as patcher:
+                    result = core.apply_selected_mods(['Launcher_mod'], root / 'rom', {}, root,
+                                                      launcher_features=selected)
+                self.assertEqual(destination.read_bytes(), b'bundled launcher' if selected is None else b'stock launcher')
+                self.assertEqual(result['copied'], 1 if selected is None else 0)
+                if selected is None or selected == []:
+                    patcher.assert_not_called()
+                else:
+                    patcher.assert_called_once_with(root / 'rom', root, selected)
+
+    def test_missing_bundled_launcher_reports_patch_alternative(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch.object(core, 'normalize_mod_version', return_value='fixture'), \
+                 patch.object(core, 'validate_mods', return_value=[{'name': 'Launcher_mod', 'partitions': []}]), \
+                 patch.object(core, '_mod_collection_dir', return_value=root), \
+                 patch.object(core, '_patch_selected_launcher') as patcher:
+                with self.assertRaisesRegex(core.StudioError, 'chọn Patch'):
+                    core.apply_selected_mods(['Launcher_mod'], root, {}, root, launcher_features=None)
+                patcher.assert_not_called()
     def test_mini_app_defaults_to_level_one_only(self):
         from html.parser import HTMLParser
 

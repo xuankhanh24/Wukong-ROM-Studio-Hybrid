@@ -241,18 +241,25 @@ function updateChecklistItem(id, done, completeKey, pendingKey) {
 function updateSummary() {
   const selected = selectedMods();
   const wkPatches = $("#wk-manager-patches");
-  if (wkPatches) wkPatches.hidden = !selected.includes("WK_Manager");
+  if (wkPatches) wkPatches.hidden = !selectedMods().includes("WK_Manager");
   const launcherFeatures = $("#launcher-features");
-  if (launcherFeatures) launcherFeatures.hidden = !selected.includes("Launcher_mod");
+  if (launcherFeatures) launcherFeatures.hidden = !selectedMods().includes("Launcher_mod");
+  const patchLauncher = $('#launcher-features input[name="launcher-mode"]:checked')?.value === "patch";
+  const launcherOptions = $("#launcher-patch-options");
+  if (launcherOptions) launcherOptions.hidden = !patchLauncher;
+  const bundledHint = $("#launcher-bundled-hint");
+  if (bundledHint) bundledHint.hidden = patchLauncher;
   const fixNotiFeatures = $("#fix-noti-features");
-  if (fixNotiFeatures) fixNotiFeatures.hidden = !selected.includes("Fix_noti");
+  if (fixNotiFeatures) fixNotiFeatures.hidden = !selectedMods().includes("Fix_noti");
   const featureSummary = $("#mod-feature-summary");
   if (featureSummary) {
     const parts = [];
-    if (selected.includes("Launcher_mod")) parts.push(t("launcherSelection", { count: $$("#launcher-features input:checked").length }));
+    if (selected.includes("Launcher_mod")) parts.push(patchLauncher
+      ? t("launcherSelection", { count: $$('#launcher-features input[type="checkbox"]:checked').length })
+      : `Launcher: ${t("launcherBundled")}`);
     if (selected.includes("Fix_noti")) {
       const level = $("#fix-noti-features input:checked")?.value;
-      parts.push(`Fix_noti: ${level === "level1" ? "LV1" : level === "level2" ? "LV2" : t("noApkPatch")}`);
+      parts.push(`Fix_noti: ${level === "level2" ? "LV2" : level === "level1" ? "LV1" : t("noApkPatch")}`);
     }
     if (selected.includes("WK_Manager")) parts.push(t("wkSelection", { count: $$("#wk-manager-patches input:checked").length }));
     featureSummary.hidden = parts.length === 0;
@@ -538,7 +545,8 @@ function buildRecipe() {
       preset: $("#preset").value, modVersion: selectedModVersion(), mods: selectedMods(), editionLabels: currentEditionLabels(),
       modReleaseVersion: selectedReleaseVersion(),
       wkManagerPatches: $$("#wk-manager-patches input:checked").map((input) => input.value),
-      launcherFeatures: $$("#launcher-features input:checked").map((input) => input.value),
+      launcherFeatures: $('#launcher-features input[name="launcher-mode"]:checked')?.value === "patch"
+        ? $$('#launcher-features input[type="checkbox"]:checked').map((input) => input.value) : null,
       fixNotiFeatures: $$("#fix-noti-features input:checked").map((input) => input.value),
       enabledSteps: $$("#steps input:checked").map((input) => input.value)
         .filter((step) => step !== "repack_super" || !selectedModVersion().startsWith("OxygenOS_")),

@@ -27,3 +27,12 @@
 .mod-feature-options p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .shared-mod-badge { display: block; margin-top: 4px; color: var(--muted); font: 500 12px/1.3 "Geist Sans", ui-sans-serif, system-ui, sans-serif; }
 .mod-group label > span b { font-size: 12px; white-space: normal; overflow-wrap: anywhere; }
+#launcher-features { grid-template-columns: minmax(0, 1fr); }
+.launcher-mode-selector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.launcher-mode-selector .feature-checkmark { border-radius: 50%; }
+#launcher-patch-options { display: grid; gap: 12px; }
+#launcher-patch-options[hidden], #launcher-bundled-hint[hidden] { display: none; }
+.launcher-feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
+@media (max-width: 640px) {
+  .launcher-feature-grid { grid-template-columns: minmax(0, 1fr); }
+}

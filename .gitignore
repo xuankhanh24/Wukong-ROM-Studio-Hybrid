@@ -8,6 +8,9 @@ Auto_Build_WK_*.zip
 /.build-validate-*/
 /.tmp/
 /Backups/
+/backup/
+/artifacts/
+/29
 /Updates/
 /Workspace/
 /Temp/

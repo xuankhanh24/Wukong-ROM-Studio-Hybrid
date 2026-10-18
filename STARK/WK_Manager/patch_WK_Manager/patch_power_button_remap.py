@@ -85,19 +85,43 @@ def transform(text, helpers):
         def max_count(method):
             if bridge + "->getMaxCount" in method:
                 return method
+            declaration = re.search(r"\.(locals|registers)\s+(\d+)", method)
+            if not declaration:
+                raise helpers.PatchError("getMaxMultiPressCount: missing register declaration")
+            owner_register = int(declaration[2]) - (declaration[1] == "registers")
+
+            def hook_return(match):
+                indent, register = match[1], match[2]
+                result_register = owner_register if register == "p0" else int(register[1:])
+                if owner_register <= 15 and result_register <= 15 and register != "p0":
+                    invoke = f"invoke-static {{p0, {register}}}, {bridge}->getMaxCount(Ljava/lang/Object;I)I"
+                else:
+                    # 35c invokes accept only four-bit physical registers.
+                    invoke = f"invoke-static/range {{{register} .. {register}}}, {bridge}->getMaxCount(I)I"
+                return f"{indent}{invoke}\n{indent}move-result {register}\n{match[0]}"
+
             result, count = re.subn(
                 r"(?m)^([ \t]*)return ([vp]\d+)[ \t]*$",
-                lambda m: f"{m[1]}invoke-static {{p0, {m[2]}}}, {bridge}->getMaxCount(Ljava/lang/Object;I)I\n"
-                          f"{m[1]}move-result {m[2]}\n{m[0]}", method)
-            if not count:
-                result, count = re.subn(
-                    r"(?m)^([ \t]*)return ([vp]\d+)[ \t]*$",
-                    lambda m: f"{m[1]}invoke-static/range {{{m[2]} .. {m[2]}}}, {bridge}->getMaxCount(I)I\n"
-                              f"{m[1]}move-result {m[2]}\n{m[0]}", method)
+                hook_return, method)
             if not count:
                 raise helpers.PatchError("getMaxMultiPressCount: no integer return")
             return result
         text = helpers._edit(text, signature, max_count)
+
+    signature = "supportLongPress()Z"
+    if helpers._pattern(signature).search(text):
+        def support_long_press(method):
+            if bridge + "->isMasterEnabled" in method:
+                return method
+            if ":wk_power_support_original" in method:
+                raise helpers.PatchError("Power support label collision")
+            return helpers._entry(method, f"""    invoke-static/range {{p0 .. p0}}, {bridge}->isMasterEnabled(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :wk_power_support_original
+    return v0
+    :wk_power_support_original
+""", 1)
+        text = helpers._edit(text, signature, support_long_press)
     return text
 
 

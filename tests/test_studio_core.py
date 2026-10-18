@@ -520,6 +520,360 @@ class StudioCoreTests(unittest.TestCase):
             self.assertEqual(result["modifiedPartitions"], ["system"])
             self.assertEqual((destination / "version.txt").read_text(encoding="utf-8"), "800")
 
+    def test_cts_gemini_patches_systemui_and_keeps_partition_payloads(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            stark = root / "STARK"
+            mod = stark / "Cts_Gemini"
+            payload = mod / "my_region" / "etc" / "extension" / "fixture.xml"
+            payload.parent.mkdir(parents=True)
+            payload.write_text("region-payload\n", encoding="utf-8")
+
+            unpack = root / "rom-unpack"
+            region = unpack / "my_region_unpacked" / "my_region"
+            systemui = (
+                unpack
+                / "system_ext_unpacked"
+                / "system_ext"
+                / "priv-app"
+                / "SystemUI"
+                / "SystemUI.apk"
+            )
+            region.mkdir(parents=True)
+            systemui.parent.mkdir(parents=True)
+            systemui.write_bytes(b"stock-systemui")
+
+            def patch_systemui(*_args):
+                systemui.write_bytes(b"patched-systemui")
+                return "system_ext"
+
+            fixture_mod = {
+                "name": "Cts_Gemini",
+                "partitions": ["my_region"],
+                "shared": True,
+            }
+            with mock.patch.object(studio_core, "STARK_ROOT", stark), mock.patch.object(
+                studio_core, "validate_mods", return_value=[fixture_mod]
+            ), mock.patch.object(
+                studio_core, "normalize_mod_version", return_value="ColorOS_16.0.7"
+            ), mock.patch.object(
+                studio_core,
+                "_patch_selected_stark_archive",
+                side_effect=patch_systemui,
+                create=True,
+            ) as patcher:
+                result = studio_core.apply_selected_mods(
+                    ["Cts_Gemini"], unpack, {"soc": "86xx"}, root / "workspace"
+                )
+
+            patcher.assert_called_once_with("Cts_Gemini", unpack, root / "workspace")
+            self.assertEqual(systemui.read_bytes(), b"patched-systemui")
+            self.assertEqual(
+                (region / "etc" / "extension" / "fixture.xml").read_text(encoding="utf-8"),
+                "region-payload\n",
+            )
+            self.assertEqual(result["copied"], 1)
+            self.assertEqual(result["patched"], 1)
+            self.assertEqual(result["modifiedPartitions"], ["my_region", "system_ext"])
+
+    def test_fix_noti_feature_patch_keeps_marker_payload_without_replacing_apk(self):
+        for features in (["level1"], ["level2"]):
+            with self.subTest(features=features), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                stark = root / "STARK"
+                mod = stark / "Fix_noti"
+                region_payload = (
+                    mod / "my_region" / "etc" / "battery" / "sys_deviceidle_whitelist.xml"
+                )
+                prepared_apk = mod / "system_ext" / "app" / "Athena" / "Athena.apk"
+                region_payload.parent.mkdir(parents=True)
+                prepared_apk.parent.mkdir(parents=True)
+                region_payload.write_text("region-payload\n", encoding="utf-8")
+                prepared_apk.write_bytes(b"prepared-athena")
+
+                unpack = root / "rom-unpack"
+                region_target = (
+                    unpack
+                    / "my_region_unpacked"
+                    / "my_region"
+                    / "etc"
+                    / "battery"
+                    / "sys_deviceidle_whitelist.xml"
+                )
+                athena = (
+                    unpack
+                    / "system_ext_unpacked"
+                    / "system_ext"
+                    / "app"
+                    / "Athena"
+                    / "Athena.apk"
+                )
+                region_target.parent.mkdir(parents=True)
+                athena.parent.mkdir(parents=True)
+                region_target.write_text("stock-region\n", encoding="utf-8")
+                athena.write_bytes(b"stock-athena")
+
+                def patch_athena(*_args):
+                    athena.write_bytes(b"patched-athena")
+                    return "system_ext"
+
+                fixture_mod = {
+                    "name": "Fix_noti",
+                    "partitions": ["my_region", "system_ext"],
+                    "shared": True,
+                }
+                with mock.patch.object(studio_core, "STARK_ROOT", stark), mock.patch.object(
+                    studio_core, "validate_mods", return_value=[fixture_mod]
+                ), mock.patch.object(
+                    studio_core, "normalize_mod_version", return_value="ColorOS_16.0.7"
+                ), mock.patch.object(
+                    studio_core, "_patch_selected_noti", side_effect=patch_athena
+                ), mock.patch.object(
+                    studio_core,
+                    "_patch_jar_with_apktool",
+                    return_value={"patchedMethods": 1},
+                ) as jar_patcher:
+                    result = studio_core.apply_selected_mods(
+                        ["Fix_noti"],
+                        unpack,
+                        {"soc": "86xx"},
+                        root / "workspace",
+                        fix_noti_features=features,
+                    )
+
+                self.assertEqual(region_target.read_text(encoding="utf-8"), "region-payload\n")
+                self.assertEqual(athena.read_bytes(), b"patched-athena")
+                self.assertEqual(result["copied"], 1)
+                self.assertIn("my_region", result["modifiedPartitions"])
+                jar_patcher.assert_called_once()
+                self.assertEqual(jar_patcher.call_args.args[0].name, "oplus-services.jar")
+                self.assertIs(jar_patcher.call_args.args[2], studio_core._patch_fix_noti_smali)
+                self.assertIn("system", result["modifiedPartitions"])
+
+    def test_empty_feature_selection_skips_the_entire_feature_mod(self):
+        for mod_name, feature_name in (
+            ("Fix_noti", "fix_noti_features"),
+            ("Launcher_mod", "launcher_features"),
+        ):
+            with self.subTest(mod=mod_name), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                payload = root / "STARK" / mod_name / "my_region" / "fixture.xml"
+                payload.parent.mkdir(parents=True)
+                payload.write_text("prepared\n", encoding="utf-8")
+                destination = (
+                    root
+                    / "rom-unpack"
+                    / "my_region_unpacked"
+                    / "my_region"
+                    / "fixture.xml"
+                )
+                destination.parent.mkdir(parents=True)
+                destination.write_text("stock\n", encoding="utf-8")
+                fixture_mod = {
+                    "name": mod_name,
+                    "partitions": ["my_region"],
+                    "shared": True,
+                }
+                kwargs = {feature_name: []}
+
+                with mock.patch.object(
+                    studio_core, "STARK_ROOT", root / "STARK"
+                ), mock.patch.object(
+                    studio_core, "validate_mods", return_value=[fixture_mod]
+                ), mock.patch.object(
+                    studio_core, "normalize_mod_version", return_value="ColorOS_16.0.7"
+                ):
+                    result = studio_core.apply_selected_mods(
+                        [mod_name],
+                        root / "rom-unpack",
+                        {"soc": "86xx"},
+                        root / "workspace",
+                        **kwargs,
+                    )
+
+                self.assertEqual(destination.read_text(encoding="utf-8"), "stock\n")
+                self.assertEqual(result["mods"], [])
+                self.assertEqual(result["copied"], 0)
+                self.assertEqual(result["patched"], 0)
+
+    def test_legacy_run_dispatches_shared_stark_patchers_through_studio_core(self):
+        legacy = studio_core._load_legacy()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            stark = root / "STARK"
+            (stark / "Cts_Gemini").mkdir(parents=True)
+            empty_mod = root / "MOD"
+            empty_mod.mkdir()
+            with mock.patch.object(legacy, "STARK_DIR", str(stark)), mock.patch.object(
+                legacy, "MOD_DIR", str(empty_mod)
+            ), mock.patch("builtins.input", return_value="2"):
+                selected = legacy.select_mod_folder()
+
+            self.assertEqual(Path(selected), stark / "Cts_Gemini")
+            report = {"copied": 2, "patched": 1}
+            with mock.patch.object(
+                studio_core, "apply_selected_mods", return_value=report
+            ) as apply:
+                changed = legacy.apply_mod(
+                    selected,
+                    str(root / "rom-unpack"),
+                    {"soc": "86xx"},
+                )
+
+            self.assertEqual(changed, 3)
+            self.assertEqual(apply.call_args.args[0], ["Cts_Gemini"])
+            self.assertEqual(apply.call_args.args[1], root / "rom-unpack")
+
+            with mock.patch.object(
+                studio_core, "apply_selected_mods", return_value=report
+            ) as apply:
+                legacy.apply_mod(
+                    str(stark / "Fix_noti"),
+                    str(root / "rom-unpack"),
+                    {"soc": "86xx"},
+                )
+            self.assertEqual(apply.call_args.kwargs["fix_noti_features"], ["level2"])
+
+    def test_every_stark_patch_directory_is_integrated_with_the_build_pipeline(self):
+        stark = Path(studio_core.__file__).resolve().parent / "STARK"
+        discovered = {
+            mod_dir.name
+            for mod_dir in stark.iterdir()
+            if mod_dir.is_dir()
+            and any(
+                child.is_dir() and child.name.startswith("patch_")
+                for child in mod_dir.iterdir()
+            )
+        }
+        self.assertEqual(discovered, set(studio_core.INTEGRATED_PATCH_MODS))
+
+    def test_script_only_shared_patch_mod_is_visible_and_ready(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            mod_root = root / "MOD"
+            (mod_root / "ColorOS_16.0.7").mkdir(parents=True)
+            patch_dir = root / "STARK" / "Chat_bubbles" / "patch_Chat_bubbles"
+            patch_dir.mkdir(parents=True)
+            (patch_dir / "patch_chat_bubbles.py").write_text("# fixture\n", encoding="utf-8")
+
+            mods = studio_core.list_mods(mod_root=mod_root)
+
+            found = next(mod for mod in mods if mod["name"] == "Chat_bubbles")
+            self.assertTrue(found["shared"])
+            self.assertTrue(found["ready"])
+            self.assertEqual(found["partitions"], [])
+
+    def test_every_script_archive_mod_is_dispatched_during_apply(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            mods = [
+                {"name": name, "partitions": [], "shared": True}
+                for name in studio_core.SCRIPT_ARCHIVE_PATCH_SPECS
+            ]
+            expected_partitions = {
+                name: str(spec["partition"])
+                for name, spec in studio_core.SCRIPT_ARCHIVE_PATCH_SPECS.items()
+            }
+
+            def dispatch(name, *_args):
+                return expected_partitions[name]
+
+            with mock.patch.object(studio_core, "validate_mods", return_value=mods), mock.patch.object(
+                studio_core, "normalize_mod_version", return_value="ColorOS_16.0.7"
+            ), mock.patch.object(
+                studio_core, "_patch_selected_stark_archive", side_effect=dispatch
+            ) as patcher:
+                result = studio_core.apply_selected_mods(
+                    list(studio_core.SCRIPT_ARCHIVE_PATCH_SPECS),
+                    root / "rom-unpack",
+                    {"soc": "86xx"},
+                    root / "workspace",
+                )
+
+            self.assertEqual(
+                [call.args[0] for call in patcher.call_args_list],
+                list(studio_core.SCRIPT_ARCHIVE_PATCH_SPECS),
+            )
+            self.assertEqual(result["patched"], len(studio_core.SCRIPT_ARCHIVE_PATCH_SPECS))
+            self.assertEqual(
+                result["modifiedPartitions"], sorted(set(expected_partitions.values()))
+            )
+
+    def test_script_archive_dispatcher_uses_registered_target_and_cli(self):
+        for name, spec in studio_core.SCRIPT_ARCHIVE_PATCH_SPECS.items():
+            with self.subTest(mod=name), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                stark = root / "STARK"
+                script = stark / str(spec["script"])
+                script.parent.mkdir(parents=True)
+                script.write_text("# fixture patcher\n", encoding="utf-8")
+                partition = str(spec["partition"])
+                relative = Path(str(spec["relativeTarget"]))
+                stock = root / "rom-unpack" / f"{partition}_unpacked" / partition / relative
+                stock.parent.mkdir(parents=True)
+                with zipfile.ZipFile(stock, "w") as archive:
+                    archive.writestr("payload", b"stock")
+                optimized = stock.parent / "oat" / "arm64" / f"{stock.stem}.vdex"
+                optimized.parent.mkdir(parents=True)
+                optimized.write_bytes(b"stale-vdex")
+                profile = Path(f"{stock}.prof")
+                profile.write_bytes(b"stale-profile")
+                workspace = root / "workspace"
+                output = workspace / "mod-tools" / name / stock.name
+
+                def run(command, **_kwargs):
+                    with zipfile.ZipFile(output, "w") as archive:
+                        archive.writestr("payload", b"patched")
+
+                with mock.patch.object(studio_core, "STARK_ROOT", stark), mock.patch.object(
+                    studio_core, "_run_command", side_effect=run
+                ) as runner:
+                    result = studio_core._patch_selected_stark_archive(
+                        name, root / "rom-unpack", workspace
+                    )
+
+                self.assertEqual(result, partition)
+                with zipfile.ZipFile(stock) as archive:
+                    self.assertEqual(archive.read("payload"), b"patched")
+                self.assertFalse(optimized.exists())
+                self.assertFalse(profile.exists())
+                command = runner.call_args.args[0]
+                self.assertEqual(command[:2], [studio_core.sys.executable, str(script)])
+                self.assertIn(str(stock), command)
+                self.assertIn(str(output), command)
+
+    def test_mod_payload_does_not_silently_skip_an_unavailable_partition(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            stark = root / "STARK"
+            mod = stark / "Fixture"
+            missing_payload = mod / "my_region" / "etc" / "marker.xml"
+            applied_payload = mod / "system" / "etc" / "applied.xml"
+            missing_payload.parent.mkdir(parents=True)
+            applied_payload.parent.mkdir(parents=True)
+            missing_payload.write_text("region\n", encoding="utf-8")
+            applied_payload.write_text("system\n", encoding="utf-8")
+            unpack = root / "rom-unpack"
+            (unpack / "system_unpacked" / "system").mkdir(parents=True)
+            fixture_mod = {
+                "name": "Fixture",
+                "partitions": ["my_region", "system"],
+                "shared": True,
+            }
+
+            with mock.patch.object(studio_core, "STARK_ROOT", stark), mock.patch.object(
+                studio_core, "validate_mods", return_value=[fixture_mod]
+            ), mock.patch.object(
+                studio_core, "normalize_mod_version", return_value="ColorOS_16.0.7"
+            ):
+                with self.assertRaisesRegex(
+                    studio_core.StudioError,
+                    "Fixture payload targets unavailable ROM partition: my_region",
+                ):
+                    studio_core.apply_selected_mods(
+                        ["Fixture"], unpack, None, root / "workspace"
+                    )
+
     def test_lite_and_resume_presets_select_expected_mods(self):
         lite = studio_core.BuildSpec.from_dict({"romPath": "rom.zip", "preset": "lite"})
         resume = studio_core.BuildSpec.from_dict({"romPath": "rom.zip", "preset": "resume"})
@@ -2609,6 +2963,8 @@ class StudioCoreTests(unittest.TestCase):
                 return_value={"copied": 0, "copiedBytes": 0, "patched": 0},
             ), mock.patch.object(
                 studio_core, "_refresh_plat_sepolicy_hash", return_value={"sha256": "fixture"}
+            ), mock.patch.object(
+                studio_core, "_patch_selected_noti", return_value=None
             ):
                 result = studio_core.apply_selected_mods(
                     ["Fix_noti", "WK_Manager"],
@@ -2616,6 +2972,7 @@ class StudioCoreTests(unittest.TestCase):
                     None,
                     root,
                     progress_callback=progress_events.append,
+                    fix_noti_features=["level1"],
                 )
 
             self.assertEqual([call[0] for call in calls], ["framework.jar", "services.jar", "oplus-services.jar"])
@@ -2679,12 +3036,15 @@ class StudioCoreTests(unittest.TestCase):
             ), mock.patch(
                 "wk_manager_patcher.patch_disable_flag_secure_oplus_services_decoded",
                 return_value={"patchedMethods": 4},
+            ), mock.patch.object(
+                studio_core, "_patch_selected_noti", return_value=None
             ):
                 result = studio_core.apply_selected_mods(
                     ["Fix_noti", "Disable_flag_secure"],
                     root / "rom-unpack",
                     None,
                     root,
+                    fix_noti_features=["level2"],
                 )
 
             self.assertEqual(calls, ["services.jar", "oplus-services.jar"])

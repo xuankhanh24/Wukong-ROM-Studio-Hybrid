@@ -5,6 +5,17 @@ namespace WukongStudio.Tests;
 public sealed class StudioBuildProfileTests
 {
     [Fact]
+    public void BundledLauncherModeRemainsDistinctFromPatchModeAfterSaving()
+    {
+        var bundled = StudioBuildProfile.Create("bundled", "ColorOS_16.0.10", "custom",
+            ["Launcher_mod"], [], ["apply_mod"], false);
+        Assert.Null(StudioBuildProfile.Parse(bundled.ToJson()).LauncherFeatures);
+        var patch = bundled with { LauncherFeatures = ["global_region", "ram"] };
+        Assert.Equal(new[] { "global_region", "ram" },
+            StudioBuildProfile.Parse(patch.ToJson()).LauncherFeatures);
+    }
+
+    [Fact]
     public void FixNotiDefaultsToLevelOneOnly()
     {
         Assert.Equal(new[] { "level1" }, StudioModFeatures.FixNoti

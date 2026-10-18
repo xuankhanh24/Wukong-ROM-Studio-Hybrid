@@ -20,7 +20,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from patch_common import run_tool, rewrite_archive, align_apk, find_tool as shared_tool, require_tool
-
 # Đảm bảo in tiếng Việt không bị lỗi charmap trên terminal Windows
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -214,7 +213,6 @@ def patch_archive(input_file: Path, output_file: Path) -> bool:
         print(f"[*] Đang đóng gói file xuất xưởng: {output_file.name}...")
 
         shutil.copyfile(out_dex, output_file)
-
         print("\n" + "="*60)
         print(f"[OK] VÁ THÀNH CÔNG! ĐÃ XUẤT RA:")
         print(f"     -> {output_file.resolve()}")

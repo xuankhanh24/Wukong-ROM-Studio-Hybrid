@@ -250,7 +250,7 @@ def patch_decoded(decoded: Path, patches, jar="oplus-services"):
                 else:
                     edits[path] = content
 
-    # Validate every selected target before writing any of them.
+    # OEM JARs contain call sites only; bridge implementations belong to framework.
     changed = methods_changed = 0
     for path, content in edits.items():
         original = path.read_text(encoding="utf-8")
@@ -261,7 +261,8 @@ def patch_decoded(decoded: Path, patches, jar="oplus-services"):
             path.write_bytes(content.encode("utf-8"))
             changed += 1
     return {"jar": jar + ".jar", "patchedClasses": changed,
-            "patchedMethods": methods_changed + methods_from_delegates, "patches": list(selected)}
+            "patchedMethods": methods_changed + methods_from_delegates,
+            "importedSmali": 0, "patches": list(selected)}
 
 
 def _selection(patches):

@@ -88,6 +88,29 @@ both known callback families, preserves OEM fallback behavior and is idempotent.
 Unknown callback signatures stop with an error instead of passing primitive values
 to an object bridge. The legacy multi-press count is `p3`; `p4` is the display ID.
 
+## WK_FW power remap update
+
+The canonical power helper is the operator-updated
+`WK_Manager/patch_WK_Manager/com/wukong/manager/WukongPowerKeyBridge.smali`.
+The patcher imports that file as supplied; it does not overwrite it from WK_FW.
+It reads the master switch, long/double/triple actions and vibration settings from
+Settings.Global, with the helper's Settings.System compatibility fallback. No
+`power_remap.prop` file is needed. Existing app actions, camera/keyguard handling,
+torch, screenshot and Circle to Search come from this single helper.
+
+All `com/wukong/...` helper and hook implementations belong in `framework.jar`,
+including the power bridge. `oplus-services.jar` retains only the small OEM
+call-site edits in `SinglePowerKeyMonitor$OplusPowerKeyRule`; it must not contain
+an injected copy of the power bridge. Selecting only `power_button_remap` patches
+framework and oplus-services, leaving `services.jar` unchanged. Legacy full-MOD
+imports use the same framework ownership. Both
+object-gesture and legacy callbacks remain supported. Existing OEM max-count
+logic is preserved, and an existing `supportLongPress()` override is enabled only
+while the master switch is on, retaining its original fallback when off.
+
+Workspace pipeline 28 requires a fresh build instead of resuming a previous
+oplus-services-owned power bridge. Run the real OEM and assembly tests below against
+the `WK_FW/test_baksmali` class to validate the updated hook without flashing.
 ## Settings CLI
 
 ```powershell
@@ -98,21 +121,48 @@ Every invocation uses isolated scratch and cleans it on failure. Updating shared
 STARK content requires explicit `--deploy-to-stark`; unattended execution does not
 overwrite the shared Settings APK as a side effect.
 
+The Settings OTA/media helper family is synchronized from the operator's
+`mod_stark/settings/patch_universal/smali` sources, including all ten nested/helper
+classes. The pipeline rebuilds only the DEX defining
+`AboutDeviceOtaUpdatePreference`, preserves the stock access/static modifiers of
+`getTargetIntentStatic`, and calls `WkOtaCardHook.onBind(Object,Object)` at normal
+returns from `onBindViewHolder`. A range invoke supports high parameter registers
+without allocating scratch registers. The stock video methods, OTA controller,
+listener and resource IDs are no longer patched independently. Missing bind
+callbacks fail explicitly. Workspace pipeline 29 invalidates old resume results.
 ## Shared catalog and compatibility
 
 The seven feature modules above, plus WK Manager/Fake Lock/WK Installer, use the
 shared STARK catalog for Windows and Telegram. Shared location/catalog visibility
-does not make a prebuilt OEM APK compatible with every firmware. Existing ROM
-assembly still copies prepared partition payloads for legacy recipes. Explicit
-`launcherFeatures` selections run the Launcher patcher on the ROM's stock APK for
+does not make a prebuilt OEM APK compatible with every firmware. ROM assembly runs
+the stock-archive patchers for Camera, Chat Bubbles, CTS/Gemini, Hasselblad and
+Settings; Launcher, Fix Notification and WK Manager retain their specialized
+dispatchers. A coverage test fails when a new top-level `patch_*` directory is added
+without a pipeline registration.
+
+The archive owned by a patcher is never copied back from an old prepared payload,
+so a successful patch cannot be overwritten later in the same MOD pass. Stale
+`oat`, `.prof`, `.dm`, `.art`, `.odex` and `.vdex` companions are removed after the
+patched archive is atomically published. Other files under marker partition folders
+such as `my_region` and `my_product` are still copied or applied as `stark_*` line
+patches. A marker payload targeting a partition that was not unpacked now stops the
+build instead of being silently skipped. When a shared module contains only its
+patcher, an installed version-specific marker payload can still supply the non-owned
+files.
+
+This integration increments the workspace pipeline version, so an old resume
+workspace cannot silently reuse a pre-fix Apply MOD result.
+
+Explicit `launcherFeatures` selections run the Launcher patcher on the ROM's stock APK for
 the selected APK features; `global_region` alone only applies the region XML patch.
 APK features require JDK (`javac`) and Android SDK (`d8`, `android.jar`) on the runner.
 Explicit `fixNotiFeatures` accepts only `level1` or `level2`, never both. Each level
-runs Athena with its matching 15 XML configs. LV2 also applies the existing external
-notification whitelist/feature patches and UID observer hook; LV1 leaves those
-additional heavy-duty patches untouched. An empty selection skips that mod's work.
-Missing fields preserve legacy behavior. Other prepared payloads must still match
-the stock firmware before use on another ROM.
+runs Athena with its matching 15 XML configs. Both levels apply the external
+notification marker payloads and patch the UID observer branch in
+`oplus-services.jar` to two `nop` instructions, including when combined with
+WK Manager or Disable Flag Secure. An empty selection skips that mod's work.
+Missing fields preserve legacy behavior. Non-archive prepared payloads must still
+match the stock firmware before use on another ROM.
 No device boot, ART verification or feature performance guarantee follows from a
 successful script build alone.
 
