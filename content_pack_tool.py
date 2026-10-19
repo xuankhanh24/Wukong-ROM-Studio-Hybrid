@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from wukong.actions_ui import GitHubActionsUI
 
 from wukong.content_packs import (
     ContentPackManager,
@@ -67,7 +68,19 @@ def main() -> int:
     elif args.command == "install":
         if not args.pack:
             parser.error("--pack is required for install")
-        ContentPackManager(content_root, rclone_config=config).install(index, args.pack)
+        ui = GitHubActionsUI()
+        def report(values):
+            ui.event({'type': 'download_progress', 'stage': 'content', 'provider': 'Content pack',
+                      'fileName': args.pack, **dict(values)})
+        ui.begin('content')
+        try:
+            ContentPackManager(content_root, rclone_config=config,
+                               progress_callback=report if ui.enabled else None).install(index, args.pack)
+        except Exception as error:
+            ui.failure('content', str(error))
+            raise
+        ui.event({'type': 'step', 'step': 'content', 'status': 'success'})
+        ui.write_transfer_summary()
     else:
         if not args.pack:
             parser.error("--pack is required for verify")

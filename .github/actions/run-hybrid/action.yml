@@ -54,7 +54,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: "Công cụ hệ thống / System tools"
+    - name: "Cài công cụ build / System tools"
       shell: bash
       run: |
         set -euo pipefail
@@ -62,7 +62,7 @@ runs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends cpio p7zip-full brotli zstd rclone e2fsprogs lz4 zip unzip
         python3 -m pip install --user -r requirements.txt
-    - name: "B · Quyền truy cập Drive / Private Drive access"
+    - name: "Kết nối kho riêng / Storage access"
       shell: bash
       env:
         RCLONE_CONFIG_B64: ${{ inputs.rclone_config_b64 }}
@@ -87,11 +87,11 @@ runs:
       run: |
         set -euo pipefail
         python3 -m tools.dccloud_preflight --config .wkstudio/secrets/rclone.conf --write-test --optional
-    - name: "B2 · Thư mục job dùng chung / Shared job store"
+    - name: "Chuẩn bị job store / Prepare job store"
       shell: bash
       run: |
         printf '%s\n' 'WUKONG_ACTIONS_JOBS_ROOT=.wkstudio/Jobs/hybrid' >> "$GITHUB_ENV"
-    - name: "Tải recipe & content-pack / Fetch build content"
+    - name: "Tải và xác minh MOD / Fetch verified content"
       shell: bash
       env:
         RECIPE_REF: ${{ inputs.recipe_ref }}
@@ -117,9 +117,9 @@ runs:
               return
             fi
             if python3 content_pack_tool.py verify --content-root . --index content-packs/index.json --pack "$pack" >/dev/null 2>&1; then
-              echo "[Wukong] Content cache hit: $pack"
+              echo "[CACHE HIT] $pack · Dùng bản đã xác minh / Reuse verified content"
             else
-              echo "[Wukong] Content cache miss: $pack"
+              echo "[CACHE MISS] $pack · Bắt đầu tải / Starting download"
               python3 content_pack_tool.py install --content-root . --index content-packs/index.json --pack "$pack" --rclone-config "$WUKONG_RCLONE_CONFIG"
             fi
           }
@@ -182,7 +182,7 @@ runs:
         printf '%s\n' 'WUKONG_PREPARATION_STAGE=toolchain' >> "$GITHUB_ENV"
         python3 -m tools.bootstrap_linux
         python3 -m tools.smoke_linux
-    - name: "E · Pipeline 05–19 · Thực thi pipeline ROM / Execute staged ROM build"
+    - name: "Build ROM · mở để xem công đoạn 05–19 / Expand stage logs"
       id: execute
       shell: bash
       env:
@@ -240,7 +240,7 @@ runs:
           wait "$reporter_pid" 2>/dev/null || true
         fi
         echo "result=$result" >> "$GITHUB_OUTPUT"
-    - name: "Tải log build đầy đủ / Upload full build log"
+    - name: "Lưu log đầy đủ / Save full build log"
       if: always()
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:

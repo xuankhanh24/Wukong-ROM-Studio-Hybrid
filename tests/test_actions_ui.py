@@ -14,6 +14,75 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class GitHubActionsUITests(unittest.TestCase):
+    def test_transfer_summary_preserves_last_speed_and_deduplicates_provider_aliases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'summary.md'
+            ui = GitHubActionsUI(enabled=True, summary_path=path)
+            with redirect_stdout(io.StringIO()):
+                ui.event({'type': 'upload_progress', 'provider': 'Google Drive', 'fileName': 'rom.zip',
+                          'bytes': 50, 'totalBytes': 100, 'percent': 50, 'speedBytesPerSecond': 10})
+                ui.event({'type': 'upload_progress', 'provider': 'gdrive', 'fileName': 'rom.zip',
+                          'bytes': 100, 'totalBytes': 100, 'percent': 100, 'etaSeconds': 0, 'status': 'complete'})
+                ui.write_transfer_summary()
+            summary = path.read_text(encoding='utf-8')
+            self.assertEqual(summary.count('| UPLOAD | Google Drive | rom.zip |'), 1)
+            self.assertIn('100.0%', summary)
+            self.assertIn('10.00 B/s', summary)
+
+    def test_transfer_names_are_redacted_and_cannot_inject_workflow_commands(self):
+        ui = GitHubActionsUI(enabled=True)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            ui.event({'type': 'download_progress',
+                      'fileName': 'https://example.test/rom.zip?token=never-print-this-123\n::error::injected',
+                      'bytes': 10, 'percent': None, 'totalBytes': None})
+        self.assertNotIn('never-print-this-123', output.getvalue())
+        self.assertFalse(any(line.startswith('::error') for line in output.getvalue().splitlines()))
+
+    def test_each_mod_has_a_flat_collapsible_group_and_failure_keeps_its_context(self):
+        ui = GitHubActionsUI(enabled=True)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            for index, name in enumerate(('Camera_mod', 'Launcher_mod'), 1):
+                ui.event({'type': 'step', 'step': 'apply_mod', 'status': 'running',
+                          'message': f'MOD {index}/2 · {name}', 'details': {'phase': 'Plus'}})
+            ui.failure('apply_mod', 'fixture failure')
+        lines = output.getvalue().splitlines()
+        depth = 0
+        for line in lines:
+            if line.startswith('::group::'):
+                depth += 1
+                self.assertEqual(depth, 1, 'GitHub groups must not nest')
+            elif line == '::endgroup::':
+                depth -= 1
+        self.assertEqual(depth, 0)
+        self.assertIn('::group::10 · Plus · MOD 2/2 · Launcher_mod', output.getvalue())
+        self.assertIn('Operation: MOD 2/2 · Launcher_mod', output.getvalue())
+
+    def test_progress_is_throttled_but_completion_and_other_files_are_not_hidden(self):
+        from unittest.mock import patch
+        ui = GitHubActionsUI(enabled=True)
+        output = io.StringIO()
+        with redirect_stdout(output), patch('wukong.actions_ui.time.monotonic', return_value=10):
+            for percent in (0, 10, 20, 100):
+                ui.event({'type': 'upload_progress', 'fileName': 'rom.zip', 'bytes': percent,
+                          'totalBytes': 100, 'percent': percent})
+            ui.event({'type': 'upload_progress', 'fileName': 'other.zip', 'bytes': 1, 'totalBytes': 100, 'percent': 1})
+        self.assertEqual(output.getvalue().count('[UPLOAD]'), 3)
+        self.assertIn('100.0%', output.getvalue())
+
+    def test_upload_and_download_logs_show_percent_speed_size_eta_without_secrets(self):
+        reporter = GitHubActionsUI(enabled=True)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            for direction in ('download', 'upload'):
+                reporter.event({'type': direction + '_progress', 'stage': direction,
+                    'fileName': 'rom.zip', 'bytes': 512 * 1024**2, 'totalBytes': 1024**3,
+                    'percent': 50, 'speedBytesPerSecond': 8 * 1024**2, 'etaSeconds': 64})
+        rendered = output.getvalue()
+        for text in ('DOWNLOAD', 'UPLOAD', '50.0%', '512.00 MiB', '1.00 GiB', '8.00 MiB/s', '01:04'):
+            self.assertIn(text, rendered)
+
     def test_failure_is_visible_outside_collapsed_group_and_in_summary(self):
         recipe = BuildRecipe.from_dict({
             'schemaVersion': 1, 'task': 'source_mirror', 'device': 'PKG110',
@@ -182,7 +251,7 @@ class GitHubActionsUITests(unittest.TestCase):
         self.assertNotIn("rclone copyto .wkstudio/recipe.json", workflow)
         self.assertNotIn("CALLBACK_SECRET: ${{ github.token }}", workflow)
         self.assertIn("GITHUB_STEP_SUMMARY", workflow)
-        self.assertIn("E · Pipeline 05–19", action)
+        self.assertIn("Build ROM · mở để xem công đoạn 05–19", action)
         self.assertIn(
             "python3 -m tools.merge_source_probe --recipe .wkstudio/recipe.json --probe .wkstudio/source-probe.json",
             action,

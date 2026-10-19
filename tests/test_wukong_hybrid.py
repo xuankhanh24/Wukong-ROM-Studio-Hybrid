@@ -390,7 +390,7 @@ class SourceAndStorageContractTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as root:
             target = Path(root, "rom.zip")
-            result = HttpSourceAdapter(
+            adapter = HttpSourceAdapter(
                 attempts=1,
                 opener=initial,
                 opener_factory=lambda: self._RangeOpener(
@@ -400,7 +400,13 @@ class SourceAndStorageContractTests(unittest.TestCase):
                 ),
                 max_connections=3,
                 parallel_threshold_bytes=1,
-            ).materialize(resolver_url, target)
+            )
+            samples = []
+            adapter.progress_callback = samples.append
+            result = adapter.materialize(resolver_url, target)
+            self.assertEqual(samples[0]['bytes'], 0)
+            self.assertEqual(samples[-1]['bytes'], len(payload))
+            self.assertEqual(samples[-1]['percent'], 100)
 
             self.assertEqual(result.path.read_bytes(), payload)
             self.assertEqual(len(range_requests), 4)
@@ -442,7 +448,7 @@ class SourceAndStorageContractTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            result = HttpSourceAdapter(
+            adapter = HttpSourceAdapter(
                 attempts=1,
                 opener=initial,
                 opener_factory=lambda: self._RangeOpener(
@@ -452,7 +458,12 @@ class SourceAndStorageContractTests(unittest.TestCase):
                 ),
                 max_connections=2,
                 parallel_threshold_bytes=1,
-            ).materialize(resolver_url, target)
+            )
+            samples = []
+            adapter.progress_callback = samples.append
+            result = adapter.materialize(resolver_url, target)
+            self.assertEqual(samples[0]['bytes'], 7)
+            self.assertEqual(samples[-1]['bytes'], len(payload))
 
             self.assertEqual(result.path.read_bytes(), payload)
             requested_ranges = {request.get_header("Range") for request in range_requests}

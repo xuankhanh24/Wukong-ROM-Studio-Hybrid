@@ -11,6 +11,7 @@ import subprocess
 import tarfile
 import tempfile
 import time
+import threading
 import uuid
 import zlib
 from concurrent.futures import ThreadPoolExecutor
@@ -27,6 +28,7 @@ from urllib.request import HTTPRedirectHandler, HTTPCookieProcessor, Request, bu
 
 from .models import ArtifactRecord
 from .security import validate_http_url
+from .transfer_progress import TransferMeter
 
 
 CHUNK_SIZE = 4 * 1024 * 1024
@@ -290,6 +292,31 @@ class HttpSourceAdapter:
         self.opener_factory = opener_factory or (default_factory if opener is None else None)
         self.max_connections = max(1, min(max_connections, DEFAULT_MAX_CONNECTIONS))
         self.parallel_threshold_bytes = max(1, parallel_threshold_bytes)
+        self.progress_callback = None
+        self._meter = None
+
+    def _start_meter(self, response, *, initial=0, started_at=None):
+        try:
+            total = int(response.headers.get('Content-Length')) + initial
+            if response.headers.get('Content-Range'):
+                total = self._parse_content_range(response.headers['Content-Range'])[2]
+        except (TypeError, ValueError, SourceError):
+            total = None
+        self._meter = TransferMeter(self.progress_callback, total=total, initial=initial, started_at=started_at)
+
+    def _copy_download(self, response, output):
+        while chunk := response.read(CHUNK_SIZE):
+            output.write(chunk)
+            if self._meter:
+                self._meter.advance(len(chunk))
+
+    def _retry_download(self, attempt, error):
+        delay = min(2**attempt, HTTP_RETRY_BACKOFF_CAP_SECONDS)
+        if self.progress_callback:
+            self.progress_callback({'status': 'retrying', 'attempt': attempt + 1, 'attempts': self.attempts,
+                                    'retryAfterSeconds': delay, 'error': type(error).__name__,
+                                    'httpStatus': getattr(error, 'code', None)})
+        time.sleep(delay)
 
     def materialize(self, uri: str, target: Path, expected_sha256: str | None = None) -> MaterializedSource:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -303,6 +330,10 @@ class HttpSourceAdapter:
                 self._refresh_attempt_opener()
                 self._download(uri, temporary)
                 os.replace(temporary, target)
+                if self.progress_callback:
+                    size = target.stat().st_size
+                    self.progress_callback({'status': 'verifying', 'bytes': size, 'totalBytes': size,
+                                            'percent': 100.0, 'etaSeconds': 0.0})
                 return _finalize_materialized(target, expected_sha256)
             except SourceResolutionError:
                 temporary.unlink(missing_ok=True)
@@ -324,11 +355,11 @@ class HttpSourceAdapter:
                     ) from exc
                 if attempt >= self.attempts:
                     raise SourceError(f"ROM download failed after {self.attempts} attempts: {exc}") from exc
-                time.sleep(min(2**attempt, HTTP_RETRY_BACKOFF_CAP_SECONDS))
+                self._retry_download(attempt, exc)
             except (URLError, TimeoutError, OSError, SourceError) as exc:
                 if attempt >= self.attempts:
                     raise SourceError(f"ROM download failed after {self.attempts} attempts: {exc}") from exc
-                time.sleep(min(2**attempt, HTTP_RETRY_BACKOFF_CAP_SECONDS))
+                self._retry_download(attempt, exc)
         raise AssertionError("unreachable")
 
     def _refresh_attempt_opener(self) -> None:
@@ -358,6 +389,7 @@ class HttpSourceAdapter:
         with self.opener.open(request, timeout=self.timeout) as response:
             final_url = response.geturl()
             validate_http_url(final_url, resolve_dns=True)
+            payload_started_at = time.monotonic()
             prefix = response.read(RESOLVER_SNIFF_SIZE)
             content_type = str(response.headers.get("Content-Type", "")).casefold()
             if self._looks_like_json(content_type, prefix):
@@ -398,9 +430,11 @@ class HttpSourceAdapter:
                 status = getattr(response, "status", response.getcode())
                 append = offset > 0 and status == 206
                 before = temporary.stat().st_size if append and temporary.is_file() else 0
+                self._start_meter(response, initial=before, started_at=payload_started_at)
                 with temporary.open("ab" if append else "wb") as handle:
                     handle.write(prefix)
-                    shutil.copyfileobj(response, handle, CHUNK_SIZE)
+                    self._meter.advance(len(prefix))
+                    self._copy_download(response, handle)
                 written = temporary.stat().st_size - before
                 self._validate_sequential_response(
                     response,
@@ -419,6 +453,8 @@ class HttpSourceAdapter:
                 self._cleanup_range_files(temporary)
                 self._checkpoint_path(temporary).unlink(missing_ok=True)
                 self._download_sequential(parallel_source.url, temporary)
+        if self._meter:
+            self._meter.finish()
 
     def _parallel_total_size(self, response: Any) -> int | None:
         if self.opener_factory is None or self.max_connections < 2:
@@ -515,6 +551,9 @@ class HttpSourceAdapter:
             return
 
         ranges = self._build_ranges(temporary, offset, total_size)
+        resumed = sum(item.path.stat().st_size for item in ranges
+                      if item.path.is_file() and item.path.stat().st_size <= item.size)
+        self._meter = TransferMeter(self.progress_callback, total=total_size, initial=offset + resumed)
         with ThreadPoolExecutor(max_workers=len(ranges), thread_name_prefix="wukong-http") as pool:
             list(
                 pool.map(
@@ -601,7 +640,7 @@ class HttpSourceAdapter:
                     )
                 before = item.path.stat().st_size if item.path.is_file() else 0
                 with item.path.open("ab") as handle:
-                    shutil.copyfileobj(response, handle, CHUNK_SIZE)
+                    self._copy_download(response, handle)
                 existing = item.path.stat().st_size
                 if existing - before != response_end - response_start + 1:
                     raise RangeProtocolError(
@@ -617,8 +656,9 @@ class HttpSourceAdapter:
             status = getattr(response, "status", response.getcode())
             if status < 200 or status >= 300:
                 raise SourceError(f"Sequential ROM fallback returned HTTP {status}")
+            self._start_meter(response)
             with temporary.open("wb") as handle:
-                shutil.copyfileobj(response, handle, CHUNK_SIZE)
+                self._copy_download(response, handle)
             size = temporary.stat().st_size
             self._validate_sequential_response(
                 response,
@@ -1086,6 +1126,7 @@ class RcloneSourceAdapter:
     def __init__(self, *, run_command: RunCommand = _run_text, config_path: Path | None = None) -> None:
         self.run_command = run_command
         self.config_path = config_path
+        self.progress_callback = None
 
     def materialize(self, uri: str, target: Path, expected_sha256: str | None = None) -> MaterializedSource:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -1095,10 +1136,17 @@ class RcloneSourceAdapter:
         if self.config_path:
             args.extend(["--config", str(self.config_path)])
         try:
-            self.run_command(args)
+            if self.progress_callback is not None and self.run_command is _run_text:
+                _run_rclone_copy_with_progress(args, self.progress_callback)
+            else:
+                self.run_command(args)
             os.replace(temporary, target)
         finally:
             temporary.unlink(missing_ok=True)
+        if self.progress_callback:
+            size = target.stat().st_size
+            self.progress_callback({'status': 'verifying', 'bytes': size, 'totalBytes': size,
+                                    'percent': 100.0, 'etaSeconds': 0.0})
         return _finalize_materialized(target, expected_sha256)
 
 
@@ -1119,6 +1167,7 @@ class RcloneStorageAdapter:
         self.run_command = run_command
         self.stream_command = stream_command
         self.config_path = config_path
+        self.download_progress_callback = None
 
     def _args(self, *values: str) -> list[str]:
         args = ["rclone", *values]
@@ -1210,6 +1259,7 @@ class RcloneStorageAdapter:
         relative_path: str,
         *,
         include_paths: Iterable[str] | None = None,
+        progress_callback=None,
     ) -> str:
         """Archive and upload a workspace checkpoint.
 
@@ -1240,6 +1290,7 @@ class RcloneStorageAdapter:
             digest, size_bytes = self._upload_stream(
                 self._args("rcat", staging_uri, "--size", str(archive_size)),
                 write_archive,
+                progress_callback=progress_callback,
             )
             if size_bytes != archive_size:
                 raise SourceError(
@@ -1268,6 +1319,9 @@ class RcloneStorageAdapter:
                 )
             self.run_command(self._args("moveto", staging_uri, uri))
             self.run_command(self._args("moveto", staging_metadata_uri, metadata_uri))
+            if progress_callback:
+                progress_callback({'bytes': size_bytes, 'totalBytes': size_bytes, 'percent': 100.0,
+                                   'etaSeconds': 0, 'status': 'complete'})
             return uri
         except Exception:
             for candidate in (staging_uri, staging_metadata_uri, uri, metadata_uri):
@@ -1282,10 +1336,11 @@ class RcloneStorageAdapter:
         source: Path,
         relative_path: str,
         include_paths: Iterable[str],
+        *, progress_callback=None,
     ) -> str:
         """Upload only the listed relative workspace paths."""
 
-        return self.sync_tree(source, relative_path, include_paths=include_paths)
+        return self.sync_tree(source, relative_path, include_paths=include_paths, progress_callback=progress_callback)
 
     @staticmethod
     def _write_checkpoint_archive(
@@ -1395,12 +1450,16 @@ class RcloneStorageAdapter:
         self,
         args: list[str],
         write_payload: Callable[[Any], tuple[str, int]],
+        *, progress_callback=None,
     ) -> tuple[str, int]:
         if self.stream_command is not None:
             buffer = io.BytesIO()
             result = write_payload(buffer)
             self.stream_command(args, buffer.getvalue())
             return result
+
+        if progress_callback is not None:
+            return self._upload_stream_with_progress(args, write_payload, progress_callback)
 
         with tempfile.TemporaryFile() as error_log:
             process = subprocess.Popen(
@@ -1423,6 +1482,57 @@ class RcloneStorageAdapter:
         if return_code != 0:
             details = stderr.decode("utf-8", errors="replace").strip()
             raise SourceError(f"Checkpoint upload failed: {details or f'rclone exited {return_code}'}")
+        return result
+
+    def _upload_stream_with_progress(self, args, write_payload, callback):
+        # Read rclone's measured network stats concurrently with TAR streaming;
+        # bytes written to stdin are not assumed to be uploaded to the cloud.
+        from collections import deque
+        process = subprocess.Popen(
+            [*args, '--use-json-log', '--stats', '1s', '--stats-one-line', '--stats-log-level', 'NOTICE'],
+            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        )
+        diagnostics = deque(maxlen=100)
+        errors = []
+        def read_stats():
+            try:
+                for raw in process.stderr:
+                    line = raw.decode('utf-8', errors='replace')
+                    diagnostics.append(line)
+                    values = _parse_rclone_progress(line)
+                    if values is None:
+                        from .build_logging import LogRedactor
+                        print('[STORAGE] ' + LogRedactor()(line.rstrip()), flush=True)
+                    if values and not errors:
+                        try:
+                            callback(values)
+                        except Exception as error:
+                            errors.append(error)
+            except Exception as error:
+                errors.append(error)
+        reader = threading.Thread(target=read_stats, daemon=True)
+        reader.start()
+        try:
+            result = write_payload(process.stdin)
+            process.stdin.close()
+            code = process.wait()
+            reader.join()
+        except BaseException:
+            process.kill()
+            process.wait()
+            reader.join(timeout=5)
+            raise
+        finally:
+            if not process.stdin.closed:
+                try:
+                    process.stdin.close()
+                except OSError:
+                    pass
+            process.stderr.close()
+        if code:
+            raise SourceError('Checkpoint upload failed: ' + ''.join(diagnostics))
+        if errors:
+            raise errors[0]
         return result
 
     def _download_stream(self, args: list[str], read_payload: Callable[[Any], Path]) -> Path:
@@ -1469,9 +1579,11 @@ class RcloneStorageAdapter:
 
         def download_archive(input_stream: Any, archive_path: Path) -> Path:
             reader = _HashingReader(input_stream)
+            meter = TransferMeter(self.download_progress_callback, total=expected_size)
             with archive_path.open("wb") as output:
                 for chunk in iter(lambda: reader.read(CHUNK_SIZE), b""):
                     output.write(chunk)
+                    meter.advance(len(chunk))
             if reader.size_bytes != expected_size:
                 raise SourceIntegrityError(
                     f"Checkpoint archive size mismatch: expected {expected_size}, got {reader.size_bytes}"
@@ -1481,6 +1593,7 @@ class RcloneStorageAdapter:
                 raise SourceIntegrityError(
                     f"Checkpoint archive checksum mismatch: expected {expected_sha256}, got {actual_sha256}"
                 )
+            meter.finish()
             return archive_path
 
         staging = destination.with_name(destination.name + ".restore-partial")
@@ -1801,7 +1914,8 @@ class RcloneStorageAdapter:
                 raise MirrorCommandError("remote_metadata_failed") from exc
         return ArtifactRecord(artifact.name, final_uri, digest, size_bytes)
 
-    def store_source(self, source: Path, *, device: str, digest: str | None = None) -> ArtifactRecord:
+    def store_source(self, source: Path, *, device: str, digest: str | None = None,
+                     progress_callback: Callable[[Mapping[str, object]], None] | None = None) -> ArtifactRecord:
         source = source.resolve()
         if not source.is_file():
             raise FileNotFoundError(source)
@@ -1810,7 +1924,7 @@ class RcloneStorageAdapter:
         if digest and actual_digest.casefold() != file_digest.casefold():
             raise SourceIntegrityError("Source checksum changed before cloud upload")
         relative = f"sources/{device}/{actual_digest}/{source.name}"
-        uri = self.copy_file(source, relative)
+        uri = self.copy_file(source, relative, **({'progress_callback': progress_callback} if progress_callback else {}))
         metadata = {
             "schemaVersion": 1,
             "name": source.name,

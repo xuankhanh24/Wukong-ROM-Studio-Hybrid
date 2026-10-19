@@ -543,9 +543,11 @@ def _extract_content_pack_archive(
             temporary_tar.unlink(missing_ok=True)
 
 
-def download_http_archive(archive: Mapping[str, Any], destination: Path) -> None:
+def download_http_archive(archive: Mapping[str, Any], destination: Path, *, progress_callback=None) -> None:
     """Reassemble versioned HTTPS assets, enforcing part size and SHA-256."""
     parts = archive.get('parts') or [archive]
+    from .transfer_progress import TransferMeter
+    meter = TransferMeter(progress_callback, total=sum(int(part['sizeBytes']) for part in parts))
     with destination.open('wb') as output:
         for part in parts:
             uri = str(part['uri'])
@@ -562,8 +564,10 @@ def download_http_archive(archive: Mapping[str, Any], destination: Path) -> None
                         raise SourceIntegrityError('Content-pack download exceeds declared size')
                     digest.update(chunk)
                     output.write(chunk)
+                    meter.advance(len(chunk))
             if count != expected_size or digest.hexdigest() != str(part['sha256']).casefold():
                 raise SourceIntegrityError('Content-pack download size or checksum mismatch')
+    meter.finish()
 
 
 def preferred_content_index(content_root: Path, bundled: Path) -> Path:
@@ -628,10 +632,12 @@ class ContentPackManager:
         *,
         run_command: RunCommand = _run_text,
         rclone_config: Path | None = None,
+        progress_callback=None,
     ) -> None:
         self.content_root = content_root.resolve()
         self.run_command = run_command
         self.rclone_config = rclone_config
+        self.progress_callback = progress_callback
 
     def _rclone(self, *args: str) -> list[str]:
         command = ["rclone", *args]
@@ -662,11 +668,16 @@ class ContentPackManager:
                 suffix = ".tar.zst" if archive.get('format') == 'tar.zst' or archive_uri.casefold().endswith((".tar.zst", ".tzst")) else ".tar"
                 archive_path = staging.with_name(staging.name + suffix)
                 if archive_uri.startswith('https://'):
-                    download_http_archive(archive, archive_path)
+                    if self.progress_callback is not None:
+                        download_http_archive(archive, archive_path, progress_callback=self.progress_callback)
+                    else:
+                        download_http_archive(archive, archive_path)
                 else:
-                    self.run_command(
-                        self._rclone("copyto", archive_uri, str(archive_path), "--retries", "3")
-                    )
+                    command = self._rclone("copyto", archive_uri, str(archive_path), "--retries", "3")
+                    if self.progress_callback is not None and self.run_command is _run_text:
+                        _run_rclone_copy(command, self.progress_callback)
+                    else:
+                        self.run_command(command)
                 expected_size = int(archive["sizeBytes"])
                 actual_size = archive_path.stat().st_size
                 if actual_size != expected_size:

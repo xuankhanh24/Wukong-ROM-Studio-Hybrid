@@ -21,6 +21,11 @@ from studio_paths import CONTENT_ROOT, SCRIPT_ROOT, WORKSPACE_ROOT
 
 LegacyBuild = Callable[[str, dict[str, Any], Path, Callable[[dict[str, Any]], None]], dict[str, Any]]
 
+
+def artifact_upload_provider(record: ArtifactRecord) -> str:
+    return 'dccloud' if any(mirror.provider.casefold() == 'dccloud' and mirror.status == 'available'
+                            and mirror.uri == record.uri for mirror in record.mirrors) else 'gdrive'
+
 # Checkpoint only after stages that materially advance the reusable workspace.
 # Read-only/preflight stages such as inspect_rom would upload the same multi-GB
 # tree again and can exhaust cloud API quotas without improving resumability.
@@ -110,14 +115,16 @@ def sync_checkpoint_tree(
     source: Path,
     relative_path: str,
     stage: str,
+    *, progress_callback=None,
 ) -> str:
     """Upload a stage checkpoint using its narrowed dependency contract."""
 
     checkpoint_paths = checkpoint_paths_for_stage(stage)
     sync_tree_subset = getattr(storage, "sync_tree_subset", None)
+    options = {'progress_callback': progress_callback} if isinstance(storage, RcloneStorageAdapter) and progress_callback else {}
     if checkpoint_paths and callable(sync_tree_subset):
-        return sync_tree_subset(source, relative_path, checkpoint_paths)
-    return storage.sync_tree(source, relative_path)
+        return sync_tree_subset(source, relative_path, checkpoint_paths, **options)
+    return storage.sync_tree(source, relative_path, **options)
 
 
 def cloud_progress_sync_mode(
@@ -246,6 +253,10 @@ class LocalJobExecutor:
             )
         self._cloud_push_warning_at: dict[str, float] = {}
 
+    def _emit_transfer(self, job_id: str, event_type: str, **values) -> None:
+        self.store.append_event(job_id, event_type, **values)
+        self.actions_ui.event({'type': event_type, **values})
+
     def execute(self, job_id: str) -> JobManifest:
         manifest = self.store.get(job_id)
         recipe = self.store.recipe(job_id)
@@ -263,6 +274,11 @@ class LocalJobExecutor:
             storage = self.storage_factory(recipe.storage.remote)
             self._push_cloud_manifest(job_id, storage)
             adapter = source_adapter_for(recipe.source.kind, config_path=self.rclone_config)
+            def report_download(values):
+                self._emit_transfer(job_id, 'download_progress', stage='download',
+                                    provider=recipe.source.kind.upper(), fileName=source_target.name, **dict(values))
+            if hasattr(adapter, 'progress_callback'):
+                adapter.progress_callback = report_download
             download_started = time.monotonic()
             source = adapter.materialize(recipe.source.uri, source_target, recipe.source.sha256)
             self.store.append_event(
@@ -285,6 +301,13 @@ class LocalJobExecutor:
                 sha256=source.sha256,
                 sizeBytes=source.size_bytes,
             )
+            report_download({'bytes': source.size_bytes, 'totalBytes': source.size_bytes,
+                             'percent': 100.0, 'etaSeconds': 0.0, 'status': 'complete'})
+            self.actions_ui.event({'type': 'step', 'step': 'download', 'status': 'success',
+                                   'details': {'durationSeconds': round(time.monotonic() - download_started, 2)}})
+            def report_source_upload(values):
+                self._emit_transfer(job_id, 'upload_progress', stage='upload',
+                                    provider='Google Drive', fileName=source.path.name, **dict(values))
             if recipe.task == "build":
                 local_metadata = {}
                 try:
@@ -318,7 +341,12 @@ class LocalJobExecutor:
                 self._push_cloud_progress(job_id, storage)
                 self.actions_ui.begin("upload")
                 upload_started = time.monotonic()
-                record = storage.store_source(source.path, device=recipe.device, digest=source.sha256)
+                record = (storage.store_source(source.path, device=recipe.device, digest=source.sha256,
+                                               progress_callback=report_source_upload)
+                          if isinstance(storage, RcloneStorageAdapter)
+                          else storage.store_source(source.path, device=recipe.device, digest=source.sha256))
+                report_source_upload({'bytes': record.size_bytes, 'totalBytes': record.size_bytes,
+                                      'percent': 100.0, 'etaSeconds': 0.0, 'status': 'complete'})
                 self.store.append_event(
                     job_id,
                     "metric",
@@ -343,8 +371,13 @@ class LocalJobExecutor:
                         source.path,
                         device=recipe.device,
                         build="published",
+                        **({'progress_callback': report_source_upload} if isinstance(storage, RcloneStorageAdapter) else {}),
                     ),
                 )
+                self._emit_transfer(job_id, 'upload_progress', stage='upload',
+                                    provider=artifact_upload_provider(record),
+                                    fileName=source.path.name, bytes=record.size_bytes, totalBytes=record.size_bytes,
+                                    percent=100.0, etaSeconds=0.0, status='complete')
                 self.store.append_event(
                     job_id,
                     "metric",
@@ -494,12 +527,18 @@ class LocalJobExecutor:
                                 raise RuntimeError("Cloud checkpoints disabled by WUKONG_DISABLE_CLOUD_CHECKPOINTS")
                             relative_checkpoint = f"checkpoints/{job_id}/{stage}"
                             checkpoint_started = time.monotonic()
+                            self.actions_ui.begin('checkpoint')
                             checkpoint = sync_checkpoint_tree(
                                 storage,
                                 build_workspace,
                                 relative_checkpoint,
                                 stage,
+                                progress_callback=lambda values: self._emit_transfer(
+                                    job_id, 'upload_progress', stage='checkpoint', provider='Drive checkpoint',
+                                    fileName=f'{stage}.tar', **dict(values)),
                             )
+                            self.actions_ui.event({'type': 'step', 'step': 'checkpoint', 'status': 'success',
+                                                   'details': {'durationSeconds': round(time.monotonic() - checkpoint_started, 2)}})
                         else:
                             checkpoint = f"local:{build_workspace}"
                         from .models import utc_now
@@ -517,6 +556,8 @@ class LocalJobExecutor:
                         self.store.append_event(job_id, "checkpoint", checkpoint=checkpoint, stage=stage)
                         self._push_cloud_progress(job_id, storage)
                     except Exception as exc:
+                        self.actions_ui.close_group()
+                        self.actions_ui.event({'type': 'warning', 'message': f'Checkpoint upload skipped: {exc}'})
                         checkpoint_upload_enabled = False
                         self.store.append_event(
                             job_id,
@@ -551,7 +592,10 @@ class LocalJobExecutor:
             last_upload_push = 0.0
             last_upload_event = 0.0
             for output_index, output in enumerate(outputs):
+                last_upload_event = 0.0
                 checksum_started = time.monotonic()
+                self.actions_ui.event({'type': 'step', 'step': 'upload', 'status': 'running',
+                                       'message': f'Kiểm tra SHA-256 / Artifact checksum · {output.name}'})
                 prepared = prepare_artifact(output, hasher=sha256_file)
                 self.store.append_event(
                     job_id,
@@ -572,7 +616,7 @@ class LocalJobExecutor:
                         last_upload_event = now
                         overall = (output_index + percent / 100.0) / max(1, len(outputs))
                         self.store.update(job_id, stage="upload", progress=0.8 + overall * 0.19)
-                        self.store.append_event(
+                        self._emit_transfer(
                             job_id,
                             "upload_progress",
                             stage="upload",
@@ -631,18 +675,18 @@ class LocalJobExecutor:
                         cacheState="not-applicable",
                     )
                     records.append(record)
-                    self.store.append_event(
-                        job_id,
-                        "upload_progress",
+                    self._emit_transfer(
+                        job_id, "upload_progress",
                         stage="upload",
+                        provider=artifact_upload_provider(record),
                         fileName=output.name,
                         fileIndex=output_index + 1,
                         fileCount=len(outputs),
                         bytes=record.size_bytes,
                         totalBytes=record.size_bytes,
-                        speedBytesPerSecond=0.0,
                         etaSeconds=0.0,
                         percent=100.0,
+                        status='complete',
                     )
                 else:
                     records.append(
@@ -710,6 +754,7 @@ class LocalJobExecutor:
             )
             if available_mirror is None:
                 raise
+            self.actions_ui.event({'type': 'warning', 'message': 'Google Drive upload failed; DC Cloud artifact is available.'})
             self.store.append_event(
                 job_id,
                 "primary_upload_failed",
@@ -760,9 +805,8 @@ class LocalJobExecutor:
             return record
 
         def report_mirror(values: Mapping[str, object]) -> None:
-            self.store.append_event(
-                job_id,
-                "upload_progress",
+            self._emit_transfer(
+                job_id, "upload_progress",
                 provider="dccloud",
                 stage="mirror_upload",
                 fileName=artifact.name,
@@ -779,6 +823,7 @@ class LocalJobExecutor:
             **({"prepared": prepared} if isinstance(self.mirror_publisher, ArtifactMirrorPublisher) else {}),
         )
         if mirror.status == "failed":
+            self.actions_ui.event({'type': 'warning', 'message': 'DC Cloud mirror upload failed; primary artifact upload will continue.'})
             self.store.append_event(
                 job_id,
                 "mirror_upload_failed",
@@ -821,6 +866,9 @@ class LocalJobExecutor:
             rclone_config=self.rclone_config,
         )
         for pack_id in required:
+            manager.progress_callback = (lambda values, current=pack_id: self.actions_ui.event(
+                {'type': 'download_progress', 'stage': 'content', 'provider': 'Content pack',
+                 'fileName': current, **dict(values)})) if self.actions_ui.enabled else None
             pack = next((item for item in index["packs"] if item["id"] == pack_id), None)
             if not pack:
                 raise OrchestrationError(
@@ -917,11 +965,26 @@ class LocalJobExecutor:
                 return True
             if build_workspace.exists():
                 shutil.rmtree(build_workspace)
-            storage.restore_tree(checkpoint, build_workspace)
+            self.actions_ui.begin('restore_checkpoint')
+            started = time.monotonic()
+            previous_callback = getattr(storage, 'download_progress_callback', None)
+            if isinstance(storage, RcloneStorageAdapter):
+                storage.download_progress_callback = lambda values: self._emit_transfer(
+                    job_id, 'download_progress', stage='restore_checkpoint', provider='Drive checkpoint',
+                    fileName='checkpoint.tar', **dict(values))
+            try:
+                storage.restore_tree(checkpoint, build_workspace)
+            finally:
+                if isinstance(storage, RcloneStorageAdapter):
+                    storage.download_progress_callback = previous_callback
             if not (build_workspace / ".wkstudio-workspace.json").is_file():
                 raise OrchestrationError("Resume checkpoint is missing its workspace marker")
+            self.actions_ui.event({'type': 'step', 'step': 'restore_checkpoint', 'status': 'success',
+                                   'details': {'durationSeconds': round(time.monotonic() - started, 2)}})
             return True
         except Exception as exc:
+            self.actions_ui.close_group()
+            self.actions_ui.event({'type': 'warning', 'message': f'Checkpoint restore skipped: {exc}'})
             if build_workspace.exists():
                 shutil.rmtree(build_workspace, ignore_errors=True)
             self.store.update(job_id, checkpoint=None, checkpoint_at=None)
@@ -984,10 +1047,14 @@ class LocalJobExecutor:
             progress=1.0,
             artifacts=artifacts,
         )
+        recipe = self.store.recipe(job_id)
+        self.actions_ui.event({'type': 'step', 'step': 'upload', 'status': 'success',
+                               'details': {'skipped': bool(recipe and recipe.task == 'build' and not recipe.storage.publish_artifact)}})
         self.actions_ui.close_group()
         self.actions_ui.begin("complete")
-        self.actions_ui.close_group()
-        recipe = self.store.recipe(job_id)
+        self.actions_ui.event({'type': 'step', 'step': 'complete', 'status': 'success',
+                               'details': {'artifacts': [{'name': item.name, 'sizeBytes': item.size_bytes,
+                                                         'sha256': item.sha256} for item in artifacts]}})
         if recipe and os.environ.get("GITHUB_ACTIONS", "").casefold() == "true":
             try:
                 CloudJobSync(self.store, self.storage_factory(recipe.storage.remote)).push(job_id)
