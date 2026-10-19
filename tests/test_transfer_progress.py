@@ -82,4 +82,3 @@ class TransferProgressTests(unittest.TestCase):
         self.assertEqual(result.size_bytes, 6)
         self.assertEqual(samples[-1]['bytes'], 6)
         self.assertEqual(samples[-1]['percent'], 100)
-
