@@ -1,3 +1,5 @@
+import { lookup } from "node:dns/promises";
+
 const MAX_REDIRECTS = 5;
 const MAX_REQUEST_BODY = 16 * 1024;
 const MAX_CLAIM_BODY = 16 * 1024;
@@ -80,31 +82,17 @@ function parsePublicUrl(value: string): URL {
 }
 
 async function defaultResolveAddresses(hostname: string): Promise<string[]> {
-  console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'dns-start', host: hostname }));
   if (privateAddress(hostname) || hostname.includes(":") || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
     return [hostname];
   }
-  const query = async (type: "A" | "AAAA"): Promise<string[]> => {
-    const url = new URL("https://cloudflare-dns.com/dns-query");
-    url.searchParams.set("name", hostname);
-    url.searchParams.set("type", type);
-    const response = await fetch(url, {
-      redirect: "manual",
-      headers: { Accept: "application/dns-json" }
-    });
-    if (!response.ok) return [];
-    const payload = await response.json() as {
-      Status?: number;
-      Answer?: Array<{ type?: number; data?: string }>;
-    };
-    if (payload.Status !== 0) return [];
-    return (payload.Answer ?? [])
-      .filter((answer) => answer.type === 1 || answer.type === 28)
-      .map((answer) => String(answer.data ?? "").trim()).filter(Boolean);
-  };
-  const addresses = [...new Set((await Promise.all([query("A"), query("AAAA")])).flat())];
-  console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'dns-finish', host: hostname, count: addresses.length }));
-  return addresses;
+  // This is a Node function, not a Worker. Use the runtime's DNS instead of
+  // requiring a second outbound HTTPS service merely to validate the host.
+  // validateDestination still rejects ANY private address in the full answer.
+  try {
+    return [...new Set((await lookup(hostname, { all: true })).map(record => record.address))];
+  } catch {
+    throw new TransportError("Source DNS lookup failed", 502);
+  }
 }
 
 async function validateDestination(value: string, resolveAddresses: ResolveAddresses): Promise<URL> {
@@ -144,9 +132,7 @@ async function secureFetch(
   let url = await validateDestination(initial, resolveAddresses);
   let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
-    console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'fetch-start', host: url.hostname }));
     const response = await fetchImpl(url, { ...requestInit, redirect: "manual", cache: "no-store" });
-    console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'fetch-finish', host: url.hostname, status: response.status }));
     if (![301, 302, 303, 307, 308].includes(response.status)) return { response, url };
     const location = response.headers.get("Location");
     await response.body?.cancel();
@@ -449,9 +435,6 @@ export function createSourceTransportHandler(dependencies: {
         }
       });
     } catch (error) {
-      const failure = error as { name?: string; cause?: { code?: string; errors?: { code?: string }[] } };
-      console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'failure', type: failure?.name,
-        code: failure?.cause?.code, codes: failure?.cause?.errors?.map(item => item.code) }));
       const status = error instanceof TransportError ? error.status : 502;
       const message = error instanceof TransportError ? error.message : "Source transport failed";
       return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });

@@ -3,6 +3,7 @@ import { apiRequest, privateApiAvailable } from "./session.js";
 import { copyText, formatBytes } from "./source-rom.js";
 import { navigate } from "./dock.js";
 import { toast } from "./shell.js";
+import { sourceErrorKey } from "../lib/source-errors.js";
 
 function normalizeRomDevice(device, queryKey = "device") {
   if (!device || typeof device !== "object") return null;
@@ -257,7 +258,7 @@ async function resolveRomRelease(release) {
     state.romResolved = { id: release.id, status: "ready", url: url.toString(), expiresAt: payload.signedUrlExpiresAt };
   } catch (error) {
     if ((controller.signal.aborted && !timedOut) || $("#rom-version-filter").value !== release.id) return;
-    state.romResolved = { id: release.id, status: "error" };
+    state.romResolved = { id: release.id, status: "error", messageKey: sourceErrorKey(error) };
   } finally {
     clearTimeout(timeout);
     if (state.romResolveController === controller) {
@@ -344,7 +345,7 @@ function renderRomCatalogResults() {
       const error = document.createElement("p");
       error.className = "rom-resolve-error";
       error.setAttribute("role", "alert");
-      error.textContent = t("romResolveFailed");
+      error.textContent = t(resolved.messageKey || "romResolveFailed");
       row.append(error);
     }
     if (resolved?.status === "ready") {

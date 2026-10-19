@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSourceTransportHandler } from "../../../api/source-transport";
 
 const claimUrl = "https://wukong-control-plane-staging.wukong-rom-studio-api.workers.dev/internal/source-transport/claim";
@@ -14,8 +14,32 @@ function request(): Request {
 }
 
 const publicDns = async () => ["8.8.8.8"];
+const nativeDns = vi.hoisted(() => vi.fn());
+vi.mock('node:dns/promises', () => ({ lookup: nativeDns }));
+afterEach(() => { vi.unstubAllGlobals(); nativeDns.mockReset(); });
 
 describe("Vercel source transport", () => {
+  it('uses runtime DNS without making an extra external DNS HTTP request', async () => {
+    nativeDns.mockResolvedValue([{ address: '8.8.8.8', family: 4 }]);
+    vi.stubGlobal('fetch', vi.fn(() => { throw Error('Unexpected external DNS request'); }));
+    const handler = createSourceTransportHandler({ fetchImpl: async input =>
+      String(input) === claimUrl ? Response.json({ operation: 'probe',
+        sourceUrl: 'https://cdn.allawnfs.com/rom.zip', range: 'bytes=0-0', maximumBytes: 1 }) :
+        new Response(new Uint8Array([0]), {status: 206, headers: {'Content-Range': 'bytes 0-0/4096'}})
+    });
+    expect((await handler(request())).status).toBe(200);
+    expect(nativeDns).toHaveBeenCalledWith('cdn.allawnfs.com', {all: true});
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('still rejects a runtime DNS answer containing a private destination', async () => {
+    nativeDns.mockResolvedValue([{ address: '8.8.8.8', family: 4 }, {address: '127.0.0.1', family: 4}]);
+    const fetchImpl = vi.fn(async () => Response.json({operation: 'probe',
+      sourceUrl: 'https://cdn.allawnfs.com/rom.zip', range: 'bytes=0-0', maximumBytes: 1}));
+    const response = await createSourceTransportHandler({fetchImpl})(request());
+    expect(response.status).toBe(400);
+    expect(fetchImpl).toHaveBeenCalledTimes(1); // Claim only; never contact the unsafe destination.
+  });
   it("accepts every public Worker origin configured for deployment", async () => {
     const config = JSON.parse(readFileSync(new URL("../wrangler.jsonc", import.meta.url), "utf8")) as {
       vars: { WUKONG_PUBLIC_API_URL: string };

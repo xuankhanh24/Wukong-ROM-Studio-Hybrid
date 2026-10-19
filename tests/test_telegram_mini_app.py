@@ -1010,6 +1010,9 @@ window.addEventListener('load', () => {{
             self._send(json.dumps({"job_id": "submitted-custom-job", "status": "queued", "stage": "queued", "progress": 0}).encode(), "application/json", 201)
             return
         if path == "/v1/sources/resolve":
+            if self.source_error_status:
+                self._send(b'{"error":"ROM transport failed","code":"source_unreachable"}', "application/json", self.source_error_status)
+                return
             self._send(json.dumps({"resolvedUrl": "https://cdn.allawnfs.com/rom.zip?Signature=fixture", "signedUrlExpiresAt": 9999999999}).encode(), "application/json")
             return
         if path == "/v1/session/pair" and self.pairing_recovery:
@@ -1030,6 +1033,9 @@ window.addEventListener('load', () => {{
             self._send(json.dumps({"user": self._fixture_user(), "maintenance": {"enabled": self.maintenance_enabled, "message": "Đang nâng cấp Studio."}}).encode(), "application/json")
             return
         if path == "/v1/sources/probe" and self.api_enabled:
+            if self.source_error_status:
+                self._send(b'{"error":"ROM transport failed","code":"source_unreachable"}', "application/json", self.source_error_status)
+                return
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length) or b"{}")
             if payload.get("uri") != OPLUS_TEST_URI:
@@ -1085,6 +1091,7 @@ def _render_mini_app_in_chrome(
     click_paste: bool = False,
     source_uri: str = OPLUS_TEST_URI,
     source_fill_delay_ms: int = 50,
+    source_error_status: int = 0,
     clipboard_fallback: bool = False,
     clipboard_gesture_only: bool = False,
     telegram_hash_authenticated: bool = False,
@@ -1137,6 +1144,7 @@ def _render_mini_app_in_chrome(
             "click_paste": click_paste,
             "source_uri": source_uri,
             "source_fill_delay_ms": source_fill_delay_ms,
+            "source_error_status": source_error_status,
             "clipboard_fallback": clipboard_fallback,
             "clipboard_gesture_only": clipboard_gesture_only,
             "pairing_recovery": pairing_recovery,
@@ -1602,6 +1610,21 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-selected-view="build"', dom)
         self.assertIn('data-selected-source="https://component-ota-cn.allawntech.com/downloadCheck?', dom)
         self.assertRegex(dom, r'id="source-product-detected"[^>]*>PKG110')
+
+    def test_analysis_transport_failure_does_not_claim_server_is_busy(self) -> None:
+        dom, _ = _render_mini_app_in_chrome(api_enabled=True, source_error_status=502)
+        self.assertIn("không kết nối được máy chủ chứa ROM", dom)
+        self.assertNotIn("Máy chủ đang bận phân tích ROM", dom)
+        self.assertIn(OPLUS_TEST_URI.split('?')[0], dom)
+
+    def test_library_resolve_reports_transport_failure_and_allows_retry(self) -> None:
+        dom, _ = _render_mini_app_in_chrome(
+            api_enabled=True, source_error_status=502, library_scenario="select",
+            page_action=lambda page: page.locator('.rom-resolve-error').wait_for(),
+        )
+        self.assertIn('class="rom-resolve-error"', dom)
+        self.assertIn("không kết nối được máy chủ chứa ROM", dom)
+        self.assertNotRegex(dom, r'<button[^>]*data-rom-action="resolve"[^>]*disabled')
 
     def test_user_sees_maintenance_gate_but_admin_keeps_workspace(self) -> None:
         dom, _ = _render_mini_app_in_chrome(api_enabled=True, maintenance_enabled=True)

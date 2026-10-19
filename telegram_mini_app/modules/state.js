@@ -195,7 +195,12 @@ Object.assign(translations.en, {
 Object.assign(translations.vi, {
   buildTitle: "Wukong Studio", buildIntro: "Cấu hình, khởi chạy và theo dõi ROM ngay trong Mini App.",
   releaseVersion: "Phiên bản phát hành", releaseVersionHint: "Nhãn hiển thị cùng MOD pack trong mỗi job.", saveReleaseVersion: "Lưu nhãn", invalidReleaseVersion: "Nhãn dài 1–64 ký tự, an toàn cho tên file và không kết thúc bằng dấu chấm hoặc khoảng trắng.", releaseVersionSaved: "Đã lưu nhãn phát hành.", jobContext: "Ngữ cảnh job", uploadingNow: "Đang upload", uploadSummary: "Upload gần nhất", noModsSelected: "Không có MOD tùy chọn",
-  probeDeferred: "Máy chủ đang bận phân tích ROM. Hãy thử lại sau ít phút.",
+  probeDeferred: "Chưa hoàn tất phân tích ROM. Hãy thử lại hoặc chọn link nguồn khác.",
+  probeTransportFailed: "Dịch vụ phân tích không kết nối được máy chủ chứa ROM. Link được giữ nguyên; hãy thử lại sau.",
+  probeRateLimited: "Đã đạt giới hạn yêu cầu phân tích ROM. Hãy chờ một lúc rồi thử lại.",
+  probeServiceUnavailable: "Dịch vụ phân tích ROM tạm thời không khả dụng. Hãy thử lại sau.",
+  probeSessionRequired: "Phiên Telegram đã hết hạn. Hãy mở lại Mini App hoặc kết nối Telegram.",
+  probeAccessDenied: "Yêu cầu truy cập bị từ chối. Hãy kiểm tra quyền và link nguồn ROM.",
   probeDeferredKicker: "ĐANG CHỜ MÁY CHỦ"
 });
 
@@ -376,7 +381,12 @@ Object.assign(translations.en, {
 Object.assign(translations.en, {
   buildTitle: "Wukong Studio", buildIntro: "Configure, launch and monitor a ROM directly in the Mini App.",
   releaseVersion: "Release version", releaseVersionHint: "This label follows the MOD pack into every job.", saveReleaseVersion: "Save label", invalidReleaseVersion: "Use 1–64 filename-safe characters; do not end with a period or space.", releaseVersionSaved: "Release label saved.", jobContext: "Job context", uploadingNow: "Uploading now", uploadSummary: "Latest upload", noModsSelected: "No optional MODs",
-  probeDeferred: "The server is busy analyzing ROMs. Try again in a moment.",
+  probeDeferred: "ROM analysis did not complete. Retry or choose another source link.",
+  probeTransportFailed: "The analysis service could not connect to the ROM host. Your link is preserved; retry later.",
+  probeRateLimited: "ROM analysis request limit reached. Wait a moment before retrying.",
+  probeServiceUnavailable: "ROM analysis is temporarily unavailable. Retry later.",
+  probeSessionRequired: "Your Telegram session expired. Reopen the Mini App or reconnect Telegram.",
+  probeAccessDenied: "Access was denied. Check your permissions and the ROM source link.",
   probeDeferredKicker: "WAITING FOR SERVER"
 });
 

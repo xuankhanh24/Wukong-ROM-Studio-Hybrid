@@ -3,6 +3,7 @@ import { toast } from "./shell.js";
 import { apiRequest, effectiveInitData, effectiveInitDataUnsafe, miniApiAvailable, presentMissingApi } from "./session.js";
 import { scheduleSourceProbe } from "./catalog.js";
 import { renderMods, updateSummary } from "./build.js";
+import { sourceErrorKey } from "../lib/source-errors.js";
 async function inspectProbeZipMetadata(...args) {
   const module = await import("./zip-metadata.js");
   return module.inspectProbeZipMetadata(...args);
@@ -415,14 +416,14 @@ async function probeSourceInPlace() {
     const sourceFailed = error?.sourceRejected && error?.status !== 429;
     const apiOffline = timedOut || error?.connectionFailed || navigator.onLine === false;
     const status = sourceFailed ? "probe-failed" : apiOffline ? "backend-offline" : "probe-deferred";
-    const message = sourceFailed ? "probeFailed" : apiOffline ? "apiOfflineMessage" : "probeDeferred";
+    const message = sourceErrorKey(error);
     state.sourceProbe = { status: sourceFailed ? "failed" : apiOffline ? "offline" : "deferred" };
     setProbePresentation(status, message);
     if (error?.code === "source_signed_url_expired") {
       $("#source-state-message").textContent = t("probeSignedExpired");
     }
     if (apiOffline) $("#source-kicker").textContent = t("apiOfflineKicker");
-    toast(error?.code === "source_signed_url_expired" ? t("probeSignedExpired") : sourceFailed ? t("probeFailed") : apiOffline ? t("apiOfflineMessage") : t("probeDeferred"), true);
+    toast(t(message), true);
   } finally {
     clearTimeout(timeout);
     if (requestId === state.sourceProbeRequestId) {
