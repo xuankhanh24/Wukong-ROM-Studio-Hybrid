@@ -62,6 +62,9 @@ class GitHubActionsUI:
         self.summary_path = summary_path or (Path(raw_summary) if raw_summary else None)
         self._active_stage: str | None = None
         self._stage_results: list[tuple[str, float]] = []
+        self._failed_stage: str | None = None
+        self._stage_message = ''
+        self._failed_context = ''
 
     def begin(self, stage: str) -> None:
         if not self.enabled or stage == self._active_stage:
@@ -70,6 +73,7 @@ class GitHubActionsUI:
         title = STAGE_TITLES.get(stage, stage.replace("_", " ").title())
         _emit(f"::group::{title}")
         self._active_stage = stage
+        self._stage_message = ''
 
     def event(self, event: Mapping[str, Any]) -> None:
         if not self.enabled or str(event.get("type") or "") != "step":
@@ -80,6 +84,7 @@ class GitHubActionsUI:
             self.begin(stage)
             message = event.get("message")
             if message:
+                self._stage_message = str(message)
                 _emit(f"[Wukong] {message}")
             return
         title = STAGE_TITLES.get(stage, stage)
@@ -109,8 +114,21 @@ class GitHubActionsUI:
             self.close_group()
         elif status == "failed":
             message = event.get("message") or "Stage failed"
-            _emit(f"::error title={_command_text(title)}::{_command_text(message)}")
-            self.close_group()
+            self.failure(stage, str(message))
+
+    def failure(self, stage: str, message: str) -> None:
+        if not self.enabled or self._failed_stage is not None:
+            return
+        from .build_logging import LogRedactor
+        self._failed_stage = stage
+        self._failed_context = LogRedactor()(self._stage_message)
+        self.close_group()
+        # The concise cause remains visible even with every stage group collapsed.
+        message = LogRedactor()(message)
+        title = STAGE_TITLES.get(stage, stage)
+        context = f"\nThao tác / Operation: {self._failed_context}" if self._failed_context else ''
+        _emit(f"[FAILED] {title}{context}\n{message}")
+        _emit(f"::error title={_command_text(title)}::{_command_text(message)}")
 
     def close_group(self) -> None:
         if self.enabled and self._active_stage is not None:
@@ -196,6 +214,17 @@ class GitHubActionsUI:
         else:
             lines.append("Chưa có artifact / No artifact was produced.")
         if manifest.error:
-            lines.extend(["", "### Lỗi / Error", "", f"> {manifest.error.replace(chr(10), ' ')}"])
+            from .build_logging import LogRedactor
+            error = LogRedactor()(manifest.error)
+            stage = self._failed_stage or manifest.stage
+            lines.extend(["", "### Lỗi / Error", "",
+                          f"Bước lỗi / Failed stage: **{stage}**", ""])
+            if self._failed_context:
+                lines.extend([f"Thao tác / Operation: {self._failed_context}", ""])
+            lines.extend('> ' + line for line in error.splitlines())
+        lines.extend(["", "### Log đầy đủ / Full build log", "",
+                      f"Tải **wukong-build-log-{manifest.job_id}** trong mục **Artifacts** của run này; "
+                      "mở `build.log` để xem stdout và stderr của pipeline. "
+                      "Log đã che thông tin xác thực và tham số URL."])
         with self.summary_path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write("\n".join(lines) + "\n")

@@ -228,7 +228,7 @@ runs:
         fi
         set +e
         echo "executor_started=true" >> "$GITHUB_OUTPUT"
-        python3 wukong_cli.py --jobs-root "$WUKONG_ACTIONS_JOBS_ROOT" execute "$job_id"
+        python3 -m tools.capture_build_log --output "$WUKONG_ACTIONS_JOBS_ROOT/$job_id/build.log" -- python3 -u wukong_cli.py --jobs-root "$WUKONG_ACTIONS_JOBS_ROOT" execute "$job_id"
         result=$?
         set -e
         if [[ -n "$reporter_pid" ]]; then
@@ -240,6 +240,14 @@ runs:
           wait "$reporter_pid" 2>/dev/null || true
         fi
         echo "result=$result" >> "$GITHUB_OUTPUT"
+    - name: "Tải log build đầy đủ / Upload full build log"
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: wukong-build-log-${{ inputs.job_id }}
+        path: .wkstudio/Jobs/hybrid/${{ inputs.job_id }}/build.log
+        if-no-files-found: warn
+        retention-days: 14
     - name: "Đồng bộ manifest & log lên Drive / Sync result to Drive"
       if: always()
       shell: bash

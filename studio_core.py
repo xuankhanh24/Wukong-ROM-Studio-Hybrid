@@ -2248,7 +2248,17 @@ def _run_command(command: list[str], *, cwd: Path = ROOT_DIR, verbose: bool | No
     try:
         run_command(command, cwd=cwd, check=True)
     except subprocess.CalledProcessError as error:
-        raise StudioError(f"Command failed with exit code {error.returncode}: {Path(command[0]).name}") from error
+        from wukong.build_logging import LogRedactor
+        executable = Path(command[0]).name
+        script = next((str(arg) for arg in command[1:] if str(arg).endswith(('.py', '.jar', '.sh'))), '')
+        tail = getattr(error, 'diagnostic_tail', '') or error.stderr or error.stdout or ''
+        if isinstance(tail, bytes):
+            tail = tail.decode('utf-8', 'replace')
+        tail = '\n'.join(str(tail).splitlines()[-12:])
+        message = f"Command failed with exit code {error.returncode}: {executable} {script}".rstrip()
+        if tail:
+            message += '\n' + tail
+        raise StudioError(LogRedactor()(message)) from error
 
 
 def _emit_progress(context: BuildContext, progress: int, message: str = "") -> None:

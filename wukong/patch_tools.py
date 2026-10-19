@@ -7,6 +7,7 @@ copying an OEM signing block never revalidates modified contents.
 from __future__ import annotations
 
 import copy
+from collections import deque
 import os
 from pathlib import Path
 import re
@@ -169,6 +170,7 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
     events = queue.Queue(maxsize=256)
     stopping = threading.Event()
     buffers = [[], []]
+    diagnostic_tail = deque(maxlen=64)
 
     def emit(value):
         while not stopping.is_set():
@@ -204,6 +206,7 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
             if line is None:
                 finished += 1
             else:
+                diagnostic_tail.append(line.decode(encoding or 'utf-8', errors or 'replace')[-2000:])
                 if capture_output:
                     buffers[channel].append(line)
                 print(line.decode(encoding or 'utf-8', errors or 'replace'), end='', flush=True)
@@ -226,7 +229,12 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
                   if value is not None else None for value in output]
     result = subprocess.CompletedProcess(command, code, *output)
     if check:
-        result.check_returncode()
+        try:
+            result.check_returncode()
+        except subprocess.CalledProcessError as exc:
+            # Keep a bounded tail even when the caller did not request capture.
+            exc.diagnostic_tail = ''.join(diagnostic_tail)
+            raise
     return result
 
 

@@ -14,6 +14,33 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class GitHubActionsUITests(unittest.TestCase):
+    def test_failure_is_visible_outside_collapsed_group_and_in_summary(self):
+        recipe = BuildRecipe.from_dict({
+            'schemaVersion': 1, 'task': 'source_mirror', 'device': 'PKG110',
+            'source': {'kind': 'https', 'uri': 'https://example.test/rom.zip'},
+        })
+        error = 'Hasselblad_filter / patch_hasselblad.py: OSError: Invalid cross-device link'
+        manifest = JobManifest(job_id='failed-job', owner=Identity('actions', '1', 'user'),
+                               recipe_digest=recipe.digest, status=JobStatus.FAILED, error=error)
+        with tempfile.TemporaryDirectory() as directory:
+            summary_path = Path(directory, 'summary.md')
+            ui = GitHubActionsUI(enabled=True, summary_path=summary_path)
+            output = io.StringIO()
+            with redirect_stdout(output):
+                ui.begin('apply_mod')
+                ui.event({'type': 'step', 'step': 'apply_mod', 'status': 'running',
+                          'message': 'MOD 18/19 · Hasselblad_filter'})
+                ui.event({'type': 'step', 'step': 'apply_mod', 'status': 'failed', 'message': error})
+                ui.write_summary(manifest, recipe)
+            rendered = output.getvalue()
+            self.assertLess(rendered.index('::endgroup::'), rendered.index('::error'))
+            self.assertIn('[FAILED]', rendered)
+            summary = summary_path.read_text(encoding='utf-8')
+            self.assertIn('apply_mod', summary)
+            self.assertIn('build.log', summary)
+            self.assertIn('MOD 18/19 · Hasselblad_filter', summary)
+            self.assertIn(error, summary)
+
     def test_pipeline_events_emit_bilingual_groups_and_completion_notice(self) -> None:
         reporter = GitHubActionsUI(enabled=True)
         output = io.StringIO()

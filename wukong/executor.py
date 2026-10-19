@@ -661,7 +661,10 @@ class LocalJobExecutor:
                 self.actions_ui.write_summary(current, recipe)
                 self._push_cancelled_terminal(job_id, recipe)
                 return current
+            self.actions_ui.failure(current.stage if current else 'build', str(exc))
             self.actions_ui.close_group()
+            from .build_logging import LogRedactor
+            print(LogRedactor()(traceback.format_exc()), flush=True)
             self.store.append_event(job_id, "error", error=str(exc), traceback=traceback.format_exc())
             failed = self.store.update(
                 job_id,

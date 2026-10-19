@@ -20,6 +20,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PatchExecutionTests(unittest.TestCase):
+    def test_command_failure_preserves_script_and_root_cause(self):
+        import studio_core
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory, 'patch_hasselblad.py')
+            script.write_text("raise OSError(18, 'Invalid cross-device link')", encoding='utf-8')
+            with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(studio_core.StudioError) as caught:
+                studio_core._run_command([sys.executable, str(script)])
+            self.assertIn('patch_hasselblad.py', str(caught.exception))
+            self.assertIn('Invalid cross-device link', str(caught.exception))
+
     def test_hasselblad_jar_publish_stays_on_destination_filesystem(self):
         module = load_script('STARK/Hasselblad_filter/patch_Hasselblad_filter/patch_hasselblad.py')
         with tempfile.TemporaryDirectory() as directory:
