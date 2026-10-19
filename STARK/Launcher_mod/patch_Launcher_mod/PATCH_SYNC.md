@@ -18,3 +18,9 @@ On-device UI behavior has not been revalidated by this integration.
 The exact PKG110_16.0.10.500 profile continues to extend that preserved base.
 Generic A16 uses the updated upstream rules; unknown graphs remain unsupported,
 not silently patched with partial coverage.
+
+Resource rebuilding preserves OEM references to non-public Android symbols using
+explicit `@*android:` syntax. This avoids depending on a locally publicized
+apktool framework cache: CI uses a clean framework and otherwise rejects the same
+symbols as private. A regression test links real resources against the framework
+embedded in the pinned apktool JAR, before and after normalization.

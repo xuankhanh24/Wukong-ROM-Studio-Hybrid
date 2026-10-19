@@ -2,6 +2,7 @@
 import hashlib
 import copy
 import json
+import re
 from pathlib import Path
 import tempfile
 import xml.etree.ElementTree as ET
@@ -47,6 +48,22 @@ def merge_settings(stock_xml, recipe_xml, selected=None):
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def preserve_framework_references(project):
+    """Keep OEM framework symbols accessible with a clean apktool framework.
+
+    Stock system apps may reference non-public Android resources. A previously
+    publicized framework cache hides this issue locally. Explicit private-symbol
+    syntax retains the same package/type/name (and ID), without publicizing the
+    shared framework or dropping any OEM values. Escaped strings stay literal.
+    """
+    references = re.compile(r'([\"\'>]\s*)@android:([\w]+/[\w.]+)(?=\s*[\"\'<])')
+    for path in (Path(project) / 'res').rglob('*.xml'):
+        original = path.read_text(encoding='utf-8')
+        updated = references.sub(r'\1@*android:\2', original)
+        if updated != original:
+            path.write_text(updated, encoding='utf-8')
 
 
 def prepare_resources(apk, selected=None):
@@ -108,6 +125,7 @@ def prepare_resources(apk, selected=None):
     (project / 'res/layout/wk_taskbar_seekbar_preference.xml').write_text(recipe['layout_xml'], encoding='utf-8')
     settings = project / 'res/xml/launcher_settings.xml'
     settings.write_text(merge_settings(settings.read_text(encoding='utf-8'), recipe['settings_xml'], selected), encoding='utf-8')
+    preserve_framework_references(project)
     staged = directory / 'resources.apk'
     run_tool([find_tool('java'), '-jar', str(apktool), 'b', str(project), '-o', str(staged)], check=True)
     # Publish the cache only after apktool completes successfully.

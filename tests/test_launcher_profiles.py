@@ -1,8 +1,10 @@
 """Exact OEM-variant guards; preserve newer stock logic while adding hooks."""
 from collections import defaultdict
 import importlib
+import os
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -15,6 +17,62 @@ sys.path.remove(str(PATCHER))
 
 
 class LauncherProfileTests(unittest.TestCase):
+    def test_private_framework_symbols_link_with_clean_bundled_framework(self):
+        from wukong.patch_tools import ToolchainError, require_tool, sdk_root
+        try:
+            candidates = sorted(sdk_root().glob('build-tools/*/aapt2' + ('.exe' if os.name == 'nt' else '')))
+            apktool = require_tool('apktool')
+        except ToolchainError as error:
+            self.skipTest(str(error))
+        if not candidates:
+            self.skipTest('Android aapt2 is not installed')
+        resources = importlib.import_module('launcher_mod.resources')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            xml = root / 'res/values/styles.xml'
+            xml.parent.mkdir(parents=True)
+            xml.write_text('<resources><style name="Fixture" parent="@android:style/TextAppearance.DeviceDefault.Body2" />'
+                           '<dimen name="width">@android:dimen/search_view_preferred_width</dimen></resources>', encoding='utf-8')
+            manifest = root / 'AndroidManifest.xml'
+            manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
+                                'package="com.wukong.fixture"><application android:label="Fixture" /></manifest>', encoding='utf-8')
+            with zipfile.ZipFile(apktool) as archive:
+                framework = root / 'framework.apk'
+                framework.write_bytes(archive.read('prebuilt/android-framework.jar'))
+            def link():
+                subprocess.run([str(candidates[-1]), 'compile', '--dir', str(root / 'res'), '-o', str(root / 'resources.zip')],
+                               check=True, capture_output=True)
+                return subprocess.run([str(candidates[-1]), 'link', '-I', str(framework), '--manifest', str(manifest),
+                                       '-o', str(root / 'linked.apk'), str(root / 'resources.zip')], capture_output=True, text=True)
+            before = link()
+            self.assertNotEqual(before.returncode, 0)
+            self.assertIn('is private', before.stderr)
+            resources.preserve_framework_references(root)
+            after = link()
+            self.assertEqual(after.returncode, 0, after.stderr)
+
+    def test_stock_framework_references_keep_their_symbols_when_private(self):
+        resources = importlib.import_module('launcher_mod.resources')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            values = root / 'res/values/styles.xml'
+            values.parent.mkdir(parents=True)
+            original = ('<resources><style name="Stock" parent="@android:style/TextAppearance.DeviceDefault.Body2" />'
+                        '<dimen name="width">@android:dimen/search_view_preferred_width</dimen>'
+                        '<string name="literal">\\@android:string/not_a_reference</string>'
+                        '<item name="app">@string/app_name</item>'
+                        '<item name="theme">?android:attr/textColorPrimary</item></resources>')
+            values.write_text(original, encoding='utf-8')
+            resources.preserve_framework_references(root)
+            result = values.read_text(encoding='utf-8')
+            self.assertIn('@*android:style/TextAppearance.DeviceDefault.Body2', result)
+            self.assertIn('@*android:dimen/search_view_preferred_width', result)
+            self.assertIn('\\@android:string/not_a_reference', result)
+            self.assertIn('@string/app_name', result)
+            self.assertIn('?android:attr/textColorPrimary', result)
+            resources.preserve_framework_references(root)
+            self.assertEqual(result, values.read_text(encoding='utf-8'))
+
     def test_duplicate_source_metadata_requires_unique_method_semantics(self):
         before = '.method public enabled()Z\n.registers 1\nconst/4 v0, 0x0\nreturn v0\n.end method\n'
         profile = {'features': [{'id': 'feed', 'classes': [{

@@ -195,6 +195,7 @@ function updateSourceDetection() {
   const detection = classifySource(currentUri);
   const uriChanged = state.sourceInputUri !== currentUri;
   if (uriChanged) {
+    state.sourceProbePresentation = null;
     state.sourceInputUri = currentUri;
     state.sourceProbeRequestId += 1;
     state.sourceProbeController?.abort();
@@ -257,10 +258,21 @@ function updateSourceDetection() {
     setProbePresentation(previewOnly ? "preview-only" : coreComplete ? "analyzed" : "probe-limited", previewOnly ? "probeSignedPreviewOnly" : coreComplete ? "probeSuccess" : "probePartial");
     return;
   }
+  // Catalog/session refreshes must not erase an in-flight probe or its error.
+  const presentation = state.sourceProbePresentation;
+  if (!uriChanged && presentation?.uri === currentUri) {
+    setProbePresentation(presentation.status, presentation.messageKey);
+    if (presentation.status === "probing") {
+      probe.disabled = true;
+      probe.textContent = t("probeAnalyzing");
+    }
+    return;
+  }
   if (!probe.hidden && !miniApiEndpoint) presentMissingApi();
 }
 
 function setProbePresentation(status, messageKey) {
+  state.sourceProbePresentation = { uri: $("#source-uri").value.trim(), status, messageKey };
   const node = $("#source-state");
   node.classList.remove("probing", "analyzed", "preview-only", "probe-deferred", "probe-limited", "probe-failed", "probe-unavailable", "backend-offline");
   node.classList.add(status);

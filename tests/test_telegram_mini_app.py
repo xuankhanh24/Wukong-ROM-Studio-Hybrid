@@ -1210,6 +1210,8 @@ def _render_mini_app_in_chrome(
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(launch_url, wait_until="networkidle")
+                # Wait for the real auth gate, not a timing assumption on CI.
+                page.wait_for_function("!document.body.classList.contains('access-checking')", timeout=15000)
                 if exercise_dock_header:
                     # Fixture timers start only once the authenticated dock is ready.
                     # A fixed delay from navigation races slow Windows CI runners.
@@ -1255,6 +1257,30 @@ def _render_mini_app_in_chrome(
 
 
 class TelegramMiniAppTests(unittest.TestCase):
+    def test_catalog_refresh_preserves_failed_and_running_source_analysis(self) -> None:
+        def refresh_catalog(page):
+            page.evaluate("""async () => {
+                const source = await import('/modules/source-rom.js');
+                const {state} = await import('/modules/state.js');
+                const {loadCatalog} = await import('/modules/catalog.js');
+                source.setProbePresentation('probe-failed', 'probeSignedExpired');
+                state.sourceProbe = {status: 'deferred'};
+                await loadCatalog();
+                if (!document.querySelector('#source-state').classList.contains('probe-failed'))
+                    throw new Error('Catalog refresh erased source failure');
+                source.setProbePresentation('probing', 'probeAnalyzing');
+                await loadCatalog();
+                if (!document.querySelector('#source-state').classList.contains('probing') ||
+                    !document.querySelector('#probe-source').disabled)
+                    throw new Error('Catalog refresh erased active source analysis');
+                document.querySelector('#source-uri').value = '';
+                source.updateSourceDetection();
+                if (state.sourceProbePresentation ||
+                    document.querySelector('#source-state').classList.contains('probing'))
+                    throw new Error('Changing source retained the previous probe');
+            }""")
+        _render_mini_app_in_chrome(api_enabled=True, page_action=refresh_catalog)
+
     def test_catalog_export_contains_only_ready_github_packs_and_defaults(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)
