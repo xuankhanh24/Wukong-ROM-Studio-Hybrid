@@ -3518,6 +3518,133 @@
     {
       "archive": {
         "format": "tar.zst",
+        "md5": "6e2206dfab580af2885f06a35799f8b5",
+        "parts": [
+          {
+            "sha256": "ca326934eca5d18c701d3d49982791f9d16f97ccbc0ab7e0bd5f8bba13964ac7",
+            "sizeBytes": 378728760,
+            "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261019-050800-60582a1c/MOD-ColorOS_17.0.0.tar.zst"
+          }
+        ],
+        "sha256": "ca326934eca5d18c701d3d49982791f9d16f97ccbc0ab7e0bd5f8bba13964ac7",
+        "sizeBytes": 378728760,
+        "uri": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261019-050800-60582a1c/MOD-ColorOS_17.0.0.tar.zst"
+      },
+      "files": [
+        {
+          "path": "Calendar_global/my_stock/del-app/Calendar/Calendar.apk",
+          "sha256": "b35ad4a97b3144cab384d54d779d8d2586a1d1f443744e4442aced4bd7a052b4",
+          "sizeBytes": 103473257
+        },
+        {
+          "path": "Gapps/my_product/app/GoogleGemini/GoogleGemini.apk",
+          "sha256": "0bc7d4e3650ae8e592d1bfdc68a8be4eb6a6939c191142338e56dfc34eaf2ceb",
+          "sizeBytes": 5679466
+        },
+        {
+          "path": "Gapps/my_product/app/GoogleLocationHistory/GoogleLocationHistory.apk",
+          "sha256": "bca584aeeb3d1be4eacc8812c189bbb9ed0ba354bfa27ccfdae5695d4ccf1259",
+          "sizeBytes": 2720602
+        },
+        {
+          "path": "Gapps/my_product/app/LatinImeGoogle/LatinImeGoogle.apk",
+          "sha256": "1ff5cc10ec628347da45a8ffd59e6763e5fd2798365ec9fa71ac3c44bcaa1c85",
+          "sizeBytes": 77435723
+        },
+        {
+          "path": "Gapps/my_product/app/SpeechServicesByGoogle/SpeechServicesByGoogle.apk",
+          "sha256": "da255cc829117c5e029400df097436f354be569309965eed20b1718035de995d",
+          "sizeBytes": 77140139
+        },
+        {
+          "path": "Gapps/my_product/app/SpeechServicesByGoogle/oat/arm64/SpeechServicesByGoogle.vdex",
+          "sha256": "4157c5b0d2fa97a4ca8ce6e74dbd5e2b0ffafda5cf7b593a708229fb63fb4aab",
+          "sizeBytes": 291412
+        },
+        {
+          "path": "Gapps/my_product/etc/extension/feature_contextualsearch_navbarhidden.xml",
+          "sha256": "96315ab1befdcc8c1dc22491d7ea0aef53b2831278de7c072e3964160264a33f",
+          "sizeBytes": 145
+        },
+        {
+          "path": "Gapps/my_product/etc/permissions/feature_contextualsearch.xml",
+          "sha256": "7a9cf003162c273c040873ea18ac2dc265917f532e4e146c11a21418f0ea83ec",
+          "sizeBytes": 212
+        },
+        {
+          "path": "Gapps/my_product/etc/permissions/feature_gemini_power_menu.xml",
+          "sha256": "3fa60edc6d6ee9eedc3855e27c74063dd0736aa55a0b89b8cb2c99b19c9da502",
+          "sizeBytes": 134
+        },
+        {
+          "path": "Gapps/my_product/overlay/GmsConfigOverlayGSA/GmsConfigOverlayGSA.apk",
+          "sha256": "6c5add710bc20263505756a97e5a0cdbd68b90240af95bf13c848d2dcec13292",
+          "sizeBytes": 8542
+        },
+        {
+          "path": "Gapps/my_product/overlay/OplusAiConfigOverlayCircleToSearch/OplusAiConfigOverlayCircleToSearch.apk",
+          "sha256": "05d0273dbd582f14c97e8e5457f9c99545fdecb6752b90799794436037d67947",
+          "sizeBytes": 12646
+        },
+        {
+          "path": "Gapps/my_product/overlay/OplusAiConfigOverlayCommon/OplusAiConfigOverlayCommon.apk",
+          "sha256": "e5b6aabd1f5b54835b1d605eb4f3ac5215eab40116d7a137cac7cbff08abcf04",
+          "sizeBytes": 8550
+        },
+        {
+          "path": "Gapps/my_product/overlay/WukongOTACard.apk",
+          "sha256": "c5dbac9a22128ce04471542f5cc4a00bd25a025517944b6086bb46117fd92182",
+          "sizeBytes": 20972389
+        },
+        {
+          "path": "Gapps/my_product/priv-app/GoogleVelvet_CTS/GoogleVelvet_CTS.apk",
+          "sha256": "5ba6ce51eaf893ca2c61d2eacadbf66c4b87224408e3d317414b48b966d8fcdf",
+          "sizeBytes": 313071355
+        },
+        {
+          "path": "Gapps/my_product/priv-app/GoogleVelvet_CTS/oat/arm64/GoogleVelvet_CTS.vdex",
+          "sha256": "7f65258283fb5acccebca9de201abaeda81a28561b2b2529f1347b0236d9892a",
+          "sizeBytes": 3087384
+        },
+        {
+          "path": "Gapps/my_product/priv-app/Phonesky/Phonesky.apk",
+          "sha256": "8221f061f1bb387ca0e2bf4f3f7438326549191154470f6f04e15930b6c9dd67",
+          "sizeBytes": 104621875
+        },
+        {
+          "path": "Gapps/my_product/priv-app/Phonesky/oat/arm64/Phonesky.vdex",
+          "sha256": "053acc2d72b2e6ce69004f15eb757d890083b8dce69af8d50e0c1faee001d20e",
+          "sizeBytes": 1586852
+        },
+        {
+          "path": "GlobalSearch/my_stock/priv-app/GlobalSearch/GlobalSearch.apk",
+          "sha256": "08bd3a314e98a723527ad4594f137f75026672b08aca117fdf77632fa5a52733",
+          "sizeBytes": 77720139
+        },
+        {
+          "path": "GlobalSearch/my_stock/priv-app/GlobalSearch/oat/arm64/GlobalSearch.vdex",
+          "sha256": "ff886540e444d9936e6069547814f3dfe6cbc496dd834a0f4eff4a93e52e246b",
+          "sizeBytes": 1321920
+        },
+        {
+          "path": "Global_props/my_product/etc/extension/US/appfeature.country.dynamic_features.xml",
+          "sha256": "4dcc55e8dc44239a9c36c58530512b240475dc10ad182bf72d78d64e3119f287",
+          "sizeBytes": 852
+        },
+        {
+          "path": "Global_props/my_product/stark_build.prop",
+          "sha256": "eb5c53063376efdadb40b57f4fb91a3f0fbf763b5d2c28bf8c226d63615d584c",
+          "sizeBytes": 92
+        }
+      ],
+      "id": "MOD/ColorOS_17.0.0",
+      "remote": "https://github.com/luukhanh24/Wukong-ROM-Studio-Hybrid/releases/download/content-20261019-050800-60582a1c/MOD/ColorOS_17.0.0",
+      "sizeBytes": 789153686,
+      "target": "MOD/ColorOS_17.0.0"
+    },
+    {
+      "archive": {
+        "format": "tar.zst",
         "md5": "c2e96d17a13e03811b324eaccdc2a9fa",
         "parts": [
           {
@@ -4058,6 +4185,6 @@
       "target": "copy-image"
     }
   ],
-  "releaseTag": "content-20261018-181331-4097d7ed",
+  "releaseTag": "content-20261019-050800-60582a1c",
   "schemaVersion": 1
 }

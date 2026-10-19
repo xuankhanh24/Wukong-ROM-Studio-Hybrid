@@ -102,7 +102,11 @@ def decode_for_profile(apk, baksmali, profile):
                         sources.setdefault(source, []).append(owner)
         # Some releases retain descriptive class names but strip .source metadata.
         # Match the source basename to a unique descriptor before giving up.
-        for source in profile.get('type_sources', {}).values():
+        source_names = list(profile.get('type_sources', {}).values()) + [
+            entry['source'] for feature in profile['features'] for entry in feature['classes']
+            if entry.get('source')
+        ]
+        for source in dict.fromkeys(source_names):
             if source not in sources:
                 basename = source.rsplit('.', 1)[0]
                 candidates = [owner for owner in dex_owners if owner.endswith('/' + basename + ';')]
@@ -112,8 +116,10 @@ def decode_for_profile(apk, baksmali, profile):
         for feature in profile['features']:
             for entry in feature['classes']:
                 candidates = [entry['owner']] if entry['owner'] in dex_owners else sources.get(entry['source'], [])
-                if len(candidates) == 1:
-                    affected.setdefault(dex_owners[candidates[0]], set()).add(candidates[0])
+                for candidate in candidates:
+                    # Shared Kotlin source names can describe several classes.
+                    # Decode them all; the engine requires a unique semantic match.
+                    affected.setdefault(dex_owners[candidate], set()).add(candidate)
         for name in sorted(affected):
             (work / name).write_bytes(archive.read(name))
             run_tool([find_tool('java'), '-jar', str(baksmali), 'd', str(work / name), '--classes', ','.join(sorted(affected[name])), '-o', str(work / name[:-4])], check=True)

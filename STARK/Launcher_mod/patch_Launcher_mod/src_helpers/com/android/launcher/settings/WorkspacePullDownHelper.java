@@ -120,6 +120,7 @@ public final class WorkspacePullDownHelper {
         try {
             if (SearchPackageLaunchHelper.startSelectedTarget(context, key)) {
                 sSlideDownPackageStarted = true;
+                cleanupAfterLaunch(controller);
                 return true;
             }
         } catch (Throwable th) {
@@ -150,36 +151,65 @@ public final class WorkspacePullDownHelper {
     }
 
     public static void cleanupAfterLaunch(Object controller) {
-        if (controller == null) return;
         try {
             sSlideDownPackageStarted = false;
-            // Use the controller's public cancellation path. It owns the native
-            // animator API, including names obfuscated differently by each build.
-            invokeMethod(controller, "pullCancel");
-            Object launcher = getField(controller, "mLauncher");
-            if (launcher != null) {
-                Object dragLayer = invokeMethod(launcher, "getDragLayer");
-                if (dragLayer instanceof View) {
-                    View v = (View) dragLayer;
-                    v.setAlpha(1.0f);
-                    v.setScaleX(1.0f);
-                    v.setScaleY(1.0f);
-                    v.setTranslationY(0.0f);
+            if (controller != null) {
+                invokeMethod(controller, "pullCancel");
+                Object animator = getField(controller, "mPullDownAnimator");
+                if (animator != null) {
+                    invokeMethod(animator, "resetScreenStatus", new Class<?>[]{boolean.class}, false);
+                    invokeMethod(animator, "destroyAnimatorIfNeeded");
+                } else {
+                    invokeMethod(controller, "resetScreenStatus", new Class<?>[]{boolean.class}, false);
+                    invokeMethod(controller, "destroyAnimatorIfNeeded");
                 }
-                Object blurScrim = invokeMethod(launcher, "getBlurScrimWindowController");
-                if (blurScrim != null) {
-                    invokeMethod(blurScrim, "detach");
+
+                Object launcher = getField(controller, "mLauncher");
+                if (launcher == null && animator != null) {
+                    launcher = getField(animator, "mLauncher");
+                }
+                if (launcher != null) {
+                    Object dragLayer = invokeMethod(launcher, "getDragLayer");
+                    if (dragLayer instanceof View) {
+                        View v = (View) dragLayer;
+                        v.setAlpha(1.0f);
+                        v.setScaleX(1.0f);
+                        v.setScaleY(1.0f);
+                        v.setTranslationY(0.0f);
+                    }
+                    Object blurScrim = invokeMethod(launcher, "getBlurScrimWindowController");
+                    if (blurScrim != null) {
+                        invokeMethod(blurScrim, "detach");
+                    }
                 }
             }
+            try {
+                Class<?> sshCls = Class.forName("com.oplus.quickstep.gesture.helper.SpecialSceneHelper");
+                Field instanceField = sshCls.getField("INSTANCE");
+                Object instance = instanceField.get(null);
+                Object helper = invokeMethod(instance, "get");
+                if (helper != null) {
+                    Method m = null;
+                    try {
+                        m = helper.getClass().getMethod("clearPullDownScene");
+                    } catch (NoSuchMethodException e) {
+                        try {
+                            m = helper.getClass().getMethod("b");
+                        } catch (Throwable ignored) {}
+                    }
+                    if (m != null) {
+                        m.setAccessible(true);
+                        m.invoke(helper);
+                    }
+                }
+            } catch (Throwable ignored) {}
         } catch (Throwable th) {
             th.printStackTrace();
         }
     }
 
     public static void onResume(Object controller) {
-        if (sSlideDownPackageStarted) {
-            cleanupAfterLaunch(controller);
-        }
+        cleanupAfterLaunch(controller);
     }
 
     private static int getIntField(Object obj, String name, int def) {

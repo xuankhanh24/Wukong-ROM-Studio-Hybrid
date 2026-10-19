@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "id": "coloros-a16-pkg110-16.0.10.500",
-  "extends": "../a16/profile.json",
+  "extends": "../a16_reviewed/profile.json",
   "apk_sha256": "59ba302c566b0ac96ed4ecffb7a831ca9b230437f9cdc54c986428e7a624b7e1",
   "review": "Stock PKG110_16.0.10.500(CN01); preserve OEM instructions, exact semantic guards; device verification pending",
   "overrides": [

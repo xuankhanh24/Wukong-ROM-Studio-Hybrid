@@ -6,12 +6,14 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.util.Log;
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
 /** Cached feature flags; expensive hardware discovery runs on configuration events. */
 public final class TweaksHelper {
     private static final String TAG = "TweaksHelper";
     private static final String PREF_NAME = "com.android.launcher_preferences";
 
+    private static volatile Context sAppContext;
     private static volatile Context sContext;
     private static volatile SharedPreferences sPrefs;
     private static volatile boolean sInitialized = false;
@@ -70,8 +72,13 @@ public final class TweaksHelper {
     public static synchronized void initialize(Context context) {
         if (sLifecycleInitialized || context == null) return;
         Context application = context.getApplicationContext();
-        if (application == null) return;
+        if (application == null) application = context;
+        sAppContext = application;
         sContext = application.createDeviceProtectedStorageContext();
+        if (sContext == null) sContext = application;
+        try {
+            application.registerComponentCallbacks(sConfigurationCallback);
+        } catch (Throwable ignored) {}
         try {
             sQuickSearchAvailable = BuildFeatures.QUICK_SEARCH && application.getPackageManager()
                     .getApplicationInfo("com.google.android.googlequicksearchbox", 0).enabled;
@@ -80,7 +87,7 @@ public final class TweaksHelper {
         }
         ensureInitialized();
         if (sInitialized) {
-            refreshDeviceState(sContext);
+            refreshDeviceState(sAppContext);
             sLifecycleInitialized = true;
         }
     }
@@ -144,11 +151,16 @@ public final class TweaksHelper {
         try {
             Class<?> atCls = Class.forName("android.app.ActivityThread");
             Method mApp = atCls.getMethod("currentApplication");
-            sContext = (Context) mApp.invoke(null);
-            if (sContext != null) {
+            Context app = (Context) mApp.invoke(null);
+            if (app != null) {
+                sAppContext = app;
+                sContext = app;
                 try {
-                    Context dps = sContext.createDeviceProtectedStorageContext();
+                    Context dps = app.createDeviceProtectedStorageContext();
                     if (dps != null) sContext = dps;
+                } catch (Throwable ignored) {}
+                try {
+                    app.registerComponentCallbacks(sConfigurationCallback);
                 } catch (Throwable ignored) {}
                 return sContext;
             }
@@ -220,7 +232,7 @@ public final class TweaksHelper {
     private static volatile boolean sConfigurationLandscape;
     private static final ComponentCallbacks sConfigurationCallback = new ComponentCallbacks() {
         @Override public void onConfigurationChanged(Configuration configuration) {
-            Context context = sContext;
+            Context context = sAppContext != null ? sAppContext : sContext;
             if (context != null) refreshDeviceState(context);
         }
         @Override public void onLowMemory() { }
@@ -236,12 +248,106 @@ public final class TweaksHelper {
             catch (ReflectiveOperationException ignored) { }
         }
         sStockTabletOrFold = Boolean.TRUE.equals(sIsHardwareTablet) || foldedOpen;
-        sConfigurationLandscape = context.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
+        boolean isLand = false;
+        if (context != null && context.getResources() != null) {
+            Configuration cfg = context.getResources().getConfiguration();
+            if (cfg != null) {
+                isLand = (cfg.orientation == Configuration.ORIENTATION_LANDSCAPE);
+            }
+        }
+        sConfigurationLandscape = isLand;
+        if (!isLand) {
+            sIsLandscape = false;
+        }
+    }
+
+    public static boolean isDeviceInLandscape(Object deviceProfile) {
+        if (sIsLandscape || sConfigurationLandscape) {
+            return true;
+        }
+        if (deviceProfile != null) {
+            try {
+                Method mConfig = deviceProfile.getClass().getMethod("config");
+                Object config = mConfig.invoke(deviceProfile);
+                if (config != null) {
+                    try {
+                        Method mIsLand = config.getClass().getMethod("isLandscape");
+                        Object res = mIsLand.invoke(config);
+                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
+                            return true;
+                        }
+                    } catch (Throwable ignored) {}
+                    try {
+                        Field f = config.getClass().getField("isLandscape");
+                        Object res = f.get(config);
+                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
+                            return true;
+                        }
+                    } catch (Throwable ignored) {}
+                    try {
+                        Field f = config.getClass().getField("p");
+                        Object res = f.get(config);
+                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
+                            return true;
+                        }
+                    } catch (Throwable ignored) {}
+                }
+            } catch (Throwable ignored) {}
+        }
+        try {
+            Class<?> su = Class.forName("com.android.common.util.ScreenUtils");
+            try {
+                Method m = su.getMethod("isDeviceProfileInLandscape", Class.forName("com.android.launcher3.DeviceProfile"));
+                Object res = m.invoke(null, deviceProfile);
+                if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
+                    return true;
+                }
+            } catch (Throwable ignored) {}
+            try {
+                Method m = su.getMethod("isDeviceInLandscape");
+                Object res = m.invoke(null);
+                if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
+                    return true;
+                }
+            } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {}
+        Context ctx = sAppContext != null ? sAppContext : getCon();
+        if (ctx != null && ctx.getResources() != null) {
+            Configuration cfg = ctx.getResources().getConfiguration();
+            if (cfg != null && cfg.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isDeviceInLandscape() {
+        return isDeviceInLandscape(null);
+    }
+
+    public static boolean shouldForceGridRecents(Object deviceProfile) {
+        if (!sWkTablet) return false;
+        return !isDeviceInLandscape(deviceProfile);
     }
 
     public static boolean shouldForceGridRecents() {
-        return sWkTablet && !sIsLandscape && !sConfigurationLandscape;
+        return shouldForceGridRecents(null);
+    }
+
+    public static boolean shouldShowAsGrid(Object recentsView) {
+        if (!sWkTablet) return false;
+        if (recentsView != null) {
+            try {
+                Method m = recentsView.getClass().getMethod("isLandScape");
+                Object res = m.invoke(recentsView);
+                if (res instanceof Boolean) {
+                    boolean isLand = ((Boolean) res).booleanValue();
+                    sIsLandscape = isLand;
+                    if (isLand) return false;
+                }
+            } catch (Throwable ignored) {}
+        }
+        return !isDeviceInLandscape(null);
     }
 
     public static boolean isGridRecentsEnabled() {
@@ -253,11 +359,15 @@ public final class TweaksHelper {
     }
 
     public static boolean isCurrentDeviceInLandscape() {
-        return sIsLandscape || sConfigurationLandscape;
+        return isDeviceInLandscape();
     }
 
     public static void setLandscapeState(boolean isLandscape) {
         sIsLandscape = isLandscape;
+    }
+
+    public static void resetLandscapeState() {
+        sIsLandscape = false;
     }
 
     // ==========================================
@@ -277,7 +387,7 @@ public final class TweaksHelper {
     }
 
     public static boolean isGoogleFeedEnabled(boolean original) {
-        return sWkGoogleFeed ? true : original;
+        return sWkGoogleFeed;
     }
 
     public static boolean isWkDockBlurEnabled() {

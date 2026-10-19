@@ -4,10 +4,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from wukong.mod_release_versions import ModReleaseVersionStore
+from wukong.mod_release_versions import ModReleaseVersionStore, default_mod_release_version
 
 
 class ModReleaseVersionStoreTests(unittest.TestCase):
+    def test_coloros_17_defaults_to_v7_without_changing_existing_releases(self):
+        self.assertEqual(default_mod_release_version('ColorOS_17.0.0'), 'V7.0')
+        self.assertEqual(default_mod_release_version('ColorOS_16.0.10'), 'V6.0')
+
     def test_labels_are_atomic_persistent_and_not_limited_to_v_prefix(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             changed: list[bool] = []

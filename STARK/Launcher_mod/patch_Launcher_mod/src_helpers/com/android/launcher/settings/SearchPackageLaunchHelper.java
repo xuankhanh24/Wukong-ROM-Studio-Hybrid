@@ -81,15 +81,39 @@ public final class SearchPackageLaunchHelper {
         sLastLaunchTimestamp = System.currentTimeMillis();
     }
 
+    public static Context getAppContext() {
+        try {
+            Class<?> appCls = Class.forName("com.android.common.LauncherApplication");
+            Method m = appCls.getMethod("getAppContext");
+            Context ctx = (Context) m.invoke(null);
+            if (ctx != null) return ctx;
+        } catch (Throwable ignored) {}
+        try {
+            Class<?> actTrackerCls = Class.forName("com.android.launcher3.util.ActivityTracker");
+            Field f = Class.forName("com.android.launcher3.Launcher").getField("ACTIVITY_TRACKER");
+            Object tracker = f.get(null);
+            Method m = tracker.getClass().getMethod("getCreatedActivity");
+            Context ctx = (Context) m.invoke(tracker);
+            if (ctx != null) return ctx;
+        } catch (Throwable ignored) {}
+        try {
+            Object ind = SearchPackageIndicatorHelper.findIndicator();
+            if (ind instanceof View) {
+                return ((View) ind).getContext();
+            }
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
     public static boolean isTargetPackage(String pkg) {
         if (TextUtils.isEmpty(pkg)) return false;
         if ("com.heytap.speechassist".equals(pkg)) return true;
 
         // 1. Kiểm tra cấu hình hiện tại trong SharedPreferences trước
         try {
-            Object ind = SearchPackageIndicatorHelper.findIndicator();
-            if (ind instanceof View) {
-                SharedPreferences sp = getPrefs(((View) ind).getContext());
+            Context ctx = getAppContext();
+            if (ctx != null) {
+                SharedPreferences sp = getPrefs(ctx);
                 if (sp != null) {
                     String targetPkg = sp.getString("wk_search_package", "");
                     if (!TextUtils.isEmpty(targetPkg) && targetPkg.equals(pkg)) {
@@ -116,6 +140,7 @@ public final class SearchPackageLaunchHelper {
      * để hệ thống ColorOS kích hoạt trọn vẹn cả Animation MỞ và ĐÓNG (morphing pill).
      */
     public static Intent getIndicatorLaunchIntent(Context context) {
+        if (context == null) context = getAppContext();
         if (context == null) return null;
         SharedPreferences sp = getPrefs(context);
         if (sp == null) return null;

@@ -18,6 +18,7 @@ DEFAULT_MOD_RELEASE_VERSION = "V3.4"
 DEFAULT_MOD_RELEASE_VERSIONS = {
     "ColorOS_15.0.1": "V3.4",
     "ColorOS_16.0.10": "V6.0",
+    "ColorOS_17.0.0": "V7.0",
     "ColorOS_16.0.5": "V3.4",
     "ColorOS_16.0.5.1001": "V3.5",
     "ColorOS_16.0.7": "V3.4",

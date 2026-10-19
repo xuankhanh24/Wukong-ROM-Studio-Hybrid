@@ -114,15 +114,15 @@ public class WkTaskbarSeekBarPreference extends COUIPreference {
         }
 
         if (mSeekBar != null) {
-            try {
-                Method mSetMin = mSeekBar.getClass().getMethod("setMin", int.class);
-                mSetMin.invoke(mSeekBar, 1);
-            } catch (Throwable ignored) {}
-
             int max = 6;
             try {
                 Method mSetMax = mSeekBar.getClass().getMethod("setMax", int.class);
                 mSetMax.invoke(mSeekBar, max);
+            } catch (Throwable ignored) {}
+
+            try {
+                Method mSetMin = mSeekBar.getClass().getMethod("setMin", int.class);
+                mSetMin.invoke(mSeekBar, 1);
             } catch (Throwable ignored) {}
 
             int saved = getSavedInt(5);

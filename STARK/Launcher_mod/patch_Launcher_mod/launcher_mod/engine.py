@@ -82,12 +82,13 @@ def select_profile(profile, selected=None):
     for feature in result['features']:
         for entry in feature['classes']:
             for rule in entry['methods']:
-                variants = rule.pop('variants', {})
-                active = [name for name in variants if name in selected]
-                if len(active) > 1:
-                    raise ValueError(f'Ambiguous method variants: {active}')
-                if active:
-                    rule['after'] = variants[active[0]]
+                for choice in [rule] + rule.get('alternatives', []):
+                    variants = choice.pop('variants', {})
+                    active = [name for name in variants if name in selected]
+                    if len(active) > 1:
+                        raise ValueError(f'Ambiguous method variants: {active}')
+                    if active:
+                        choice['after'] = variants[active[0]]
     return result
 
 
@@ -109,6 +110,21 @@ def plan_patch(roots, profile, source_index=None, selected=None):
             else:
                 paths = [root / (candidate[1:-1] + '.smali') for candidate in candidates for root in root_paths]
                 paths = [path for path in paths if path.is_file()]
+            if len(paths) > 1:
+                required = [rule for rule in entry['methods'] if rule.get('before') and not rule.get('optional')]
+                compatible = []
+                for candidate in paths:
+                    candidate_text = candidate.read_text(encoding='utf-8')
+                    candidate_owner = re.search(r'(?m)^\.class .* (L[^;]+;)', candidate_text)[1]
+                    local_aliases = {**aliases, owner: candidate_owner}
+                    bodies = list(METHOD.finditer(candidate_text))
+                    if required and all(any(
+                        semantic(body.group()) == semantic(remap(choice['before'], local_aliases))
+                        for choice in [rule] + rule.get('alternatives', []) if choice.get('before')
+                        for body in bodies
+                    ) for rule in required):
+                        compatible.append(candidate)
+                paths = compatible
             if len(paths) != 1:
                 raise ValueError(f"{feature['id']}: class {entry['source'] or owner} has {len(paths)} candidates")
             path = paths[0]
@@ -128,7 +144,27 @@ def plan_patch(roots, profile, source_index=None, selected=None):
         content = files[path]
         methods = list(METHOD.finditer(content))
         for rule in entry['methods']:
-            before, after = remap(rule['before'], aliases), remap(rule['after'], aliases)
+            choices = []
+            for choice in [rule] + rule.get('alternatives', []):
+                expected = remap(choice['before'], aliases)
+                if not expected:
+                    choices.append((choice, None))
+                    continue
+                candidates = [m for m in methods if semantic(m.group()) == semantic(expected)]
+                if len(candidates) > 1:
+                    candidates = [m for m in candidates if signature(m.group()) == signature(expected)]
+                if len(candidates) > 1:
+                    raise ValueError(f"{feature}: {path.name} has ambiguous semantic matches")
+                if candidates:
+                    choices.append((choice, candidates[0]))
+            if not choices:
+                if rule.get('optional'):
+                    continue
+                raise ValueError(f"{feature}: {path.name}::{signature(rule['before'])} has 0 semantic matches")
+            if len(choices) != 1:
+                raise ValueError(f"{feature}: {path.name} has ambiguous semantic alternatives")
+            choice, match = choices[0]
+            before, after = remap(choice['before'], aliases), remap(choice['after'], aliases)
             if not before:
                 if any(signature(m.group()) == signature(after) for m in methods):
                     raise ValueError(f"{feature}: added method already exists: {signature(after)}")
@@ -142,14 +178,6 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                 stock_body = before[old_registers.end():].strip()
                 if stock_body in after:
                     raise ValueError(f"{feature}: preserved stock body loses local registers: {signature(before)}")
-            expected = semantic(before)
-            candidates = [m for m in methods if semantic(m.group()) == expected]
-            # A name is only a disambiguation hint after semantic matching.
-            if len(candidates) > 1:
-                candidates = [m for m in candidates if signature(m.group()) == signature(before)]
-            if len(candidates) != 1:
-                raise ValueError(f"{feature}: {path.name}::{signature(before)} has {len(candidates)} semantic matches")
-            match = candidates[0]
             key = (path, match.start())
             if key in seen:
                 raise ValueError(f'Overlapping patch: {path}::{signature(before)}')
@@ -204,12 +232,15 @@ def load_profile(path):
     if profile.get('extends'):
         base = load_profile(path.parent / profile['extends'])
         for override in profile['overrides']:
+            target_signatures = {override['method'], signature(override['before'])}
             rules = [rule for feature in base['features'] if feature['id'] == override['feature']
                      for entry in feature['classes'] if entry['owner'] == override['owner']
-                     for rule in entry['methods'] if rule['before'] and signature(rule['before']) == override['method']]
+                     for rule in entry['methods'] if rule['before'] and signature(rule['before']) in target_signatures]
             if len(rules) != 1:
                 raise ValueError('Reviewed profile override must bind exactly one base rule')
             rules[0].update(before=override['before'], after=override['after'], variants=override.get('variants', {}))
+            # Exact-fingerprint overrides must not inherit generic OEM alternatives.
+            rules[0].pop('alternatives', None)
         return {**base, **{key: value for key, value in profile.items() if key not in {'extends', 'overrides'}}}
     profile['features'] = [json.loads((path.parent / feature).read_text(encoding='utf-8')) for feature in profile['features']]
     return profile

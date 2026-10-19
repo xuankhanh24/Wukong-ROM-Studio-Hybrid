@@ -243,6 +243,28 @@ class GitHubContentTests(unittest.TestCase):
             manager = ContentPackManager(root, run_command=lambda *args: self.fail('no remote STARK replacement'))
             self.assertEqual(manager.install(index, 'STARK/common'), (root / 'STARK').resolve())
 
+    def test_all_checkout_owned_base_packs_are_valid_without_remote_archives(self):
+        from wukong.content_packs import GIT_CONTENT_PACKS
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            packs = []
+            for pack_id, target in GIT_CONTENT_PACKS.items():
+                (root / target).mkdir()
+                data = b'checkout fixture'
+                (root / target / 'fixture.bin').write_bytes(data)
+                packs.append({'id': pack_id, 'target': target, 'source': 'git',
+                              'files': [{'path': 'fixture.bin', 'sizeBytes': len(data),
+                                         'sha256': hashlib.sha256(data).hexdigest()}],
+                              'sizeBytes': len(data)})
+            index = {'schemaVersion': 1, 'packs': packs}
+            validate_content_index(index)
+            manager = ContentPackManager(root, run_command=lambda *args: self.fail('no remote base overlay'))
+            for pack in packs:
+                self.assertEqual(manager.install(index, pack['id']), (root / pack['target']).resolve())
+            with self.assertRaises(ValueError):
+                validate_content_index({'schemaVersion': 1, 'packs': [{
+                    'id': 'MOD/Unsafe', 'target': 'MOD/Unsafe', 'source': 'git', 'files': [], 'sizeBytes': 0}]})
+
     def test_release_catalog_refresh_uses_matching_new_manifest_not_old_hashes(self):
         from wukong.content_packs import load_content_index
         with tempfile.TemporaryDirectory() as directory:

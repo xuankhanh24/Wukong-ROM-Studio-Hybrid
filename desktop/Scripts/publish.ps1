@@ -100,6 +100,14 @@ Copy-Item -Path (Join-Path $publishRoot '*') -Destination (Join-Path $staging 'A
 
 & (Join-Path $scriptRoot 'verify-stark-payload.ps1') -SourceRoot $sourceRoot -StagingRoot $staging
 
+# Validate with the staged package, not the developer checkout: older runtimes
+# rejected Git-owned base packs even though the current publisher accepted them.
+$stagedScripts = Join-Path $staging 'Runtime/Scripts'
+& python -c 'import sys,json; from pathlib import Path; sys.path.insert(0, sys.argv[1]); from wukong.content_packs import validate_content_index; validate_content_index(json.loads((Path(sys.argv[1])/"content-packs/index.json").read_text(encoding="utf-8")))' $stagedScripts
+if ($LASTEXITCODE -ne 0) {
+    throw 'Staged runtime cannot read the current content catalog. Rebuild the Runtime/Scripts package.'
+}
+
 # A stale branch catalog must not download a Drive snapshot over shared STARK.
 $packCatalog = Get-Content -LiteralPath (Join-Path $staging 'Runtime/Scripts/content-packs/index.json') -Raw | ConvertFrom-Json
 $releaseModPacks = @($packCatalog.packs | Where-Object { $_.id -like 'MOD/*' })
