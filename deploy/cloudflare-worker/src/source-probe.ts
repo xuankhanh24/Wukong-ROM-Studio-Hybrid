@@ -249,16 +249,16 @@ function isOplusResolver(url: URL): boolean {
   );
 }
 
-async function matchingDanielSelection(source: URL): Promise<string | null> {
+async function matchingDanielSelection(source: URL, env: Env): Promise<string | null> {
   if (!isOplusResolver(source)) return null;
   const cacheKey = new Request("https://rom-catalog-cache.wukong.invalid/source-selectors-latest-v1");
   try {
     let cached = await caches.default.match(cacheKey);
     if (!cached) {
-      const response = await fetch("https://roms.danielspringer.at/api/ota.php?latest=1", {
-        headers: {Accept: "application/json", "User-Agent": "Wukong-ROM-Studio/1.0"},
-        redirect: "manual", signal: AbortSignal.timeout(8_000)
-      });
+      // Use the same bounded, claimed catalog transport as ROM discovery.
+      // The source-resolution service must not silently depend on a second
+      // Cloudflare -> catalog connection that discovery already bridges.
+      const response = await callSourceTransport(env, "catalog", "https://roms.danielspringer.at/api/ota.php?latest=1", "", 2 * 1024 * 1024);
       if (!response.ok) { await response.body?.cancel(); return null; }
       const payload = JSON.parse(new TextDecoder().decode(await limitedBody(response, 2 * 1024 * 1024))) as {
         releases?: Record<string, unknown>[];
@@ -481,7 +481,7 @@ export async function resolveSource(request: Request, env: Env, value: unknown, 
   const uri = value && typeof value === "object" ? String((value as JsonObject).uri ?? "").trim() : "";
   if (!uri || uri.length > 8192) throw new SourceProbeHttpError("A valid ROM source URL is required");
   const source = validatedUrl(uri);
-  const matched = await matchingDanielSelection(source);
+  const matched = await matchingDanielSelection(source, env);
   const selection = matched ? validatedUrl(matched) : source;
   if (!isDanielCatalogSelection(selection) && !isDanielOtaPage(selection)) {
     return createProbeSession(request, env, value, ownerSubject, true);
@@ -520,7 +520,7 @@ export async function createProbeSession(
   let transportMode: "direct" | "vercel" = "direct";
   let resolvedInput = uri;
   let catalogMetadata: Record<string, unknown> | null = null;
-  const matched = await matchingDanielSelection(originalUrl);
+  const matched = await matchingDanielSelection(originalUrl, env);
   const selection = matched ? validatedUrl(matched) : originalUrl;
   const websiteSelection = isDanielCatalogSelection(selection) || isDanielOtaPage(selection);
   if (websiteSelection) {

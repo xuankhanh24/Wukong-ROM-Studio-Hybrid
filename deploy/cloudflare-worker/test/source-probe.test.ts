@@ -1,5 +1,5 @@
 import { SELF } from "cloudflare:test";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 function mockDnsAndOrigin(handler: (request: Request) => Response | Promise<Response>): void {
   vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -16,18 +16,26 @@ function mockDnsAndOrigin(handler: (request: Request) => Response | Promise<Resp
 }
 
 describe("bounded ROM source Range proxy", () => {
+  beforeEach(async () => {
+    await caches.default.put(new Request('https://rom-catalog-cache.wukong.invalid/source-selectors-latest-v1'),
+      Response.json([], {headers: {'Cache-Control': 'public, max-age=900'}}));
+  });
   it('matches a pasted latest OPlus source against the public catalog before using the website resolver', async () => {
+    await caches.default.delete(new Request('https://rom-catalog-cache.wukong.invalid/source-selectors-latest-v1'));
     const original = 'https://component-ota-cn.allawntech.com/downloadCheck?catalog-match=1';
     const calls: string[] = [];
+    let catalogCalls = 0;
     mockDnsAndOrigin(async request => {
       const url = new URL(request.url);
       calls.push(url.hostname);
-      if (url.hostname === 'roms.danielspringer.at') return Response.json({releases: [
-        {id: 'exact-release', source_url: original}
-      ]});
       if (url.pathname === '/api/source-transport') {
         const claim = await request.json() as {claimUrl: string; token: string};
         const work = await (await SELF.fetch(claim.claimUrl, {method: 'POST', headers: {Authorization: `TransportClaim ${claim.token}`}})).json();
+        if ((work as {operation: string}).operation === 'catalog') {
+          catalogCalls += 1;
+          expect(work).toMatchObject({sourceUrl: 'https://roms.danielspringer.at/api/ota.php?latest=1', maximumBytes: 2 * 1024 * 1024});
+          return Response.json({releases: [{id: 'exact-release', source_url: original}]});
+        }
         expect(work).toMatchObject({resolveOnly: true, sourceUrl: 'https://roms.danielspringer.at/api/ota.php?id=exact-release'});
         return Response.json({resolvedUrl: 'https://cdn.allawnfs.com/rom.zip', sizeBytes: 4096});
       }
@@ -45,7 +53,7 @@ describe("bounded ROM source Range proxy", () => {
       body: JSON.stringify({uri: original})
     });
     expect(second.status).toBe(200);
-    expect(calls.filter(host => host === 'roms.danielspringer.at')).toHaveLength(1);
+    expect(catalogCalls).toBe(1);
   });
   it('preserves the resolver timeout after the bounded retry is exhausted', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL) => Response.json({
