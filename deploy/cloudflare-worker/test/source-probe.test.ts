@@ -16,6 +16,19 @@ function mockDnsAndOrigin(handler: (request: Request) => Response | Promise<Resp
 }
 
 describe("bounded ROM source Range proxy", () => {
+  it('preserves the resolver timeout after the bounded retry is exhausted', async () => {
+    const fetchMock = vi.fn(async () => Response.json({
+      code: 'source_transport_timeout', stage: 'resolver', error: 'ROM source connection timed out'
+    }, {status: 502}));
+    vi.stubGlobal('fetch', fetchMock);
+    const response = await SELF.fetch('https://worker.example/v1/sources/probe', {
+      method: 'POST', headers: {Origin: 'https://wukong-rom-studio.vercel.app', 'Content-Type': 'application/json'},
+      body: JSON.stringify({uri: 'https://component-ota-cn.allawntech.com/downloadCheck?timeout=1'})
+    });
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({code: 'source_transport_timeout', error: 'ROM source connection timed out (resolver)'});
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
   it('preserves safe transport diagnostics and never retries an origin access denial', async () => {
     const calls: string[] = [];
     vi.stubGlobal('fetch', vi.fn(async input => {
