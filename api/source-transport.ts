@@ -26,7 +26,7 @@ interface TransportWork {
 class TransportError extends Error {
   readonly status: number;
 
-  constructor(message: string, status = 400) {
+  constructor(message: string, status = 400, readonly code = "source_transport_error", readonly stage = "") {
     super(message);
     this.status = status;
   }
@@ -91,7 +91,7 @@ async function defaultResolveAddresses(hostname: string): Promise<string[]> {
   try {
     return [...new Set((await lookup(hostname, { all: true })).map(record => record.address))];
   } catch {
-    throw new TransportError("Source DNS lookup failed", 502);
+    throw new TransportError("Source DNS lookup failed", 502, "source_dns_failure", "dns");
   }
 }
 
@@ -133,6 +133,12 @@ async function secureFetch(
   let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
     const response = await fetchImpl(url, { ...requestInit, redirect: "manual", cache: "no-store" });
+    if ([401, 403, 429].includes(response.status)) {
+      await response.body?.cancel();
+      throw new TransportError(response.status === 429 ? "ROM host request limit reached" : "ROM host denied access",
+        response.status === 429 ? 429 : 403, response.status === 429 ? "source_rate_limited" : "source_access_denied",
+        sourceKind(url) ?? "source");
+    }
     if (![301, 302, 303, 307, 308].includes(response.status)) return { response, url };
     const location = response.headers.get("Location");
     await response.body?.cancel();
@@ -319,7 +325,20 @@ export function createSourceTransportHandler(dependencies: {
   fetchImpl?: Fetch;
   resolveAddresses?: ResolveAddresses;
 } = {}) {
-  const fetchImpl = dependencies.fetchImpl ?? fetch;
+  const rawFetch = dependencies.fetchImpl ?? fetch;
+  const fetchImpl: Fetch = async (input, init) => {
+    try {
+      return await rawFetch(input, init);
+    } catch (error) {
+      const failure = error as { name?: string; cause?: {code?: string; errors?: {code?: string}[]} };
+      const codes = [failure?.cause?.code, ...(failure?.cause?.errors?.map(item => item.code) ?? [])];
+      const timedOut = failure?.name === 'TimeoutError' || codes.some(code =>
+        ['UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT', 'ETIMEDOUT'].includes(code ?? ''));
+      const current = new URL(input instanceof Request ? input.url : String(input));
+      throw new TransportError(timedOut ? 'ROM source connection timed out' : 'ROM source connection failed',
+        502, timedOut ? 'source_transport_timeout' : 'source_transport_connection', sourceKind(current) ?? 'control-plane');
+    }
+  };
   const resolveAddresses = dependencies.resolveAddresses ?? defaultResolveAddresses;
   return async (request: Request): Promise<Response> => {
     try {
@@ -437,7 +456,10 @@ export function createSourceTransportHandler(dependencies: {
     } catch (error) {
       const status = error instanceof TransportError ? error.status : 502;
       const message = error instanceof TransportError ? error.message : "Source transport failed";
-      return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
+      return Response.json({ error: message,
+        code: error instanceof TransportError ? error.code : 'source_transport_error',
+        stage: error instanceof TransportError ? error.stage : ''
+      }, { status, headers: { "Cache-Control": "no-store" } });
     }
   };
 }

@@ -16,6 +16,20 @@ function mockDnsAndOrigin(handler: (request: Request) => Response | Promise<Resp
 }
 
 describe("bounded ROM source Range proxy", () => {
+  it('preserves safe transport diagnostics and never retries an origin access denial', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async input => {
+      calls.push(String(input));
+      return Response.json({code: 'source_access_denied', stage: 'cdn', error: 'private upstream body'}, {status: 403});
+    }));
+    const response = await SELF.fetch('https://worker.example/v1/sources/probe', {
+      method: 'POST', headers: {Origin: 'https://wukong-rom-studio.vercel.app', 'Content-Type': 'application/json'},
+      body: JSON.stringify({uri: 'https://component-ota-cn.allawntech.com/downloadCheck?denied=1'})
+    });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({code: 'source_access_denied'});
+    expect(calls).toHaveLength(1);
+  });
   it("retries a transient probe transport failure with a fresh single-use claim", async () => {
     const tokens: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

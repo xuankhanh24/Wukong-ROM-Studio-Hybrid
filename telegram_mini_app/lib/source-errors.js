@@ -1,6 +1,7 @@
 /** Safe localized messages shared by source analysis and library Resolve. */
 export function sourceErrorKey(error = {}) {
   if (error.code === 'source_signed_url_expired') return 'probeSignedExpired';
+  if (error.code === 'source_access_denied') return 'probeAccessDenied';
   if (error.status === 429) return 'probeRateLimited';
   if (error.status === 401) return 'probeSessionRequired';
   if (error.status === 403) return 'probeAccessDenied';

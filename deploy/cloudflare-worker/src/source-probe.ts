@@ -320,7 +320,26 @@ export async function callSourceTransport(
     throw new SourceProbeHttpError("ROM source transport returned an unexpected redirect", 502);
   }
   if (!response.ok) {
-    await response.body?.cancel();
+    // Only forward fixed diagnostic categories, never arbitrary origin bodies,
+    // signed download URLs or raw transport exception messages.
+    try {
+      const detail = JSON.parse(new TextDecoder().decode(await limitedBody(response, 4096))) as JsonObject;
+      const messages: Record<string, string> = {
+        source_transport_timeout: 'ROM source connection timed out',
+        source_transport_connection: 'ROM source connection failed',
+        source_dns_failure: 'ROM source DNS lookup failed',
+        source_access_denied: 'ROM host denied access',
+        source_rate_limited: 'ROM host request limit reached'
+      };
+      const code = String(detail.code ?? '');
+      if (messages[code]) {
+        const stage = ['dns', 'resolver', 'cdn', 'daniel', 'catalog', 'control-plane'].includes(String(detail.stage)) ? ` (${detail.stage})` : '';
+        throw new SourceProbeHttpError(messages[code] + stage,
+          code === 'source_access_denied' ? 403 : code === 'source_rate_limited' ? 429 : 502, code);
+      }
+    } catch (error) {
+      if (error instanceof SourceProbeHttpError && error.code !== 'source_unreachable') throw error;
+    }
     throw new SourceProbeHttpError("ROM source transport could not reach this link", 502);
   }
   return response;
