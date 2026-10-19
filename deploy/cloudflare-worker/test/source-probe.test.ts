@@ -16,6 +16,37 @@ function mockDnsAndOrigin(handler: (request: Request) => Response | Promise<Resp
 }
 
 describe("bounded ROM source Range proxy", () => {
+  it('matches a pasted latest OPlus source against the public catalog before using the website resolver', async () => {
+    const original = 'https://component-ota-cn.allawntech.com/downloadCheck?catalog-match=1';
+    const calls: string[] = [];
+    mockDnsAndOrigin(async request => {
+      const url = new URL(request.url);
+      calls.push(url.hostname);
+      if (url.hostname === 'roms.danielspringer.at') return Response.json({releases: [
+        {id: 'exact-release', source_url: original}
+      ]});
+      if (url.pathname === '/api/source-transport') {
+        const claim = await request.json() as {claimUrl: string; token: string};
+        const work = await (await SELF.fetch(claim.claimUrl, {method: 'POST', headers: {Authorization: `TransportClaim ${claim.token}`}})).json();
+        expect(work).toMatchObject({resolveOnly: true, sourceUrl: 'https://roms.danielspringer.at/api/ota.php?id=exact-release'});
+        return Response.json({resolvedUrl: 'https://cdn.allawnfs.com/rom.zip', sizeBytes: 4096});
+      }
+      expect(url.hostname).toBe('cdn.allawnfs.com');
+      return new Response(new Uint8Array(1), {status: 206, headers: {'Content-Range': 'bytes 0-0/4096'}});
+    });
+    const response = await SELF.fetch('https://worker.example/v1/sources/probe', {
+      method: 'POST', headers: {Origin: 'https://wukong-rom-studio.vercel.app', 'Content-Type': 'application/json'},
+      body: JSON.stringify({uri: original})
+    });
+    expect(response.status).toBe(200);
+    expect(calls).not.toContain('component-ota-cn.allawntech.com');
+    const second = await SELF.fetch('https://worker.example/v1/sources/probe', {
+      method: 'POST', headers: {Origin: 'https://wukong-rom-studio.vercel.app', 'Content-Type': 'application/json'},
+      body: JSON.stringify({uri: original})
+    });
+    expect(second.status).toBe(200);
+    expect(calls.filter(host => host === 'roms.danielspringer.at')).toHaveLength(1);
+  });
   it('preserves the resolver timeout after the bounded retry is exhausted', async () => {
     const fetchMock = vi.fn(async () => Response.json({
       code: 'source_transport_timeout', stage: 'resolver', error: 'ROM source connection timed out'
@@ -27,7 +58,7 @@ describe("bounded ROM source Range proxy", () => {
     });
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({code: 'source_transport_timeout', error: 'ROM source connection timed out (resolver)'});
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls.filter(([input]) => String(input).includes('/api/source-transport'))).toHaveLength(2);
   });
   it('preserves safe transport diagnostics and never retries an origin access denial', async () => {
     const calls: string[] = [];
@@ -41,7 +72,7 @@ describe("bounded ROM source Range proxy", () => {
     });
     expect(response.status).toBe(403);
     expect(await response.json()).toMatchObject({code: 'source_access_denied'});
-    expect(calls).toHaveLength(1);
+    expect(calls.filter(url => url.includes('/api/source-transport'))).toHaveLength(1);
   });
   it("retries a transient probe transport failure with a fresh single-use claim", async () => {
     const tokens: string[] = [];
@@ -60,9 +91,10 @@ describe("bounded ROM source Range proxy", () => {
     expect(tokens).toHaveLength(2);
     expect(tokens[0]).not.toBe(tokens[1]);
   });
-  afterEach(() => {
+  afterEach(async () => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    await caches.default.delete(new Request('https://rom-catalog-cache.wukong.invalid/source-selectors-latest-v1'));
   });
 
   it("creates a two-minute probe session and serves a bounded byte range", async () => {

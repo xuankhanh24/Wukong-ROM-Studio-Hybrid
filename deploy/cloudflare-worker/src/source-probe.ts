@@ -249,6 +249,47 @@ function isOplusResolver(url: URL): boolean {
   );
 }
 
+async function matchingDanielSelection(source: URL): Promise<string | null> {
+  if (!isOplusResolver(source)) return null;
+  const cacheKey = new Request("https://rom-catalog-cache.wukong.invalid/source-selectors-latest-v1");
+  try {
+    let cached = await caches.default.match(cacheKey);
+    if (!cached) {
+      const response = await fetch("https://roms.danielspringer.at/api/ota.php?latest=1", {
+        headers: {Accept: "application/json", "User-Agent": "Wukong-ROM-Studio/1.0"},
+        redirect: "manual", signal: AbortSignal.timeout(8_000)
+      });
+      if (!response.ok) { await response.body?.cancel(); return null; }
+      const payload = JSON.parse(new TextDecoder().decode(await limitedBody(response, 2 * 1024 * 1024))) as {
+        releases?: Record<string, unknown>[];
+      };
+      if (!Array.isArray(payload.releases) || payload.releases.length > 2000) return null;
+      const matches = new Map<string, string | null>();
+      for (const row of payload.releases) {
+        if (!row || typeof row.source_url !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(String(row.id ?? ""))) continue;
+        let url: URL;
+        try { url = new URL(row.source_url); } catch { continue; }
+        if (!isOplusResolver(url)) continue;
+        url.hash = "";
+        const selector = `https://roms.danielspringer.at/api/ota.php?${new URLSearchParams({id: String(row.id)})}`;
+        if (matches.has(url.toString()) && matches.get(url.toString()) !== selector) matches.set(url.toString(), null);
+        else matches.set(url.toString(), selector);
+      }
+      cached = Response.json([...matches.entries()].filter(([, value]) => value !== null), {
+        headers: {"Cache-Control": "public, max-age=900"}
+      });
+      await caches.default.put(cacheKey, cached.clone());
+    }
+    const entries = await cached.json() as [string, string][];
+    const canonical = new URL(source); canonical.hash = "";
+    return new Map(entries).get(canonical.toString()) ?? null;
+  } catch {
+    // Catalog absence is not permission to guess a device/version. Preserve
+    // the existing resolver path when no exact public match is available.
+    return null;
+  }
+}
+
 function usesVercelTransport(url: URL): boolean {
   const host = url.hostname.toLowerCase();
   return isDanielCatalogSelection(url) || isDanielOtaPage(url) || isOplusResolver(url) || host.endsWith(".allawnfs.com");
@@ -440,10 +481,12 @@ export async function resolveSource(request: Request, env: Env, value: unknown, 
   const uri = value && typeof value === "object" ? String((value as JsonObject).uri ?? "").trim() : "";
   if (!uri || uri.length > 8192) throw new SourceProbeHttpError("A valid ROM source URL is required");
   const source = validatedUrl(uri);
-  if (!isDanielCatalogSelection(source) && !isDanielOtaPage(source)) {
+  const matched = await matchingDanielSelection(source);
+  const selection = matched ? validatedUrl(matched) : source;
+  if (!isDanielCatalogSelection(selection) && !isDanielOtaPage(selection)) {
     return createProbeSession(request, env, value, ownerSubject, true);
   }
-  const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", uri, "bytes=0-0", 1, true));
+  const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", selection.toString(), "bytes=0-0", 1, true));
   const expiry = signedUrlExpiry(validatedUrl(metadata.resolvedUrl));
   if (expiry && expiry <= Math.floor(Date.now() / 1000)) {
     throw new SourceProbeHttpError("The signed ROM download URL has expired", 400, "source_signed_url_expired");
@@ -477,9 +520,11 @@ export async function createProbeSession(
   let transportMode: "direct" | "vercel" = "direct";
   let resolvedInput = uri;
   let catalogMetadata: Record<string, unknown> | null = null;
-  const websiteSelection = isDanielCatalogSelection(originalUrl) || isDanielOtaPage(originalUrl);
+  const matched = await matchingDanielSelection(originalUrl);
+  const selection = matched ? validatedUrl(matched) : originalUrl;
+  const websiteSelection = isDanielCatalogSelection(selection) || isDanielOtaPage(selection);
   if (websiteSelection) {
-    const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", uri, "bytes=0-0", 1, true));
+    const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", selection.toString(), "bytes=0-0", 1, true));
     resolvedInput = metadata.resolvedUrl;
     catalogMetadata = metadata.catalog;
   }
