@@ -1,0 +1,49 @@
+name: Source transport diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    environment: vercel-production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - run: npm install --global vercel@59.5.0
+      - name: Bounded production reproduction
+        run: |
+          python - <<'PY'
+          import json, urllib.request, urllib.error
+          catalog = json.load(urllib.request.urlopen('https://roms.danielspringer.at/api/ota.php?model=PKG110&latest=1', timeout=20))
+          req = urllib.request.Request('https://wukong-control-plane.wukong-rom-studio-api.workers.dev/v1/sources/probe',
+              data=json.dumps({'uri':catalog['releases'][0]['source_url']}).encode(),
+              headers={'Content-Type':'application/json','Origin':'https://wukong-rom-studio.vercel.app'})
+          try:
+              with urllib.request.urlopen(req, timeout=60) as res: print('probe status:', res.status)
+          except urllib.error.HTTPError as error: print('probe status:', error.code)
+          PY
+      - name: Read sanitized transport phases only
+        run: |
+          vercel logs --project "$VERCEL_PROJECT_ID" --environment production --since 10m --json --limit 100 --token "$VERCEL_TOKEN" > "$RUNNER_TEMP/runtime.jsonl"
+          python - "$RUNNER_TEMP/runtime.jsonl" <<'PY'
+          import json, re, sys
+          text = open(sys.argv[1], encoding='utf8').read()
+          # Emit only our fixed-tag diagnostics, never request URLs or credentials.
+          for line in text.splitlines():
+              try: value = json.loads(line)
+              except ValueError: continue
+              def visit(node):
+                  if isinstance(node, dict):
+                      for item in node.values(): visit(item)
+                  elif isinstance(node, list):
+                      for item in node: visit(item)
+                  elif isinstance(node, str) and node.startswith('[DEBUG-rom-transport]'):
+                      print(node)
+              visit(value)
+          PY

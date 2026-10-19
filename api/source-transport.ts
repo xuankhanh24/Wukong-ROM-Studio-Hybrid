@@ -80,6 +80,7 @@ function parsePublicUrl(value: string): URL {
 }
 
 async function defaultResolveAddresses(hostname: string): Promise<string[]> {
+  console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'dns-start', host: hostname }));
   if (privateAddress(hostname) || hostname.includes(":") || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
     return [hostname];
   }
@@ -101,7 +102,9 @@ async function defaultResolveAddresses(hostname: string): Promise<string[]> {
       .filter((answer) => answer.type === 1 || answer.type === 28)
       .map((answer) => String(answer.data ?? "").trim()).filter(Boolean);
   };
-  return [...new Set((await Promise.all([query("A"), query("AAAA")])).flat())];
+  const addresses = [...new Set((await Promise.all([query("A"), query("AAAA")])).flat())];
+  console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'dns-finish', host: hostname, count: addresses.length }));
+  return addresses;
 }
 
 async function validateDestination(value: string, resolveAddresses: ResolveAddresses): Promise<URL> {
@@ -141,7 +144,9 @@ async function secureFetch(
   let url = await validateDestination(initial, resolveAddresses);
   let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
+    console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'fetch-start', host: url.hostname }));
     const response = await fetchImpl(url, { ...requestInit, redirect: "manual", cache: "no-store" });
+    console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'fetch-finish', host: url.hostname, status: response.status }));
     if (![301, 302, 303, 307, 308].includes(response.status)) return { response, url };
     const location = response.headers.get("Location");
     await response.body?.cancel();
@@ -444,6 +449,9 @@ export function createSourceTransportHandler(dependencies: {
         }
       });
     } catch (error) {
+      const failure = error as { name?: string; cause?: { code?: string; errors?: { code?: string }[] } };
+      console.warn('[DEBUG-rom-transport]', JSON.stringify({ phase: 'failure', type: failure?.name,
+        code: failure?.cause?.code, codes: failure?.cause?.errors?.map(item => item.code) }));
       const status = error instanceof TransportError ? error.status : 502;
       const message = error instanceof TransportError ? error.message : "Source transport failed";
       return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
