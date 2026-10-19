@@ -86,6 +86,7 @@ class _DanielOtaPageParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.result: dict[str, str] = {}
         self.metadata: dict[str, str] = {}
+        self.device_versions: dict[str, Any] = {}
         self._capture: str | None = None
         self._capture_depth = 0
         self._text: list[str] = []
@@ -96,6 +97,12 @@ class _DanielOtaPageParser(HTMLParser):
         values = {name.casefold(): value or "" for name, value in attrs}
         classes = {item.casefold() for item in values.get("class", "").split()}
         normalized_tag = tag.casefold()
+        if normalized_tag == "select" and values.get("id") == "device":
+            try:
+                choices = json.loads(values.get("data-devices", "{}"))
+                self.device_versions = choices if isinstance(choices, dict) else {}
+            except (ValueError, TypeError):
+                self.device_versions = {}
         if normalized_tag == "div" and values.get("id") == "resultBox":
             self.result = {
                 "url": unescape(values.get("data-url", "")).strip(),
@@ -748,9 +755,14 @@ class HttpSourceAdapter:
         parsed = urlparse(uri)
         if (parsed.hostname or "").rstrip(".").casefold() != "roms.danielspringer.at":
             return False
+        query = parse_qs(parsed.query, keep_blank_values=True)
+        if parsed.scheme == "https" and parsed.path == "/api/ota.php":
+            ids = query.get("id", [])
+            return set(query) == {"id"} and len(ids) == 1 and bool(ids[0]) and len(ids[0]) <= 128 and all(
+                ch.isascii() and (ch.isalnum() or ch in "_-") for ch in ids[0]
+            )
         if parsed.path.rstrip("/").casefold() != "/index.php":
             return False
-        query = parse_qs(parsed.query, keep_blank_values=True)
         return query.get("view", [""])[0].casefold() == "ota" and bool(
             query.get("build", [""])[0].strip()
         )
@@ -760,6 +772,23 @@ class HttpSourceAdapter:
         return resolved
 
     def _resolve_daniel_ota_page_details(self, uri: str) -> tuple[str, dict[str, str]]:
+        selection: dict[str, Any] | None = None
+        if urlparse(uri).path == "/api/ota.php":
+            with self.opener.open(Request(uri, headers={"Accept": "application/json"}), timeout=self.timeout) as response:
+                validate_http_url(response.geturl(), resolve_dns=True)
+                raw = response.read(MAX_CATALOG_PAGE_BYTES + 1)
+            if len(raw) > MAX_CATALOG_PAGE_BYTES:
+                raise SourceResolutionError("Daniel catalog selection exceeds the resolver limit")
+            try:
+                data = json.loads(raw)
+                selected_id = parse_qs(urlparse(uri).query)["id"][0]
+                rows = [row for row in data["releases"] if isinstance(row, dict) and row.get("id") == selected_id]
+                if len(rows) != 1 or not all(isinstance(rows[0].get(key), str) and 0 < len(rows[0][key]) <= 256 for key in ("device", "region", "version")):
+                    raise ValueError("Invalid selection")
+                selection = rows[0]
+            except (ValueError, KeyError, TypeError) as exc:
+                raise SourceResolutionError("Daniel catalog selection is invalid") from exc
+            uri = "https://roms.danielspringer.at/index.php?view=ota"
         request = Request(
             uri,
             headers={
@@ -781,6 +810,26 @@ class HttpSourceAdapter:
 
         parser = _DanielOtaPageParser()
         parser.feed(page)
+        if selection:
+            regions = parser.device_versions.get(selection["device"], {})
+            versions = regions.get(selection["region"], []) if isinstance(regions, dict) else []
+            if not isinstance(versions, list) or versions.count(selection["version"]) != 1:
+                raise SourceResolutionError("Exact ROM version is not available on the catalog page")
+            body = urlencode({"device": selection["device"], "region": selection["region"],
+                              "version_index": versions.index(selection["version"])}).encode("ascii")
+            form = Request(uri, data=body, method="POST", headers={
+                "Content-Type": "application/x-www-form-urlencoded", "Origin": "https://roms.danielspringer.at",
+                "Referer": uri, "Accept": "text/html", "User-Agent": "Wukong-ROM-Studio/1.0"})
+            with self.opener.open(form, timeout=self.timeout) as response:
+                page_url = response.geturl()
+                validate_http_url(page_url, resolve_dns=True)
+                raw = response.read(MAX_CATALOG_PAGE_BYTES + 1)
+            if len(raw) > MAX_CATALOG_PAGE_BYTES:
+                raise SourceResolutionError("Daniel catalog page exceeds the resolver limit")
+            parser = _DanielOtaPageParser()
+            parser.feed(raw.decode("utf-8-sig"))
+            if parser.metadata.get("version") != selection["version"]:
+                raise SourceResolutionError("Daniel catalog returned a different ROM version")
         page_metadata = dict(parser.metadata)
         resolved = parser.result.get("url", "")
         if resolved:

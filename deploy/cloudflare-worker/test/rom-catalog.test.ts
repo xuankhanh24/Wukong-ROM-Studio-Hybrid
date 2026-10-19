@@ -3,6 +3,28 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { tmaHeaders } from "./helpers";
 
 describe("ROM discovery catalog", () => {
+  it('resolves a catalog selection without requiring a CDN probe or creating a range session', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input, init) => {
+      const request = new Request(input, init);
+      calls.push(new URL(request.url).pathname);
+      expect(new URL(request.url).pathname).toBe('/api/source-transport');
+      const claim = await request.json() as {claimUrl: string; token: string};
+      const work = await (await SELF.fetch(claim.claimUrl, {method: 'POST', headers: {Authorization: `TransportClaim ${claim.token}`}})).json();
+      expect(work).toMatchObject({resolveOnly: true, sourceUrl: 'https://roms.danielspringer.at/api/ota.php?id=abc123'});
+      return Response.json({resolvedUrl: 'https://cdn.allawnfs.com/rom.zip?Expires=2000000000&Signature=temporary',
+        filename: 'rom.zip', sizeBytes: 4096});
+    }));
+    const response = await SELF.fetch('https://worker.example/v1/sources/resolve', {
+      method: 'POST', headers: await tmaHeaders(1678823419),
+      body: JSON.stringify({uri: 'https://roms.danielspringer.at/api/ota.php?id=abc123'})
+    });
+    expect(response.status).toBe(200);
+    const payload = await response.json();
+    expect(payload).toMatchObject({resolvedUrl: expect.stringContaining('Signature=temporary'), deepInspected: false});
+    expect(payload).not.toHaveProperty('rangeSession');
+    expect(calls).toHaveLength(1);
+  });
   it("returns a direct resolved link only for an approved private resolve request", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({
       resolvedUrl: "https://cdn.allawnfs.com/rom.zip?Signature=temporary",

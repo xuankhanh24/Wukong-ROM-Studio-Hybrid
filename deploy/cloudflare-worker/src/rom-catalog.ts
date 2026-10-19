@@ -67,6 +67,7 @@ function normalizeRelease(row: UpstreamRelease): Record<string, unknown> | null 
     publishedAt: dateValue(row.published),
     versionCode: stringValue(String(row.version_code ?? ""), 128),
     sourceUrl,
+    resolverUrl: /^[A-Za-z0-9_-]{1,128}$/.test(String(row.id ?? "")) ? `${DANIEL_API}?${new URLSearchParams({id: String(row.id)})}` : "",
     changelogUrl: httpUrl(row.changelog_url),
     latest: row.is_latest === true || row.is_latest === 1 || row.is_latest === "1"
   };
@@ -139,7 +140,7 @@ export function validateRomCatalogRequest(request: Request): void {
 
 export async function romCatalog(request: Request, env: Env): Promise<Record<string, unknown>> {
   const { devicesOnly, upstream } = catalogRequest(request);
-  const cacheKey = new Request(`https://rom-catalog-cache.wukong.invalid/${devicesOnly ? "devices-oplus-v2" : "releases-v2"}?${upstream.searchParams}`);
+  const cacheKey = new Request(`https://rom-catalog-cache.wukong.invalid/${devicesOnly ? "devices-oplus-v2" : "releases-v3"}?${upstream.searchParams}`);
   const cached = await caches.default.match(cacheKey);
   if (cached) return await cached.json() as Record<string, unknown>;
 

@@ -45,6 +45,7 @@ import {
   SourceProbeHttpError,
   claimSourceTransport,
   createProbeSession,
+  resolveSource,
   proxyProbeRange
 } from "./source-probe";
 import {
@@ -198,7 +199,7 @@ async function routeWithIdentity(
   }
   if (path === "/v1/sources/resolve" && request.method === "POST") {
     try {
-      return json(await createProbeSession(request, env, await request.json(), auth.subject, true));
+      return json(await resolveSource(request, env, await request.json(), auth.subject));
     } catch (error) {
       if (error instanceof SourceProbeHttpError) return json({ error: error.message, code: error.code }, error.status);
       return json({ error: "ROM source could not be resolved", code: "source_unreachable" }, 502);

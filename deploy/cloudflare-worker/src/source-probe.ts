@@ -236,6 +236,12 @@ function isDanielOtaPage(url: URL): boolean {
   );
 }
 
+function isDanielCatalogSelection(url: URL): boolean {
+  return url.protocol === "https:" && url.hostname === "roms.danielspringer.at" &&
+    url.pathname === "/api/ota.php" && [...url.searchParams.keys()].length === 1 &&
+    /^[A-Za-z0-9_-]{1,128}$/.test(url.searchParams.get("id") ?? "");
+}
+
 function isOplusResolver(url: URL): boolean {
   return (
     /^component-ota(?:-[a-z0-9]+)?\.allawntech\.com$/i.test(url.hostname) &&
@@ -245,7 +251,7 @@ function isOplusResolver(url: URL): boolean {
 
 function usesVercelTransport(url: URL): boolean {
   const host = url.hostname.toLowerCase();
-  return isDanielOtaPage(url) || isOplusResolver(url) || host.endsWith(".allawnfs.com");
+  return isDanielCatalogSelection(url) || isDanielOtaPage(url) || isOplusResolver(url) || host.endsWith(".allawnfs.com");
 }
 
 function base64Url(bytes: Uint8Array): string {
@@ -266,7 +272,8 @@ async function createTransportClaim(
   operation: "probe" | "range" | "catalog",
   sourceUrl: string,
   rangeHeader: string,
-  maximumBytes: number
+  maximumBytes: number,
+  resolveOnly = false
 ): Promise<{ claimUrl: string; token: string }> {
   const random = crypto.getRandomValues(new Uint8Array(32));
   const token = base64Url(random);
@@ -274,11 +281,11 @@ async function createTransportClaim(
   await env.DB.prepare(
     `INSERT INTO wukong_source_transport_claims
      (token_hash, operation, source_url, range_header, maximum_bytes,
-      created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+      created_at, expires_at, resolve_only)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     await sha256Hex(token), operation, sourceUrl, rangeHeader,
-    maximumBytes, now, now + TRANSPORT_CLAIM_SECONDS
+    maximumBytes, now, now + TRANSPORT_CLAIM_SECONDS, resolveOnly ? 1 : 0
   ).run();
   return {
     claimUrl: new URL("/internal/source-transport/claim", validatedUrl(env.WUKONG_PUBLIC_API_URL)).toString(),
@@ -291,14 +298,15 @@ export async function callSourceTransport(
   operation: "probe" | "range" | "catalog",
   sourceUrl: string,
   rangeHeader: string,
-  maximumBytes: number
+  maximumBytes: number,
+  resolveOnly = false
 ): Promise<Response> {
   const transport = validatedUrl(env.WUKONG_SOURCE_TRANSPORT_URL);
   if (transport.protocol !== "https:") {
     throw new SourceProbeHttpError("ROM source transport is unavailable", 503);
   }
   const claim = await createTransportClaim(
-    env, operation, sourceUrl, rangeHeader, maximumBytes
+    env, operation, sourceUrl, rangeHeader, maximumBytes, resolveOnly
   );
   let response: Response;
   try {
@@ -360,7 +368,7 @@ export async function claimSourceTransport(request: Request, env: Env): Promise<
     return Response.json({ error: "Source transport claim is invalid or expired" }, { status: 410 });
   }
   const row = await env.DB.prepare(
-    `SELECT operation, source_url, range_header, maximum_bytes
+    `SELECT operation, source_url, range_header, maximum_bytes, resolve_only
      FROM wukong_source_transport_claims WHERE token_hash = ?`
   ).bind(tokenHash).first<Record<string, unknown>>();
   if (!row) return Response.json({ error: "Source transport claim is unavailable" }, { status: 410 });
@@ -368,7 +376,8 @@ export async function claimSourceTransport(request: Request, env: Env): Promise<
     operation: String(row.operation),
     sourceUrl: String(row.source_url),
     range: String(row.range_header),
-    maximumBytes: Number(row.maximum_bytes)
+    maximumBytes: Number(row.maximum_bytes),
+    resolveOnly: Number(row.resolve_only) === 1
   }, { headers: { "Cache-Control": "no-store" } });
 }
 
@@ -394,6 +403,7 @@ interface TransportProbeMetadata {
   checksum: string;
   etag: string | null;
   lastModified: string | null;
+  catalog: Record<string, unknown> | null;
 }
 
 async function transportProbeMetadata(response: Response): Promise<TransportProbeMetadata> {
@@ -421,8 +431,25 @@ async function transportProbeMetadata(response: Response): Promise<TransportProb
     contentType: String(value.contentType ?? "").slice(0, 255),
     checksum: String(value.checksum ?? "").slice(0, 512),
     etag: value.etag == null ? null : String(value.etag).slice(0, 512),
-    lastModified: value.lastModified == null ? null : String(value.lastModified).slice(0, 512)
+    lastModified: value.lastModified == null ? null : String(value.lastModified).slice(0, 512),
+    catalog: value.catalog && typeof value.catalog === "object" && !Array.isArray(value.catalog) ? value.catalog as Record<string, unknown> : null
   };
+}
+
+export async function resolveSource(request: Request, env: Env, value: unknown, ownerSubject: string): Promise<JsonObject> {
+  const uri = value && typeof value === "object" ? String((value as JsonObject).uri ?? "").trim() : "";
+  if (!uri || uri.length > 8192) throw new SourceProbeHttpError("A valid ROM source URL is required");
+  const source = validatedUrl(uri);
+  if (!isDanielCatalogSelection(source) && !isDanielOtaPage(source)) {
+    return createProbeSession(request, env, value, ownerSubject, true);
+  }
+  const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", uri, "bytes=0-0", 1, true));
+  const expiry = signedUrlExpiry(validatedUrl(metadata.resolvedUrl));
+  if (expiry && expiry <= Math.floor(Date.now() / 1000)) {
+    throw new SourceProbeHttpError("The signed ROM download URL has expired", 400, "source_signed_url_expired");
+  }
+  return {resolvedUrl: metadata.resolvedUrl, filename: metadata.filename, sizeBytes: metadata.sizeBytes,
+    signedUrlExpiresAt: expiry, deepInspected: false};
 }
 
 export async function createProbeSession(
@@ -448,7 +475,15 @@ export async function createProbeSession(
   let etag: string | null;
   let lastModified: string | null;
   let transportMode: "direct" | "vercel" = "direct";
-  if (usesVercelTransport(originalUrl)) {
+  let resolvedInput = uri;
+  let catalogMetadata: Record<string, unknown> | null = null;
+  const websiteSelection = isDanielCatalogSelection(originalUrl) || isDanielOtaPage(originalUrl);
+  if (websiteSelection) {
+    const metadata = await transportProbeMetadata(await callSourceTransport(env, "probe", uri, "bytes=0-0", 1, true));
+    resolvedInput = metadata.resolvedUrl;
+    catalogMetadata = metadata.catalog;
+  }
+  if (usesVercelTransport(originalUrl) && !websiteSelection) {
     let transportResponse: Response;
     try {
       transportResponse = await callSourceTransport(env, "probe", uri, "bytes=0-0", 1);
@@ -467,7 +502,6 @@ export async function createProbeSession(
     lastModified = metadata.lastModified;
     transportMode = "vercel";
   } else {
-    const resolvedInput = uri;
     const probeUrl = validatedUrl(resolvedInput);
     const result = await secureFetch(resolvedInput, {
       method: "GET",
@@ -538,12 +572,12 @@ export async function createProbeSession(
     lastModified,
     md5: checksum || null,
     checksumHeader: checksum || null,
-    productName: null,
+    productName: typeof catalogMetadata?.model === "string" ? catalogMetadata.model.slice(0, 128) : null,
     device: null,
-    version: null,
+    version: typeof catalogMetadata?.version === "string" ? catalogMetadata.version.slice(0, 256) : null,
     androidVersion: null,
-    securityPatch: null,
-    buildDate: null,
+    securityPatch: typeof catalogMetadata?.security_patch === "string" ? catalogMetadata.security_patch.slice(0, 64) : null,
+    buildDate: typeof catalogMetadata?.build_timestamp === "string" ? catalogMetadata.build_timestamp.slice(0, 64) : null,
     otaType: null,
     deepInspected: false,
     warning: null,

@@ -19,6 +19,38 @@ vi.mock('node:dns/promises', () => ({ lookup: nativeDns }));
 afterEach(() => { vi.unstubAllGlobals(); nativeDns.mockReset(); });
 
 describe("Vercel source transport", () => {
+  it('resolves an exact catalog selection through the website form without fetching the CDN', async () => {
+    const calls: Request[] = [];
+    const handler = createSourceTransportHandler({resolveAddresses: publicDns, fetchImpl: async (input, init) => {
+      const current = new Request(input, init);
+      calls.push(current);
+      const url = new URL(current.url);
+      if (url.pathname === '/internal/source-transport/claim') return Response.json({operation: 'probe',
+        sourceUrl: 'https://roms.danielspringer.at/api/ota.php?id=abc123', maximumBytes: 1, range: 'bytes=0-0', resolveOnly: true});
+      if (url.pathname === '/api/ota.php') return Response.json({releases: [{id: 'abc123', device: 'OP ACE 5',
+        region: 'CN', version: 'PKG110_16.0.10.500(CN01)', model: 'PKG110', size: 8718572190, md5: 'known-md5'}]});
+      if (url.searchParams.get('ota_action') === 'resolve_json') {
+        expect(current.headers.get('Cookie')).toBe('PHPSESSID=selected');
+        expect(await current.text()).toBe('k=selected-key&csrf=selected-csrf');
+        return Response.json({ok: true, url: 'https://cdn.allawnfs.com/rom.zip?Expires=2000000000&Signature=private'});
+      }
+      expect(url.hostname).toBe('roms.danielspringer.at');
+      if (current.method === 'POST') {
+        expect(await current.text()).toBe('device=OP+ACE+5&region=CN&version_index=1');
+        expect(current.headers.get('Cookie')).toBe('PHPSESSID=initial');
+        return new Response(null, {status: 302, headers: {Location: '/index.php?view=ota#resultBox', 'Set-Cookie': 'PHPSESSID=selected; Path=/'}});
+      }
+      if (current.headers.get('Cookie') === 'PHPSESSID=selected') {
+        return new Response('<p class="ota-version-name">PKG110_<strong>16.0.10.500</strong>(CN01)</p><div id="resultBox" data-ota-key="selected-key" data-csrf="selected-csrf"></div>');
+      }
+      return new Response('<select id="device" data-devices=\'{&quot;OP ACE 5&quot;:{&quot;CN&quot;:[&quot;other&quot;,&quot;PKG110_16.0.10.500(CN01)&quot;]}}\'></select>',
+        {headers: {'Set-Cookie': 'PHPSESSID=initial; Path=/'}});
+    }});
+    const response = await handler(request());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({resolvedUrl: expect.stringContaining('cdn.allawnfs.com'), sizeBytes: 8718572190, checksum: 'known-md5'});
+    expect(calls).toHaveLength(6);
+  });
   it('reports the failed network phase without leaking the signed URL', async () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const handler = createSourceTransportHandler({resolveAddresses: publicDns, fetchImpl: async input => {

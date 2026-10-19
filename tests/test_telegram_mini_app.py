@@ -791,7 +791,7 @@ window.addEventListener('load', () => {{
             self._send(json.dumps({"presetLabels": dict(type(self).preset_labels), "editable": self.admin_user}).encode(), "application/json")
             return
         if path == "/v1/rom-catalog":
-            self._send(json.dumps({"releases": [{"id": "rom-fixture", "device": "OnePlus 13", "model": "CPH2653", "region": "EU", "version": "CPH2653_16.0.10.501(EX01)", "securityPatch": "2026-08-01", "sizeBytes": 8304912951, "sourceUrl": OPLUS_TEST_URI}, {"id": "rom-old", "device": "OnePlus 13", "region": "EU", "version": "CPH2653_16.0.9.500(EX01)", "sourceUrl": "https://cdn.example/old.zip"}]}).encode(), "application/json")
+            self._send(json.dumps({"releases": [{"id": "rom-fixture", "device": "OnePlus 13", "model": "CPH2653", "region": "EU", "version": "CPH2653_16.0.10.501(EX01)", "securityPatch": "2026-08-01", "sizeBytes": 8304912951, "sourceUrl": OPLUS_TEST_URI, "resolverUrl": "https://roms.danielspringer.at/api/ota.php?id=rom-fixture"}, {"id": "rom-old", "device": "OnePlus 13", "region": "EU", "version": "CPH2653_16.0.9.500(EX01)", "sourceUrl": "https://cdn.example/old.zip"}]}).encode(), "application/json")
             return
         if path == "/v1/rom-catalog/devices":
             self._send(json.dumps({"devices": [
@@ -1010,6 +1010,11 @@ window.addEventListener('load', () => {{
             self._send(json.dumps({"job_id": "submitted-custom-job", "status": "queued", "stage": "queued", "progress": 0}).encode(), "application/json", 201)
             return
         if path == "/v1/sources/resolve":
+            length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(length) or b"{}")
+            if self.library_scenario == "select" and payload.get("uri") != "https://roms.danielspringer.at/api/ota.php?id=rom-fixture":
+                self._send(b'{"error":"expected exact catalog selection"}', "application/json", 400)
+                return
             if self.source_error_status:
                 self._send(b'{"error":"ROM transport failed","code":"source_unreachable"}', "application/json", self.source_error_status)
                 return
@@ -1038,7 +1043,7 @@ window.addEventListener('load', () => {{
                 return
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length) or b"{}")
-            if payload.get("uri") != OPLUS_TEST_URI:
+            if payload.get("uri") not in {OPLUS_TEST_URI, "https://roms.danielspringer.at/api/ota.php?id=rom-fixture"}:
                 self._send(b'{"error":"unexpected fixture URI"}', "application/json", 400)
                 return
             if self.probe_signed_expired:
@@ -1589,7 +1594,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('id="open-rom-catalog"', html)
         self.assertIn('id="rom-catalog-results"', html)
         self.assertIn('apiRequest(`/v1/rom-catalog?', script)
-        self.assertIn('source.value = release.sourceUrl;', script)
+        self.assertIn('source.value = release.resolverUrl || release.sourceUrl;', script)
         self.assertIn("scheduleSourceProbe();", script)
 
     def test_library_search_selects_rom_and_returns_to_studio(self) -> None:
@@ -1608,7 +1613,7 @@ class TelegramMiniAppTests(unittest.TestCase):
         self.assertIn('data-device-label="OnePlus 13"', dom)
         self.assertIn('data-device-regions=",CN,EU"', dom)
         self.assertIn('data-selected-view="build"', dom)
-        self.assertIn('data-selected-source="https://component-ota-cn.allawntech.com/downloadCheck?', dom)
+        self.assertIn('data-selected-source="https://roms.danielspringer.at/api/ota.php?id=rom-fixture"', dom)
         self.assertRegex(dom, r'id="source-product-detected"[^>]*>PKG110')
 
     def test_analysis_transport_failure_does_not_claim_server_is_busy(self) -> None:

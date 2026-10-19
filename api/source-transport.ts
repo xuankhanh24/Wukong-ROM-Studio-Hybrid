@@ -21,6 +21,7 @@ interface TransportWork {
   sourceUrl: string;
   range: string;
   maximumBytes: number;
+  resolveOnly?: boolean;
 }
 
 class TransportError extends Error {
@@ -49,13 +50,16 @@ function privateAddress(value: string): boolean {
     normalized.startsWith("::ffff:");
 }
 
-function sourceKind(url: URL): "daniel" | "resolver" | "cdn" | "catalog" | null {
+function sourceKind(url: URL): "daniel" | "resolver" | "cdn" | "catalog" | "selection" | null {
   const host = url.hostname.toLowerCase();
   const path = url.pathname.toLowerCase().replace(/\/$/, "");
-  if (url.protocol === "https:" && host === "roms.danielspringer.at" && url.pathname === "/api/ota.php") return "catalog";
+  if (url.protocol === "https:" && host === "roms.danielspringer.at" && url.pathname === "/api/ota.php") {
+    if ([...url.searchParams.keys()].length === 1 && /^[A-Za-z0-9_-]{1,128}$/.test(url.searchParams.get("id") ?? "")) return "selection";
+    return "catalog";
+  }
   if (
     host === "roms.danielspringer.at" && path === "/index.php" &&
-    ((url.searchParams.get("view")?.toLowerCase() === "ota" && Boolean(url.searchParams.get("build"))) ||
+    ((url.searchParams.get("view")?.toLowerCase() === "ota") ||
       url.searchParams.get("ota_action") === "resolve_json")
   ) return "daniel";
   if (
@@ -127,8 +131,9 @@ async function secureFetch(
   initial: string,
   init: RequestInit,
   fetchImpl: Fetch,
-  resolveAddresses: ResolveAddresses
-): Promise<{ response: Response; url: URL }> {
+  resolveAddresses: ResolveAddresses,
+  selectionForm = false
+): Promise<{ response: Response; url: URL; cookies: string }> {
   let url = await validateDestination(initial, resolveAddresses);
   let requestInit: RequestInit = { ...init, headers: new Headers(init.headers) };
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
@@ -139,16 +144,31 @@ async function secureFetch(
         response.status === 429 ? 429 : 403, response.status === 429 ? "source_rate_limited" : "source_access_denied",
         sourceKind(url) ?? "source");
     }
-    if (![301, 302, 303, 307, 308].includes(response.status)) return { response, url };
+    if (![301, 302, 303, 307, 308].includes(response.status)) {
+      return { response, url, cookies: mergeCookies(new Headers(requestInit.headers).get("Cookie") ?? "", responseCookies(response)) };
+    }
     const location = response.headers.get("Location");
     await response.body?.cancel();
     if (!location || redirects === MAX_REDIRECTS) {
       throw new TransportError("Source redirect is invalid", 502);
     }
-    if (!["GET", "HEAD"].includes(String(requestInit.method ?? "GET").toUpperCase())) {
-      throw new TransportError("Source resolver returned an unexpected redirect", 502);
-    }
     const nextUrl = await validateDestination(new URL(location, url).toString(), resolveAddresses);
+    if (!["GET", "HEAD"].includes(String(requestInit.method ?? "GET").toUpperCase())) {
+      // The public selection form uses POST -> 302 -> GET with a cookie-bound
+      // result. This exception is not available to resolve_json or other hosts.
+      if (!selectionForm || requestInit.method !== "POST" || ![302, 303].includes(response.status) ||
+        url.hostname !== "roms.danielspringer.at" || nextUrl.origin !== url.origin ||
+        nextUrl.pathname !== "/index.php" || nextUrl.searchParams.get("view") !== "ota" ||
+        [...nextUrl.searchParams.keys()].some(key => !["view", "build"].includes(key))) {
+        throw new TransportError("Source resolver returned an unexpected redirect", 502);
+      }
+      const headers = new Headers(requestInit.headers);
+      headers.delete("Content-Type");
+      headers.delete("Content-Length");
+      const cookies = mergeCookies(headers.get("Cookie") ?? "", responseCookies(response));
+      if (cookies) headers.set("Cookie", cookies);
+      requestInit = {...requestInit, method: "GET", body: undefined, headers};
+    }
     requestInit = { ...requestInit, headers: headersForRedirect(requestInit.headers, url, nextUrl) };
     url = nextUrl;
   }
@@ -196,12 +216,34 @@ function responseCookies(response: Response): string {
     .filter((value) => /^[!#$%&'*+.^_`|~0-9A-Za-z-]+=[^;\r\n]*$/.test(value)).join("; ");
 }
 
+function mergeCookies(previous: string, fresh: string): string {
+  const values = new Map<string, string>();
+  for (const item of [previous, fresh].flatMap(value => value.split("; "))) {
+    if (item.includes("=")) values.set(item.split("=", 1)[0]!, item);
+  }
+  return [...values.values()].join("; ");
+}
+
 async function resolveDaniel(
   source: string,
   fetchImpl: Fetch,
   resolveAddresses: ResolveAddresses
-): Promise<string> {
-  const page = await secureFetch(source, {
+): Promise<{url: string; catalog: Record<string, unknown> | null}> {
+  let catalog: Record<string, unknown> | null = null;
+  if (sourceKind(new URL(source)) === "selection") {
+    const selected = await secureFetch(source, {headers: {Accept: "application/json"}}, fetchImpl, resolveAddresses);
+    if (!selected.response.ok) throw new TransportError("ROM catalog selection is unavailable", 502);
+    const payload = JSON.parse(new TextDecoder().decode(await boundedBytes(selected.response, MAX_CATALOG_PAGE))) as {releases?: Record<string, unknown>[]};
+    const id = new URL(source).searchParams.get("id");
+    const rows = payload.releases?.filter(row => row.id === id) ?? [];
+    if (rows.length !== 1 || !["device", "region", "version"].every(key =>
+      typeof rows[0]?.[key] === "string" && String(rows[0][key]).length <= 256)) {
+      throw new TransportError("ROM catalog selection is invalid", 502);
+    }
+    catalog = rows[0]!;
+    source = "https://roms.danielspringer.at/index.php?view=ota";
+  }
+  let page = await secureFetch(source, {
     method: "GET",
     headers: {
       Accept: "text/html,application/xhtml+xml",
@@ -210,13 +252,35 @@ async function resolveDaniel(
     }
   }, fetchImpl, resolveAddresses);
   if (!page.response.ok) throw new TransportError("ROM catalog page is unavailable", 502);
-  const cookies = responseCookies(page.response);
-  const html = new TextDecoder("utf-8", { fatal: true }).decode(
+  let cookies = responseCookies(page.response);
+  let html = new TextDecoder("utf-8", { fatal: true }).decode(
     await boundedBytes(page.response, MAX_CATALOG_PAGE)
   );
+  if (catalog) {
+    const select = html.match(/<select\b[^>]*\bid\s*=\s*["']device["'][^>]*>/i)?.[0] ?? "";
+    const devices = JSON.parse(decodeAttribute(select, "data-devices")) as Record<string, Record<string, unknown[]>>;
+    const versions = devices[String(catalog.device)]?.[String(catalog.region)];
+    const index = Array.isArray(versions) ? versions.indexOf(catalog.version) : -1;
+    if (index < 0 || versions!.filter(version => version === catalog!.version).length !== 1) {
+      throw new TransportError("Exact ROM version is not available on the catalog page", 502);
+    }
+    page = await secureFetch(source, {
+      method: "POST", headers: {Accept: "text/html", "Content-Type": "application/x-www-form-urlencoded",
+        Origin: "https://roms.danielspringer.at", Referer: source, ...(cookies ? {Cookie: cookies} : {})},
+      body: new URLSearchParams({device: String(catalog.device), region: String(catalog.region), version_index: String(index)})
+    }, fetchImpl, resolveAddresses, true);
+    if (!page.response.ok) throw new TransportError("ROM catalog selection failed", 502);
+    // secureFetch carries the selection session through its POST/redirect/GET.
+    // A final GET may not set a new cookie; retain the session used on that GET.
+    cookies = page.cookies;
+    html = new TextDecoder("utf-8", {fatal: true}).decode(await boundedBytes(page.response, MAX_CATALOG_PAGE));
+    const versionMarkup = html.match(/<p\b[^>]*class\s*=\s*["'][^"']*\bota-version-name\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i)?.[1] ?? "";
+    const selectedVersion = decodeAttribute(`data-value="${versionMarkup.replace(/<[^>]*>/g, "").replaceAll('"', '&quot;')}"`, "data-value").trim();
+    if (selectedVersion !== catalog.version) throw new TransportError("ROM catalog returned a different version", 502);
+  }
   const tag = html.match(/<[^>]+\bid\s*=\s*["']resultBox["'][^>]*>/i)?.[0] ?? "";
   const ready = decodeAttribute(tag, "data-url").trim();
-  if (ready) return (await validateDestination(ready, resolveAddresses)).toString();
+  if (ready) return {url: (await validateDestination(ready, resolveAddresses)).toString(), catalog};
   const key = decodeAttribute(tag, "data-ota-key").trim();
   const csrf = decodeAttribute(tag, "data-csrf").trim();
   if (!key || !csrf || key.length > 256 || csrf.length > 256) {
@@ -245,7 +309,7 @@ async function resolveDaniel(
   if (!result.response.ok || payload.ok !== true || typeof payload.url !== "string") {
     throw new TransportError("ROM catalog could not prepare the download", 502);
   }
-  return (await validateDestination(payload.url, resolveAddresses)).toString();
+  return {url: (await validateDestination(payload.url, resolveAddresses)).toString(), catalog};
 }
 
 function probeHeaders(url: URL): HeadersInit {
@@ -389,8 +453,21 @@ export function createSourceTransportHandler(dependencies: {
       if (sourceKind(new URL(source)) === "catalog") throw new TransportError("Catalog operation is required", 403);
       if (work.operation === "probe") {
         const original = new URL(source);
-        if (sourceKind(original) === "daniel") {
-          source = await resolveDaniel(source, fetchImpl, resolveAddresses);
+        let catalog: Record<string, unknown> | null = null;
+        if (["daniel", "selection"].includes(sourceKind(original) ?? "")) {
+          if (sourceKind(original) === "daniel" && !original.searchParams.get("build")) {
+            throw new TransportError("Select an exact ROM build before resolving");
+          }
+          const resolved = await resolveDaniel(source, fetchImpl, resolveAddresses);
+          source = resolved.url;
+          catalog = resolved.catalog;
+        }
+        if (work.resolveOnly === true) {
+          const resolved = new URL(source);
+          if (sourceKind(resolved) !== "cdn") throw new TransportError("Source is not a resolved ROM download", 400);
+          return Response.json({resolvedUrl: source, filename: filenameFrom(new Response(), resolved),
+            sizeBytes: catalog?.size ?? null, checksum: catalog?.md5 ?? "", contentType: "",
+            etag: null, lastModified: null, catalog}, {headers: {"Cache-Control": "no-store"}});
         }
         const result = await secureFetch(source, {
           method: "GET",

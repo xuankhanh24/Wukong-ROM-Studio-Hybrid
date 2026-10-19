@@ -89,6 +89,7 @@ async function fetchPublicRomCatalog(params) {
         md5: String(release?.md5 ?? "").trim(), sizeBytes: Number.isFinite(Number(release?.size)) ? Number(release.size) : null,
         publishedAt: String(release?.published ?? "").trim(), versionCode: String(release?.version_code ?? "").trim(),
         sourceUrl: String(release?.source_url ?? "").trim(), changelogUrl: String(release?.changelog_url ?? "").trim(),
+        resolverUrl: /^[A-Za-z0-9_-]{1,128}$/.test(String(release?.id ?? "")) ? `https://roms.danielspringer.at/api/ota.php?${new URLSearchParams({id: String(release.id)})}` : "",
         latest: release?.is_latest === true || release?.is_latest === 1 || release?.is_latest === "1"
       })).filter((release) => release.id && release.sourceUrl),
       truncated: false
@@ -250,7 +251,7 @@ async function resolveRomRelease(release) {
   renderRomCatalogResults();
   try {
     const payload = await apiRequest("/v1/sources/resolve", {
-      method: "POST", body: JSON.stringify({ uri: release.sourceUrl }), signal: controller.signal, timeoutMs: 70000
+      method: "POST", body: JSON.stringify({ uri: release.resolverUrl || release.sourceUrl }), signal: controller.signal, timeoutMs: 70000
     });
     if (controller.signal.aborted || $("#rom-version-filter").value !== release.id) return;
     const url = new URL(payload.resolvedUrl);
@@ -319,7 +320,7 @@ function renderRomCatalogResults() {
     use.textContent = t("useRom");
     use.addEventListener("click", () => {
       const source = $("#source-uri");
-      source.value = release.sourceUrl;
+      source.value = release.resolverUrl || release.sourceUrl;
       source.dispatchEvent(new Event("input", { bubbles: true }));
       navigate("build");
       source.focus({ preventScroll: true });

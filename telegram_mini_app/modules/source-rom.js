@@ -28,7 +28,7 @@ function classifySource(rawValue) {
   if (host.includes("allawn") || host.includes("oppo") || host.includes("coloros") || path.endsWith("/downloadcheck")) {
     provider = "OPlus OTA"; type = path.endsWith("/downloadcheck") ? t("sourceResolver") : t("sourceDirect"); marker = "OTA";
   } else if (host === "roms.danielspringer.at") {
-    provider = "Daniel Springer"; type = url.searchParams.has("build") ? t("sourcePage") : t("sourceDirect"); marker = "OTA";
+    provider = "Daniel Springer"; type = url.searchParams.has("build") || url.searchParams.has("id") ? t("sourcePage") : t("sourceDirect"); marker = "OTA";
   } else if (host.includes("drive.google.com")) {
     provider = "Google Drive"; type = t("sourceDriveType"); marker = "DRV";
   }

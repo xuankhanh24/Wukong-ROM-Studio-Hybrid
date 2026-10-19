@@ -799,6 +799,24 @@ class SourceAndStorageContractTests(unittest.TestCase):
             self.assertEqual(payload, result.path.read_bytes())
         self.assertEqual(4, opener.calls)
 
+    def test_http_source_resolves_exact_daniel_catalog_selection(self) -> None:
+        selector = "https://roms.danielspringer.at/api/ota.php?id=abc123"
+        page_url = "https://roms.danielspringer.at/index.php?view=ota"
+        download_url = "https://93.184.216.35/rom.zip"
+        opener = self._SequenceOpener([
+            self._HttpResponse(json.dumps({"releases": [{"id": "abc123", "device": "OP ACE 5", "region": "CN", "version": "exact"}]}).encode(), url=selector, content_type="application/json"),
+            self._HttpResponse(b'''<select id="device" data-devices='{&quot;OP ACE 5&quot;:{&quot;CN&quot;:[&quot;other&quot;,&quot;exact&quot;]}}'></select>''', url=page_url, content_type="text/html"),
+            self._HttpResponse(b'<p class="ota-version-name">exact</p><div id="resultBox" data-url="" data-ota-key="key" data-csrf="csrf"></div>', url=page_url, content_type="text/html"),
+            self._HttpResponse(json.dumps({"ok": True, "url": download_url}).encode(), url=page_url, content_type="application/json"),
+            self._HttpResponse(b"PK\x03\x04catalog-rom", url=download_url, content_type="application/zip"),
+        ])
+        with tempfile.TemporaryDirectory() as root:
+            result = HttpSourceAdapter(attempts=1, opener=opener).materialize(selector, Path(root, "rom.zip"))
+            self.assertEqual(result.path.read_bytes(), b"PK\x03\x04catalog-rom")
+        self.assertEqual(opener.requests[2].get_method(), "POST")
+        self.assertIn(b"version_index=1", opener.requests[2].data)
+        self.assertIn(b"device=OP+ACE+5", opener.requests[2].data)
+
     def test_http_source_resolves_stable_daniel_springer_build_page(self) -> None:
         page_url = (
             "https://roms.danielspringer.at/index.php?view=ota&"

@@ -324,6 +324,7 @@ describe("bounded ROM source Range proxy", () => {
         }
         expect(work).toMatchObject({
           operation: "probe",
+          resolveOnly: true,
           sourceUrl: "https://roms.danielspringer.at/index.php?view=ota&build=fixture-build"
         });
         return Response.json({
@@ -336,7 +337,14 @@ describe("bounded ROM source Range proxy", () => {
           lastModified: null
         });
       }
-      throw new Error(`Unexpected fetch ${request.url}`);
+      if (url.hostname === "gauss-compota-c-cn.allawnfs.com") {
+        const range = request.headers.get("Range");
+        return new Response(new Uint8Array(range === "bytes=0-0" ? 1 : 32), {status: 206, headers: {
+          "Content-Range": range === "bytes=0-0" ? "bytes 0-0/8192" : "bytes 0-31/8192",
+          "Content-Type": "application/zip", "Content-MD5": "a28632dc4e3e2c8b51cc6e938c87b6fb"
+        }});
+      }
+      throw new Error("Unexpected source host");
     });
 
     const probe = await SELF.fetch("https://worker.example/v1/sources/probe", {
