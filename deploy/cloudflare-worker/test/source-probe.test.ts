@@ -48,7 +48,7 @@ describe("bounded ROM source Range proxy", () => {
     expect(calls.filter(host => host === 'roms.danielspringer.at')).toHaveLength(1);
   });
   it('preserves the resolver timeout after the bounded retry is exhausted', async () => {
-    const fetchMock = vi.fn(async () => Response.json({
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL) => Response.json({
       code: 'source_transport_timeout', stage: 'resolver', error: 'ROM source connection timed out'
     }, {status: 502}));
     vi.stubGlobal('fetch', fetchMock);
