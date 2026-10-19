@@ -152,7 +152,9 @@ def patch_archive(input_file: Path, output_file: Path) -> bool:
         print("    Kiểm tra bộ công cụ dùng chung bin/Java/toolchain.json.")
         return False
 
-    temp_dir = Path(tempfile.mkdtemp(prefix="hasselblad_patch_"))
+    # Atomic publication requires staging on the destination filesystem.
+    # Hosted runners can mount /tmp and the checkout on different devices.
+    temp_dir = Path(tempfile.mkdtemp(prefix="hasselblad_patch_", dir=output_file.parent))
     out_smali = temp_dir / "smali"
     out_dex = temp_dir / "classes.dex"
 

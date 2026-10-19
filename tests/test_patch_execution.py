@@ -7,6 +7,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import errno
+import os
+import zipfile
+from unittest.mock import patch
 
 from STARK import patch_common as common
 from tests import test_smali_assembly
@@ -16,6 +20,41 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PatchExecutionTests(unittest.TestCase):
+    def test_hasselblad_jar_publish_stays_on_destination_filesystem(self):
+        module = load_script('STARK/Hasselblad_filter/patch_Hasselblad_filter/patch_hasselblad.py')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'original.jar'
+            output = root / 'output' / 'patched.jar'
+            output.parent.mkdir()
+            output.write_bytes(b'previous output')
+            dex = test_smali_assembly.SmaliAssemblyTests.valid_header_fixture()
+            with zipfile.ZipFile(source, 'w') as archive:
+                archive.writestr('classes.dex', dex + module.TARGET_KEYS[0].encode())
+                archive.writestr('resource.txt', b'unchanged')
+            before = source.read_bytes()
+            replace = os.replace
+            def destination_replace(staged, target):
+                if Path(target) == output and output.parent not in Path(staged).parents:
+                    raise OSError(errno.EXDEV, 'Invalid cross-device link')
+                return replace(staged, target)
+            def fake_tool(command, **kwargs):
+                if 'a' in command:
+                    Path(command[command.index('-o') + 1]).write_bytes(dex)
+                return subprocess.CompletedProcess(command, 0, '', '')
+            with patch.object(module, 'shared_tool', return_value='fixture.jar'), \
+                    patch.object(module, 'require_tool', return_value='java'), \
+                    patch.object(module, 'run_tool', side_effect=fake_tool), \
+                    patch.object(module, 'patch_smali_directory', return_value=(1, 1)), \
+                    patch.object(module.os, 'replace', side_effect=destination_replace), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertTrue(module.patch_archive(source, output))
+            with zipfile.ZipFile(output) as archive:
+                self.assertEqual(archive.read('classes.dex'), dex)
+                self.assertEqual(archive.read('resource.txt'), b'unchanged')
+            self.assertEqual(source.read_bytes(), before)
+            self.assertEqual(list(output.parent.glob('hasselblad_patch_*')), [])
+
     def test_all_mods_bind_the_same_runner(self):
         scripts = [
             'Camera_mod/patch_Camera_mod/patch_camera.py',
