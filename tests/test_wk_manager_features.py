@@ -1,4 +1,6 @@
 import tempfile
+import json
+import re
 import os
 import shutil
 import subprocess
@@ -9,6 +11,7 @@ from unittest.mock import patch
 
 from wukong.models import BuildOptions, RecipeValidationError
 from wukong.wk_features import load_patcher, normalize_patches
+from wukong.wk_features import FEATURES as SUPPORTED_PATCHES
 
 ROOT = Path(__file__).resolve().parents[1]
 FEATURES = load_patcher(ROOT / "STARK")
@@ -202,6 +205,19 @@ class FeatureTests(unittest.TestCase):
         for invalid in ("multi_window", [True], ["invalid"]):
             with self.assertRaises(RecipeValidationError):
                 BuildOptions.from_dict({"wkManagerPatches": invalid})
+
+    def test_mini_app_worker_and_python_accept_the_same_wk_patches(self):
+        html = (ROOT / "telegram_mini_app/index.html").read_text(encoding="utf-8")
+        fieldset = re.search(r'<fieldset\b[^>]*id="wk-manager-patches"[^>]*>(.*?)</fieldset>', html, re.S)
+        self.assertIsNotNone(fieldset)
+        ui_patches = re.findall(r'<input\b[^>]*\bvalue="([^"]+)"', fieldset.group(1))
+        worker = (ROOT / "deploy/cloudflare-worker/src/jobs.ts").read_text(encoding="utf-8")
+        allowlist = re.search(r'const WK_MANAGER_PATCHES = new Set\((\[[\s\S]*?\])\)', worker)
+        self.assertIsNotNone(allowlist)
+        worker_patches = json.loads(allowlist.group(1))
+        self.assertEqual(list(SUPPORTED_PATCHES), ui_patches)
+        self.assertEqual(list(SUPPORTED_PATCHES), worker_patches)
+        self.assertEqual(list(SUPPORTED_PATCHES), normalize_patches(ui_patches))
 
     def test_explicit_selection_does_not_run_legacy_patchers(self):
         import studio_core

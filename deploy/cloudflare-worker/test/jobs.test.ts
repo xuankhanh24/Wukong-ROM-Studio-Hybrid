@@ -1,6 +1,10 @@
 import { env, SELF } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { tmaHeaders } from "./helpers";
+import { validateRecipe } from "../src/jobs";
+
+const wkPatches = ["keybox_manager", "play_integrity_spoof", "gamespoof", "hma_privacy_spoof", "kernel_manager",
+  "power_button_remap", "multi_window", "disable_flag_secure", "black_window", "multi_audio"];
 
 const recipe = {
   schemaVersion: 1,
@@ -41,6 +45,17 @@ async function seedApprovedUser(subject: string, credits: number): Promise<void>
 }
 
 describe("atomic Accepted Job creation", () => {
+  it("accepts individual WK hooks, explicit none and deduplicated selections without accepting invalid names", () => {
+    for (const patches of [[], ...wkPatches.map(patch => [patch]), [...wkPatches, "keybox_manager"]]) {
+      const result = validateRecipe({...recipe, build: {...recipe.build, wkManagerPatches: patches}});
+      expect((result.build as Record<string, unknown>).wkManagerPatches).toEqual([...new Set(patches)]);
+    }
+    expect(validateRecipe(recipe).build).not.toHaveProperty("wkManagerPatches");
+    for (const patches of ["all", [true], [{}], [...wkPatches, "unknown"]]) {
+      expect(() => validateRecipe({...recipe, build: {...recipe.build, wkManagerPatches: patches}}))
+        .toThrow("Unsupported WK Manager patch selection");
+    }
+  });
   it("keeps Launcher and the selected Fix_noti level and rejects two levels", async () => {
     await seedApprovedUser("43981", 3);
     const headers = await tmaHeaders(43981);
@@ -63,14 +78,15 @@ describe("atomic Accepted Job creation", () => {
   it("preserves explicit WK feature selection and rejects unknown patches", async () => {
     await seedApprovedUser("43980", 3);
     const headers = await tmaHeaders(43980);
-    const selected = { ...recipe, build: { ...recipe.build, wkManagerPatches: ["multi_window", "power_button_remap", "black_window", "multi_audio"] } };
+    const patches = wkPatches;
+    const selected = { ...recipe, build: { ...recipe.build, wkManagerPatches: patches } };
     const created = await SELF.fetch("https://worker.example/v1/jobs", {
       method: "POST", headers: { ...headers, "Idempotency-Key": "wk-feature-selection" }, body: JSON.stringify(selected)
     });
-    expect(created.status).toBe(201);
+    expect(created.status, JSON.stringify(await created.clone().json())).toBe(201);
     const job = await created.json() as { job_id: string };
     const snapshot = await (await SELF.fetch(`https://worker.example/v1/sync?jobId=${job.job_id}`, { headers })).json() as any;
-    expect(snapshot.activeJob.recipe.build.wkManagerPatches).toEqual(["multi_window", "power_button_remap", "black_window", "multi_audio"]);
+    expect(snapshot.activeJob.recipe.build.wkManagerPatches).toEqual(patches);
     const rejected = await SELF.fetch("https://worker.example/v1/jobs", {
       method: "POST", headers: { ...headers, "Idempotency-Key": "wk-invalid-selection" },
       body: JSON.stringify({ ...recipe, build: { ...recipe.build, wkManagerPatches: ["unknown"] } })

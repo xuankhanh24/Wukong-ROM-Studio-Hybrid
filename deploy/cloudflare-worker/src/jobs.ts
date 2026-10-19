@@ -15,6 +15,10 @@ const IDEMPOTENCY_KEY = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const JOB_HISTORY_PAGE_SIZE = 20;
 const JOB_HISTORY_STATUSES = new Set(["active", "succeeded", "failed"]);
 const JOB_PRESETS = new Set(["lite", "plus", "both", "custom"]);
+const WK_MANAGER_PATCHES = new Set([
+  "keybox_manager", "play_integrity_spoof", "gamespoof", "hma_privacy_spoof", "kernel_manager",
+  "power_button_remap", "multi_window", "disable_flag_secure", "black_window", "multi_audio"
+]);
 const PIPELINE_STEP_NAMES = new Set([
   "inspect_rom", "extract_payload", "unpack_partitions", "debloat", "apply_mod",
   "sync_configs", "repack_partitions", "repack_super", "patch_vbmeta",
@@ -154,7 +158,7 @@ export function validateRecipe(value: unknown): JsonObject {
   }
   if (build.wkManagerPatches !== undefined) {
     if (!Array.isArray(build.wkManagerPatches) || build.wkManagerPatches.some(
-      value => typeof value !== "string" || !["multi_window", "power_button_remap", "black_window", "multi_audio"].includes(value)
+      value => typeof value !== "string" || !WK_MANAGER_PATCHES.has(value)
     )) throw new JobHttpError("Unsupported WK Manager patch selection", 400);
     build.wkManagerPatches = [...new Set(build.wkManagerPatches)];
   }
