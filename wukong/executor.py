@@ -607,6 +607,8 @@ class LocalJobExecutor:
                 )
                 upload_started = time.monotonic()
                 if recipe.storage.publish_artifact:
+                    self.actions_ui.event({'type': 'step', 'step': 'upload', 'status': 'running',
+                                           'message': f'Tải lên / Upload · {output.name}'})
                     def report_upload(values: Mapping[str, object], *, current: Path = output) -> None:
                         nonlocal last_upload_event, last_upload_push
                         percent = float(values.get("percent") or 0.0)
