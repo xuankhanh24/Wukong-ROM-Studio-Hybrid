@@ -20,6 +20,7 @@ afterEach(() => { vi.unstubAllGlobals(); nativeDns.mockReset(); });
 
 describe("Vercel source transport", () => {
   it('reports the failed network phase without leaking the signed URL', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const handler = createSourceTransportHandler({resolveAddresses: publicDns, fetchImpl: async input => {
       if (String(input) === claimUrl) return Response.json({operation: 'probe',
         sourceUrl: 'https://cdn.allawnfs.com/rom.zip?Signature=private', range: 'bytes=0-0', maximumBytes: 1});
@@ -32,6 +33,11 @@ describe("Vercel source transport", () => {
     expect(JSON.parse(result)).toMatchObject({code: 'source_transport_timeout', stage: 'cdn'});
     expect(result).not.toContain('Signature');
     expect(result).not.toContain('private');
+    const diagnostics = JSON.stringify(warning.mock.calls);
+    expect(diagnostics).toContain('source_transport_timeout');
+    expect(diagnostics).not.toContain('Signature');
+    expect(diagnostics).not.toContain(token);
+    warning.mockRestore();
   });
   it('uses runtime DNS without making an extra external DNS HTTP request', async () => {
     nativeDns.mockResolvedValue([{ address: '8.8.8.8', family: 4 }]);

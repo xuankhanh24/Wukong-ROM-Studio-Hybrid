@@ -456,6 +456,20 @@ export function createSourceTransportHandler(dependencies: {
     } catch (error) {
       const status = error instanceof TransportError ? error.status : 502;
       const message = error instanceof TransportError ? error.message : "Source transport failed";
+      if (status >= 500) {
+        // Keep production failures diagnosable without logging signed ROM URLs,
+        // claim tokens, request bodies, or arbitrary exception messages.
+        const failure = error as { name?: unknown; code?: unknown; cause?: { code?: unknown } };
+        const safeIdentifier = (value: unknown): string =>
+          typeof value === "string" && /^[A-Za-z0-9_]{1,80}$/.test(value) ? value : "unknown";
+        console.warn("source_transport_failure", JSON.stringify({
+          status,
+          code: error instanceof TransportError ? error.code : "source_transport_error",
+          stage: error instanceof TransportError ? error.stage : "",
+          reason: error instanceof TransportError ? message : safeIdentifier(failure?.name),
+          causeCode: safeIdentifier(failure?.cause?.code)
+        }));
+      }
       return Response.json({ error: message,
         code: error instanceof TransportError ? error.code : 'source_transport_error',
         stage: error instanceof TransportError ? error.stage : ''
