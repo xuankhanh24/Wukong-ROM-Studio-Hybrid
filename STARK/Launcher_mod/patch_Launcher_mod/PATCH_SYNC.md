@@ -24,3 +24,6 @@ explicit `@*android:` syntax. This avoids depending on a locally publicized
 apktool framework cache: CI uses a clean framework and otherwise rejects the same
 symbols as private. A regression test links real resources against the framework
 embedded in the pinned apktool JAR, before and after normalization.
+Private theme attributes use an explicit private XML namespace (not `?*android`).
+Decode and rebuild share a per-build clean framework directory so host caches
+cannot change the IDs assigned to OEM framework references.

@@ -31,7 +31,8 @@ class LauncherProfileTests(unittest.TestCase):
             root = Path(directory)
             xml = root / 'res/values/styles.xml'
             xml.parent.mkdir(parents=True)
-            xml.write_text('<resources><style name="Fixture" parent="@android:style/TextAppearance.DeviceDefault.Body2" />'
+            xml.write_text('<resources><style name="Fixture" parent="@android:style/TextAppearance.DeviceDefault.Body2">'
+                           '<item name="android:colorAccent">?android:^attr-private/colorAccentPrimary</item></style>'
                            '<dimen name="width">@android:dimen/search_view_preferred_width</dimen></resources>', encoding='utf-8')
             manifest = root / 'AndroidManifest.xml'
             manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
@@ -61,6 +62,7 @@ class LauncherProfileTests(unittest.TestCase):
                         '<dimen name="width">@android:dimen/search_view_preferred_width</dimen>'
                         '<string name="literal">\\@android:string/not_a_reference</string>'
                         '<item name="app">@string/app_name</item>'
+                        '<item name="private_theme">?android:^attr-private/colorAccentPrimary</item>'
                         '<item name="theme">?android:attr/textColorPrimary</item></resources>')
             values.write_text(original, encoding='utf-8')
             resources.preserve_framework_references(root)
@@ -70,6 +72,8 @@ class LauncherProfileTests(unittest.TestCase):
             self.assertIn('\\@android:string/not_a_reference', result)
             self.assertIn('@string/app_name', result)
             self.assertIn('?android:attr/textColorPrimary', result)
+            self.assertIn('?wkandroidprv:attr/colorAccentPrimary', result)
+            self.assertIn('xmlns:wkandroidprv="http://schemas.android.com/apk/prv/res/android"', result)
             resources.preserve_framework_references(root)
             self.assertEqual(result, values.read_text(encoding='utf-8'))
 

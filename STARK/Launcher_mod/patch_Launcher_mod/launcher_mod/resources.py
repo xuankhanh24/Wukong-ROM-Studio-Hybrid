@@ -62,6 +62,21 @@ def preserve_framework_references(project):
     for path in (Path(project) / 'res').rglob('*.xml'):
         original = path.read_text(encoding='utf-8')
         updated = references.sub(r'\1@*android:\2', original)
+        if '?android:^attr-private/' in updated:
+            # Theme references do not support ?*android. Resolve them through
+            # AAPT's private namespace instead, preserving attribute semantics.
+            alias = 'wkandroidprv'
+            namespace = 'http://schemas.android.com/apk/prv/res/android'
+            root = re.match(r'(?:\s|<\?.*?\?>|<!--.*?-->)*<[\w:.-]+', updated, re.S)
+            if not root:
+                raise ValueError(f'Cannot find resource XML root: {path}')
+            header = updated[root.end():updated.index('>', root.end())]
+            binding = re.search(r'xmlns:wkandroidprv=[\"\']([^\"\']+)', header)
+            if binding and binding[1] != namespace:
+                raise ValueError(f'Conflicting private Android namespace: {path}')
+            if not binding:
+                updated = updated[:root.end()] + f' xmlns:{alias}="{namespace}"' + updated[root.end():]
+            updated = updated.replace('?android:^attr-private/', f'?{alias}:attr/')
         if updated != original:
             path.write_text(updated, encoding='utf-8')
 
@@ -89,7 +104,12 @@ def prepare_resources(apk, selected=None):
     (ROOT / 'scratch').mkdir(exist_ok=True)
     directory = Path(tempfile.mkdtemp(prefix='launcher-resources-', dir=ROOT / 'scratch'))
     project = directory / 'decoded'
-    run_tool([find_tool('java'), '-jar', str(apktool), 'd', '-s', str(Path(apk).resolve()), '-o', str(project)], check=True)
+    # Decode and link against the SAME clean, pinned framework. Mixing a local
+    # OEM framework with the embedded one can silently change Android IDs.
+    frameworks = directory / 'frameworks'
+    frameworks.mkdir()
+    run_tool([find_tool('java'), '-jar', str(apktool), 'd', '-s', str(Path(apk).resolve()),
+              '-p', str(frameworks), '-o', str(project)], check=True)
     public = project / 'res/values/public.xml'
     public_tree = ET.parse(public)
     public_root = public_tree.getroot()
@@ -127,7 +147,7 @@ def prepare_resources(apk, selected=None):
     settings.write_text(merge_settings(settings.read_text(encoding='utf-8'), recipe['settings_xml'], selected), encoding='utf-8')
     preserve_framework_references(project)
     staged = directory / 'resources.apk'
-    run_tool([find_tool('java'), '-jar', str(apktool), 'b', str(project), '-o', str(staged)], check=True)
+    run_tool([find_tool('java'), '-jar', str(apktool), 'b', str(project), '-p', str(frameworks), '-o', str(staged)], check=True)
     # Publish the cache only after apktool completes successfully.
     output.write_bytes(staged.read_bytes())
     stamp.write_text(json.dumps({**expected, 'output': digest(output)}, indent=2), encoding='utf-8')

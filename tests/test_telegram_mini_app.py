@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import io
+from contextlib import ExitStack
 import json
 import re
 import shutil
+import socket
 import subprocess
 import tempfile
 import threading
@@ -18,6 +20,11 @@ from wukong.mod_release_versions import default_mod_release_version
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+class _MiniAppFixtureServer(ThreadingHTTPServer):
+    # Browsers import many ESM files concurrently. The stdlib default of five
+    # pending connections is too small while a busy CI host schedules threads.
+    request_queue_size = 128
 
 OPLUS_TEST_URI = (
     "https://component-ota-cn.allawntech.com/downloadCheck?"
@@ -1186,7 +1193,7 @@ def _render_mini_app_in_chrome(
             "maintenance_enabled": maintenance_enabled,
         },
     )
-    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    server = _MiniAppFixtureServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -1208,10 +1215,19 @@ def _render_mini_app_in_chrome(
             try:
                 page = browser.new_page(viewport={"width": window_width, "height": window_height}, device_scale_factor=1)
                 errors = []
+                failed_requests = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
+                page.on("requestfailed", lambda request: failed_requests.append(
+                    (urlsplit(request.url).path, request.failure)))
                 page.goto(launch_url, wait_until="networkidle")
                 # Wait for the real auth gate, not a timing assumption on CI.
-                page.wait_for_function("!document.body.classList.contains('access-checking')", timeout=15000)
+                try:
+                    page.wait_for_function("!document.body.classList.contains('access-checking')", timeout=15000)
+                except Exception as error:
+                    raise AssertionError({
+                        'phase': 'authentication boot', 'body': page.locator('body').get_attribute('class'),
+                        'pageErrors': errors, 'failedRequests': failed_requests[-12:],
+                    }) from error
                 if exercise_dock_header:
                     # Fixture timers start only once the authenticated dock is ready.
                     # A fixed delay from navigation races slow Windows CI runners.
@@ -1257,6 +1273,13 @@ def _render_mini_app_in_chrome(
 
 
 class TelegramMiniAppTests(unittest.TestCase):
+    def test_fixture_accepts_a_module_import_burst_before_workers_are_scheduled(self) -> None:
+        with _MiniAppFixtureServer(('127.0.0.1', 0), _MiniAppFixtureHandler) as server, ExitStack() as clients:
+            # Native ESM imports plus CSS/fonts exceed HTTPServer's five-slot
+            # default backlog while a busy Windows runner schedules workers.
+            for _ in range(24):
+                clients.enter_context(socket.create_connection(server.server_address, timeout=0.2))
+
     def test_catalog_refresh_preserves_failed_and_running_source_analysis(self) -> None:
         def refresh_catalog(page):
             page.evaluate("""async () => {
