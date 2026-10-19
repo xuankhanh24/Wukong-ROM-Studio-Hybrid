@@ -185,6 +185,10 @@ async function startBatchBuild() {
   } finally { button.disabled = false; }
 }
 
+let reopenNotificationVersion = '';
+let reopenNotificationSentVersion = '';
+let reopenNotificationPending = false;
+
 function renderMaintenanceAdmin() {
   const maintenance = state.maintenance || { enabled: false, message: "" };
   const enabled = Boolean(maintenance.enabled);
@@ -204,6 +208,61 @@ function renderMaintenanceAdmin() {
   }
   const status = $("#maintenance-admin-status");
   if (status) status.textContent = t(enabled ? "maintenanceClosedStatus" : "maintenanceOpenStatus");
+  const composer = $('#reopen-notification');
+  if (composer) {
+    composer.hidden = enabled || !maintenance.updatedAt;
+    if (!composer.hidden && reopenNotificationVersion !== maintenance.updatedAt) {
+      reopenNotificationVersion = maintenance.updatedAt;
+      $('#reopen-notification-message').value = t('reopenNotificationDefault');
+      $('#reopen-notification-status').textContent = '';
+    }
+    const sent = reopenNotificationSentVersion === maintenance.updatedAt;
+    $('#reopen-notification-send').disabled = reopenNotificationPending || sent;
+    $('#reopen-notification-send').textContent = t(sent ? 'reopenNotificationSent' : 'reopenNotificationSend');
+  }
+}
+
+function confirmReopenNotification(message) {
+  const dialog = $('#reopen-notification-dialog');
+  $('#reopen-notification-preview').textContent = message;
+  dialog.returnValue = '';
+  return new Promise(resolve => {
+    dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true });
+    dialog.showModal();
+  });
+}
+
+async function sendReopenNotification() {
+  if (state.me?.role !== 'admin' || state.maintenance?.enabled || reopenNotificationPending ||
+      reopenNotificationSentVersion === state.maintenance?.updatedAt) return;
+  const message = $('#reopen-notification-message').value.trim();
+  const status = $('#reopen-notification-status');
+  if (!message || message.length > 2000) {
+    status.textContent = t('reopenNotificationRequired');
+    $('#reopen-notification-message').focus();
+    return;
+  }
+  const updatedAt = state.maintenance.updatedAt;
+  reopenNotificationPending = true;
+  renderMaintenanceAdmin();
+  try {
+    const confirmed = await confirmReopenNotification(message);
+    if (!confirmed) return;
+    status.textContent = t('reopenNotificationSending');
+    const payload = await apiRequest('/v1/system/reopen-notification', {
+      method: 'POST', body: JSON.stringify({ message, updatedAt })
+    });
+    reopenNotificationSentVersion = updatedAt;
+    status.textContent = payload.queued > 0
+      ? t('reopenNotificationQueued').replace('{count}', payload.queued)
+      : t('reopenNotificationAlreadyQueued');
+  } catch (error) {
+    status.textContent = error.message;
+    toast(error.message, true);
+  } finally {
+    reopenNotificationPending = false;
+    renderMaintenanceAdmin();
+  }
 }
 
 async function updateMaintenance() {
@@ -727,4 +786,4 @@ async function performCacheClear() {
   }
 }
 
-export { renderAdminReleaseEditor, savePermanentReleaseVersion, batchSelections, setBatchSelections, updateBatchSummary, renderBatchChoices, openBatchBuildPage, closeBatchBuildPage, batchReleaseSummary, renderBatch, loadBatch, loadLatestBatch, startBatchBuild, renderMaintenanceAdmin, updateMaintenance, renderAdminUsers, loadAdminUsers, adminAuditArticle, scheduleAdminUserActivityPoll, refreshAdminUserActivity, requestAdminAction, runAdminUserAction, openAdminUser, renderAdminPresetLabels, savePermanentPresetLabels, openCacheClearDialog, performCacheClear };
+export { renderAdminReleaseEditor, savePermanentReleaseVersion, batchSelections, setBatchSelections, updateBatchSummary, renderBatchChoices, openBatchBuildPage, closeBatchBuildPage, batchReleaseSummary, renderBatch, loadBatch, loadLatestBatch, startBatchBuild, renderMaintenanceAdmin, updateMaintenance, sendReopenNotification, renderAdminUsers, loadAdminUsers, adminAuditArticle, scheduleAdminUserActivityPoll, refreshAdminUserActivity, requestAdminAction, runAdminUserAction, openAdminUser, renderAdminPresetLabels, savePermanentPresetLabels, openCacheClearDialog, performCacheClear };

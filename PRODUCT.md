@@ -33,4 +33,5 @@ The chat wizard gathers the complete task envelope. The Mini App is build-focuse
 - Telegram callback data is short, versioned, and never grants access by itself.
 - Mini App requests are capped at Telegram's 4096-byte `sendData` limit and ownership always comes from the authenticated Telegram sender, never from browser payload fields.
 - Tokens, rclone configuration, and credentials never appear in recipes, state files, logs, or messages.
+- After reopening the Mini App from maintenance, an administrator may edit and confirm a plain-text Telegram announcement (up to 2000 characters) for approved users. Reopening never sends automatically. The existing outbox queues delivery, deduplicates each recipient per reopening, and includes a button to open the Mini App.
 - Vietnamese and English command descriptions and all critical UI states are maintained together.

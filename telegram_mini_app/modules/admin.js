@@ -80,6 +80,11 @@ export function updateMaintenance(...args) {
   if (panel) return panel.updateMaintenance(...args);
   return loadAdminPanel().then(module => module.updateMaintenance(...args));
 }
+export function sendReopenNotification(...args) {
+  if (state.me?.role !== 'admin') return Promise.resolve();
+  if (panel) return panel.sendReopenNotification(...args);
+  return loadAdminPanel().then(module => module.sendReopenNotification(...args));
+}
 export function renderAdminUsers(...args) {
   if (state.me?.role !== 'admin') return Promise.resolve();
   if (panel) return panel.renderAdminUsers(...args);

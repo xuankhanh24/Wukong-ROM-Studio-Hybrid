@@ -79,6 +79,7 @@ import {
 } from "./state";
 import {
   maintenanceState,
+  queueReopenNotification,
   setMaintenanceState
 } from "./system";
 import {
@@ -185,6 +186,19 @@ async function routeWithIdentity(
       return json({
         error: error instanceof Error ? error.message : "Maintenance state is invalid"
       }, 400);
+    }
+  }
+  if (path === '/v1/system/reopen-notification' && request.method === 'POST') {
+    if (auth.role !== 'admin') return json({ error: 'Admin access is required' }, 403);
+    const payload = await request.json().catch(() => ({})) as Record<string, unknown>;
+    try {
+      const result = await queueReopenNotification(env, auth.subject, payload);
+      if (result.queued && env.WUKONG_DISABLE_EXTERNAL_DISPATCH !== '1') {
+        ctx.waitUntil(drainTelegramOutbox(env, 25));
+      }
+      return json(result);
+    } catch (error) {
+      return json({ error: error instanceof Error ? error.message : 'Could not queue the notification' }, 400);
     }
   }
   if (path === "/v1/drafts/source" && request.method === "GET") {

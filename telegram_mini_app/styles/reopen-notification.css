@@ -1,0 +1,25 @@
+.reopen-notification:not([hidden]) {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.reopen-notification h3 { margin: 0; font-size: 15px; }
+.reopen-notification p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.reopen-notification .field { margin: 0; }
+.reopen-notification textarea { min-height: 112px; }
+.reopen-notification button { width: 100%; min-height: 44px; }
+.confirm-dialog .reopen-notification-preview {
+  max-height: 35vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+#reopen-notification-confirm {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+#reopen-notification-confirm:hover { background: var(--accent-strong); }

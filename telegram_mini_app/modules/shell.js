@@ -4,7 +4,7 @@ import { applyCustomPresetLabelForJob, closeDebloatEditor, enforceExclusiveMods,
 import { closeAdminJobPage, loadAdminJobDetail, loadJobs, renderJobHistory, renderSelectedJob, setJobsConnection } from "./jobs.js";
 import { runQuickAction, activeSignedLaunchToken, apiRequest, autoVerifySession, closeTelegramApp, connectTelegramSession, effectiveInitData, initializeApprovedWorkspace, loadSession, miniApiAvailable, openTelegramBot, pauseWorkspacePolling, pollTelegramPairing, reconnectWorkspace, scheduleWorkspaceReconnect, renderAccessGate, renderAccount, storedPairing } from "./session.js";
 import { loadRomDevices, renderRomCatalogResults, renderRomDevices, renderRomVersions, resetRomResolved, searchRomCatalog, selectLibraryTab } from "./rom-catalog.js";
-import { closeBatchBuildPage, loadAdminUsers, loadBatch, openBatchBuildPage, performCacheClear, renderAdminUsers, savePermanentPresetLabels, savePermanentReleaseVersion, setBatchSelections, startBatchBuild, updateBatchSummary, updateMaintenance } from "./admin.js";
+import { closeBatchBuildPage, loadAdminUsers, loadBatch, openBatchBuildPage, performCacheClear, renderAdminUsers, savePermanentPresetLabels, savePermanentReleaseVersion, sendReopenNotification, setBatchSelections, startBatchBuild, updateBatchSummary, updateMaintenance } from "./admin.js";
 import { clearSource, copySourceMetadata, pasteSourceFromClipboard, probeSourceInPlace, restoreSourceDraft, updateSourceDetection } from "./source-rom.js";
 import { applyTheme, bindLiquidBottomTabs, bindTelegramThemeEvents, handleSystemThemeChange, navigate, prefersReducedMotion, scheduleGreeting, updateDispatchFab, updateDockShellPath, updateGreetingOverflow, updateMastheadScroll } from "./dock.js";
 import { scheduleSourceProbe } from "./catalog.js";
@@ -164,6 +164,9 @@ function bindEvents() {
     updateMaintenance().catch((error) => toast(error.message, true));
   });
   $("#maintenance-message-input").addEventListener("input", () => { state.maintenanceMessageDirty = true; });
+  $('#reopen-notification-send').addEventListener('click', () => {
+    sendReopenNotification().catch(error => toast(error.message, true));
+  });
   $("#clear-source").addEventListener("click", clearSource);
   $("#probe-source").addEventListener("click", () => {
     clearTimeout(state.sourceProbeTimer);
