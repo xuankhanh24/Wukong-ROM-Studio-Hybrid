@@ -172,6 +172,8 @@ class GitHubActionsUI:
             return
         if event.get('type') == 'warning':
             message = _safe_text(event.get('message') or event.get('warning') or 'Warning')
+            if len(message) > 2000:
+                message = message[:2000] + ' … (chi tiết trong build.log)'
             self._warnings.append(message)
             _emit(f'::warning::{_command_text(message)}')
             return

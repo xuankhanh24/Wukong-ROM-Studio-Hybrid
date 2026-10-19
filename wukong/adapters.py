@@ -1498,9 +1498,9 @@ class RcloneStorageAdapter:
             try:
                 for raw in process.stderr:
                     line = raw.decode('utf-8', errors='replace')
-                    diagnostics.append(line)
                     values = _parse_rclone_progress(line)
                     if values is None:
+                        diagnostics.append(line)
                         from .build_logging import LogRedactor
                         print('[STORAGE] ' + LogRedactor()(line.rstrip()), flush=True)
                     if values and not errors:
@@ -1530,7 +1530,7 @@ class RcloneStorageAdapter:
                     pass
             process.stderr.close()
         if code:
-            raise SourceError('Checkpoint upload failed: ' + ''.join(diagnostics))
+            raise SourceError(f'Checkpoint upload failed (rclone exit {code}): ' + ''.join(diagnostics))
         if errors:
             raise errors[0]
         return result

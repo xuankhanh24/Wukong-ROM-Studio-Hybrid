@@ -9,6 +9,16 @@ from wukong.adapters import HttpSourceAdapter, RcloneStorageAdapter
 
 
 class TransferProgressTests(unittest.TestCase):
+    def test_stream_upload_failure_includes_exit_code_even_without_stderr(self):
+        from wukong.adapters import SourceError
+        storage = RcloneStorageAdapter()
+        def write(output):
+            output.write(b'abc')
+            return 'digest', 3
+        with self.assertRaisesRegex(SourceError, 'rclone exit 3'):
+            storage._upload_stream([sys.executable, '-c', 'import sys;sys.stdin.buffer.read();sys.exit(3)'],
+                                   write, progress_callback=lambda values: None)
+
     def test_truncated_http_body_does_not_report_transfer_complete(self):
         class Response(io.BytesIO):
             headers = {'Content-Length': '100', 'Content-Type': 'application/zip'}
