@@ -2684,6 +2684,7 @@ def _patch_jar_with_apktool(
             reuse_decoded.is_dir()
             and marker.get("jar") == jar.name
             and marker.get("sha256") == jar_hash
+            and marker.get("decodedLayoutValid", True) is True
         ):
             decoded = reuse_decoded
             decoded_reused = True
@@ -2731,27 +2732,47 @@ def _patch_jar_with_apktool(
     build_started = time.perf_counter()
     smali_tool = helper.require_tool("smali")
     selective_build = bool(before_dex or after_dex) and bool(smali_tool)
+    added_dex = set()
     if selective_build:
         from wukong.smali_io import assembly_api
+        from wukong.dex_shards import assemble_dex_shards
         api_level = assembly_api(decoded)
         print(f"[*] {jar.name}: assemble changed DEX using API {api_level}", flush=True)
         # Assemble only trees changed by the selected hooks. Original OEM DEX
         # and non-DEX local records are retained by the merge below.
         dex_output = work_dir / "rebuilt-dex"
         dex_output.mkdir(exist_ok=True)
+        reserved_dex = set(before_profile) | set(after_dex)
+        next_dex_index = max((int(match[1] or 1) for name in reserved_dex
+                              if (match := re.fullmatch(r"classes(\d+)?\.dex", name))), default=1) + 1
+
+        def allocate_dex_name():
+            nonlocal next_dex_index
+            name = f"classes{next_dex_index}.dex"
+            next_dex_index += 1
+            return name
+
+        def assemble_tree(source, output):
+            helper.run_tool([java, "-jar", str(smali_tool), "a", str(source),
+                             "--api", str(api_level), "-o", str(output)], runner=_run_command)
+
         with zipfile.ZipFile(rebuilt, "w", compression=zipfile.ZIP_STORED) as archive:
             for name in sorted(changed_dex):
                 folder = "smali" if name == "classes.dex" else "smali_" + name[:-4]
                 output = dex_output / name
                 try:
-                    helper.run_tool([java, "-jar", str(smali_tool), "a", str(decoded / folder),
-                                     "--api", str(api_level), "-o", str(output)], runner=_run_command)
+                    assembled = assemble_dex_shards(decoded / folder, output,
+                                                    build=assemble_tree, allocate_name=allocate_dex_name)
                 except helper.ToolchainError as exc:
                     raise StudioError(
                         f"Smali produced missing or invalid DEX {name} at API {api_level}; "
                         "original JAR is unchanged. Check assembler diagnostics above."
                     ) from exc
-                archive.write(output, name)
+                for assembled_name, assembled_path in assembled.items():
+                    archive.write(assembled_path, assembled_name)
+                    if assembled_name not in after_dex:
+                        added_dex.add(assembled_name)
+        changed_dex.update(added_dex)
     else:
         helper.run_tool([java, "-jar", apktool, "b", str(decoded), "-o", str(rebuilt)], runner=_run_command)
     build_seconds = time.perf_counter() - build_started
@@ -2772,7 +2793,7 @@ def _patch_jar_with_apktool(
     final_hash = _file_sha256(jar)
     _write_json_atomic(
         decoded.parent / APKTOOL_DECODE_MARKER_NAME,
-        {"jar": jar.name, "sha256": final_hash},
+        {"jar": jar.name, "sha256": final_hash, "decodedLayoutValid": not added_dex},
     )
     details = dict(report) if isinstance(report, dict) else {}
     details.update(
@@ -2780,6 +2801,7 @@ def _patch_jar_with_apktool(
             "jar": jar.name,
             "selectiveDexBuild": selective_build,
             "changedDex": sorted(changed_dex),
+            "splitDex": sorted(added_dex),
             "decodedReused": decoded_reused,
             "decodeSeconds": round(decode_seconds, 3),
             "fingerprintSeconds": round(fingerprint_seconds, 3),
