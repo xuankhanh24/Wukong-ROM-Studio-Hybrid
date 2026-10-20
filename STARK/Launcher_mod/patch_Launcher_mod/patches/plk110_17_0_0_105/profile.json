@@ -1,0 +1,11 @@
+{
+  "schema": 2,
+  "id": "coloros-plk110-17.0.0.105-reviewed",
+  "extends": "../a17/profile.json",
+  "apk_sha256": "af89139f18857f5c9e130cd492f08dc1a3e26b131aec74490432b2c590ac972e",
+  "type_bindings": {
+    "Lcom/android/quickstep/y1;": "Lcom/android/quickstep/s1;",
+    "Lgt/d;": "Lht/c;"
+  },
+  "overrides": []
+}

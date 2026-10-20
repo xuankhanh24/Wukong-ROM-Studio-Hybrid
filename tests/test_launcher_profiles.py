@@ -116,6 +116,10 @@ class LauncherProfileTests(unittest.TestCase):
             _, matches, _, aliases = engine.plan_patch([root], profile, sources)
             self.assertEqual(aliases['Lexample/Feature;'], 'Lexample/A;')
             self.assertEqual(len(matches), 1)
+            # A recycled obfuscated descriptor must not override source metadata.
+            (root / 'example/Feature.smali').write_text('.class public Lexample/Feature;\n' + before)
+            _, matches, _, _ = engine.plan_patch([root], profile, sources)
+            self.assertEqual(matches[0].path, root / 'example/A.smali')
             (root / 'example/B.smali').write_text('.class public Lexample/B;\n' + before)
             with self.assertRaisesRegex(ValueError, 'candidates'):
                 engine.plan_patch([root], profile, sources)
@@ -138,6 +142,66 @@ class LauncherProfileTests(unittest.TestCase):
                 _, _, sources = profiles.decode_for_profile(apk, 'fixture.jar', profile)
             self.assertEqual(sources.get('OverlayUtils.kt'), [owner])
             self.assertIn(owner, tool.call_args.args[0])
+
+    def test_decode_uses_source_metadata_when_old_descriptor_is_recycled(self):
+        profiles = importlib.import_module('launcher_mod.profiles')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            apk = root / 'stock.apk'
+            with zipfile.ZipFile(apk, 'w') as archive:
+                archive.writestr('classes.dex', b'fixture')
+            profile = {'features': [{'id': 'feed', 'classes': [{
+                'owner': 'Lexample/Old;', 'source': 'Feature.kt', 'methods': []
+            }]}]}
+            with patch.object(profiles, 'ROOT', root), \
+                    patch.object(profiles, 'dex_inventory', return_value={
+                        'Lexample/Old;': 'Unrelated.kt', 'Lexample/New;': 'Feature.kt'}), \
+                    patch.object(profiles, 'find_tool', return_value='java'), \
+                    patch.object(profiles, 'run_tool') as tool:
+                profiles.decode_for_profile(apk, 'fixture.jar', profile)
+            command = tool.call_args.args[0]
+            self.assertEqual(command[command.index('--classes') + 1], 'Lexample/New;')
+
+    def test_fingerprint_binding_disambiguates_shared_kotlin_source(self):
+        before = ('.method public run()Z\n.registers 1\n'
+                  'invoke-interface {v0}, Lexample/Lazy;->getValue()Ljava/lang/Object;\n'
+                  'const/4 v0, 0x0\nreturn v0\n.end method\n')
+        profile = {'type_sources': {'Lexample/Lazy;': 'Lazy.kt'},
+                   'type_bindings': {'Lexample/Lazy;': 'Lexample/NativeLazy;'},
+                   'features': [{'id': 'feed', 'classes': [{
+                       'owner': 'Lexample/Feed;', 'source': '', 'methods': [{
+                           'before': before, 'after': before.replace('0x0', '0x1')}]
+                   }]}]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'example/Feed.smali'
+            path.parent.mkdir()
+            path.write_text('.class public Lexample/Feed;\n' + before.replace('Lexample/Lazy;', 'Lexample/NativeLazy;'))
+            _, matches, _, _ = engine.plan_patch([root], profile, {
+                'Lazy.kt': ['Lexample/NativeLazy;', 'Lexample/OtherLazy;']})
+            self.assertEqual(len(matches), 1)
+            self.assertIn('Lexample/NativeLazy;->getValue()', matches[0].replacement)
+
+    def test_alternatives_with_same_body_use_exact_method_signature(self):
+        before = '.method public a()Z\n.registers 1\nconst/4 v0, 0x0\nreturn v0\n.end method\n'
+        renamed = before.replace('a()Z', 'enabled()Z')
+        profile = {'features': [{'id': 'feed', 'classes': [{
+            'owner': 'Lexample/Feed;', 'source': '', 'methods': [{
+                'before': before, 'after': before.replace('0x0', '0x1'),
+                'alternatives': [{'before': renamed, 'after': renamed.replace('0x0', '0x2')}]
+            }]
+        }]}]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'example/Feed.smali'
+            path.parent.mkdir()
+            path.write_text('.class public Lexample/Feed;\n' + before)
+            _, matches, _, _ = engine.plan_patch([root], profile)
+            self.assertIn('const/4 v0, 0x1', matches[0].replacement)
+            self.assertNotIn('const/4 v0, 0x2', matches[0].replacement)
+            profile['features'][0]['classes'][0]['methods'][0]['alternatives'][0]['before'] = before
+            with self.assertRaisesRegex(ValueError, 'ambiguous semantic alternatives'):
+                engine.plan_patch([root], profile)
 
     def test_reviewed_alternative_method_body_is_supported(self):
         original = '.method public run()Z\n.registers 1\nconst/4 v0, 0x0\nreturn v0\n.end method\n'

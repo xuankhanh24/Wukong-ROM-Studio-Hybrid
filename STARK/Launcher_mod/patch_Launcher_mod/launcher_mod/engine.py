@@ -96,20 +96,36 @@ def plan_patch(roots, profile, source_index=None, selected=None):
     profile = select_profile(profile, selected)
     source_index = source_index or {}
     files = {}
-    aliases = {}
+    aliases = dict(profile.get('type_bindings', {}))
     entries = []
     root_paths = [Path(root) for root in (roots.values() if isinstance(roots, dict) else roots)]
+    # Obfuscated descriptors can be reused by unrelated classes in a newer ROM.
+    # Bind unambiguous source identities before comparing any method bodies.
+    for owner, source in profile.get('type_sources', {}).items():
+        candidates = source_index.get(source, [])
+        if owner in candidates:
+            aliases.setdefault(owner, owner)
+        else:
+            candidates = [candidate for candidate in candidates
+                          if ('$' in candidate) == ('$' in owner)]
+            if len(candidates) == 1:
+                aliases.setdefault(owner, candidates[0])
     for feature in profile['features']:
         for entry in feature['classes']:
             owner = entry['owner']
             candidates = source_index.get(entry['source'], []) if entry['source'] else []
+            if owner in candidates:
+                candidates = [owner]
+            elif candidates:
+                candidates = [candidate for candidate in candidates
+                              if ('$' in candidate) == ('$' in owner)]
             exact = [root / (owner[1:-1] + '.smali') for root in root_paths]
             exact = [path for path in exact if path.is_file()]
-            if exact:
-                paths = exact
-            else:
+            if candidates:
                 paths = [root / (candidate[1:-1] + '.smali') for candidate in candidates for root in root_paths]
                 paths = [path for path in paths if path.is_file()]
+            else:
+                paths = exact
             if len(paths) > 1:
                 required = [rule for rule in entry['methods'] if rule.get('before') and not rule.get('optional')]
                 compatible = []
@@ -162,7 +178,11 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                     continue
                 raise ValueError(f"{feature}: {path.name}::{signature(rule['before'])} has 0 semantic matches")
             if len(choices) != 1:
-                raise ValueError(f"{feature}: {path.name} has ambiguous semantic alternatives")
+                exact = [(choice, match) for choice, match in choices if match is not None
+                         and signature(choice['before']) == signature(match.group())]
+                if len(exact) != 1:
+                    raise ValueError(f"{feature}: {path.name} has ambiguous semantic alternatives")
+                choices = exact
             choice, match = choices[0]
             before, after = ((choice['before'], choice['after']) if choice.get('raw') else
                              (remap(choice['before'], aliases), remap(choice['after'], aliases)))

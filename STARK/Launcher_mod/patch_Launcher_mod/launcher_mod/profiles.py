@@ -115,7 +115,9 @@ def decode_for_profile(apk, baksmali, profile):
         affected = {}
         for feature in profile['features']:
             for entry in feature['classes']:
-                candidates = [entry['owner']] if entry['owner'] in dex_owners else sources.get(entry['source'], [])
+                candidates = sources.get(entry['source'], []) if entry.get('source') else []
+                if not candidates and entry['owner'] in dex_owners:
+                    candidates = [entry['owner']]
                 for candidate in candidates:
                     # Shared Kotlin source names can describe several classes.
                     # Decode them all; the engine requires a unique semantic match.
