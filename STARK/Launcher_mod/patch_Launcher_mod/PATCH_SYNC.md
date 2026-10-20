@@ -1,20 +1,22 @@
 # Launcher patch sync · V7.0
 
-Imported reviewed patch data and Java helpers from the supplied `launcher-mod`
-checkout at `b03b1f4` (recents landscape and Google Feed toggle fixes).
+Patch rules and Java helpers are based on `xuankhanh24/OplusLauncher-Mod`,
+commit `86d6ec3d841d69f0f406042bbce5fd4486a10bed`.
 Build entry points continue to use this project's shared, hash-locked toolchain,
 transactional archive writer, 16 KB alignment and DEX verifier.
 
-The default build uses one catalog, `patches/shared/profile.json`, for A16 and
-A17. The catalog contains reviewed instruction-graph alternatives for each
-feature; it is not selected by Android version, device model or APK fingerprint.
-The older directories remain historical inputs and regression fixtures.
-New patch changes belong in the shared catalog.
+Runtime patch data lives in exactly two directories: `patches/a16/` and
+`patches/a17/`. The upstream API-family detector selects the appropriate
+`profile.json` from the APK's classes and source metadata. It does not use device
+models or APK fingerprints. Both families use the same engine, Java helpers,
+resource builder, toolchain and verifier.
 
-Every requested feature must match a complete rule graph before any source is
-written. When several graphs match, the most complete graph is used; equally
-complete graphs must produce equivalent edits. Empty historical feature entries
-cannot make a requested feature pass without applying hooks.
+All required rules must match before any source is written. Reviewed older OEM
+graphs are retained inside the A16 feature files so the existing A16 inputs
+remain supported. When several complete A16 graphs match, the most complete is
+used; equally complete graphs must produce equivalent edits. Empty historical
+feature entries are excluded. Historical stock examples live under
+`tests/fixtures/launcher/` and are not runtime profiles.
 
 Class identity comes from source metadata and complete method semantics.
 Recycled obfuscated names cannot take precedence over that metadata. References

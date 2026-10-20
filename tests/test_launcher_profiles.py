@@ -223,7 +223,7 @@ class LauncherProfileTests(unittest.TestCase):
             self.assertIn('0x1', path.read_text(), 'Planning must not write source files')
 
     def setUp(self):
-        self.profile = engine.load_profile(PATCHER / 'patches/pkg110_16_0_10_500/profile.json')
+        self.profile = engine.load_profile(Path(__file__).parent / 'fixtures/launcher/pkg110_16_0_10_500/profile.json')
 
     def fixture(self, directory):
         owners = defaultdict(dict)
@@ -274,26 +274,34 @@ class LauncherProfileTests(unittest.TestCase):
         self.assertIn('Lm9/n;', rule['after'])
 
 
-class SharedLauncherCatalogTests(unittest.TestCase):
-    def test_default_catalog_is_the_same_for_a16_and_a17(self):
+class LauncherFamilyCatalogTests(unittest.TestCase):
+    def test_catalog_selection_uses_api_family_instead_of_model_or_filename(self):
         profiles = importlib.import_module('launcher_mod.profiles')
-        selected = [profiles.choose_profile(Path(name)) for name in ('A16.apk', 'A17.apk', 'PLK110.apk')]
-        self.assertEqual(len(set(selected)), 1)
-        catalog = engine.load_profile(selected[0])
-        self.assertEqual(catalog['id'], 'coloros-shared')
-        self.assertNotIn('apk_sha256', catalog)
-        for feature in catalog['features']:
-            self.assertTrue(feature['alternatives'])
-            self.assertTrue(all(variant['classes'] for variant in feature['alternatives']))
+        cases = [({'Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;': None}, 'a16'),
+                 ({'Lx/a;': 'OplusGridRecentsConfig.kt'}, 'a17'),
+                 ({'Lx/a;': 'ExpandDataManager.kt',
+                   'Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;': None}, 'a17')]
+        with tempfile.TemporaryDirectory() as directory:
+            apk = Path(directory) / 'arbitrary-model.apk'
+            with zipfile.ZipFile(apk, 'w') as archive:
+                archive.writestr('classes.dex', b'fixture')
+            for inventory, family in cases:
+                with self.subTest(family=family), patch.object(profiles, 'dex_inventory', return_value=inventory):
+                    catalog_path = profiles.choose_profile(apk)
+                    self.assertEqual(catalog_path.parent.name, family)
+                    self.assertNotIn('apk_sha256', engine.load_profile(catalog_path))
+            with patch.object(profiles, 'dex_inventory', return_value={}):
+                with self.assertRaisesRegex(ValueError, 'No recognized grid API family'):
+                    profiles.choose_profile(apk)
 
-    def test_shared_rules_match_both_method_graphs_and_reject_unknown_graph(self):
+    def test_family_rules_match_oem_graphs_and_reject_unknown_graph(self):
         original = '.method public enabled()Z\n.registers 1\nconst/4 v0, 0x0\nreturn v0\n.end method\n'
         replacement = original.replace('0x0', '0x2')
         variants = [{'classes': [{
             'owner': 'Lexample/Feature;', 'source': '',
             'methods': [{'before': original.replace('0x0', value), 'after': replacement}]
         }]} for value in ('0x0', '0x1')]
-        profile = {'id': 'shared', 'shared': True, 'features': [{
+        profile = {'id': 'a16', 'feature_variants': True, 'features': [{
             'id': 'feed', 'classes': [], 'alternatives': variants
         }]}
         with tempfile.TemporaryDirectory() as directory:
@@ -308,13 +316,13 @@ class SharedLauncherCatalogTests(unittest.TestCase):
                     self.assertIn('const/4 v0, 0x2', matches[0].replacement)
             path.write_text('.class public Lexample/Feature;\n' + original.replace('0x0', '0x3'))
             unchanged = path.read_bytes()
-            with self.assertRaisesRegex(ValueError, 'no complete shared rule variant'):
+            with self.assertRaisesRegex(ValueError, 'no complete rule variant'):
                 engine.apply_profile([root], profile)
             self.assertEqual(path.read_bytes(), unchanged)
             variants[1]['classes'][0]['methods'][0]['before'] = variants[0]['classes'][0]['methods'][0]['before']
             variants[1]['classes'][0]['methods'][0]['after'] = original.replace('0x0', '0x4')
             path.write_text('.class public Lexample/Feature;\n' + original)
-            with self.assertRaisesRegex(ValueError, 'ambiguous shared rule variants'):
+            with self.assertRaisesRegex(ValueError, 'ambiguous rule variants'):
                 engine.plan_patch([root], profile)
 
 

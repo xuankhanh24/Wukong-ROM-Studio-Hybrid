@@ -13,8 +13,17 @@ from .toolchain import run_tool, find_tool
 
 
 def choose_profile(apk):
-    # One catalog for every supported ROM; complete method graphs select rules.
-    return ROOT / 'patches/shared/profile.json'
+    # Use the upstream API-family detection, never a model or APK fingerprint.
+    with zipfile.ZipFile(apk) as archive:
+        inventory = {owner: source for name in archive.namelist() if name.endswith('.dex')
+                     for owner, source in dex_inventory(archive.read(name)).items()}
+    if 'ExpandDataManager.kt' in inventory.values() or 'HotseatResizeHelper.kt' in inventory.values():
+        return ROOT / 'patches/a17/profile.json'
+    if 'Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;' in inventory:
+        return ROOT / 'patches/a16/profile.json'
+    if 'OplusGridRecentsConfig.kt' in inventory.values():
+        return ROOT / 'patches/a17/profile.json'
+    raise ValueError('No recognized grid API family; supply a reviewed profile explicitly')
 
 
 def adapt_helper_abi(apk, directory):

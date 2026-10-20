@@ -1,42 +1,99 @@
 {
   "id": "feed",
-  "classes": [
+  "classes": [],
+  "alternatives": [
     {
-      "owner": "Lcom/android/common/config/FeatureOption;",
-      "source": null,
-      "methods": [
+      "classes": [
         {
-          "before": ".method public static final isSupportGoogleAssistant()Z\n.registers 3\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nconst/4 v1, 0x0\nconst/4 v2, 0x1\nif-eqz v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-nez v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-eqz v0, :cond_27\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\n:cond_18\n:goto_18\nmove v1, v2\ngoto :goto_27\n:cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-nez v0, :cond_18\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\ngoto :goto_18\n:cond_27\n:goto_27\nreturn v1\n.end method\n",
-          "after": ".method public static final isSupportGoogleAssistant()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
-        }
-      ],
-      "fields": []
-    },
-    {
-      "owner": "Lcom/android/overlay/OverlayProxy;",
-      "source": null,
-      "methods": [
-        {
-          "before": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n",
-          "after": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n"
+          "owner": "Lcom/android/common/config/FeatureOption;",
+          "source": "FeatureOption.kt",
+          "methods": [
+            {
+              "before": ".method public static final isSupportGoogleAssistant()Z\n.registers 3\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nconst/4 v1, 0x0\nconst/4 v2, 0x1\nif-eqz v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-nez v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-eqz v0, :cond_27\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\n:cond_18\n:goto_18\nmove v1, v2\ngoto :goto_27\n:cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-nez v0, :cond_18\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\ngoto :goto_18\n:cond_27\n:goto_27\nreturn v1\n.end method\n",
+              "after": ".method public static final isSupportGoogleAssistant()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
+            }
+          ],
+          "fields": []
         },
         {
-          "before": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n",
-          "after": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n"
+          "owner": "Lcom/android/overlay/OverlayProxy;",
+          "source": "OverlayProxy.java",
+          "methods": [
+            {
+              "before": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n",
+              "after": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n"
+            },
+            {
+              "before": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n",
+              "after": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n"
+            }
+          ],
+          "fields": []
         }
       ],
-      "fields": []
+      "type_sources": {
+        "Lcom/android/common/config/FeatureOption;": "FeatureOption.kt",
+        "Lcom/android/common/util/AppFeatureUtils;": "AppFeatureUtils.kt",
+        "Lkotlin/jvm/JvmStatic;": "JvmPlatformAnnotations.kt"
+      }
     },
     {
-      "owner": "Lcom/android/overlay/OverlayUtils;",
-      "source": null,
-      "methods": [
+      "classes": [
         {
-          "before": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 2\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_f\ninvoke-static {}, Lcom/android/overlay/OverlayProxy;->getAssistScreenType()I\nmove-result v0\nconst/4 v1, 0x2\nif-ne v0, v1, :cond_f\nconst/4 v0, 0x1\ngoto :goto_10\n:cond_f\nconst/4 v0, 0x0\n:goto_10\nreturn v0\n.end method\n",
-          "after": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
+          "owner": "Lcom/android/common/config/FeatureOption;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method public static final isSupportGoogleAssistant()Z\n.registers 3\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nconst/4 v1, 0x0\nconst/4 v2, 0x1\nif-eqz v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-nez v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-eqz v0, :cond_27\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\n:cond_18\n:goto_18\nmove v1, v2\ngoto :goto_27\n:cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-nez v0, :cond_18\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\ngoto :goto_18\n:cond_27\n:goto_27\nreturn v1\n.end method\n",
+              "after": ".method public static final isSupportGoogleAssistant()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
+            }
+          ],
+          "fields": []
+        },
+        {
+          "owner": "Lcom/android/overlay/OverlayProxy;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n",
+              "after": ".method public static getOverlayPackageName()Ljava/lang/String;\n.registers 2\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result v0\nif-eqz v0, :cond_9\nconst-string v0, \"com.oplus.leftscreen\"\nreturn-object v0\n:cond_9\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-eqz v0, :cond_24\nsget v0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne v0, v1, :cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result v0\nif-eqz v0, :cond_1b\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n:cond_1b\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_24\nconst-string v0, \"com.google.android.googlequicksearchbox\"\nreturn-object v0\n:cond_24\nsget-object v0, Lcom/android/overlay/OverlayProxy;->ASSIST_PACKAGE:Ljava/lang/String;\nreturn-object v0\n.end method\n"
+            },
+            {
+              "before": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n",
+              "after": ".method public static getOverlayAction(Landroid/content/Context;)Ljava/lang/String;\n.registers 3\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :cond_stock\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_stock\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportRealmeHiAssistant()Z\nmove-result p0\nif-eqz p0, :cond_9\nconst-string p0, \"com.oplus.leftscreen.coreservice\"\nreturn-object p0\n:cond_9\nsget-boolean p0, Lcom/android/common/config/FeatureOption;->isExp:Z\nconst-string/jumbo v0, \"heytap.intent.action.assistantscreen.window.server\"\nif-eqz p0, :cond_25\nsget p0, Lcom/android/overlay/OverlayProxy;->sAssistScreenType:I\nconst/4 v1, 0x1\nif-ne p0, v1, :cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->getSSupportShelfAssistant()Z\nmove-result p0\nif-eqz p0, :cond_1c\nreturn-object v0\n:cond_1c\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result p0\nif-eqz p0, :cond_25\nconst-string p0, \"com.android.launcher3.WINDOW_OVERLAY\"\nreturn-object p0\n:cond_25\nreturn-object v0\n.end method\n"
+            }
+          ],
+          "fields": []
+        },
+        {
+          "owner": "Lcom/android/overlay/OverlayUtils;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 2\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_f\ninvoke-static {}, Lcom/android/overlay/OverlayProxy;->getAssistScreenType()I\nmove-result v0\nconst/4 v1, 0x2\nif-ne v0, v1, :cond_f\nconst/4 v0, 0x1\ngoto :goto_10\n:cond_f\nconst/4 v0, 0x0\n:goto_10\nreturn v0\n.end method\n",
+              "after": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
+            }
+          ],
+          "fields": []
         }
       ],
-      "fields": []
+      "type_sources": {}
+    },
+    {
+      "classes": [
+        {
+          "owner": "Lcom/android/common/config/FeatureOption;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method public static final isSupportGoogleAssistant()Z\n.registers 3\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nconst/4 v1, 0x0\nconst/4 v2, 0x1\nif-eqz v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-nez v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-eqz v0, :cond_27\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\n:cond_18\n:goto_18\nmove v1, v2\ngoto :goto_27\n:cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-nez v0, :cond_18\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\ngoto :goto_18\n:cond_27\n:goto_27\nreturn v1\n.end method\n",
+              "after": ".method public static final isSupportGoogleAssistant()Z\n.registers 3\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nif-eqz v0, :mod_stock\nconst/4 v0, 0x1\nreturn v0\n:mod_stock\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/util/AppFeatureUtils;->isTablet()Z\nmove-result v0\nconst/4 v1, 0x0\nconst/4 v2, 0x1\nif-eqz v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->isExp:Z\nif-nez v0, :cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-eqz v0, :cond_27\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\n:cond_18\n:goto_18\nmove v1, v2\ngoto :goto_27\n:cond_1a\nsget-boolean v0, Lcom/android/common/config/FeatureOption;->sIsSupportOverlayGoogleAssistant:Z\nif-nez v0, :cond_18\nsget-object v0, Lcom/android/common/util/AppFeatureUtils;->INSTANCE:Lcom/android/common/util/AppFeatureUtils;\ninvoke-virtual {v0}, Lcom/android/common/util/AppFeatureUtils;->isSupportGoogleOverlay()Z\nmove-result v0\nif-eqz v0, :cond_27\ngoto :goto_18\n:cond_27\n:goto_27\nreturn v1\n.end method\n"
+            }
+          ],
+          "fields": []
+        }
+      ],
+      "type_sources": {}
     }
   ]
 }

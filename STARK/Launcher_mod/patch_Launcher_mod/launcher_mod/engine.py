@@ -147,7 +147,7 @@ def select_profile(profile, selected=None):
 
 
 def resolve_profile(roots, profile, source_index=None):
-    """Choose complete reviewed feature graphs from the shared rule catalog."""
+    """Choose complete reviewed OEM graphs within the selected API family."""
     features = []
     for feature in profile['features']:
         if not feature.get('alternatives'):
@@ -157,7 +157,7 @@ def resolve_profile(roots, profile, source_index=None):
         for variant in feature['alternatives']:
             candidate = {'id': feature['id'], 'classes': variant['classes'],
                          'type_sources': variant.get('type_sources', profile.get('type_sources', {}))}
-            trial = {**profile, 'features': [candidate], 'dependencies': {}, 'shared': False,
+            trial = {**profile, 'features': [candidate], 'dependencies': {}, 'feature_variants': False,
                      'type_sources': candidate['type_sources']}
             try:
                 _, matches, additions, _ = plan_patch(roots, trial, source_index)
@@ -168,11 +168,11 @@ def resolve_profile(roots, profile, source_index=None):
             extras = tuple(sorted((str(path), tuple(values)) for path, values in additions.items()))
             supported.append((len(matches) + sum(map(len, additions.values())), (edits, extras), candidate))
         if not supported:
-            raise ValueError(f"{feature['id']}: no complete shared rule variant matched: " + '; '.join(dict.fromkeys(errors)))
+            raise ValueError(f"{feature['id']}: no complete rule variant matched: " + '; '.join(dict.fromkeys(errors)))
         most_complete = max(item[0] for item in supported)
         supported = [item for item in supported if item[0] == most_complete]
         if len({item[1] for item in supported}) != 1:
-            raise ValueError(f"{feature['id']}: ambiguous shared rule variants")
+            raise ValueError(f"{feature['id']}: ambiguous rule variants")
         features.append(supported[0][2])
     return {**profile, 'features': features}
 
@@ -182,16 +182,16 @@ def plan_patch(roots, profile, source_index=None, selected=None):
     if any(feature.get('alternatives') for feature in profile['features']):
         roots = list(roots.values() if isinstance(roots, dict) else roots)
         profile = resolve_profile(roots, profile, source_index)
-    if profile.get('shared'):
+    if profile.get('feature_variants'):
         files, matches, additions, aliases, seen = {}, [], {}, {}, set()
         for feature in profile['features']:
-            trial = {**profile, 'features': [feature], 'shared': False, 'dependencies': {},
+            trial = {**profile, 'features': [feature], 'feature_variants': False, 'dependencies': {},
                      'type_sources': feature.get('type_sources', profile.get('type_sources', {}))}
             local_files, local_matches, local_additions, local_aliases = plan_patch(roots, trial, source_index)
             for match in local_matches:
                 key = (match.path, match.start)
                 if key in seen:
-                    raise ValueError(f'Overlapping shared patch: {match.path}::{match.method}')
+                    raise ValueError(f'Overlapping patch: {match.path}::{match.method}')
                 seen.add(key)
             files.update(local_files)
             matches.extend(local_matches)

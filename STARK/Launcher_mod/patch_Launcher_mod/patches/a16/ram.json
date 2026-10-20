@@ -1,22 +1,133 @@
 {
   "id": "ram",
-  "classes": [
+  "classes": [],
+  "alternatives": [
     {
-      "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
-      "source": null,
-      "methods": [
+      "classes": [
         {
-          "before": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 7\ninvoke-static {}, Lcom/oplus/basecommon/util/SystemPropertiesHelper;->getFirstApiLevel()I\nmove-result v0\nnew-instance v1, Ljava/lang/StringBuilder;\nconst-string/jumbo v2, \"judgeWhetherAllowMemoDisplay(), LauncherModeManager.isOtaVersionUpdate()=\"\ninvoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;\nconst-string v2, \", apiLevel=\"\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\ninvoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v1\nconst-string v2, \"MemoryInfoManager\"\ninvoke-static {v2, v1}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\nconst/4 v1, 0x1\nconst/4 v3, 0x0\nif-nez v0, :cond_5b\niget-object v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mContext:Landroid/content/Context;\ninvoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v0\nconst-string v4, \"allow_memory_info_display\"\nconst/4 v5, -0x1\ninvoke-static {v0, v4, v5, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I\nmove-result v0\nnew-instance v4, Ljava/lang/StringBuilder;\nconst-string/jumbo v5, \"judgeWhetherAllowMemoDisplay(), isAllowMemoryInfoDisplay=\"\ninvoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v4\ninvoke-static {v2, v4}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\nif-eqz v2, :cond_54\nif-eqz v0, :cond_50\ngoto :goto_51\n:cond_50\nmove v1, v3\n:goto_51\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_54\nif-ne v0, v1, :cond_57\ngoto :goto_58\n:cond_57\nmove v1, v3\n:goto_58\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_5b\nconst/16 v2, 0x22\nif-le v0, v2, :cond_62\niput-boolean v3, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_62\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\n:goto_64\niget-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ninvoke-direct {p0, v0}, Lcom/oplus/quickstep/memory/MemoryInfoManager;->saveAllowMemoryInfoDisplay(Z)Z\nreturn-void\n.end method\n",
-          "after": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\nreturn-void\n.end method\n",
-          "alternatives": [
+          "owner": "Lep/g;",
+          "source": "MemoryInfoManager.java",
+          "methods": [
+            {
+              "before": ".method public final g()Z\n.registers 1\niget-boolean p0, p0, Lep/g;->m:Z\nreturn p0\n.end method\n",
+              "after": ".method public final g()Z\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->m:Z\nreturn v0\n.end method\n",
+              "alternatives": [
+                {
+                  "before": ".method public final g()Z\n.registers 2\niget-boolean v0, p0, Lep/g;->m:Z\nreturn v0\n.end method\n",
+                  "after": ".method public final g()Z\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->m:Z\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public final g()Z\n.registers 2\nconst/4 v0, 0x1\nreturn v0\n.end method\n",
+                  "after": ".method public final g()Z\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->m:Z\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public isAllowMemoryInfoDisplay()Z\n.registers 1\niget-boolean p0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\nreturn p0\n.end method\n",
+                  "after": ".method public isAllowMemoryInfoDisplay()Z\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public isAllowMemoryInfoDisplay()Z\n.registers 2\niget-boolean v0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\nreturn v0\n.end method\n",
+                  "after": ".method public isAllowMemoryInfoDisplay()Z\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\nreturn v0\n.end method\n"
+                }
+              ]
+            },
+            {
+              "before": ".method public final h()Z\n.registers 1\niget-boolean p0, p0, Lep/g;->d:Z\nreturn p0\n.end method\n",
+              "after": ".method public final h()Z\n.registers 4\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->m:Z\niget-object v1, p0, Lep/g;->b:Landroid/content/Context;\nif-nez v1, :cond_a\niget-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n:cond_a\ninvoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v1\nconst-string v2, \"allow_memory_info_display\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z\nconst-string v2, \"display_memory_information_recent_task\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I\nmove-result v1\nif-ne v1, v0, :cond_1e\niput-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n:cond_1e\nconst/4 v0, 0x0\niput-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n.end method\n",
+              "alternatives": [
+                {
+                  "before": ".method public final h()Z\n.registers 2\niget-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n.end method\n",
+                  "after": ".method public final h()Z\n.registers 4\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->m:Z\niget-object v1, p0, Lep/g;->b:Landroid/content/Context;\nif-nez v1, :cond_a\niget-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n:cond_a\ninvoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v1\nconst-string v2, \"allow_memory_info_display\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z\nconst-string v2, \"display_memory_information_recent_task\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I\nmove-result v1\nif-ne v1, v0, :cond_1e\niput-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n:cond_1e\nconst/4 v0, 0x0\niput-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public needMemoryDetail()Z\n.registers 1\niget-boolean p0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn p0\n.end method\n",
+                  "after": ".method public needMemoryDetail()Z\n.registers 4\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\niget-object v1, p0, Lep/g;->mContext:Landroid/content/Context;\nif-nez v1, :cond_a\niget-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n:cond_a\ninvoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v1\nconst-string v2, \"allow_memory_info_display\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z\nconst-string v2, \"display_memory_information_recent_task\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I\nmove-result v1\nif-ne v1, v0, :cond_1e\niput-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n:cond_1e\nconst/4 v0, 0x0\niput-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public needMemoryDetail()Z\n.registers 2\niget-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n.end method\n",
+                  "after": ".method public needMemoryDetail()Z\n.registers 4\nconst/4 v0, 0x1\niput-boolean v0, p0, Lep/g;->mAllowMemoryInfoDisplay:Z\niget-object v1, p0, Lep/g;->mContext:Landroid/content/Context;\nif-nez v1, :cond_a\niget-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n:cond_a\ninvoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v1\nconst-string v2, \"allow_memory_info_display\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z\nconst-string v2, \"display_memory_information_recent_task\"\ninvoke-static {v1, v2, v0}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I\nmove-result v1\nif-ne v1, v0, :cond_1e\niput-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n:cond_1e\nconst/4 v0, 0x0\niput-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n.end method\n"
+                }
+              ]
+            },
+            {
+              "before": ".method public final b()I\n.registers 1\niget-boolean p0, p0, Lep/g;->d:Z\nreturn p0\n.end method\n",
+              "after": ".method public final b()I\n.registers 2\ninvoke-virtual {p0}, Lep/g;->h()Z\nmove-result v0\nreturn v0\n.end method\n",
+              "alternatives": [
+                {
+                  "before": ".method public final b()I\n.registers 2\niget-boolean v0, p0, Lep/g;->d:Z\nreturn v0\n.end method\n",
+                  "after": ".method public final b()I\n.registers 2\ninvoke-virtual {p0}, Lep/g;->h()Z\nmove-result v0\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public getMemoDisplaySwitch()I\n.registers 1\niget-boolean p0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn p0\n.end method\n",
+                  "after": ".method public getMemoDisplaySwitch()I\n.registers 2\ninvoke-virtual {p0}, Lep/g;->needMemoryDetail()Z\nmove-result v0\nreturn v0\n.end method\n"
+                },
+                {
+                  "before": ".method public getMemoDisplaySwitch()I\n.registers 2\niget-boolean v0, p0, Lep/g;->mNeedMemoryDetail:Z\nreturn v0\n.end method\n",
+                  "after": ".method public getMemoDisplaySwitch()I\n.registers 2\ninvoke-virtual {p0}, Lep/g;->needMemoryDetail()Z\nmove-result v0\nreturn v0\n.end method\n"
+                }
+              ]
+            }
+          ],
+          "fields": []
+        }
+      ],
+      "type_sources": {
+        "Lep/g;": "MemoryInfoManager.java"
+      }
+    },
+    {
+      "classes": [
+        {
+          "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 7\ninvoke-static {}, Lcom/oplus/basecommon/util/SystemPropertiesHelper;->getFirstApiLevel()I\nmove-result v0\nnew-instance v1, Ljava/lang/StringBuilder;\nconst-string/jumbo v2, \"judgeWhetherAllowMemoDisplay(), LauncherModeManager.isOtaVersionUpdate()=\"\ninvoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;\nconst-string v2, \", apiLevel=\"\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\ninvoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v1\nconst-string v2, \"MemoryInfoManager\"\ninvoke-static {v2, v1}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\nconst/4 v1, 0x1\nconst/4 v3, 0x0\nif-nez v0, :cond_5b\niget-object v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mContext:Landroid/content/Context;\ninvoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v0\nconst-string v4, \"allow_memory_info_display\"\nconst/4 v5, -0x1\ninvoke-static {v0, v4, v5, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I\nmove-result v0\nnew-instance v4, Ljava/lang/StringBuilder;\nconst-string/jumbo v5, \"judgeWhetherAllowMemoDisplay(), isAllowMemoryInfoDisplay=\"\ninvoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v4\ninvoke-static {v2, v4}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\nif-eqz v2, :cond_54\nif-eqz v0, :cond_50\ngoto :goto_51\n:cond_50\nmove v1, v3\n:goto_51\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_54\nif-ne v0, v1, :cond_57\ngoto :goto_58\n:cond_57\nmove v1, v3\n:goto_58\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_5b\nconst/16 v2, 0x22\nif-le v0, v2, :cond_62\niput-boolean v3, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_62\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\n:goto_64\niget-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ninvoke-direct {p0, v0}, Lcom/oplus/quickstep/memory/MemoryInfoManager;->saveAllowMemoryInfoDisplay(Z)Z\nreturn-void\n.end method\n",
+              "after": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\nreturn-void\n.end method\n",
+              "alternatives": [
+                {
+                  "before": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 7\ninvoke-static {}, Lcom/oplus/basecommon/util/SystemPropertiesHelper;->getFirstApiLevel()I\nmove-result v0\nnew-instance v1, Ljava/lang/StringBuilder;\nconst-string v2, \"judgeWhetherAllowMemoDisplay(), LauncherModeManager.isOtaVersionUpdate()=\"\ninvoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;\nconst-string v2, \", apiLevel=\"\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\ninvoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v1\nconst-string v2, \"MemoryInfoManager\"\ninvoke-static {v2, v1}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\nconst/4 v1, 0x1\nconst/4 v3, 0x0\nif-nez v0, :cond_59\niget-object v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mContext:Landroid/content/Context;\ninvoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v0\nconst-string v4, \"allow_memory_info_display\"\nconst/4 v5, -0x1\ninvoke-static {v0, v4, v5, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I\nmove-result v0\nnew-instance v4, Ljava/lang/StringBuilder;\nconst-string v5, \"judgeWhetherAllowMemoDisplay(), isAllowMemoryInfoDisplay=\"\ninvoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v4\ninvoke-static {v2, v4}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\nif-eqz v2, :cond_52\nif-eqz v0, :cond_4e\ngoto :goto_4f\n:cond_4e\nmove v1, v3\n:goto_4f\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_52\nif-ne v0, v1, :cond_55\ngoto :goto_56\n:cond_55\nmove v1, v3\n:goto_56\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_59\nconst/16 v2, 0x22\nif-le v0, v2, :cond_60\niput-boolean v3, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_60\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\n:goto_62\niget-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ninvoke-direct {p0, v0}, Lcom/oplus/quickstep/memory/MemoryInfoManager;->saveAllowMemoryInfoDisplay(Z)Z\nreturn-void\n.end method\n",
+                  "after": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\nreturn-void\n.end method\n"
+                }
+              ]
+            }
+          ],
+          "fields": []
+        }
+      ],
+      "type_sources": {}
+    },
+    {
+      "classes": [
+        {
+          "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
+          "source": null,
+          "methods": [
             {
               "before": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 7\ninvoke-static {}, Lcom/oplus/basecommon/util/SystemPropertiesHelper;->getFirstApiLevel()I\nmove-result v0\nnew-instance v1, Ljava/lang/StringBuilder;\nconst-string v2, \"judgeWhetherAllowMemoDisplay(), LauncherModeManager.isOtaVersionUpdate()=\"\ninvoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;\nconst-string v2, \", apiLevel=\"\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\ninvoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v1\nconst-string v2, \"MemoryInfoManager\"\ninvoke-static {v2, v1}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\nconst/4 v1, 0x1\nconst/4 v3, 0x0\nif-nez v0, :cond_59\niget-object v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mContext:Landroid/content/Context;\ninvoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v0\nconst-string v4, \"allow_memory_info_display\"\nconst/4 v5, -0x1\ninvoke-static {v0, v4, v5, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I\nmove-result v0\nnew-instance v4, Ljava/lang/StringBuilder;\nconst-string v5, \"judgeWhetherAllowMemoDisplay(), isAllowMemoryInfoDisplay=\"\ninvoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v4\ninvoke-static {v2, v4}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\nif-eqz v2, :cond_52\nif-eqz v0, :cond_4e\ngoto :goto_4f\n:cond_4e\nmove v1, v3\n:goto_4f\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_52\nif-ne v0, v1, :cond_55\ngoto :goto_56\n:cond_55\nmove v1, v3\n:goto_56\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_59\nconst/16 v2, 0x22\nif-le v0, v2, :cond_60\niput-boolean v3, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_62\n:cond_60\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\n:goto_62\niget-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ninvoke-direct {p0, v0}, Lcom/oplus/quickstep/memory/MemoryInfoManager;->saveAllowMemoryInfoDisplay(Z)Z\nreturn-void\n.end method\n",
               "after": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\nreturn-void\n.end method\n"
             }
-          ]
+          ],
+          "fields": []
         }
       ],
-      "fields": []
+      "type_sources": {}
+    },
+    {
+      "classes": [
+        {
+          "owner": "Lcom/oplus/quickstep/memory/MemoryInfoManager;",
+          "source": null,
+          "methods": [
+            {
+              "before": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 7\ninvoke-static {}, Lcom/oplus/basecommon/util/SystemPropertiesHelper;->getFirstApiLevel()I\nmove-result v0\nnew-instance v1, Ljava/lang/StringBuilder;\nconst-string/jumbo v2, \"judgeWhetherAllowMemoDisplay(), LauncherModeManager.isOtaVersionUpdate()=\"\ninvoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;\nconst-string v2, \", apiLevel=\"\ninvoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\ninvoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v1\nconst-string v2, \"MemoryInfoManager\"\ninvoke-static {v2, v1}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\nconst/4 v1, 0x1\nconst/4 v3, 0x0\nif-nez v0, :cond_5b\niget-object v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mContext:Landroid/content/Context;\ninvoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;\nmove-result-object v0\nconst-string v4, \"allow_memory_info_display\"\nconst/4 v5, -0x1\ninvoke-static {v0, v4, v5, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I\nmove-result v0\nnew-instance v4, Ljava/lang/StringBuilder;\nconst-string/jumbo v5, \"judgeWhetherAllowMemoDisplay(), isAllowMemoryInfoDisplay=\"\ninvoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V\ninvoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;\ninvoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\nmove-result-object v4\ninvoke-static {v2, v4}, Lcom/oplus/basecommon/log/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V\ninvoke-static {}, Lcom/android/launcher/mode/LauncherModeManager;->isOtaVersionUpdate()Z\nmove-result v2\nif-eqz v2, :cond_54\nif-eqz v0, :cond_50\ngoto :goto_51\n:cond_50\nmove v1, v3\n:goto_51\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_54\nif-ne v0, v1, :cond_57\ngoto :goto_58\n:cond_57\nmove v1, v3\n:goto_58\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_5b\nconst/16 v2, 0x22\nif-le v0, v2, :cond_62\niput-boolean v3, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ngoto :goto_64\n:cond_62\niput-boolean v1, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\n:goto_64\niget-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\ninvoke-direct {p0, v0}, Lcom/oplus/quickstep/memory/MemoryInfoManager;->saveAllowMemoryInfoDisplay(Z)Z\nreturn-void\n.end method\n",
+              "after": ".method private judgeWhetherAllowMemoDisplay()V\n.registers 2\nconst/4 v0, 0x1\niput-boolean v0, p0, Lcom/oplus/quickstep/memory/MemoryInfoManager;->mAllowMemoryInfoDisplay:Z\nreturn-void\n.end method\n",
+              "variants": {}
+            }
+          ],
+          "fields": []
+        }
+      ],
+      "type_sources": {}
     }
   ]
 }
