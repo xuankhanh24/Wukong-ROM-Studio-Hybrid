@@ -98,7 +98,7 @@ def plan_patch(roots, profile, source_index=None, selected=None):
     files = {}
     aliases = {}
     entries = []
-    root_paths = [Path(root) for root in roots]
+    root_paths = [Path(root) for root in (roots.values() if isinstance(roots, dict) else roots)]
     for feature in profile['features']:
         for entry in feature['classes']:
             owner = entry['owner']
@@ -119,7 +119,7 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                     local_aliases = {**aliases, owner: candidate_owner}
                     bodies = list(METHOD.finditer(candidate_text))
                     if required and all(any(
-                        semantic(body.group()) == semantic(remap(choice['before'], local_aliases))
+                        semantic(body.group()) == semantic(choice['before'] if choice.get('raw') else remap(choice['before'], local_aliases))
                         for choice in [rule] + rule.get('alternatives', []) if choice.get('before')
                         for body in bodies
                     ) for rule in required):
@@ -146,7 +146,7 @@ def plan_patch(roots, profile, source_index=None, selected=None):
         for rule in entry['methods']:
             choices = []
             for choice in [rule] + rule.get('alternatives', []):
-                expected = remap(choice['before'], aliases)
+                expected = choice['before'] if choice.get('raw') else remap(choice['before'], aliases)
                 if not expected:
                     choices.append((choice, None))
                     continue
@@ -164,7 +164,8 @@ def plan_patch(roots, profile, source_index=None, selected=None):
             if len(choices) != 1:
                 raise ValueError(f"{feature}: {path.name} has ambiguous semantic alternatives")
             choice, match = choices[0]
-            before, after = remap(choice['before'], aliases), remap(choice['after'], aliases)
+            before, after = ((choice['before'], choice['after']) if choice.get('raw') else
+                             (remap(choice['before'], aliases), remap(choice['after'], aliases)))
             if not before:
                 if any(signature(m.group()) == signature(after) for m in methods):
                     raise ValueError(f"{feature}: added method already exists: {signature(after)}")

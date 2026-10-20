@@ -193,7 +193,8 @@ def main(argv=None):
             compile_res = run_cmd([*adb, "shell", "su", "-c", "cmd package compile -m speed -f com.android.launcher"])
             print(f" -> [COMPILE RESULT] {compile_res}", flush=True)
 
-            run_cmd([*adb, "shell", "su", "0", "killall", "com.android.launcher"])
+            run_tool([*adb, "shell", "su", "0", "killall", "com.android.launcher"], check=False, capture_output=True)
+            run_tool([*adb, "shell", "am", "start", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME"], check=False, capture_output=True)
             print("\n" + "=" * 80)
             print(">>> Đã build và cài APK; cần kiểm tra từng tính năng trên thiết bị. <<<")
             print(f">>> File Module flash: {module_zip} <<<")

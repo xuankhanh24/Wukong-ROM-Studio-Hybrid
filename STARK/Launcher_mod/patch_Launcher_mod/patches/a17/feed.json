@@ -26,17 +26,6 @@
         }
       ],
       "fields": []
-    },
-    {
-      "owner": "Lcom/android/overlay/OverlayUtils;",
-      "source": "OverlayUtils.kt",
-      "methods": [
-        {
-          "before": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 2\n.annotation runtime Lkotlin/jvm/JvmStatic;\n.end annotation\ninvoke-static {}, Lcom/android/common/config/FeatureOption;->isSupportGoogleAssistant()Z\nmove-result v0\nif-eqz v0, :cond_f\ninvoke-static {}, Lcom/android/overlay/OverlayProxy;->getAssistScreenType()I\nmove-result v0\nconst/4 v1, 0x2\nif-ne v0, v1, :cond_f\nconst/4 v0, 0x1\ngoto :goto_10\n:cond_f\nconst/4 v0, 0x0\n:goto_10\nreturn v0\n.end method\n",
-          "after": ".method public static final selectedGoogleAssistantScreen()Z\n.registers 1\ninvoke-static {}, Landroid/preference/TweaksHelper;->isWkGoogleFeedEnabled()Z\nmove-result v0\nreturn v0\n.end method\n"
-        }
-      ],
-      "fields": []
     }
   ]
 }

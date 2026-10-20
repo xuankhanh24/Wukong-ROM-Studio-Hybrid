@@ -77,6 +77,29 @@ class LauncherProfileTests(unittest.TestCase):
             resources.preserve_framework_references(root)
             self.assertEqual(result, values.read_text(encoding='utf-8'))
 
+    def test_raw_oem_alternative_keeps_descriptors_with_dictionary_roots(self):
+        original = ('.method public run()Z\n.registers 1\n'
+                    'invoke-static {}, Lexample/Original;->enabled()Z\n'
+                    'move-result v0\nreturn v0\n.end method\n')
+        replacement = original.replace('enabled()Z', 'patched()Z')
+        profile = {'features': [{'id': 'feed', 'classes': [{
+            'owner': 'Lexample/Feed;', 'source': '', 'methods': [{
+                'before': original.replace('enabled()Z', 'other()Z'), 'after': replacement,
+                'alternatives': [{'before': original, 'after': replacement, 'raw': True}]
+            }]
+        }]}], 'type_sources': {'Lexample/Original;': 'Original.kt'}}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'example/Feed.smali'
+            path.parent.mkdir()
+            path.write_text('.class public Lexample/Feed;\n' + original)
+            sources = {'Original.kt': ['Lexample/Renamed;']}
+            _, matches, _, aliases = engine.plan_patch({'classes.dex': root}, profile, sources)
+            self.assertEqual(aliases['Lexample/Original;'], 'Lexample/Renamed;')
+            self.assertEqual(len(matches), 1)
+            self.assertIn('Lexample/Original;->patched()Z', matches[0].replacement)
+            self.assertNotIn('Lexample/Renamed;', matches[0].replacement)
+
     def test_duplicate_source_metadata_requires_unique_method_semantics(self):
         before = '.method public enabled()Z\n.registers 1\nconst/4 v0, 0x0\nreturn v0\n.end method\n'
         profile = {'features': [{'id': 'feed', 'classes': [{

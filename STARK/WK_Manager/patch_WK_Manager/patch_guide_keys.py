@@ -5,9 +5,11 @@ def plan_edits(decoded, selected, helpers, jar="oplus-services"):
     """Return validated edits without writing, so a missing target cannot leave half a patch."""
     edits = {}
 
-    def apply(name, signature, setting, result, parameter_words):
+    def apply(name, signature, setting, result, parameter_words, *, optional=False):
         path = helpers._class(decoded, name)
         text = edits.get(path, path.read_text(encoding="utf-8"))
+        if optional and not helpers._pattern(signature).search(text):
+            return
 
         def editor(method):
             if f'"{setting}"' in method:
@@ -55,7 +57,11 @@ def plan_edits(decoded, selected, helpers, jar="oplus-services"):
                 ("com.android.server.wm.DisplayContent", "hasSecureWindowOnScreen()Z", "0x0", "return", 1),
                 ("com.android.server.wm.WindowState", "isSecureLocked()Z", "0x0", "return", 1),
             ):
-                apply(name, signature, "disable_flag_secure", (val, ret), words)
+                # Newer ROMs removed this method. Match the legacy services
+                # patcher's compatibility rule; all other targets stay strict.
+                apply(name, signature, "disable_flag_secure", (val, ret), words,
+                      optional=(name, signature) == (
+                          "com.android.server.wm.DisplayContent", "hasSecureWindowOnScreen()Z"))
 
             name = "com.android.server.wm.WindowManagerService"
             signature = "notifyScreenshotListeners(I)Ljava/util/List;"

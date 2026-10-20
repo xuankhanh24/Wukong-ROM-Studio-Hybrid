@@ -26,7 +26,56 @@ def guide_fixture(root):
     return service, utils
 
 
+def secure_services_fixture(root, display_methods=0):
+    paths = []
+    for name, signature in (
+        ("com.android.server.devicepolicy.DevicePolicyCacheImpl", "isScreenCaptureAllowed(I)Z"),
+        ("com.android.server.devicepolicy.DevicePolicyManagerService", "getScreenCaptureDisabled(Landroid/content/ComponentName;IZ)Z"),
+        ("com.android.server.wm.WindowState", "isSecureLocked()Z"),
+        ("com.android.server.wm.WindowManagerService", "notifyScreenshotListeners(I)Ljava/util/List;"),
+    ):
+        body = "const/4 v0, 0x0\n    " + ("return-object v0" if signature.endswith("Ljava/util/List;") else "return v0")
+        paths.append(write_class(root, name,
+            f".method public {signature}\n    .locals 1\n    {body}\n.end method\n"))
+    paths.append(write_class(root, "com.android.server.wm.DisplayContent",
+        (".method public hasSecureWindowOnScreen()Z\n    .locals 1\n"
+         "    const/4 v0, 0x1\n    return v0\n.end method\n") * display_methods))
+    return paths
+
+
 class GuideKeyTests(unittest.TestCase):
+    def test_secure_services_allow_removed_display_method_and_are_idempotent(self):
+        for display_methods in (0, 1):
+            with self.subTest(display_methods=display_methods), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                paths = secure_services_fixture(root, display_methods)
+                original_display = paths[-1].read_bytes()
+                report = FEATURES.patch_decoded(root, ["disable_flag_secure"], "services")
+                self.assertEqual(report["patchedMethods"], 4 + display_methods)
+                for path in paths[:4]:
+                    self.assertIn('"disable_flag_secure"', path.read_text())
+                    self.assertIn(":wk_disable_flag_secure_original", path.read_text())
+                if display_methods:
+                    self.assertIn('"disable_flag_secure"', paths[-1].read_text())
+                    self.assertIn("const/4 v0, 0x1\n    return v0", paths[-1].read_text())
+                else:
+                    self.assertEqual(paths[-1].read_bytes(), original_display)
+                self.assertEqual(FEATURES.patch_decoded(root, ["disable_flag_secure"], "services")["patchedMethods"], 0)
+
+    def test_secure_services_still_reject_invalid_targets_without_writes(self):
+        for invalid in ("duplicate_display", "missing_class", "missing_required_method"):
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                paths = secure_services_fixture(root, 2 if invalid == "duplicate_display" else 0)
+                if invalid == "missing_class":
+                    paths.pop().unlink()
+                elif invalid == "missing_required_method":
+                    paths[2].write_text(".class public Lcom/android/server/wm/WindowState;\n")
+                originals = {path: path.read_bytes() for path in paths}
+                with self.assertRaises(FEATURES.PatchError):
+                    FEATURES.patch_decoded(root, ["disable_flag_secure"], "services")
+                self.assertEqual(originals, {path: path.read_bytes() for path in paths})
+
     @unittest.skipUnless(os.environ.get("WK_SMALI_JAR"), "Set WK_SMALI_JAR for DEX assembly")
     def test_combined_window_and_guide_hooks_assemble(self):
         with tempfile.TemporaryDirectory() as tmp:
