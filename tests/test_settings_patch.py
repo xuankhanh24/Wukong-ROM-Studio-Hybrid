@@ -18,6 +18,7 @@ def preference(access):
         '    .locals 1\n    const/4 v0, 0x0\n    return-object v0\n.end method\n'
         '.method public onBindViewHolder(Landroidx/preference/PreferenceViewHolder;)V\n'
         '    .registers 22\n'
+        '    invoke-super/range {p0 .. p1}, Landroidx/preference/Preference;->onBindViewHolder(Landroidx/preference/PreferenceViewHolder;)V\n'
         f'    {invoke}/range {{p0 .. p0}}, {OWNER}->getTargetIntentStatic()Landroid/content/Intent;\n'
         '    move-result-object v0\n    return-void\n.end method\n'
         '.method private final setupTopVideo()V\n    .locals 0\n'
@@ -60,5 +61,36 @@ class SettingsPatchTests(unittest.TestCase):
             original = preference('private').replace('onBindViewHolder(', 'unknownCallback(')
             path.write_text(original, encoding='utf-8')
             with self.assertRaisesRegex(ValueError, 'onBindViewHolder'):
+                SETTINGS.patch_ota_preference(path)
+            self.assertEqual(path.read_text(encoding='utf-8'), original)
+
+    def test_hook_precedes_holder_register_reuse(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'Preference.smali'
+            original = preference('private').replace(
+                '    move-result-object v0\n    return-void',
+                '    move-result-object v0\n    const/4 p1, 0x0\n    return-void',
+            )
+            path.write_text(original, encoding='utf-8')
+            SETTINGS.patch_ota_preference(path)
+            result = path.read_text(encoding='utf-8')
+            self.assertLess(result.index('->onBind('), result.index('const/4 p1'))
+
+    def test_touch_anchor_is_scoped_to_bind_and_supports_range(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'Preference.smali'
+            touch = '    invoke-virtual/range {v0 .. v1}, Landroid/view/View;->setOnTouchListener(Landroid/view/View$OnTouchListener;)V\n'
+            original = preference('public').replace('    move-result-object v0\n    return-void', '    move-result-object v0\n' + touch + '    return-void')
+            path.write_text(original, encoding='utf-8')
+            SETTINGS.patch_ota_preference(path)
+            result = path.read_text(encoding='utf-8')
+            self.assertLess(result.index(touch), result.index('->onBind('))
+
+    def test_no_safe_anchor_fails_without_changing_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'Preference.smali'
+            original = re.sub(r'(?m)^.*invoke-super/range.*\n', '', preference('private'))
+            path.write_text(original, encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'safe hook anchor'):
                 SETTINGS.patch_ota_preference(path)
             self.assertEqual(path.read_text(encoding='utf-8'), original)

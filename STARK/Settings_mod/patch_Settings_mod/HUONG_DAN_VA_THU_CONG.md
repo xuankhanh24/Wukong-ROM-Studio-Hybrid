@@ -1,5 +1,11 @@
 # HƯỚNG DẪN VÁ THỦ CÔNG SETTINGS MOD (COLOROS / OXYGENOS ANDROID 14 - 17+)
 
+> Đồng bộ 21/10/2026 từ commit `1407f0c` của nguồn Settings: chèn hook sau
+> `setOnTouchListener` trong callback, hoặc sau `invoke-super onBindViewHolder`
+> nếu không có touch listener. Không chèn trước return vì OEM có thể đã tái sử dụng
+> thanh ghi holder trên A17. Giữ `invoke-static/range`, hỗ trợ anchor `/range`
+> và dừng patch nếu không tìm thấy điểm chèn; 10 helper smali trùng SHA-256 nguồn.
+
 > Đối chiếu và đồng bộ 20/10/2026: đủ 10 helper smali từ
 > `Downloads/mod_stark/settings/patch_universal/smali` (khác biệt còn lại trước
 > lần đồng bộ này chỉ là dòng trống). Giữ CLI tích hợp toolchain chung,

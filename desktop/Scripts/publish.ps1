@@ -52,6 +52,7 @@ if (-not $SkipTests) {
             tests.test_wk_manager_force_policy `
             tests.test_stark_archive `
             tests.test_patch_toolchain `
+            tests.test_settings_patch `
             tests.test_command_logging `
             tests.test_smali_io `
             tests.test_smali_assembly `

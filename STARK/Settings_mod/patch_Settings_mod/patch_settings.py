@@ -17,7 +17,7 @@ Tính năng chính:
      - Xác định chính xác DEX chứa AboutDeviceOtaUpdatePreference.
      - Chỉ decompile và build lại DEX chứa OTA preference; giữ các DEX khác nguyên bản.
   4. Vá bytecode Smali thích ứng (Adaptive Hooks):
-     - Gọi WkOtaCardHook.onBind tại cuối onBindViewHolder, không dùng thanh ghi tạm.
+     - Gọi WkOtaCardHook.onBind sau touch listener hoặc super callback, không dùng thanh ghi tạm.
      - Giữ nguyên public/private/static/final của getTargetIntentStatic trên A16/A17.
      - Bộ helper xử lý ảnh/video/audio, màu chữ, tap play/pause và vòng đời player.
      - Giữ nguyên các method video nội bộ, controller, listener và resource ID của OEM.
@@ -199,13 +199,19 @@ def patch_ota_preference(pref_path):
             "    # WUKONG UNIVERSAL OTA MEDIA CARD\n"
             f"    invoke-static/range {{p0 .. p1}}, {bridge}->onBind(Ljava/lang/Object;Ljava/lang/Object;)V\n"
         )
-        bind, count = re.subn(
-            r"(?m)^([ \t]*)return-void[ \t]*$",
-            lambda match: hook + match.group(),
-            bind,
+        # Match only this callback. OEM code may reuse p1 before returning,
+        # so a return-void is not a safe place to pass the original holder.
+        anchors = (
+            r"(?m)^[ \t]*invoke-virtual(?:/range)?\s*\{[^}\n]+\},\s*Landroid/view/View;->setOnTouchListener\(Landroid/view/View\$OnTouchListener;\)V[ \t]*$",
+            r"(?m)^[ \t]*invoke-super(?:/range)?\s*\{[^}\n]+\},\s*L[^;\n]+;->onBindViewHolder\(Landroidx/preference/PreferenceViewHolder;\)V[ \t]*$",
         )
-        if not count:
-            raise ValueError("onBindViewHolder has no normal return")
+        for anchor in anchors:
+            match = re.search(anchor, bind)
+            if match:
+                bind = bind[:match.end()] + "\n" + hook.rstrip("\n") + bind[match.end():]
+                break
+        else:
+            raise ValueError("onBindViewHolder has no safe hook anchor")
     code = original[:matches[0].start()] + bind + original[matches[0].end():]
 
     # Keep public/private/static/final exactly as supplied by the stock ABI.
