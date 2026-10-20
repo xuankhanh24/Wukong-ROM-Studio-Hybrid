@@ -1,5 +1,11 @@
 # HƯỚNG DẪN VÁ THỦ CÔNG SETTINGS MOD (COLOROS / OXYGENOS ANDROID 14 - 17+)
 
+> Đối chiếu và đồng bộ 20/10/2026: đủ 10 helper smali từ
+> `Downloads/mod_stark/settings/patch_universal/smali` (khác biệt còn lại trước
+> lần đồng bộ này chỉ là dòng trống). Giữ CLI tích hợp toolchain chung,
+> hook `invoke-static/range` cho thanh ghi cao và nguyên trạng access modifier
+> OEM trên A16/A17; không chép APK đầu ra, thư mục work hay tool path cá nhân.
+
 > Cập nhật 18/10/2026: `patch_settings.py` đã chuyển sang bộ 10 class universal
 > từ `mod_stark/settings/patch_universal/smali`. Hook mới gọi
 > `WkOtaCardHook.onBind(Object,Object)` tại cuối `onBindViewHolder`, giữ nguyên

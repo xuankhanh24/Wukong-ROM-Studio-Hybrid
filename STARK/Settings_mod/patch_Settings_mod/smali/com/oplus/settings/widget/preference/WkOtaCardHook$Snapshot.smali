@@ -24,6 +24,7 @@
 .field final revision:J
 
 .field final soundEnabled:Z
+
 .field final uri:Landroid/net/Uri;
 
 
