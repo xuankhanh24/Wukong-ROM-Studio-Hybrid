@@ -1,12 +1,11 @@
 """Decode affected DEX files by source metadata, then apply independent patches."""
 import json
-import hashlib
 import re
 from pathlib import Path
 import struct
 import tempfile
 import zipfile
-from .engine import apply_profile, load_profile, plan_patch, remap, select_profile
+from .engine import apply_profile, class_entries, load_profile, plan_patch, remap, resolve_profile, select_profile
 
 from .paths import ROOT
 from .paths import stock_apk
@@ -14,22 +13,8 @@ from .toolchain import run_tool, find_tool
 
 
 def choose_profile(apk):
-    # Exact stock fingerprint selects reviewed OEM variants. Never adapt an
-    # unknown instruction graph automatically or lower compatibility coverage.
-    with open(apk, 'rb') as stream:
-        apk_digest = hashlib.file_digest(stream, 'sha256').hexdigest()
-    for path in sorted((ROOT / 'patches').glob('*/profile.json')):
-        metadata = json.loads(path.read_text(encoding='utf-8'))
-        if metadata.get('apk_sha256') == apk_digest:
-            return path
-    with zipfile.ZipFile(apk) as archive:
-        inventory = {owner: source for name in archive.namelist() if name.endswith('.dex')
-                     for owner, source in dex_inventory(archive.read(name)).items()}
-    if 'Lcom/oplus/quickstep/layout/grid/OplusGridRecentsConfig;' in inventory:
-        return ROOT / 'patches/a16/profile.json'
-    if 'OplusGridRecentsConfig.kt' in inventory.values():
-        return ROOT / 'patches/a17/profile.json'
-    raise ValueError('No recognized grid API family; supply a reviewed profile explicitly')
+    # One catalog for every supported ROM; complete method graphs select rules.
+    return ROOT / 'patches/shared/profile.json'
 
 
 def adapt_helper_abi(apk, directory):
@@ -103,7 +88,7 @@ def decode_for_profile(apk, baksmali, profile):
         # Some releases retain descriptive class names but strip .source metadata.
         # Match the source basename to a unique descriptor before giving up.
         source_names = list(profile.get('type_sources', {}).values()) + [
-            entry['source'] for feature in profile['features'] for entry in feature['classes']
+            entry['source'] for feature in profile['features'] for entry in class_entries(feature)
             if entry.get('source')
         ]
         for source in dict.fromkeys(source_names):
@@ -114,7 +99,7 @@ def decode_for_profile(apk, baksmali, profile):
                     sources[source] = candidates
         affected = {}
         for feature in profile['features']:
-            for entry in feature['classes']:
+            for entry in class_entries(feature):
                 candidates = sources.get(entry['source'], []) if entry.get('source') else []
                 if not candidates and entry['owner'] in dex_owners:
                     candidates = [entry['owner']]
@@ -130,11 +115,12 @@ def decode_for_profile(apk, baksmali, profile):
 
 
 def inspect_profile(roots, profile, sources):
+    profile = resolve_profile(roots, profile, sources)
     rows = []
     for feature in profile['features']:
         for entry in feature['classes']:
             for rule in entry['methods']:
-                candidate = {**profile, 'features': [{'id': feature['id'], 'classes': [{**entry, 'methods': [rule], 'fields': []}]}]}
+                candidate = {**profile, 'features': [{**feature, 'classes': [{**entry, 'methods': [rule], 'fields': []}]}]}
                 try:
                     plan_patch(roots.values(), candidate, sources)
                     status, reason = 'matched', None
@@ -147,6 +133,7 @@ def inspect_profile(roots, profile, sources):
 def prepare_patches(apk, baksmali, profile_path=None, selected=None):
     profile = select_profile(load_profile(profile_path or choose_profile(apk)), selected)
     work, roots, sources = decode_for_profile(apk, baksmali, profile)
+    profile = resolve_profile(roots, profile, sources)
     (work / 'selection.json').write_text(json.dumps({
         'profile': profile['id'], 'requested_features': sorted(selected) if selected is not None else None,
         'resolved_features': [feature['id'] for feature in profile['features']],

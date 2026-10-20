@@ -5,19 +5,24 @@ checkout at `b03b1f4` (recents landscape and Google Feed toggle fixes).
 Build entry points continue to use this project's shared, hash-locked toolchain,
 transactional archive writer, 16 KB alignment and DEX verifier.
 
-The engine supports reviewed alternative method bodies. Ambiguous classes or
-method alternatives still fail before source changes. Duplicate Kotlin source
-metadata is resolved only by a unique match of required method semantics.
+The default build uses one catalog, `patches/shared/profile.json`, for A16 and
+A17. The catalog contains reviewed instruction-graph alternatives for each
+feature; it is not selected by Android version, device model or APK fingerprint.
+The older directories remain historical inputs and regression fixtures.
+New patch changes belong in the shared catalog.
 
-A17 stock fixture: all 65 rules matched; APK and module built without installation,
-16 KB alignment passed, DEX verification found no unresolved references or callbacks.
-On-device UI behavior has not been revalidated by this integration.
+Every requested feature must match a complete rule graph before any source is
+written. When several graphs match, the most complete graph is used; equally
+complete graphs must produce equivalent edits. Empty historical feature entries
+cannot make a requested feature pass without applying hooks.
 
-`a16_reviewed` preserves the previous 42-rule graph for stock SHA-256
-`6add0b8865703d9727ae5d23547b7dab5a75b7db78ce8c6688860abcd9d0eedb`.
-The exact PKG110_16.0.10.500 profile continues to extend that preserved base.
-Generic A16 uses the updated upstream rules; unknown graphs remain unsupported,
-not silently patched with partial coverage.
+Class identity comes from source metadata and complete method semantics.
+Recycled obfuscated names cannot take precedence over that metadata. References
+sharing a Kotlin source file are bound consistently from unchanged instructions,
+without a device-specific class map. Ambiguous classes, references or different
+replacement graphs remain errors.
+
+Build and DEX verification do not replace on-device UI validation.
 
 Resource rebuilding preserves OEM references to non-public Android symbols using
 explicit `@*android:` syntax. This avoids depending on a locally publicized

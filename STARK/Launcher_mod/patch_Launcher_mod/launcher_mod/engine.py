@@ -6,6 +6,7 @@ instruction graph is rejected rather than guessed. All matches are planned befor
 any source is written.
 """
 from dataclasses import dataclass
+from functools import lru_cache
 import copy
 import json
 from pathlib import Path
@@ -26,6 +27,7 @@ def signature(text):
     return text.splitlines()[0].split()[-1]
 
 
+@lru_cache(maxsize=1024)
 def semantic(text, ignore_name=True):
     text = compact(text)
     if ignore_name:
@@ -49,6 +51,53 @@ def remap(text, aliases):
                   lambda m: m.group() if m.group().startswith('"') else aliases.get(m.group(), m.group()), text)
 
 
+def match_types(expected, actual, aliases, type_sources, source_index):
+    """Match the complete method graph, binding only same-source class names."""
+    def header_shape(text):
+        header = text.splitlines()[0].split()
+        prototype = header[-1].split('(', 1)[1]
+        prototype = re.sub(r'L[\w$-]+(?:/[\w$-]+)*;', 'L;', prototype)
+        return header[:-1], prototype
+    if header_shape(expected) != header_shape(actual):
+        return None
+    expected = semantic(remap(expected, aliases))
+    actual = semantic(actual)
+    if expected == actual:
+        return {}
+    tokens = re.compile(r'"(?:\\.|[^"\\])*"|(?<![\w$])L[\w$-]+(?:/[\w$-]+)*;')
+    groups, parts, position = {}, [], 0
+    for token in tokens.finditer(expected):
+        owner = token.group()
+        parts.append(re.escape(expected[position:token.start()]))
+        source = type_sources.get(owner) if owner not in aliases else None
+        candidates = source_index.get(source, []) if source else []
+        candidates = [candidate for candidate in candidates
+                      if ('$' in candidate) == ('$' in owner)]
+        if candidates:
+            if owner in groups:
+                parts.append(f'(?P={groups[owner]})')
+            else:
+                group = f'type{len(groups)}'
+                groups[owner] = group
+                parts.append(f'(?P<{group}>' + '|'.join(re.escape(c) for c in candidates) + ')')
+        else:
+            parts.append(re.escape(owner))
+        position = token.end()
+    if not groups:
+        return None
+    parts.append(re.escape(expected[position:]))
+    matched = re.fullmatch(''.join(parts), actual)
+    return {owner: matched[group] for owner, group in groups.items()} if matched else None
+
+
+def output_graph(text):
+    # Moving a method annotation past injected instructions does not change its
+    # bytecode. Keep annotation contents in the equivalence check.
+    annotation = re.compile(r'(?ms)^\s*\.annotation\b.*?^\s*\.end annotation[^\n]*\n?')
+    metadata = tuple(sorted(compact(match.group()) for match in annotation.finditer(text)))
+    return semantic(annotation.sub('', text), False), metadata
+
+
 @dataclass
 class Match:
     path: Path
@@ -57,6 +106,11 @@ class Match:
     replacement: str
     feature: str
     method: str
+
+
+def class_entries(feature):
+    return feature.get('classes', []) + [entry for variant in feature.get('alternatives', [])
+                                         for entry in variant['classes']]
 
 
 def select_profile(profile, selected=None):
@@ -80,7 +134,7 @@ def select_profile(profile, selected=None):
     result = copy.deepcopy(profile)
     result['features'] = [feature for feature in result['features'] if feature['id'] in selected]
     for feature in result['features']:
-        for entry in feature['classes']:
+        for entry in class_entries(feature):
             for rule in entry['methods']:
                 for choice in [rule] + rule.get('alternatives', []):
                     variants = choice.pop('variants', {})
@@ -92,11 +146,62 @@ def select_profile(profile, selected=None):
     return result
 
 
+def resolve_profile(roots, profile, source_index=None):
+    """Choose complete reviewed feature graphs from the shared rule catalog."""
+    features = []
+    for feature in profile['features']:
+        if not feature.get('alternatives'):
+            features.append(feature)
+            continue
+        supported, errors = [], []
+        for variant in feature['alternatives']:
+            candidate = {'id': feature['id'], 'classes': variant['classes'],
+                         'type_sources': variant.get('type_sources', profile.get('type_sources', {}))}
+            trial = {**profile, 'features': [candidate], 'dependencies': {}, 'shared': False,
+                     'type_sources': candidate['type_sources']}
+            try:
+                _, matches, additions, _ = plan_patch(roots, trial, source_index)
+            except ValueError as error:
+                errors.append(str(error))
+                continue
+            edits = tuple(sorted((str(m.path), m.start, m.end, output_graph(m.replacement)) for m in matches))
+            extras = tuple(sorted((str(path), tuple(values)) for path, values in additions.items()))
+            supported.append((len(matches) + sum(map(len, additions.values())), (edits, extras), candidate))
+        if not supported:
+            raise ValueError(f"{feature['id']}: no complete shared rule variant matched: " + '; '.join(dict.fromkeys(errors)))
+        most_complete = max(item[0] for item in supported)
+        supported = [item for item in supported if item[0] == most_complete]
+        if len({item[1] for item in supported}) != 1:
+            raise ValueError(f"{feature['id']}: ambiguous shared rule variants")
+        features.append(supported[0][2])
+    return {**profile, 'features': features}
+
+
 def plan_patch(roots, profile, source_index=None, selected=None):
     profile = select_profile(profile, selected)
+    if any(feature.get('alternatives') for feature in profile['features']):
+        roots = list(roots.values() if isinstance(roots, dict) else roots)
+        profile = resolve_profile(roots, profile, source_index)
+    if profile.get('shared'):
+        files, matches, additions, aliases, seen = {}, [], {}, {}, set()
+        for feature in profile['features']:
+            trial = {**profile, 'features': [feature], 'shared': False, 'dependencies': {},
+                     'type_sources': feature.get('type_sources', profile.get('type_sources', {}))}
+            local_files, local_matches, local_additions, local_aliases = plan_patch(roots, trial, source_index)
+            for match in local_matches:
+                key = (match.path, match.start)
+                if key in seen:
+                    raise ValueError(f'Overlapping shared patch: {match.path}::{match.method}')
+                seen.add(key)
+            files.update(local_files)
+            matches.extend(local_matches)
+            aliases.update(local_aliases)
+            for path, values in local_additions.items():
+                additions.setdefault(path, []).extend(values)
+        return files, matches, additions, aliases
     source_index = source_index or {}
     files = {}
-    aliases = dict(profile.get('type_bindings', {}))
+    aliases = {}
     entries = []
     root_paths = [Path(root) for root in (roots.values() if isinstance(roots, dict) else roots)]
     # Obfuscated descriptors can be reused by unrelated classes in a newer ROM.
@@ -135,7 +240,9 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                     local_aliases = {**aliases, owner: candidate_owner}
                     bodies = list(METHOD.finditer(candidate_text))
                     if required and all(any(
-                        semantic(body.group()) == semantic(choice['before'] if choice.get('raw') else remap(choice['before'], local_aliases))
+                        (semantic(body.group()) == semantic(choice['before']) if choice.get('raw') else
+                         match_types(choice['before'], body.group(), local_aliases,
+                                     profile.get('type_sources', {}), source_index) is not None)
                         for choice in [rule] + rule.get('alternatives', []) if choice.get('before')
                         for body in bodies
                     ) for rule in required):
@@ -147,6 +254,23 @@ def plan_patch(roots, profile, source_index=None, selected=None):
             content = files.setdefault(path, path.read_text(encoding='utf-8'))
             actual_owner = re.search(r'(?m)^\.class .* (L[^;]+;)', content)[1]
             aliases[owner] = actual_owner
+            # Learn ambiguous reference types from unchanged instructions, never
+            # from the ROM model, Android version or a stock APK fingerprint.
+            bodies = list(METHOD.finditer(content))
+            for rule in entry['methods']:
+                bindings = []
+                for choice in [rule] + rule.get('alternatives', []):
+                    if not choice.get('before') or choice.get('raw'):
+                        continue
+                    for body in bodies:
+                        bound = match_types(choice['before'], body.group(), aliases,
+                                            profile.get('type_sources', {}), source_index)
+                        if bound is not None:
+                            bindings.append(bound)
+                if bindings:
+                    for descriptor, actual in bindings[0].items():
+                        if all(binding.get(descriptor) == actual for binding in bindings):
+                            aliases[descriptor] = actual
             entries.append((feature['id'], entry, path))
     # Bind referenced obfuscated class descriptors through unique source metadata.
     for owner, source in profile.get('type_sources', {}).items():
@@ -177,6 +301,15 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                 if rule.get('optional'):
                     continue
                 raise ValueError(f"{feature}: {path.name}::{signature(rule['before'])} has 0 semantic matches")
+            if len(choices) != 1:
+                equivalent = {}
+                for choice, match in choices:
+                    after = choice['after'] if choice.get('raw') else remap(choice['after'], aliases)
+                    if match is not None:
+                        after = match.group().splitlines()[0] + '\n' + after.split('\n', 1)[1]
+                    key = (match.span() if match is not None else None, output_graph(after))
+                    equivalent.setdefault(key, (choice, match))
+                choices = list(equivalent.values())
             if len(choices) != 1:
                 exact = [(choice, match) for choice, match in choices if match is not None
                          and signature(choice['before']) == signature(match.group())]
