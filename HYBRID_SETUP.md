@@ -175,8 +175,7 @@ assets back into Git:
 |-----------|---------------------------|----------|
 | Reject missing MODs before downloading the ROM | on (`WUKONG_DROP_MISSING_MODS=0`) | set `1` only for an explicit best-effort recovery |
 | Fall back to maximized `ubuntu-24.04` when the self-hosted runner is offline (large estimates) | on for `github-auto` / `github-hosted` | explicit `self-hosted-linux` still requires the runner |
-| Continue build if a checkpoint upload hits Drive quota | on | set `WUKONG_DISABLE_CLOUD_CHECKPOINTS=1` to skip uploads entirely |
-| Continue with a clean workspace if checkpoint restore fails | on | n/a |
+| Upload/download cloud resume checkpoints | removed | hosted builds use a clean workspace; local filesystem resume is unchanged |
 
 Hosted jobs cache the pinned Linux toolchain, common recovery/image content and
 Python packages. ROM source archives and private per-version MOD packs are not

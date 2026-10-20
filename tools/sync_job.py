@@ -19,11 +19,6 @@ def main() -> int:
         default=JOBS_ROOT / "hybrid",
         help="Local job store containing the manifest and events to synchronize",
     )
-    parser.add_argument(
-        "--pull-checkpoint",
-        action="store_true",
-        help="Import only a validated cloud checkpoint before execution",
-    )
     args = parser.parse_args()
     store = FileJobStore(args.jobs_root)
     if not store.get(args.job_id):
@@ -33,10 +28,7 @@ def main() -> int:
         store,
         RcloneStorageAdapter(config_path=Path(args.config)),
     )
-    if args.pull_checkpoint:
-        sync.pull_checkpoint(args.job_id)
-    else:
-        sync.push(args.job_id)
+    sync.push(args.job_id)
     return 0
 
 

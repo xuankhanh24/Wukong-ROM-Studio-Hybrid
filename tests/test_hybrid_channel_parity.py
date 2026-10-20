@@ -16,12 +16,9 @@ from wukong.cli import main as cli_main
 from wukong.content_packs import build_content_index
 from wukong.executor import (
     CHECKPOINT_STAGES,
-    DEFAULT_CLOUD_CHECKPOINT_STAGES,
     LocalJobExecutor,
-    checkpoint_paths_for_stage,
     checkpoint_stages_for_environment,
     cloud_progress_sync_mode,
-    sync_checkpoint_tree,
     source_target_for,
 )
 from wukong.models import ArtifactRecord, BuildRecipe, Identity, JobStatus, RecipeValidationError
@@ -77,34 +74,6 @@ class HybridChannelParityContractTests(unittest.TestCase):
                 if "enabledSteps" in expected:
                     self.assertEqual(expected["enabledSteps"], list(build.enabled_steps))
 
-    def test_extract_checkpoint_contains_only_resume_inputs(self) -> None:
-        self.assertEqual(
-            (
-                ".wkstudio-workspace.json",
-                ".studio-markers/extract_payload.json",
-                "source_rom",
-            ),
-            checkpoint_paths_for_stage("extract_payload"),
-        )
-        self.assertIsNone(checkpoint_paths_for_stage("unpack_partitions"))
-
-    def test_extract_checkpoint_uses_subset_capable_storage(self) -> None:
-        calls: list[tuple[str, object]] = []
-
-        class Storage:
-            def sync_tree_subset(self, _source: Path, _relative: str, paths: object) -> str:
-                calls.append(("subset", paths))
-                return "checkpoint://filtered"
-
-            def sync_tree(self, _source: Path, _relative: str) -> str:
-                calls.append(("full", None))
-                return "checkpoint://full"
-
-        result = sync_checkpoint_tree(Storage(), Path("workspace"), "checkpoints/job/extract_payload", "extract_payload")
-
-        self.assertEqual("checkpoint://filtered", result)
-        self.assertEqual("subset", calls[0][0])
-        self.assertEqual(checkpoint_paths_for_stage("extract_payload"), calls[0][1])
 
     def test_default_dccloud_factory_uses_scoped_webdav_root(self) -> None:
         with tempfile.TemporaryDirectory() as temporary, patch.dict(
@@ -172,10 +141,12 @@ class HybridChannelParityContractTests(unittest.TestCase):
         self.assertIn("repack_partitions", CHECKPOINT_STAGES)
         self.assertIn("patch_vendor_boot", CHECKPOINT_STAGES)
 
-    def test_actions_checkpoint_policy_keeps_only_high_value_extract_snapshot(self) -> None:
-        self.assertEqual({"extract_payload"}, DEFAULT_CLOUD_CHECKPOINT_STAGES)
-        with patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}, clear=False):
-            self.assertEqual({"extract_payload"}, checkpoint_stages_for_environment())
+    def test_actions_checkpoint_policy_never_uploads_even_with_old_overrides(self) -> None:
+        with patch.dict("os.environ", {
+            "GITHUB_ACTIONS": "true",
+            "WUKONG_CLOUD_CHECKPOINT_STAGES": "extract_payload,unpack_partitions",
+        }, clear=False):
+            self.assertEqual(set(), checkpoint_stages_for_environment())
         with patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=False):
             self.assertEqual(CHECKPOINT_STAGES, checkpoint_stages_for_environment())
 
@@ -276,7 +247,7 @@ class HybridChannelParityContractTests(unittest.TestCase):
             metrics = [event for event in events if event.get("type") == "metric"]
             self.assertTrue(any(event.get("stage") == "upload" and event.get("cacheState") == "not-applicable" for event in metrics))
 
-    def test_actions_checkpoint_failure_does_not_stop_or_repeat_build(self) -> None:
+    def test_actions_never_uploads_checkpoint_and_preserves_build_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             rom = root / "source.zip"
@@ -325,6 +296,11 @@ class HybridChannelParityContractTests(unittest.TestCase):
             store = InMemoryJobStore()
             orchestrator = HybridOrchestrator(store=store, workspace_root=root / "jobs")
             manifest = orchestrator.submit(recipe, Identity("actions", "100", "user"), job_id="checkpoint-warning")
+            store.update(
+                manifest.job_id,
+                checkpoint="wukong-gdrive:WukongROM/checkpoints/old/extract_payload.tar",
+                checkpoint_at="2026-10-20T06:00:00Z",
+            )
 
             class FailingCheckpointStorage(_FixtureStorage):
                 attempts = 0
@@ -357,14 +333,16 @@ class HybridChannelParityContractTests(unittest.TestCase):
                 ).execute(manifest.job_id)
 
             self.assertEqual(completed.status, JobStatus.SUCCEEDED, completed.error)
-            self.assertEqual(storage.attempts, 1)
+            self.assertEqual(storage.attempts, 0)
+            self.assertIsNone(completed.checkpoint)
             warnings = [event for event in store.events(manifest.job_id) if event.type == "warning"]
-            self.assertTrue(any("remaining checkpoints are disabled" in event.payload["warning"] for event in warnings))
+            self.assertFalse(any("Checkpoint upload" in str(event.payload) for event in warnings))
+            self.assertFalse(any(event.type == "checkpoint" for event in store.events(manifest.job_id)))
             metrics = [event for event in store.events(manifest.job_id) if event.type == "metric"]
             self.assertTrue(any(event.payload.get("stage") == "extract_payload" and event.payload.get("cacheState") == "hit" for event in metrics))
             self.assertTrue(any(event.payload.get("stage") == "unpack_partitions" and event.payload.get("bytesProcessed") == 24 for event in metrics))
 
-    def test_failed_checkpoint_restore_continues_with_clean_workspace(self) -> None:
+    def test_obsolete_cloud_checkpoint_is_ignored_without_downloading(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             rom = root / "source.zip"
@@ -426,9 +404,13 @@ class HybridChannelParityContractTests(unittest.TestCase):
             )
 
             class FailingRestoreStorage(_FixtureStorage):
+                attempts = 0
+
                 def restore_tree(self, _uri: str, _destination: Path) -> Path:
+                    self.attempts += 1
                     raise OSError("quota exceeded while restoring checkpoint")
 
+            storage = FailingRestoreStorage()
             seen_presets: list[str] = []
 
             def legacy_build(_job_id, spec, workspace, callback):
@@ -446,21 +428,21 @@ class HybridChannelParityContractTests(unittest.TestCase):
                     build_workspace_root=root / "build",
                     content_root=content_root,
                     content_index=content_index,
-                    storage_factory=lambda _remote: FailingRestoreStorage(),
+                    storage_factory=lambda _remote: storage,
                     legacy_build=legacy_build,
                 ).execute(manifest.job_id)
 
             self.assertEqual(completed.status, JobStatus.SUCCEEDED, completed.error)
             self.assertEqual(seen_presets, ["custom"])
-            # Cloud checkpoint is discarded on restore failure; a later local
-            # checkpoint from a successful stage is allowed.
+            self.assertEqual(storage.attempts, 0)
+            # Old cloud references are discarded; cheap local markers remain.
             final = store.get(manifest.job_id)
             self.assertIsNotNone(final)
             assert final is not None
             if final.checkpoint:
                 self.assertTrue(str(final.checkpoint).startswith("local:"))
             warnings = [event for event in store.events(manifest.job_id) if event.type == "warning"]
-            self.assertTrue(any("Checkpoint restore failed" in event.payload["warning"] for event in warnings))
+            self.assertFalse(any("Checkpoint restore failed" in str(event.payload) for event in warnings))
 
     def test_local_build_without_cloud_publish_records_artifact_checksum(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

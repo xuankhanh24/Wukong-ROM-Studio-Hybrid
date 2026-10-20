@@ -70,6 +70,43 @@ class BuildLoggingTests(unittest.TestCase):
         self.assertNotIn('Signature', text)
         self.assertNotIn('fragment', text)
 
+    def test_zip_header_warnings_are_summarized_without_changing_capture(self):
+        from wukong.patch_tools import run_command
+        warning = '10-20 06:28:10.842  4388  4388 W zip     : WARNING: header mismatch'
+        console = io.StringIO()
+        with redirect_stdout(console):
+            result = run_command([
+                sys.executable, '-c',
+                "import sys; print('aligning'); "
+                f"[print({warning!r}, file=sys.stderr) for _ in range(11)]; "
+                "print('Verification successful')",
+            ], capture_output=True, text=True)
+        displayed = console.getvalue().split('\n', 1)[1]
+        self.assertNotIn(warning, displayed)
+        self.assertEqual(displayed.count('ZIP header mismatch'), 1)
+        self.assertIn('11 occurrences', displayed)
+        self.assertIn('Verification successful', displayed)
+        self.assertEqual(result.stderr.count(warning), 11)
+        self.assertEqual(result.returncode, 0)
+
+    def test_zip_summary_preserves_failure_and_unrelated_warnings(self):
+        from wukong.patch_tools import run_command
+        console = io.StringIO()
+        with redirect_stdout(console), self.assertRaises(subprocess.CalledProcessError) as caught:
+            run_command([
+                sys.executable, '-c',
+                "import sys; print('WARNING: other issue', file=sys.stderr); "
+                "[print('WARNING: header mismatch', file=sys.stderr) for _ in range(3)]; "
+                "print('ERROR: invalid archive', file=sys.stderr); sys.exit(7)",
+            ], capture_output=True, text=True, check=True)
+        displayed = console.getvalue().split('\n', 1)[1]
+        self.assertIn('3 occurrences', displayed)
+        self.assertIn('WARNING: other issue', displayed)
+        self.assertIn('ERROR: invalid archive', displayed)
+        self.assertEqual(caught.exception.returncode, 7)
+        self.assertEqual(caught.exception.stderr.count('WARNING: header mismatch'), 3)
+        self.assertIn('ERROR: invalid archive', caught.exception.diagnostic_tail)
+
     def test_both_runner_routes_share_durable_log_upload(self):
         root = Path(__file__).resolve().parents[1]
         action = (root / '.github/actions/run-hybrid/action.yml').read_text(encoding='utf-8')

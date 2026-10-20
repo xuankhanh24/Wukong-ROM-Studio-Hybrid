@@ -30,23 +30,6 @@ def artifact_upload_provider(record: ArtifactRecord) -> str:
 # Read-only/preflight stages such as inspect_rom would upload the same multi-GB
 # tree again and can exhaust cloud API quotas without improving resumability.
 CHECKPOINT_STAGES = set(CHECKPOINT_PIPELINE_STEPS)
-# A hosted checkpoint uploads the whole multi-GB workspace.  Production timing
-# showed that snapshots after unpack/sync/repack cost ~50 minutes while the
-# work they protect takes only a few minutes.  Keep the valuable post-extract
-# snapshot (it avoids re-downloading and re-extracting the ROM) and let local
-# runs retain their cheap filesystem checkpoints after every reusable stage.
-DEFAULT_CLOUD_CHECKPOINT_STAGES = {"extract_payload"}
-# A post-extraction resume only needs the workspace identity, the successful
-# stage marker, and the extracted source images consumed by ``batch_unpack``.
-# Keeping this contract explicit prevents a hosted checkpoint from scanning
-# and uploading later-stage trees such as ``rom-unpack`` and package caches.
-CLOUD_CHECKPOINT_PATHS: dict[str, tuple[str, ...]] = {
-    "extract_payload": (
-        ".wkstudio-workspace.json",
-        ".studio-markers/extract_payload.json",
-        "source_rom",
-    ),
-}
 CLOUD_PROGRESS_RETRY_SECONDS = 30.0
 CLOUD_PROGRESS_INTERVAL_SECONDS = 90.0
 CLOUD_PROGRESS_DELTA_PERCENT = 10.0
@@ -87,44 +70,10 @@ def artifact_upload_edition(
 
 
 def checkpoint_stages_for_environment() -> set[str]:
-    if os.environ.get("GITHUB_ACTIONS", "").casefold() != "true":
-        return set(CHECKPOINT_STAGES)
-    configured = os.environ.get("WUKONG_CLOUD_CHECKPOINT_STAGES", "").strip()
-    if not configured:
-        return set(DEFAULT_CLOUD_CHECKPOINT_STAGES)
-    return {
-        item.strip()
-        for item in configured.split(",")
-        if item.strip() in CHECKPOINT_STAGES
-    }
-
-
-def checkpoint_paths_for_stage(stage: str) -> tuple[str, ...] | None:
-    """Return the minimal workspace paths needed to resume ``stage``.
-
-    ``None`` intentionally means full-workspace behavior for stages whose
-    dependency contract has not been narrowed yet.  This keeps custom
-    checkpoint policies safe while the hosted extract snapshot is optimized.
-    """
-
-    return CLOUD_CHECKPOINT_PATHS.get(stage)
-
-
-def sync_checkpoint_tree(
-    storage: Any,
-    source: Path,
-    relative_path: str,
-    stage: str,
-    *, progress_callback=None,
-) -> str:
-    """Upload a stage checkpoint using its narrowed dependency contract."""
-
-    checkpoint_paths = checkpoint_paths_for_stage(stage)
-    sync_tree_subset = getattr(storage, "sync_tree_subset", None)
-    options = {'progress_callback': progress_callback} if isinstance(storage, RcloneStorageAdapter) and progress_callback else {}
-    if checkpoint_paths and callable(sync_tree_subset):
-        return sync_tree_subset(source, relative_path, checkpoint_paths, **options)
-    return storage.sync_tree(source, relative_path, **options)
+    # Keep inexpensive local resume markers, never upload cloud snapshots.
+    if os.environ.get("GITHUB_ACTIONS", "").casefold() == "true":
+        return set()
+    return set(CHECKPOINT_STAGES)
 
 
 def cloud_progress_sync_mode(
@@ -413,12 +362,20 @@ class LocalJobExecutor:
             legacy_spec = recipe.to_legacy_spec(local_rom_path=str(source.path))
             legacy_spec["romSha256"] = source.sha256
             resume_ready = False
-            if manifest.checkpoint:
+            if manifest.checkpoint and (
+                not manifest.checkpoint.startswith("local:")
+                or os.environ.get("GITHUB_ACTIONS", "").casefold() == "true"
+            ):
+                manifest = self.store.update(job_id, checkpoint=None, checkpoint_at=None)
+            if (
+                manifest.checkpoint
+                and manifest.checkpoint.startswith("local:")
+                and os.environ.get("GITHUB_ACTIONS", "").casefold() != "true"
+            ):
                 resume_ready = self._try_restore_checkpoint(
                     job_id,
                     manifest.checkpoint,
                     build_workspace,
-                    storage,
                 )
                 if resume_ready:
                     marker_path = build_workspace / ".wkstudio-workspace.json"
@@ -517,41 +474,9 @@ class LocalJobExecutor:
                     and checkpoint_upload_enabled
                 ):
                     try:
-                        if os.environ.get("GITHUB_ACTIONS", "").casefold() == "true":
-                            if os.environ.get("WUKONG_DISABLE_CLOUD_CHECKPOINTS", "").strip().casefold() in {
-                                "1",
-                                "true",
-                                "yes",
-                                "on",
-                            }:
-                                raise RuntimeError("Cloud checkpoints disabled by WUKONG_DISABLE_CLOUD_CHECKPOINTS")
-                            relative_checkpoint = f"checkpoints/{job_id}/{stage}"
-                            checkpoint_started = time.monotonic()
-                            self.actions_ui.begin('checkpoint')
-                            checkpoint = sync_checkpoint_tree(
-                                storage,
-                                build_workspace,
-                                relative_checkpoint,
-                                stage,
-                                progress_callback=lambda values: self._emit_transfer(
-                                    job_id, 'upload_progress', stage='checkpoint', provider='Drive checkpoint',
-                                    fileName=f'{stage}.tar', **dict(values)),
-                            )
-                            self.actions_ui.event({'type': 'step', 'step': 'checkpoint', 'status': 'success',
-                                                   'details': {'durationSeconds': round(time.monotonic() - checkpoint_started, 2)}})
-                        else:
-                            checkpoint = f"local:{build_workspace}"
+                        checkpoint = f"local:{build_workspace}"
                         from .models import utc_now
 
-                        if os.environ.get("GITHUB_ACTIONS", "").casefold() == "true":
-                            self.store.append_event(
-                                job_id,
-                                "metric",
-                                stage="checkpoint",
-                                sourceStage=stage,
-                                durationSeconds=round(time.monotonic() - checkpoint_started, 3),
-                                cacheState="not-applicable",
-                            )
                         self.store.update(job_id, checkpoint=checkpoint, checkpoint_at=utc_now())
                         self.store.append_event(job_id, "checkpoint", checkpoint=checkpoint, stage=stage)
                         self._push_cloud_progress(job_id, storage)
@@ -951,38 +876,19 @@ class LocalJobExecutor:
         job_id: str,
         checkpoint: str,
         build_workspace: Path,
-        storage: RcloneStorageAdapter,
     ) -> bool:
         import shutil
 
         try:
-            if checkpoint.startswith("local:"):
-                checkpoint_path = Path(checkpoint[6:]).resolve()
-                if checkpoint_path != build_workspace:
-                    raise OrchestrationError(
-                        f"Resume checkpoint path {checkpoint_path} does not match workspace {build_workspace}"
-                    )
-                if not (build_workspace / ".wkstudio-workspace.json").is_file():
-                    raise OrchestrationError("Local resume checkpoint is missing its workspace marker")
-                return True
-            if build_workspace.exists():
-                shutil.rmtree(build_workspace)
-            self.actions_ui.begin('restore_checkpoint')
-            started = time.monotonic()
-            previous_callback = getattr(storage, 'download_progress_callback', None)
-            if isinstance(storage, RcloneStorageAdapter):
-                storage.download_progress_callback = lambda values: self._emit_transfer(
-                    job_id, 'download_progress', stage='restore_checkpoint', provider='Drive checkpoint',
-                    fileName='checkpoint.tar', **dict(values))
-            try:
-                storage.restore_tree(checkpoint, build_workspace)
-            finally:
-                if isinstance(storage, RcloneStorageAdapter):
-                    storage.download_progress_callback = previous_callback
+            if not checkpoint.startswith("local:"):
+                return False
+            checkpoint_path = Path(checkpoint[6:]).resolve()
+            if checkpoint_path != build_workspace:
+                raise OrchestrationError(
+                    f"Resume checkpoint path {checkpoint_path} does not match workspace {build_workspace}"
+                )
             if not (build_workspace / ".wkstudio-workspace.json").is_file():
-                raise OrchestrationError("Resume checkpoint is missing its workspace marker")
-            self.actions_ui.event({'type': 'step', 'step': 'restore_checkpoint', 'status': 'success',
-                                   'details': {'durationSeconds': round(time.monotonic() - started, 2)}})
+                raise OrchestrationError("Local resume checkpoint is missing its workspace marker")
             return True
         except Exception as exc:
             self.actions_ui.close_group()

@@ -288,9 +288,10 @@ class GitHubActionsUITests(unittest.TestCase):
         self.assertEqual(action.count(f"WUKONG_ACTIONS_JOBS_ROOT={jobs_root}"), 1)
         self.assertEqual(
             action.count('--jobs-root "$WUKONG_ACTIONS_JOBS_ROOT"'),
-            5,
-            "submit, checkpoint pull, progress, execute and terminal sync must share one job store",
+            4,
+            "submit, progress, execute and terminal sync must share one job store",
         )
+        self.assertNotIn("--pull-checkpoint", action)
         self.assertIn(f"{jobs_root}/${{{{ inputs.job_id }}}}/manifest.json", workflow)
         self.assertIn(f"{jobs_root}/${{{{ inputs.job_id }}}}/events.jsonl", workflow)
         self.assertIn(f'manifest="{jobs_root}/$WUKONG_JOB_ID/manifest.json"', workflow)

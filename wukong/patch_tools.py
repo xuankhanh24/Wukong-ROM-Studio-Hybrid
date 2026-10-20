@@ -158,6 +158,12 @@ def java_command(tool, *arguments):
     return [require_tool('java'), '-jar', require_tool(tool), *map(str, arguments)]
 
 
+_ZIP_HEADER_WARNING = re.compile(
+    r'(?:\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+\s+'
+    r'\d+\s+\d+\s+W\s+zip\s*:\s*)?WARNING: header mismatch'
+)
+
+
 def run_command(command, *, capture_output=False, text=False, encoding=None,
                   errors=None, check=False, timeout=None, cwd=None, env=None):
     """Stream both channels even when legacy callers also need captured output."""
@@ -171,6 +177,7 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
     stopping = threading.Event()
     buffers = [[], []]
     diagnostic_tail = deque(maxlen=64)
+    zip_header_warnings = 0
 
     def emit(value):
         while not stopping.is_set():
@@ -206,10 +213,16 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
             if line is None:
                 finished += 1
             else:
-                diagnostic_tail.append(line.decode(encoding or 'utf-8', errors or 'replace')[-2000:])
+                decoded = line.decode(encoding or 'utf-8', errors or 'replace')
+                diagnostic_tail.append(decoded[-2000:])
                 if capture_output:
                     buffers[channel].append(line)
-                print(line.decode(encoding or 'utf-8', errors or 'replace'), end='', flush=True)
+                # Compact only this known repeated warning in the displayed log.
+                # Captured output and failure diagnostics retain the original bytes.
+                if _ZIP_HEADER_WARNING.fullmatch(decoded.strip()):
+                    zip_header_warnings += 1
+                else:
+                    print(decoded, end='', flush=True)
         # A child can close both pipes and still keep running.
         remaining = None if timeout is None else max(0.001, timeout - (time.monotonic() - started))
         code = process.wait(timeout=remaining)
@@ -221,6 +234,9 @@ def run_command(command, *, capture_output=False, text=False, encoding=None,
     finally:
         for thread in threads:
             thread.join(timeout=5)
+        if zip_header_warnings:
+            print(f"\n[!] ZIP header mismatch: {zip_header_warnings} occurrences "
+                  "(grouped; archive headers differ)", flush=True)
         print(f"\n[*] CMD finished: {Path(command[0]).name} exit={process.returncode} "
               f"duration={time.monotonic() - started:.2f}s", flush=True)
     output = [b''.join(parts) for parts in buffers] if capture_output else [None, None]
