@@ -21,7 +21,7 @@
 .method constructor <init>()V
     .locals 0
 
-    .line 43
+    .line 41
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -32,18 +32,18 @@
 .method public newThread(Ljava/lang/Runnable;)Ljava/lang/Thread;
     .locals 2
 
-    .line 46
+    .line 44
     new-instance v0, Ljava/lang/Thread;
 
     const-string v1, "WkOtaMediaRelease"
 
     invoke-direct {v0, p1, v1}, Ljava/lang/Thread;-><init>(Ljava/lang/Runnable;Ljava/lang/String;)V
 
-    .line 47
+    .line 45
     const/4 p1, 0x1
 
     invoke-virtual {v0, p1}, Ljava/lang/Thread;->setDaemon(Z)V
 
-    .line 48
+    .line 46
     return-object v0
 .end method

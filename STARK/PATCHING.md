@@ -122,8 +122,10 @@ STARK content requires explicit `--deploy-to-stark`; unattended execution does n
 overwrite the shared Settings APK as a side effect.
 
 The Settings OTA/media helper family is synchronized from the operator's
-`mod_stark/settings/patch_universal/smali` sources, including all ten nested/helper
-classes. The pipeline rebuilds only the DEX defining
+`mod_stark/settings/patch_universal/smali` sources. Source revision `9977840`
+contains eight helper classes and renders media at original quality without
+downsampling or stock mask tint. Obsolete synthetic helper classes are removed
+when synchronizing the source. The pipeline rebuilds only the DEX defining
 `AboutDeviceOtaUpdatePreference`, preserves the stock access/static modifiers of
 `getTargetIntentStatic`, and calls `WkOtaCardHook.onBind(Object,Object)` after the
 touch listener setup, or after the super bind callback when that anchor is absent.
@@ -132,7 +134,7 @@ This avoids passing a holder parameter already reused by OEM code at a return.
 A range invoke supports high parameter registers
 without allocating scratch registers. The stock video methods, OTA controller,
 listener and resource IDs are no longer patched independently. Missing bind
-callbacks fail explicitly. Workspace pipeline 30 invalidates resume results with the old Settings hook placement.
+callbacks fail explicitly. Workspace pipeline 31 invalidates resume results with the old Settings media helpers.
 ## Shared catalog and compatibility
 
 The seven feature modules above, plus WK Manager/Fake Lock/WK Installer, use the

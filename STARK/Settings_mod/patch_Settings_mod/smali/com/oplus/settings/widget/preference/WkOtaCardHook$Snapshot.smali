@@ -32,27 +32,27 @@
 .method constructor <init>(ILandroid/net/Uri;ZIJZ)V
     .locals 0
 
-    .line 873
+    .line 745
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 874
+    .line 746
     iput p1, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
 
-    .line 875
+    .line 747
     iput-object p2, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->uri:Landroid/net/Uri;
 
-    .line 876
+    .line 748
     iput-boolean p3, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->blur:Z
 
-    .line 877
+    .line 749
     iput p4, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->blurLevel:I
 
-    .line 878
+    .line 750
     iput-wide p5, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->revision:J
 
-    .line 879
+    .line 751
     iput-boolean p7, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->soundEnabled:Z
 
-    .line 880
+    .line 752
     return-void
 .end method

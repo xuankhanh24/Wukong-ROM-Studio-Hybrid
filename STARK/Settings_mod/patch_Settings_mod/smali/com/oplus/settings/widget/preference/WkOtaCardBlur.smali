@@ -221,31 +221,31 @@
 
     invoke-virtual/range {p0 .. p0}, Landroid/graphics/Bitmap;->getWidth()I
 
-    move-result v9
+    move-result v3
 
     .line 61
     invoke-virtual/range {p0 .. p0}, Landroid/graphics/Bitmap;->getHeight()I
 
-    move-result v10
+    move-result v7
 
     .line 62
     if-lez v0, :cond_7
 
-    if-lez v9, :cond_7
+    if-lez v3, :cond_7
 
-    if-gtz v10, :cond_0
+    if-gtz v7, :cond_0
 
     goto/16 :goto_6
 
     .line 65
     :cond_0
-    mul-int v1, v9, v10
+    mul-int v1, v3, v7
 
     .line 66
-    new-array v11, v1, [I
+    new-array v2, v1, [I
 
     .line 67
-    new-array v12, v1, [I
+    new-array v9, v1, [I
 
     .line 68
     nop
@@ -255,39 +255,35 @@
 
     const/4 v6, 0x0
 
+    move v4, v3
+
     const/4 v3, 0x0
 
+    move v8, v7
+
+    move v7, v4
+
     move-object/from16 v1, p0
-
-    move-object v2, v11
-
-    move v4, v9
-
-    move v7, v9
-
-    move v8, v10
 
     invoke-virtual/range {v1 .. v8}, Landroid/graphics/Bitmap;->getPixels([IIIIIII)V
 
     .line 70
-    nop
+    move-object v1, v2
 
     .line 71
-    mul-int/lit8 v1, v0, 0x2
+    mul-int/lit8 v2, v0, 0x2
 
-    add-int/lit8 v1, v1, 0x1
+    add-int/lit8 v2, v2, 0x1
 
     .line 72
-    const/4 v2, 0x0
-
-    const/4 v3, 0x0
+    move v5, v3
 
     .line 73
     :goto_0
-    if-ge v3, v10, :cond_3
+    if-ge v5, v8, :cond_3
 
     .line 74
-    mul-int v4, v3, v9
+    mul-int v6, v5, v4
 
     .line 75
     nop
@@ -302,48 +298,48 @@
     nop
 
     .line 79
-    neg-int v5, v0
+    neg-int v7, v0
 
-    const/4 v6, 0x0
+    move v10, v3
 
-    const/4 v7, 0x0
+    move v11, v10
 
-    const/4 v8, 0x0
+    move v12, v11
 
-    const/4 v13, 0x0
+    move v13, v12
 
     :goto_1
-    if-gt v5, v0, :cond_1
+    if-gt v7, v0, :cond_1
 
     .line 80
-    add-int/lit8 v14, v9, -0x1
+    add-int/lit8 v14, v4, -0x1
 
-    invoke-static {v5, v2, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v7, v3, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
     move-result v14
 
-    add-int/2addr v14, v4
+    add-int/2addr v14, v6
 
-    aget v14, v11, v14
+    aget v14, v1, v14
 
     .line 81
     ushr-int/lit8 v15, v14, 0x18
 
-    add-int/2addr v6, v15
+    add-int/2addr v10, v15
 
     .line 82
     ushr-int/lit8 v15, v14, 0x10
 
     and-int/lit16 v15, v15, 0xff
 
-    add-int/2addr v7, v15
+    add-int/2addr v11, v15
 
     .line 83
     ushr-int/lit8 v15, v14, 0x8
 
     and-int/lit16 v15, v15, 0xff
 
-    add-int/2addr v8, v15
+    add-int/2addr v12, v15
 
     .line 84
     and-int/lit16 v14, v14, 0xff
@@ -351,58 +347,58 @@
     add-int/2addr v13, v14
 
     .line 79
-    add-int/lit8 v5, v5, 0x1
+    add-int/lit8 v7, v7, 0x1
 
     goto :goto_1
 
     .line 86
     :cond_1
-    const/4 v5, 0x0
+    move v7, v3
 
     .line 87
     :goto_2
-    if-ge v5, v9, :cond_2
+    if-ge v7, v4, :cond_2
 
     .line 88
-    add-int v14, v4, v5
+    add-int v14, v6, v7
 
-    invoke-static {v6, v7, v8, v13, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->packColor(IIIII)I
+    invoke-static {v10, v11, v12, v13, v2}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->packColor(IIIII)I
 
     move-result v15
 
-    aput v15, v12, v14
+    aput v15, v9, v14
 
     .line 89
-    add-int/lit8 v14, v9, -0x1
+    add-int/lit8 v14, v4, -0x1
 
     .line 90
-    sub-int v15, v5, v0
+    sub-int v15, v7, v0
 
-    invoke-static {v15, v2, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v15, v3, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
     move-result v15
 
-    add-int/2addr v15, v4
+    add-int/2addr v15, v6
 
-    aget v15, v11, v15
+    aget v15, v1, v15
 
     .line 91
     nop
 
     .line 92
-    add-int v16, v5, v0
+    add-int v16, v7, v0
 
-    move/from16 v17, v1
+    move-object/from16 v17, v1
 
     add-int/lit8 v1, v16, 0x1
 
-    invoke-static {v1, v2, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v1, v3, v14}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
     move-result v1
 
-    add-int/2addr v1, v4
+    add-int/2addr v1, v6
 
-    aget v1, v11, v1
+    aget v1, v17, v1
 
     .line 93
     ushr-int/lit8 v14, v1, 0x18
@@ -411,45 +407,45 @@
 
     sub-int v14, v14, v16
 
-    add-int/2addr v6, v14
+    add-int/2addr v10, v14
 
     .line 94
     ushr-int/lit8 v14, v1, 0x10
 
     and-int/lit16 v14, v14, 0xff
 
-    ushr-int/lit8 v2, v15, 0x10
+    ushr-int/lit8 v3, v15, 0x10
 
-    and-int/lit16 v2, v2, 0xff
+    and-int/lit16 v3, v3, 0xff
 
-    sub-int/2addr v14, v2
+    sub-int/2addr v14, v3
 
-    add-int/2addr v7, v14
+    add-int/2addr v11, v14
 
     .line 95
-    ushr-int/lit8 v2, v1, 0x8
+    ushr-int/lit8 v3, v1, 0x8
 
-    and-int/lit16 v2, v2, 0xff
+    and-int/lit16 v3, v3, 0xff
 
     ushr-int/lit8 v14, v15, 0x8
 
     and-int/lit16 v14, v14, 0xff
 
-    sub-int/2addr v2, v14
+    sub-int/2addr v3, v14
 
-    add-int/2addr v8, v2
+    add-int/2addr v12, v3
 
     .line 96
     and-int/lit16 v1, v1, 0xff
 
-    and-int/lit16 v2, v15, 0xff
+    and-int/lit16 v3, v15, 0xff
 
-    sub-int/2addr v1, v2
+    sub-int/2addr v1, v3
 
     add-int/2addr v13, v1
 
     .line 97
-    add-int/lit8 v5, v5, 0x1
+    add-int/lit8 v7, v7, 0x1
 
     .line 98
     nop
@@ -458,35 +454,35 @@
     nop
 
     .line 100
-    move/from16 v1, v17
+    move-object/from16 v1, v17
 
-    const/4 v2, 0x0
+    const/4 v3, 0x0
 
     goto :goto_2
 
     .line 101
     :cond_2
-    move/from16 v17, v1
+    move-object/from16 v17, v1
 
-    add-int/lit8 v3, v3, 0x1
+    add-int/lit8 v5, v5, 0x1
 
     .line 102
     nop
 
     .line 103
-    const/4 v2, 0x0
+    const/4 v3, 0x0
 
     goto :goto_0
 
     .line 104
     :cond_3
-    move/from16 v17, v1
+    move-object/from16 v17, v1
 
     .line 105
     const/4 v1, 0x0
 
     :goto_3
-    if-ge v1, v9, :cond_6
+    if-ge v1, v4, :cond_6
 
     .line 106
     nop
@@ -501,168 +497,166 @@
     nop
 
     .line 110
-    neg-int v2, v0
-
-    const/4 v3, 0x0
-
-    const/4 v4, 0x0
+    neg-int v3, v0
 
     const/4 v5, 0x0
 
     const/4 v6, 0x0
 
+    const/4 v7, 0x0
+
+    const/4 v10, 0x0
+
     :goto_4
-    if-gt v2, v0, :cond_4
+    if-gt v3, v0, :cond_4
 
     .line 111
-    add-int/lit8 v7, v10, -0x1
+    add-int/lit8 v11, v8, -0x1
 
-    const/4 v8, 0x0
+    const/4 v12, 0x0
 
-    invoke-static {v2, v8, v7}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v3, v12, v11}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
-    move-result v7
+    move-result v11
 
-    mul-int v7, v7, v9
+    mul-int/2addr v11, v4
 
-    add-int/2addr v7, v1
+    add-int/2addr v11, v1
 
-    aget v7, v12, v7
+    aget v11, v9, v11
 
     .line 112
-    ushr-int/lit8 v8, v7, 0x18
+    ushr-int/lit8 v12, v11, 0x18
 
-    add-int/2addr v3, v8
+    add-int/2addr v5, v12
 
     .line 113
-    ushr-int/lit8 v8, v7, 0x10
+    ushr-int/lit8 v12, v11, 0x10
 
-    and-int/lit16 v8, v8, 0xff
+    and-int/lit16 v12, v12, 0xff
 
-    add-int/2addr v4, v8
+    add-int/2addr v6, v12
 
     .line 114
-    ushr-int/lit8 v8, v7, 0x8
+    ushr-int/lit8 v12, v11, 0x8
 
-    and-int/lit16 v8, v8, 0xff
+    and-int/lit16 v12, v12, 0xff
 
-    add-int/2addr v5, v8
+    add-int/2addr v7, v12
 
     .line 115
-    and-int/lit16 v7, v7, 0xff
+    and-int/lit16 v11, v11, 0xff
 
-    add-int/2addr v6, v7
+    add-int/2addr v10, v11
 
     .line 110
-    add-int/lit8 v2, v2, 0x1
+    add-int/lit8 v3, v3, 0x1
 
     goto :goto_4
 
     .line 117
     :cond_4
-    const/4 v8, 0x0
+    const/4 v12, 0x0
 
     :goto_5
-    if-ge v8, v10, :cond_5
+    if-ge v12, v8, :cond_5
 
     .line 118
-    mul-int v2, v8, v9
+    mul-int v3, v12, v4
 
-    add-int/2addr v2, v1
+    add-int/2addr v3, v1
 
-    move/from16 v7, v17
+    invoke-static {v5, v6, v7, v10, v2}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->packColor(IIIII)I
 
-    invoke-static {v3, v4, v5, v6, v7}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->packColor(IIIII)I
+    move-result v11
 
-    move-result v13
-
-    aput v13, v11, v2
+    aput v11, v17, v3
 
     .line 119
-    add-int/lit8 v2, v10, -0x1
+    add-int/lit8 v3, v8, -0x1
 
     .line 120
-    sub-int v13, v8, v0
+    sub-int v11, v12, v0
 
-    const/4 v14, 0x0
+    const/4 v13, 0x0
 
-    invoke-static {v13, v14, v2}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v11, v13, v3}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
-    move-result v13
+    move-result v11
 
-    mul-int v13, v13, v9
+    mul-int/2addr v11, v4
 
-    add-int/2addr v13, v1
+    add-int/2addr v11, v1
 
-    aget v13, v12, v13
+    aget v11, v9, v11
 
     .line 121
-    add-int v15, v8, v0
+    add-int v14, v12, v0
 
-    add-int/lit8 v15, v15, 0x1
+    add-int/lit8 v14, v14, 0x1
 
-    invoke-static {v15, v14, v2}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
+    invoke-static {v14, v13, v3}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->clamp(III)I
 
-    move-result v2
+    move-result v3
 
-    mul-int v2, v2, v9
+    mul-int/2addr v3, v4
 
-    add-int/2addr v2, v1
+    add-int/2addr v3, v1
 
-    aget v2, v12, v2
+    aget v3, v9, v3
 
     .line 122
-    ushr-int/lit8 v15, v2, 0x18
+    ushr-int/lit8 v14, v3, 0x18
 
-    ushr-int/lit8 v16, v13, 0x18
-
-    sub-int v15, v15, v16
-
-    add-int/2addr v3, v15
-
-    .line 123
-    ushr-int/lit8 v15, v2, 0x10
-
-    and-int/lit16 v15, v15, 0xff
-
-    ushr-int/lit8 v14, v13, 0x10
-
-    and-int/lit16 v14, v14, 0xff
-
-    sub-int/2addr v15, v14
-
-    add-int/2addr v4, v15
-
-    .line 124
-    ushr-int/lit8 v14, v2, 0x8
-
-    and-int/lit16 v14, v14, 0xff
-
-    ushr-int/lit8 v15, v13, 0x8
-
-    and-int/lit16 v15, v15, 0xff
+    ushr-int/lit8 v15, v11, 0x18
 
     sub-int/2addr v14, v15
 
     add-int/2addr v5, v14
 
+    .line 123
+    ushr-int/lit8 v14, v3, 0x10
+
+    and-int/lit16 v14, v14, 0xff
+
+    ushr-int/lit8 v15, v11, 0x10
+
+    and-int/lit16 v15, v15, 0xff
+
+    sub-int/2addr v14, v15
+
+    add-int/2addr v6, v14
+
+    .line 124
+    ushr-int/lit8 v14, v3, 0x8
+
+    and-int/lit16 v14, v14, 0xff
+
+    ushr-int/lit8 v15, v11, 0x8
+
+    and-int/lit16 v15, v15, 0xff
+
+    sub-int/2addr v14, v15
+
+    add-int/2addr v7, v14
+
     .line 125
-    and-int/lit16 v2, v2, 0xff
+    and-int/lit16 v3, v3, 0xff
 
-    and-int/lit16 v13, v13, 0xff
+    and-int/lit16 v11, v11, 0xff
 
-    sub-int/2addr v2, v13
+    sub-int/2addr v3, v11
 
-    add-int/2addr v6, v2
+    add-int/2addr v10, v3
 
     .line 117
-    add-int/lit8 v8, v8, 0x1
+    add-int/lit8 v12, v12, 0x1
 
     goto :goto_5
 
     .line 105
     :cond_5
-    move/from16 v7, v17
+    const/4 v13, 0x0
 
     add-int/lit8 v1, v1, 0x1
 
@@ -670,21 +664,21 @@
 
     .line 128
     :cond_6
+    move v3, v4
+
     const/4 v4, 0x0
 
     const/4 v5, 0x0
 
     const/4 v2, 0x0
 
+    move v6, v3
+
     move-object/from16 v0, p0
 
-    move-object v1, v11
+    move v7, v8
 
-    move v3, v9
-
-    move v6, v9
-
-    move v7, v10
+    move-object/from16 v1, v17
 
     invoke-virtual/range {v0 .. v7}, Landroid/graphics/Bitmap;->setPixels([IIIIIII)V
 

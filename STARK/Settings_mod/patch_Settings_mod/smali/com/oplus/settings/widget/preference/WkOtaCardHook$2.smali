@@ -8,7 +8,7 @@
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupTelegramClick(Ljava/lang/Object;Landroid/view/View;Landroid/view/View;)V
+    value = Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupVideoMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;Landroid/view/View;)V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -17,22 +17,11 @@
 .end annotation
 
 
-# instance fields
-.field final synthetic val$preference:Ljava/lang/Object;
-
-
 # direct methods
-.method constructor <init>(Ljava/lang/Object;)V
+.method constructor <init>()V
     .locals 0
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
-    .line 688
-    iput-object p1, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;->val$preference:Ljava/lang/Object;
-
+    .line 173
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -41,42 +30,20 @@
 
 # virtual methods
 .method public onClick(Landroid/view/View;)V
-    .locals 1
+    .locals 0
 
-    .line 691
-    nop
+    .line 176
+    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->-$$Nest$sfgetactiveVideoListener()Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 692
-    const/4 v0, 0x0
+    move-result-object p1
 
+    .line 177
     if-eqz p1, :cond_0
 
-    .line 693
-    invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
+    .line 178
+    invoke-virtual {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->togglePlayPause()V
 
-    move-result-object p1
-
-    goto :goto_0
-
-    .line 692
+    .line 180
     :cond_0
-    move-object p1, v0
-
-    .line 695
-    :goto_0
-    if-nez p1, :cond_1
-
-    .line 696
-    iget-object p1, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;->val$preference:Ljava/lang/Object;
-
-    invoke-static {p1, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->-$$Nest$smextractContext(Ljava/lang/Object;Ljava/lang/Object;)Landroid/content/Context;
-
-    move-result-object p1
-
-    .line 698
-    :cond_1
-    invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->openTelegramLink(Landroid/content/Context;)V
-
-    .line 699
     return-void
 .end method

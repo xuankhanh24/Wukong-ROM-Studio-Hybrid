@@ -1,5 +1,10 @@
 # HƯỚNG DẪN VÁ THỦ CÔNG SETTINGS MOD (COLOROS / OXYGENOS ANDROID 14 - 17+)
 
+> Đồng bộ nguồn `9977840` ngày 21/10/2026: bộ helper hiện có 8 class smali,
+> hiển thị media ở chất lượng gốc, không downsample hoặc phủ tint/mask stock.
+> Loại bỏ hai class nguồn đã bỏ (`ExternalSyntheticBackport0` và `Hook$3`).
+> Giữ hook an toàn A16/A17 của CLI tích hợp; pipeline 31 vô hiệu hóa cache patch cũ.
+
 > Đồng bộ 21/10/2026 từ commit `1407f0c` của nguồn Settings: chèn hook sau
 > `setOnTouchListener` trong callback, hoặc sau `invoke-super onBindViewHolder`
 > nếu không có touch listener. Không chèn trước return vì OEM có thể đã tái sử dụng

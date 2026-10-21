@@ -25,7 +25,7 @@
 .method constructor <init>(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
     .locals 0
 
-    .line 917
+    .line 790
     iput-object p1, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$1;->this$0:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -38,11 +38,11 @@
 .method public onAudioFocusChange(I)V
     .locals 1
 
-    .line 920
+    .line 793
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$1;->this$0:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     invoke-static {v0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->-$$Nest$mhandleAudioFocusChange(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;I)V
 
-    .line 921
+    .line 794
     return-void
 .end method

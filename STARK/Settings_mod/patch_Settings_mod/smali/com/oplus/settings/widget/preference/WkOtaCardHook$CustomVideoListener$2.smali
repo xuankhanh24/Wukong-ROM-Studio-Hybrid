@@ -34,7 +34,7 @@
         }
     .end annotation
 
-    .line 1252
+    .line 1100
     iput-object p1, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->this$0:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     iput-object p2, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$mp:Landroid/media/MediaPlayer;
@@ -51,12 +51,12 @@
 .method public run()V
     .locals 2
 
-    .line 1255
+    .line 1103
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$mp:Landroid/media/MediaPlayer;
 
     if-eqz v0, :cond_0
 
-    .line 1256
+    .line 1104
     :try_start_0
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$mp:Landroid/media/MediaPlayer;
 
@@ -71,7 +71,7 @@
     :catchall_0
     move-exception v0
 
-    .line 1257
+    .line 1105
     :goto_0
     :try_start_1
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$mp:Landroid/media/MediaPlayer;
@@ -85,7 +85,7 @@
     :catchall_1
     move-exception v0
 
-    .line 1258
+    .line 1106
     :goto_1
     :try_start_2
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$mp:Landroid/media/MediaPlayer;
@@ -99,14 +99,14 @@
     :catchall_2
     move-exception v0
 
-    .line 1260
+    .line 1108
     :cond_0
     :goto_2
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$s:Landroid/view/Surface;
 
     if-eqz v0, :cond_1
 
-    .line 1261
+    .line 1109
     :try_start_3
     iget-object v0, p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener$2;->val$s:Landroid/view/Surface;
 
@@ -119,7 +119,7 @@
     :catchall_3
     move-exception v0
 
-    .line 1263
+    .line 1111
     :cond_1
     :goto_3
     return-void

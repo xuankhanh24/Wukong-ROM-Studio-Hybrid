@@ -17,7 +17,7 @@
 
 .field private static final CONFIG_URI:Landroid/net/Uri;
 
-.field private static final MAX_IMAGE_DIMENSION:I = 0x500
+.field private static final MAX_IMAGE_DIMENSION:I = 0x1000
 
 .field private static final METHOD_GET_CONFIG:Ljava/lang/String; = "get_config"
 
@@ -41,8 +41,6 @@
 
 .field private static cachedSnapshot:Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
-.field private static volatile savedPlaybackPosition:I
-
 .field private static snapshotLoadElapsed:J
 
 .field private static snapshotLoaded:Z
@@ -57,20 +55,12 @@
     return-object v0
 .end method
 
-.method static bridge synthetic -$$Nest$sfgetsavedPlaybackPosition()I
+.method static bridge synthetic -$$Nest$sfgetactiveVideoListener()Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
     .locals 1
 
-    sget v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
+    sget-object v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    return v0
-.end method
-
-.method static bridge synthetic -$$Nest$sfputsavedPlaybackPosition(I)V
-    .locals 0
-
-    sput p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
-    return-void
+    return-object v0
 .end method
 
 .method static bridge synthetic -$$Nest$smactivate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
@@ -81,20 +71,10 @@
     return-void
 .end method
 
-.method static bridge synthetic -$$Nest$smextractContext(Ljava/lang/Object;Ljava/lang/Object;)Landroid/content/Context;
-    .locals 0
-
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->extractContext(Ljava/lang/Object;Ljava/lang/Object;)Landroid/content/Context;
-
-    move-result-object p0
-
-    return-object p0
-.end method
-
 .method static constructor <clinit>()V
     .locals 1
 
-    .line 43
+    .line 41
     new-instance v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$1;
 
     invoke-direct {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$1;-><init>()V
@@ -105,7 +85,7 @@
 
     sput-object v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->ASYNC_RELEASE_EXECUTOR:Ljava/util/concurrent/ExecutorService;
 
-    .line 51
+    .line 49
     const-string v0, "content://com.wukong.manager.otacard/config"
 
     invoke-static {v0}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
@@ -114,18 +94,13 @@
 
     sput-object v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->CONFIG_URI:Landroid/net/Uri;
 
-    .line 67
-    const/4 v0, 0x0
-
-    sput v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
     return-void
 .end method
 
 .method private constructor <init>()V
     .locals 0
 
-    .line 69
+    .line 66
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -138,39 +113,42 @@
 
     monitor-enter v0
 
-    .line 796
+    .line 668
     :try_start_0
     sget-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     if-eq v1, p0, :cond_1
 
-    .line 797
+    .line 669
     sget-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     if-eqz v1, :cond_0
 
-    .line 798
+    .line 670
     sget-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     invoke-virtual {v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->release()V
 
-    .line 800
+    .line 672
     :cond_0
     sput-object p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 802
+    .line 674
     :cond_1
     monitor-exit v0
 
     return-void
 
-    .line 795
+    .line 667
     :catchall_0
     move-exception p0
 
+    :try_start_1
     monitor-exit v0
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
     throw p0
 .end method
@@ -178,23 +156,23 @@
 .method static applyCenterCrop(Landroid/view/TextureView;II)V
     .locals 4
 
-    .line 828
+    .line 700
     if-nez p0, :cond_0
 
     return-void
 
-    .line 829
+    .line 701
     :cond_0
     invoke-virtual {p0}, Landroid/view/TextureView;->getWidth()I
 
     move-result v0
 
-    .line 830
+    .line 702
     invoke-virtual {p0}, Landroid/view/TextureView;->getHeight()I
 
     move-result v1
 
-    .line 831
+    .line 703
     if-lez v0, :cond_3
 
     if-lez v1, :cond_3
@@ -205,7 +183,7 @@
 
     goto :goto_1
 
-    .line 833
+    .line 705
     :cond_1
     int-to-float v0, v0
 
@@ -213,61 +191,61 @@
 
     div-float v2, v0, v1
 
-    .line 834
+    .line 706
     int-to-float p1, p1
 
     int-to-float p2, p2
 
     div-float/2addr p1, p2
 
-    .line 835
+    .line 707
     nop
 
-    .line 836
+    .line 708
     nop
 
-    .line 838
-    const/high16 p2, 0x3f800000    # 1.0f
+    .line 710
+    cmpl-float p2, p1, v2
 
-    cmpl-float v3, p1, v2
+    const/high16 v3, 0x3f800000    # 1.0f
 
-    if-lez v3, :cond_2
+    if-lez p2, :cond_2
 
-    .line 839
+    .line 711
     div-float/2addr p1, v2
 
-    move p2, p1
+    move v2, v3
 
-    const/high16 v2, 0x3f800000    # 1.0f
+    move v3, p1
 
     goto :goto_0
 
-    .line 841
+    .line 713
     :cond_2
     div-float/2addr v2, p1
 
-    .line 844
+    .line 716
     :goto_0
     new-instance p1, Landroid/graphics/Matrix;
 
     invoke-direct {p1}, Landroid/graphics/Matrix;-><init>()V
 
-    .line 845
-    const/high16 v3, 0x40000000    # 2.0f
+    .line 717
+    const/high16 p2, 0x40000000    # 2.0f
 
-    div-float/2addr v0, v3
+    div-float/2addr v0, p2
 
-    div-float/2addr v1, v3
+    div-float/2addr v1, p2
 
-    invoke-virtual {p1, p2, v2, v0, v1}, Landroid/graphics/Matrix;->setScale(FFFF)V
+    invoke-virtual {p1, v3, v2, v0, v1}, Landroid/graphics/Matrix;->setScale(FFFF)V
 
-    .line 846
+    .line 718
     invoke-virtual {p0, p1}, Landroid/view/TextureView;->setTransform(Landroid/graphics/Matrix;)V
 
-    .line 847
+    .line 719
     return-void
 
-    .line 831
+    .line 703
     :cond_3
     :goto_1
     return-void
@@ -276,12 +254,12 @@
 .method public static applyCustomVideoTransform(Landroid/content/Context;Landroid/view/TextureView;)Z
     .locals 4
 
-    .line 620
+    .line 610
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
     move-result-object v0
 
-    .line 621
+    .line 611
     const/4 v1, 0x0
 
     if-eqz v0, :cond_1
@@ -296,22 +274,22 @@
 
     goto :goto_2
 
-    .line 622
+    .line 612
     :cond_0
     nop
 
-    .line 623
+    .line 613
     new-instance v2, Landroid/media/MediaMetadataRetriever;
 
     invoke-direct {v2}, Landroid/media/MediaMetadataRetriever;-><init>()V
 
-    .line 625
+    .line 615
     :try_start_0
     iget-object v0, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->uri:Landroid/net/Uri;
 
     invoke-virtual {v2, p0, v0}, Landroid/media/MediaMetadataRetriever;->setDataSource(Landroid/content/Context;Landroid/net/Uri;)V
 
-    .line 626
+    .line 616
     const/16 p0, 0x12
 
     invoke-virtual {v2, p0}, Landroid/media/MediaMetadataRetriever;->extractMetadata(I)Ljava/lang/String;
@@ -324,7 +302,7 @@
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_2
 
-    .line 627
+    .line 617
     const/16 v0, 0x13
 
     :try_start_1
@@ -338,7 +316,7 @@
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_1
 
-    .line 630
+    .line 620
     :try_start_2
     invoke-virtual {v2}, Landroid/media/MediaMetadataRetriever;->release()V
 
@@ -347,10 +325,10 @@
     :catchall_0
     move-exception v0
 
-    .line 631
+    .line 621
     goto :goto_1
 
-    .line 628
+    .line 618
     :catchall_1
     move-exception v0
 
@@ -359,24 +337,24 @@
     :catchall_2
     move-exception p0
 
-    const/4 p0, 0x0
+    move p0, v1
 
-    .line 630
+    .line 620
     :goto_0
     invoke-virtual {v2}, Landroid/media/MediaMetadataRetriever;->release()V
     :try_end_2
     .catchall {:try_start_2 .. :try_end_2} :catchall_0
 
-    .line 632
+    .line 622
     :goto_1
     invoke-static {p1, p0, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyCenterCrop(Landroid/view/TextureView;II)V
 
-    .line 633
+    .line 623
     const/4 p0, 0x1
 
     return p0
 
-    .line 621
+    .line 611
     :cond_1
     :goto_2
     return v1
@@ -385,12 +363,12 @@
 .method private static applyEffect(Landroid/view/View;Z)V
     .locals 2
 
-    .line 850
+    .line 722
     if-nez p0, :cond_0
 
     return-void
 
-    .line 851
+    .line 723
     :cond_0
     if-eqz p1, :cond_1
 
@@ -398,7 +376,7 @@
 
     if-nez v0, :cond_1
 
-    .line 852
+    .line 724
     sget-object v0, Landroid/graphics/Shader$TileMode;->CLAMP:Landroid/graphics/Shader$TileMode;
 
     const/high16 v1, 0x41b00000    # 22.0f
@@ -409,7 +387,7 @@
 
     sput-object v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedBlurEffect:Landroid/graphics/RenderEffect;
 
-    .line 854
+    .line 726
     :cond_1
     if-eqz p1, :cond_2
 
@@ -423,21 +401,21 @@
     :goto_0
     invoke-virtual {p0, p1}, Landroid/view/View;->setRenderEffect(Landroid/graphics/RenderEffect;)V
 
-    .line 855
+    .line 727
     return-void
 .end method
 
 .method public static applyHeaderColors(Landroid/content/Context;Landroid/view/View;)V
     .locals 0
 
-    .line 637
+    .line 627
     if-eqz p0, :cond_2
 
     if-nez p1, :cond_0
 
     goto :goto_0
 
-    .line 638
+    .line 628
     :cond_0
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->mode(Landroid/content/Context;)I
 
@@ -447,14 +425,14 @@
 
     return-void
 
-    .line 639
+    .line 629
     :cond_1
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyWhiteTextRecursively(Landroid/view/View;)V
 
-    .line 640
+    .line 630
     return-void
 
-    .line 637
+    .line 627
     :cond_2
     :goto_0
     return-void
@@ -463,15 +441,15 @@
 .method public static applyImage(Landroid/content/Context;Landroid/widget/ImageView;)Z
     .locals 4
 
-    .line 477
+    .line 459
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
     move-result-object v0
 
-    .line 478
+    .line 460
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseAnyCustomVideo()V
 
-    .line 479
+    .line 461
     const/4 v1, 0x0
 
     if-eqz v0, :cond_4
@@ -484,28 +462,28 @@
 
     goto :goto_0
 
-    .line 484
+    .line 466
     :cond_0
     if-nez p1, :cond_1
 
     return v3
 
-    .line 485
+    .line 467
     :cond_1
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->loadImageDrawable(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;)Landroid/graphics/drawable/Drawable;
 
     move-result-object p0
 
-    .line 486
+    .line 468
     if-nez p0, :cond_2
 
-    .line 487
+    .line 469
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 488
+    .line 470
     return v1
 
-    .line 490
+    .line 472
     :cond_2
     invoke-virtual {p1}, Landroid/widget/ImageView;->getDrawable()Landroid/graphics/drawable/Drawable;
 
@@ -513,45 +491,55 @@
 
     if-eq v0, p0, :cond_3
 
-    .line 491
+    .line 473
     invoke-virtual {p1, p0}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
 
-    .line 493
+    .line 475
     :cond_3
+    const/4 p0, 0x0
+
+    invoke-virtual {p1, p0}, Landroid/widget/ImageView;->setColorFilter(Landroid/graphics/ColorFilter;)V
+
+    .line 476
+    const/16 p0, 0xff
+
+    invoke-virtual {p1, p0}, Landroid/widget/ImageView;->setImageAlpha(I)V
+
+    .line 477
     sget-object p0, Landroid/widget/ImageView$ScaleType;->CENTER_CROP:Landroid/widget/ImageView$ScaleType;
 
     invoke-virtual {p1, p0}, Landroid/widget/ImageView;->setScaleType(Landroid/widget/ImageView$ScaleType;)V
 
-    .line 494
+    .line 478
     invoke-virtual {p1, v1}, Landroid/widget/ImageView;->setVisibility(I)V
 
-    .line 495
+    .line 479
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 496
+    .line 480
     return v3
 
-    .line 480
+    .line 462
     :cond_4
     :goto_0
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 481
+    .line 463
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearImageCache()V
 
-    .line 482
+    .line 464
     return v1
 .end method
 
 .method public static applyVideoStyle(Landroid/view/TextureView;Landroid/widget/ImageView;)V
     .locals 2
 
-    .line 609
+    .line 599
     if-nez p0, :cond_0
 
     return-void
 
-    .line 610
+    .line 600
     :cond_0
     invoke-virtual {p0}, Landroid/view/TextureView;->getContext()Landroid/content/Context;
 
@@ -561,7 +549,7 @@
 
     move-result-object v0
 
-    .line 611
+    .line 601
     if-eqz v0, :cond_2
 
     iget v0, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
@@ -570,37 +558,37 @@
 
     if-ne v0, v1, :cond_2
 
-    .line 612
+    .line 602
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 613
+    .line 603
     if-eqz p1, :cond_1
 
     const/16 p0, 0x8
 
     invoke-virtual {p1, p0}, Landroid/widget/ImageView;->setVisibility(I)V
 
-    .line 614
+    .line 604
     :cond_1
     return-void
 
-    .line 616
+    .line 606
     :cond_2
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 617
+    .line 607
     return-void
 .end method
 
 .method private static applyWhiteTextRecursively(Landroid/view/View;)V
     .locals 5
 
-    .line 643
+    .line 633
     if-nez p0, :cond_0
 
     return-void
 
-    .line 644
+    .line 634
     :cond_0
     instance-of v0, p0, Landroid/widget/TextView;
 
@@ -610,17 +598,17 @@
 
     if-nez v0, :cond_1
 
-    .line 645
+    .line 635
     move-object v0, p0
 
     check-cast v0, Landroid/widget/TextView;
 
-    .line 646
+    .line 636
     const/4 v1, -0x1
 
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
 
-    .line 647
+    .line 637
     const/high16 v1, 0x40000000    # 2.0f
 
     const/high16 v2, -0x56000000
@@ -631,16 +619,16 @@
 
     invoke-virtual {v0, v3, v4, v1, v2}, Landroid/widget/TextView;->setShadowLayer(FFFI)V
 
-    .line 649
+    .line 639
     :cond_1
     instance-of v0, p0, Landroid/view/ViewGroup;
 
     if-eqz v0, :cond_2
 
-    .line 650
+    .line 640
     check-cast p0, Landroid/view/ViewGroup;
 
-    .line 651
+    .line 641
     const/4 v0, 0x0
 
     :goto_0
@@ -650,19 +638,19 @@
 
     if-ge v0, v1, :cond_2
 
-    .line 652
+    .line 642
     invoke-virtual {p0, v0}, Landroid/view/ViewGroup;->getChildAt(I)Landroid/view/View;
 
     move-result-object v1
 
     invoke-static {v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyWhiteTextRecursively(Landroid/view/View;)V
 
-    .line 651
+    .line 641
     add-int/lit8 v0, v0, 0x1
 
     goto :goto_0
 
-    .line 655
+    .line 645
     :cond_2
     return-void
 .end method
@@ -670,7 +658,7 @@
 .method private static clampBlurLevel(I)I
     .locals 1
 
-    .line 469
+    .line 451
     const/4 v0, 0x0
 
     invoke-static {v0, p0}, Ljava/lang/Math;->max(II)I
@@ -689,12 +677,12 @@
 .method private static clearEffect(Landroid/view/View;)V
     .locals 1
 
-    .line 858
+    .line 730
     const/4 v0, 0x0
 
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyEffect(Landroid/view/View;Z)V
 
-    .line 859
+    .line 731
     return-void
 .end method
 
@@ -705,27 +693,30 @@
 
     monitor-enter v0
 
-    .line 545
+    .line 535
     const/4 v1, 0x0
 
     :try_start_0
     sput-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageKey:Ljava/lang/String;
 
-    .line 546
+    .line 536
     sput-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageDrawable:Landroid/graphics/drawable/Drawable;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 547
+    .line 537
     monitor-exit v0
 
     return-void
 
-    .line 544
+    .line 534
     :catchall_0
     move-exception v1
 
+    :try_start_1
     monitor-exit v0
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
     throw v1
 .end method
@@ -733,7 +724,7 @@
 .method public static customVideoMarker(Landroid/content/Context;)Ljava/lang/String;
     .locals 1
 
-    .line 554
+    .line 544
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->mode(Landroid/content/Context;)I
 
     move-result p0
@@ -754,21 +745,21 @@
 .end method
 
 .method private static decodeScaledBitmap(Landroid/content/ContentResolver;Landroid/net/Uri;)Landroid/graphics/Bitmap;
-    .locals 6
+    .locals 7
 
-    .line 517
+    .line 505
     const-string v0, "WkOtaCardHook"
 
     new-instance v1, Landroid/graphics/BitmapFactory$Options;
 
     invoke-direct {v1}, Landroid/graphics/BitmapFactory$Options;-><init>()V
 
-    .line 518
+    .line 506
     const/4 v2, 0x1
 
     iput-boolean v2, v1, Landroid/graphics/BitmapFactory$Options;->inJustDecodeBounds:Z
 
-    .line 519
+    .line 507
     const/4 v3, 0x0
 
     :try_start_0
@@ -776,28 +767,28 @@
 
     move-result-object v4
 
-    .line 520
+    .line 508
     if-nez v4, :cond_1
 
-    .line 522
+    .line 510
     if-eqz v4, :cond_0
 
     invoke-virtual {v4}, Ljava/io/InputStream;->close()V
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_5
 
-    .line 520
+    .line 508
     :cond_0
     return-object v3
 
-    .line 521
+    .line 509
     :cond_1
     :try_start_1
     invoke-static {v4, v3, v1}, Landroid/graphics/BitmapFactory;->decodeStream(Ljava/io/InputStream;Landroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_3
 
-    .line 522
+    .line 510
     if-eqz v4, :cond_2
 
     :try_start_2
@@ -805,66 +796,74 @@
     :try_end_2
     .catchall {:try_start_2 .. :try_end_2} :catchall_5
 
-    .line 525
+    .line 513
     :cond_2
     nop
 
-    .line 527
-    nop
+    .line 515
+    move v4, v2
 
-    .line 528
+    .line 516
     :goto_0
-    iget v4, v1, Landroid/graphics/BitmapFactory$Options;->outWidth:I
+    iget v5, v1, Landroid/graphics/BitmapFactory$Options;->outWidth:I
 
-    div-int/2addr v4, v2
+    div-int/2addr v5, v4
 
-    const/16 v5, 0x500
+    const/16 v6, 0x1000
 
-    if-gt v4, v5, :cond_8
+    if-gt v5, v6, :cond_8
 
-    iget v4, v1, Landroid/graphics/BitmapFactory$Options;->outHeight:I
+    iget v5, v1, Landroid/graphics/BitmapFactory$Options;->outHeight:I
 
-    div-int/2addr v4, v2
+    div-int/2addr v5, v4
 
-    if-le v4, v5, :cond_3
+    if-le v5, v6, :cond_3
 
     goto :goto_2
 
-    .line 532
+    .line 520
     :cond_3
     new-instance v1, Landroid/graphics/BitmapFactory$Options;
 
     invoke-direct {v1}, Landroid/graphics/BitmapFactory$Options;-><init>()V
 
-    .line 533
-    iput v2, v1, Landroid/graphics/BitmapFactory$Options;->inSampleSize:I
+    .line 521
+    iput v4, v1, Landroid/graphics/BitmapFactory$Options;->inSampleSize:I
 
-    .line 534
+    .line 522
+    const/4 v4, 0x0
+
+    iput-boolean v4, v1, Landroid/graphics/BitmapFactory$Options;->inScaled:Z
+
+    .line 523
+    iput-boolean v2, v1, Landroid/graphics/BitmapFactory$Options;->inDither:Z
+
+    .line 524
     sget-object v2, Landroid/graphics/Bitmap$Config;->ARGB_8888:Landroid/graphics/Bitmap$Config;
 
     iput-object v2, v1, Landroid/graphics/BitmapFactory$Options;->inPreferredConfig:Landroid/graphics/Bitmap$Config;
 
-    .line 535
+    .line 525
     :try_start_3
     invoke-virtual {p0, p1}, Landroid/content/ContentResolver;->openInputStream(Landroid/net/Uri;)Ljava/io/InputStream;
 
     move-result-object p0
 
-    .line 536
+    .line 526
     if-nez p0, :cond_5
 
-    .line 538
+    .line 528
     if-eqz p0, :cond_4
 
     invoke-virtual {p0}, Ljava/io/InputStream;->close()V
     :try_end_3
     .catchall {:try_start_3 .. :try_end_3} :catchall_2
 
-    .line 536
+    .line 526
     :cond_4
     return-object v3
 
-    .line 537
+    .line 527
     :cond_5
     :try_start_4
     invoke-static {p0, v3, v1}, Landroid/graphics/BitmapFactory;->decodeStream(Ljava/io/InputStream;Landroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;
@@ -873,7 +872,7 @@
     :try_end_4
     .catchall {:try_start_4 .. :try_end_4} :catchall_0
 
-    .line 538
+    .line 528
     if-eqz p0, :cond_6
 
     :try_start_5
@@ -881,11 +880,11 @@
     :try_end_5
     .catchall {:try_start_5 .. :try_end_5} :catchall_2
 
-    .line 537
+    .line 527
     :cond_6
     return-object p1
 
-    .line 535
+    .line 525
     :catchall_0
     move-exception p1
 
@@ -902,7 +901,7 @@
     move-exception p0
 
     :try_start_7
-    invoke-static {p1, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$$ExternalSyntheticBackport0;->m(Ljava/lang/Throwable;Ljava/lang/Throwable;)V
+    invoke-virtual {p1, p0}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
 
     :cond_7
     :goto_1
@@ -910,26 +909,26 @@
     :try_end_7
     .catchall {:try_start_7 .. :try_end_7} :catchall_2
 
-    .line 538
+    .line 528
     :catchall_2
     move-exception p0
 
-    .line 539
+    .line 529
     const-string p1, "Cannot decode custom OTA image"
 
     invoke-static {v0, p1, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 540
+    .line 530
     return-object v3
 
-    .line 529
+    .line 517
     :cond_8
     :goto_2
-    mul-int/lit8 v2, v2, 0x2
+    mul-int/lit8 v4, v4, 0x2
 
     goto :goto_0
 
-    .line 519
+    .line 507
     :catchall_3
     move-exception p0
 
@@ -946,7 +945,7 @@
     move-exception p1
 
     :try_start_9
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$$ExternalSyntheticBackport0;->m(Ljava/lang/Throwable;Ljava/lang/Throwable;)V
+    invoke-virtual {p0, p1}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
 
     :cond_9
     :goto_3
@@ -954,47 +953,47 @@
     :try_end_9
     .catchall {:try_start_9 .. :try_end_9} :catchall_5
 
-    .line 522
+    .line 510
     :catchall_5
     move-exception p0
 
-    .line 523
+    .line 511
     const-string p1, "Cannot read custom OTA image bounds"
 
     invoke-static {v0, p1, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 524
+    .line 512
     return-object v3
 .end method
 
 .method private static detachCustomListener(Landroid/view/TextureView;)V
     .locals 2
 
-    .line 786
+    .line 658
     invoke-virtual {p0}, Landroid/view/TextureView;->getSurfaceTextureListener()Landroid/view/TextureView$SurfaceTextureListener;
 
     move-result-object v0
 
-    .line 787
+    .line 659
     instance-of v1, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     if-eqz v1, :cond_0
 
-    .line 788
+    .line 660
     check-cast v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 789
+    .line 661
     invoke-virtual {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->release()V
 
-    .line 790
+    .line 662
     invoke-static {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseActive(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
 
-    .line 791
+    .line 663
     const/4 v0, 0x0
 
     invoke-virtual {p0, v0}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
 
-    .line 793
+    .line 665
     :cond_0
     return-void
 .end method
@@ -1002,15 +1001,15 @@
 .method private static extractContext(Ljava/lang/Object;Ljava/lang/Object;)Landroid/content/Context;
     .locals 3
 
-    .line 256
+    .line 264
     if-eqz p1, :cond_0
 
-    .line 257
+    .line 265
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->extractItemView(Ljava/lang/Object;)Landroid/view/View;
 
     move-result-object p1
 
-    .line 258
+    .line 266
     if-eqz p1, :cond_0
 
     invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
@@ -1019,18 +1018,18 @@
 
     if-eqz v0, :cond_0
 
-    .line 259
+    .line 267
     invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
 
     move-result-object p0
 
     return-object p0
 
-    .line 262
+    .line 270
     :cond_0
     if-eqz p0, :cond_2
 
-    .line 264
+    .line 272
     :try_start_0
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -1046,7 +1045,7 @@
 
     move-result-object p1
 
-    .line 265
+    .line 273
     new-array v0, v1, [Ljava/lang/Object;
 
     invoke-virtual {p1, p0, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
@@ -1059,11 +1058,11 @@
 
     return-object p1
 
-    .line 266
+    .line 274
     :catchall_0
     move-exception p1
 
-    .line 268
+    .line 276
     :try_start_1
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -1075,15 +1074,15 @@
 
     move-result-object p1
 
-    .line 269
+    .line 277
     if-eqz p1, :cond_1
 
-    .line 270
+    .line 278
     const/4 v0, 0x1
 
     invoke-virtual {p1, v0}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 271
+    .line 279
     invoke-virtual {p1, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p0
@@ -1094,14 +1093,14 @@
 
     return-object p0
 
-    .line 273
+    .line 281
     :catchall_1
     move-exception p0
 
     :cond_1
     nop
 
-    .line 275
+    .line 283
     :cond_2
     const/4 p0, 0x0
 
@@ -1111,14 +1110,14 @@
 .method private static extractItemView(Ljava/lang/Object;)Landroid/view/View;
     .locals 3
 
-    .line 279
+    .line 287
     const/4 v0, 0x0
 
     if-nez p0, :cond_0
 
     return-object v0
 
-    .line 280
+    .line 288
     :cond_0
     instance-of v1, p0, Landroid/view/View;
 
@@ -1128,7 +1127,7 @@
 
     return-object p0
 
-    .line 282
+    .line 290
     :cond_1
     :try_start_0
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
@@ -1141,15 +1140,15 @@
 
     move-result-object v1
 
-    .line 283
+    .line 291
     if-eqz v1, :cond_2
 
-    .line 284
+    .line 292
     const/4 v2, 0x1
 
     invoke-virtual {v1, v2}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 285
+    .line 293
     invoke-virtual {v1, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p0
@@ -1160,14 +1159,14 @@
 
     return-object p0
 
-    .line 287
+    .line 295
     :catchall_0
     move-exception p0
 
     :cond_2
     nop
 
-    .line 288
+    .line 296
     return-object v0
 .end method
 
@@ -1184,10 +1183,10 @@
         }
     .end annotation
 
-    .line 374
+    .line 382
     nop
 
-    .line 375
+    .line 383
     :goto_0
     if-eqz p0, :cond_0
 
@@ -1195,7 +1194,7 @@
 
     if-eq p0, v0, :cond_0
 
-    .line 377
+    .line 385
     :try_start_0
     invoke-virtual {p0, p1}, Ljava/lang/Class;->getDeclaredField(Ljava/lang/String;)Ljava/lang/reflect/Field;
 
@@ -1205,74 +1204,19 @@
 
     return-object p0
 
-    .line 378
+    .line 386
     :catch_0
     move-exception v0
 
-    .line 379
+    .line 387
     invoke-virtual {p0}, Ljava/lang/Class;->getSuperclass()Ljava/lang/Class;
 
     move-result-object p0
 
-    .line 380
+    .line 388
     goto :goto_0
 
-    .line 382
-    :cond_0
-    const/4 p0, 0x0
-
-    return-object p0
-.end method
-
-.method private static varargs findMethod(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-    .locals 1
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "(",
-            "Ljava/lang/Class<",
-            "*>;",
-            "Ljava/lang/String;",
-            "[",
-            "Ljava/lang/Class<",
-            "*>;)",
-            "Ljava/lang/reflect/Method;"
-        }
-    .end annotation
-
-    .line 398
-    nop
-
-    .line 399
-    :goto_0
-    if-eqz p0, :cond_0
-
-    const-class v0, Ljava/lang/Object;
-
-    if-eq p0, v0, :cond_0
-
-    .line 401
-    :try_start_0
-    invoke-virtual {p0, p1, p2}, Ljava/lang/Class;->getDeclaredMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object p0
-    :try_end_0
-    .catch Ljava/lang/NoSuchMethodException; {:try_start_0 .. :try_end_0} :catch_0
-
-    return-object p0
-
-    .line 402
-    :catch_0
-    move-exception v0
-
-    .line 403
-    invoke-virtual {p0}, Ljava/lang/Class;->getSuperclass()Ljava/lang/Class;
-
-    move-result-object p0
-
-    .line 404
-    goto :goto_0
-
-    .line 406
+    .line 390
     :cond_0
     const/4 p0, 0x0
 
@@ -1292,14 +1236,14 @@
         }
     .end annotation
 
-    .line 361
+    .line 369
     const/4 v0, 0x0
 
     if-nez p0, :cond_0
 
     return-object v0
 
-    .line 362
+    .line 370
     :cond_0
     invoke-virtual {p1, p0}, Ljava/lang/Class;->isInstance(Ljava/lang/Object;)Z
 
@@ -1315,16 +1259,16 @@
 
     return-object p0
 
-    .line 363
+    .line 371
     :cond_1
     instance-of v1, p0, Landroid/view/ViewGroup;
 
     if-eqz v1, :cond_3
 
-    .line 364
+    .line 372
     check-cast p0, Landroid/view/ViewGroup;
 
-    .line 365
+    .line 373
     const/4 v1, 0x0
 
     :goto_0
@@ -1334,7 +1278,7 @@
 
     if-ge v1, v2, :cond_3
 
-    .line 366
+    .line 374
     invoke-virtual {p0, v1}, Landroid/view/ViewGroup;->getChildAt(I)Landroid/view/View;
 
     move-result-object v2
@@ -1343,98 +1287,33 @@
 
     move-result-object v2
 
-    .line 367
+    .line 375
     if-eqz v2, :cond_2
 
     return-object v2
 
-    .line 365
+    .line 373
     :cond_2
     add-int/lit8 v1, v1, 0x1
 
     goto :goto_0
 
-    .line 370
+    .line 378
     :cond_3
-    return-object v0
-.end method
-
-.method private static findViewByName(Landroid/view/View;Ljava/lang/String;)Landroid/view/View;
-    .locals 4
-
-    .line 410
-    const/4 v0, 0x0
-
-    if-eqz p0, :cond_2
-
-    if-nez p1, :cond_0
-
-    goto :goto_0
-
-    .line 412
-    :cond_0
-    :try_start_0
-    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
-
-    move-result-object v1
-
-    .line 413
-    if-eqz v1, :cond_1
-
-    .line 414
-    invoke-virtual {v1}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
-
-    move-result-object v2
-
-    const-string v3, "id"
-
-    invoke-virtual {v1}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v2, p1, v3, v1}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
-
-    move-result p1
-
-    .line 415
-    if-eqz p1, :cond_1
-
-    .line 416
-    invoke-virtual {p0, p1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
-
-    move-result-object p0
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
-
-    return-object p0
-
-    .line 419
-    :catchall_0
-    move-exception p0
-
-    :cond_1
-    nop
-
-    .line 420
-    return-object v0
-
-    .line 410
-    :cond_2
-    :goto_0
     return-object v0
 .end method
 
 .method private static getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
     .locals 2
 
-    .line 386
+    .line 394
     const/4 v0, 0x0
 
     if-nez p0, :cond_0
 
     return-object v0
 
-    .line 388
+    .line 396
     :cond_0
     :try_start_0
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
@@ -1445,15 +1324,15 @@
 
     move-result-object p1
 
-    .line 389
+    .line 397
     if-eqz p1, :cond_1
 
-    .line 390
+    .line 398
     const/4 v1, 0x1
 
     invoke-virtual {p1, v1}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 391
+    .line 399
     invoke-virtual {p1, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p0
@@ -1462,28 +1341,28 @@
 
     return-object p0
 
-    .line 393
+    .line 401
     :catchall_0
     move-exception p0
 
     :cond_1
     nop
 
-    .line 394
+    .line 402
     return-object v0
 .end method
 
 .method public static getTargetIntent()Landroid/content/Intent;
     .locals 2
 
-    .line 658
+    .line 648
     new-instance v0, Landroid/content/Intent;
 
     const-string v1, "android.intent.action.VIEW"
 
     invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    .line 659
+    .line 649
     const-string v1, "https://t.me/OnePlus_Ace5_Port"
 
     invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
@@ -1492,29 +1371,29 @@
 
     invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
 
-    .line 660
+    .line 650
     return-object v0
 .end method
 
 .method public static hook(Ljava/lang/Object;)V
     .locals 1
 
-    .line 88
+    .line 85
     const/4 v0, 0x0
 
     invoke-static {v0, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
 
-    .line 89
+    .line 86
     return-void
 .end method
 
 .method public static hook(Ljava/lang/Object;Ljava/lang/Object;)V
     .locals 0
 
-    .line 84
+    .line 81
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
 
-    .line 85
+    .line 82
     return-void
 .end method
 
@@ -1525,7 +1404,7 @@
 
     monitor-enter v0
 
-    .line 500
+    .line 484
     :try_start_0
     iget-object v1, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->uri:Landroid/net/Uri;
 
@@ -1569,7 +1448,7 @@
 
     move-result-object v1
 
-    .line 501
+    .line 485
     sget-object v2, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageKey:Ljava/lang/String;
 
     invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -1582,16 +1461,16 @@
 
     if-eqz v2, :cond_0
 
-    .line 502
+    .line 486
     sget-object p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageDrawable:Landroid/graphics/drawable/Drawable;
     :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_1
 
     monitor-exit v0
 
     return-object p0
 
-    .line 504
+    .line 488
     :cond_0
     :try_start_1
     invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
@@ -1604,9 +1483,9 @@
 
     move-result-object v2
     :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_0
+    .catchall {:try_start_1 .. :try_end_1} :catchall_1
 
-    .line 505
+    .line 489
     if-nez v2, :cond_1
 
     monitor-exit v0
@@ -1615,25 +1494,53 @@
 
     return-object p0
 
-    .line 506
+    .line 490
     :cond_1
     :try_start_2
     iget v3, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->blurLevel:I
 
     if-eqz v3, :cond_2
 
-    .line 507
+    .line 491
     iget p1, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->blurLevel:I
 
     invoke-static {v2, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardBlur;->apply(Landroid/graphics/Bitmap;I)Landroid/graphics/Bitmap;
 
     move-result-object v2
 
-    .line 509
+    .line 493
     :cond_2
     sput-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageKey:Ljava/lang/String;
+    :try_end_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_1
 
-    .line 510
+    .line 495
+    :try_start_3
+    invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+
+    move-result-object p1
+
+    invoke-virtual {p1}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
+
+    move-result-object p1
+
+    iget p1, p1, Landroid/util/DisplayMetrics;->densityDpi:I
+
+    invoke-virtual {v2, p1}, Landroid/graphics/Bitmap;->setDensity(I)V
+    :try_end_3
+    .catchall {:try_start_3 .. :try_end_3} :catchall_0
+
+    goto :goto_0
+
+    .line 496
+    :catchall_0
+    move-exception p1
+
+    :goto_0
+    nop
+
+    .line 497
+    :try_start_4
     new-instance p1, Landroid/graphics/drawable/BitmapDrawable;
 
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
@@ -1642,101 +1549,47 @@
 
     invoke-direct {p1, p0, v2}, Landroid/graphics/drawable/BitmapDrawable;-><init>(Landroid/content/res/Resources;Landroid/graphics/Bitmap;)V
 
-    .line 511
+    .line 498
     const/4 p0, 0x1
 
     invoke-virtual {p1, p0}, Landroid/graphics/drawable/BitmapDrawable;->setFilterBitmap(Z)V
 
-    .line 512
+    .line 499
+    invoke-virtual {p1, p0}, Landroid/graphics/drawable/BitmapDrawable;->setDither(Z)V
+
+    .line 500
     sput-object p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageDrawable:Landroid/graphics/drawable/Drawable;
 
-    .line 513
+    .line 501
     sget-object p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedImageDrawable:Landroid/graphics/drawable/Drawable;
-    :try_end_2
-    .catchall {:try_start_2 .. :try_end_2} :catchall_0
+    :try_end_4
+    .catchall {:try_start_4 .. :try_end_4} :catchall_1
 
     monitor-exit v0
 
     return-object p0
 
-    .line 499
-    :catchall_0
+    .line 483
+    :catchall_1
     move-exception p0
 
+    :try_start_5
     monitor-exit v0
+    :try_end_5
+    .catchall {:try_start_5 .. :try_end_5} :catchall_1
 
     throw p0
-.end method
-
-.method private static makeTouchTransparent(Landroid/view/View;)V
-    .locals 2
-
-    .line 675
-    if-nez p0, :cond_0
-
-    return-void
-
-    .line 676
-    :cond_0
-    instance-of v0, p0, Landroid/widget/Button;
-
-    if-eqz v0, :cond_1
-
-    return-void
-
-    .line 677
-    :cond_1
-    const/4 v0, 0x0
-
-    invoke-virtual {p0, v0}, Landroid/view/View;->setClickable(Z)V
-
-    .line 678
-    invoke-virtual {p0, v0}, Landroid/view/View;->setFocusable(Z)V
-
-    .line 679
-    instance-of v1, p0, Landroid/view/ViewGroup;
-
-    if-eqz v1, :cond_2
-
-    .line 680
-    check-cast p0, Landroid/view/ViewGroup;
-
-    .line 681
-    nop
-
-    :goto_0
-    invoke-virtual {p0}, Landroid/view/ViewGroup;->getChildCount()I
-
-    move-result v1
-
-    if-ge v0, v1, :cond_2
-
-    .line 682
-    invoke-virtual {p0, v0}, Landroid/view/ViewGroup;->getChildAt(I)Landroid/view/View;
-
-    move-result-object v1
-
-    invoke-static {v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->makeTouchTransparent(Landroid/view/View;)V
-
-    .line 681
-    add-int/lit8 v0, v0, 0x1
-
-    goto :goto_0
-
-    .line 685
-    :cond_2
-    return-void
 .end method
 
 .method public static mode(Landroid/content/Context;)I
     .locals 0
 
-    .line 428
+    .line 410
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
     move-result-object p0
 
-    .line 429
+    .line 411
     if-nez p0, :cond_0
 
     const/4 p0, 0x0
@@ -1753,226 +1606,169 @@
 .method public static onBind(Ljava/lang/Object;)V
     .locals 1
 
-    .line 80
+    .line 77
     const/4 v0, 0x0
 
     invoke-static {v0, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
 
-    .line 81
+    .line 78
     return-void
 .end method
 
 .method public static onBind(Ljava/lang/Object;Ljava/lang/Object;)V
     .locals 0
 
-    .line 76
+    .line 73
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
 
-    .line 77
+    .line 74
     return-void
 .end method
 
 .method public static onBindViewHolder(Ljava/lang/Object;)V
     .locals 1
 
-    .line 92
+    .line 89
     const/4 v0, 0x0
 
     invoke-static {v0, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
 
-    .line 93
+    .line 90
     return-void
 .end method
 
 .method public static onBindViewHolder(Ljava/lang/Object;Ljava/lang/Object;)V
-    .locals 8
+    .locals 7
 
-    .line 97
+    .line 94
     :try_start_0
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->extractContext(Ljava/lang/Object;Ljava/lang/Object;)Landroid/content/Context;
 
-    move-result-object v6
+    move-result-object v0
 
-    .line 98
-    if-nez v6, :cond_0
+    .line 95
+    if-nez v0, :cond_0
 
     return-void
 
-    .line 100
+    .line 97
     :cond_0
+    invoke-static {v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
+
+    move-result-object v1
+
+    .line 98
+    if-eqz v1, :cond_5
+
+    iget v2, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
+
+    if-nez v2, :cond_1
+
+    goto :goto_1
+
+    .line 103
+    :cond_1
     invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->extractItemView(Ljava/lang/Object;)Landroid/view/View;
 
     move-result-object p1
 
-    .line 101
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->resolveTopCard(Ljava/lang/Object;Landroid/view/View;)Landroid/view/View;
-
-    move-result-object v7
-
-    .line 103
-    invoke-static {v6}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
-
-    move-result-object v1
-
-    .line 104
-    if-eqz v1, :cond_5
-
-    iget v0, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
-
-    if-nez v0, :cond_1
-
-    goto :goto_1
-
-    .line 112
-    :cond_1
+    .line 106
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseStockPlayer(Ljava/lang/Object;)V
 
-    .line 115
+    .line 109
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->resolveTextureView(Ljava/lang/Object;Landroid/view/View;)Landroid/view/TextureView;
 
     move-result-object v2
 
-    .line 116
+    .line 110
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->resolveTopBg(Ljava/lang/Object;Landroid/view/View;)Landroid/widget/ImageView;
 
     move-result-object v3
 
-    .line 117
+    .line 111
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->resolveVideoMask(Ljava/lang/Object;Landroid/view/View;)Landroid/widget/ImageView;
 
     move-result-object v4
 
-    .line 120
-    iget v0, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
+    .line 112
+    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->resolveTopCard(Ljava/lang/Object;Landroid/view/View;)Landroid/view/View;
 
-    const/4 v5, 0x2
+    move-result-object v5
 
-    if-ne v0, v5, :cond_2
+    .line 115
+    iget p0, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
 
-    .line 121
-    move-object v0, v6
+    const/4 v6, 0x2
 
-    move-object v5, v7
+    if-ne p0, v6, :cond_2
 
+    .line 116
     invoke-static/range {v0 .. v5}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupVideoMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;Landroid/view/View;)V
 
     goto :goto_0
 
-    .line 122
+    .line 117
     :cond_2
-    iget v0, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
+    iget p0, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
 
     const/4 v5, 0x1
 
-    if-ne v0, v5, :cond_3
+    if-ne p0, v5, :cond_3
 
-    .line 123
-    invoke-static {v6, v1, v2, v3, v4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupImageMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)V
+    .line 118
+    invoke-static {v0, v1, v2, v3, v4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupImageMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)V
 
-    .line 127
+    .line 122
     :cond_3
     :goto_0
     if-eqz p1, :cond_4
 
+    .line 123
+    invoke-static {v0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyHeaderColors(Landroid/content/Context;Landroid/view/View;)V
+
     .line 128
-    invoke-static {v6, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->applyHeaderColors(Landroid/content/Context;Landroid/view/View;)V
-
-    .line 132
     :cond_4
-    invoke-static {p0, p1, v7}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupTelegramClick(Ljava/lang/Object;Landroid/view/View;Landroid/view/View;)V
-
-    .line 136
     goto :goto_2
 
-    .line 105
+    .line 99
     :cond_5
     :goto_1
-    const/4 v0, 0x0
-
-    sput v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
-    .line 106
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseAnyCustomVideo()V
-
-    .line 107
-    invoke-static {p0, p1, v7}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->setupTelegramClick(Ljava/lang/Object;Landroid/view/View;Landroid/view/View;)V
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 108
+    .line 100
     return-void
 
-    .line 134
+    .line 126
     :catchall_0
-    move-exception p0
+    move-exception v0
 
-    .line 135
+    move-object p0, v0
+
+    .line 127
     const-string p1, "WkOtaCardHook"
 
     const-string v0, "Exception in onBindViewHolder hook"
 
     invoke-static {p1, v0, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 137
+    .line 129
     :goto_2
-    return-void
-.end method
-
-.method public static openTelegramLink(Landroid/content/Context;)V
-    .locals 2
-
-    .line 664
-    if-nez p0, :cond_0
-
-    return-void
-
-    .line 666
-    :cond_0
-    :try_start_0
-    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getTargetIntent()Landroid/content/Intent;
-
-    move-result-object v0
-
-    .line 667
-    const/high16 v1, 0x10000000
-
-    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
-
-    .line 668
-    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
-
-    .line 671
-    goto :goto_0
-
-    .line 669
-    :catchall_0
-    move-exception p0
-
-    .line 670
-    const-string v0, "WkOtaCardHook"
-
-    const-string v1, "Failed to launch Telegram intent"
-
-    invoke-static {v0, v1, p0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
-
-    .line 672
-    :goto_0
     return-void
 .end method
 
 .method private static parseDimension(Ljava/lang/String;)I
     .locals 1
 
-    .line 819
+    .line 691
     const/4 v0, 0x0
 
     if-nez p0, :cond_0
 
     return v0
 
-    .line 821
+    .line 693
     :cond_0
     :try_start_0
     invoke-static {p0}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
@@ -1983,11 +1779,11 @@
 
     return p0
 
-    .line 822
+    .line 694
     :catch_0
     move-exception p0
 
-    .line 823
+    .line 695
     return v0
 .end method
 
@@ -1998,7 +1794,7 @@
 
     monitor-enter v1
 
-    .line 433
+    .line 415
     const/4 v2, 0x0
 
     if-nez p0, :cond_0
@@ -2007,14 +1803,14 @@
 
     return-object v2
 
-    .line 434
+    .line 416
     :cond_0
     :try_start_0
     invoke-static {}, Landroid/os/SystemClock;->elapsedRealtime()J
 
     move-result-wide v3
 
-    .line 435
+    .line 417
     sget-boolean v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->snapshotLoaded:Z
 
     if-eqz v0, :cond_2
@@ -2031,7 +1827,7 @@
 
     goto :goto_0
 
-    .line 465
+    .line 447
     :cond_1
     sget-object v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedSnapshot:Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
     :try_end_0
@@ -2041,12 +1837,12 @@
 
     return-object v0
 
-    .line 436
+    .line 418
     :cond_2
     :goto_0
     nop
 
-    .line 438
+    .line 420
     const/4 v5, 0x1
 
     :try_start_1
@@ -2062,7 +1858,7 @@
 
     move-result-object v0
 
-    .line 439
+    .line 421
     if-eqz v0, :cond_6
 
     const-string v6, "enabled"
@@ -2075,21 +1871,21 @@
 
     if-eqz v6, :cond_6
 
-    .line 440
+    .line 422
     const-string v6, "media_uri"
 
     invoke-virtual {v0, v6}, Landroid/os/Bundle;->getString(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v6
 
-    .line 441
+    .line 423
     const-string v8, "type"
 
     invoke-virtual {v0, v8}, Landroid/os/Bundle;->getString(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v8
 
-    .line 442
+    .line 424
     if-eqz v6, :cond_6
 
     invoke-virtual {v6}, Ljava/lang/String;->length()I
@@ -2098,10 +1894,10 @@
 
     if-lez v9, :cond_6
 
-    .line 443
+    .line 425
     nop
 
-    .line 444
+    .line 426
     const-string v9, "Image"
 
     invoke-virtual {v9, v8}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -2110,12 +1906,12 @@
 
     if-eqz v9, :cond_3
 
-    .line 445
-    const/4 v10, 0x1
+    .line 427
+    move v10, v5
 
     goto :goto_1
 
-    .line 446
+    .line 428
     :cond_3
     const-string v9, "Video"
 
@@ -2125,34 +1921,34 @@
 
     if-eqz v8, :cond_4
 
-    .line 447
+    .line 429
     const/4 v8, 0x2
 
-    const/4 v10, 0x2
+    move v10, v8
 
     goto :goto_1
 
-    .line 446
+    .line 428
     :cond_4
-    const/4 v10, 0x0
+    move v10, v7
 
-    .line 449
+    .line 431
     :goto_1
     if-eqz v10, :cond_6
 
-    .line 450
+    .line 432
     invoke-static {v6}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
 
     move-result-object v11
 
-    .line 451
+    .line 433
     const-string v6, "blur"
 
     invoke-virtual {v0, v6, v7}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;Z)Z
 
     move-result v12
 
-    .line 452
+    .line 434
     const-string v6, "blur_level"
 
     if-eqz v12, :cond_5
@@ -2168,7 +1964,7 @@
 
     move-result v13
 
-    .line 453
+    .line 435
     const-string v6, "revision"
 
     const-wide/16 v7, 0x0
@@ -2177,7 +1973,7 @@
 
     move-result-wide v14
 
-    .line 454
+    .line 436
     const-string v6, "sound_enabled"
 
     const-string v7, "sound"
@@ -2190,20 +1986,18 @@
 
     move-result v16
 
-    .line 455
-    new-instance v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
-
-    move-object v9, v0
+    .line 437
+    new-instance v9, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
     invoke-direct/range {v9 .. v16}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;-><init>(ILandroid/net/Uri;ZIJZ)V
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
-    move-object v2, v0
+    move-object v2, v9
 
     goto :goto_2
 
-    .line 459
+    .line 441
     :catchall_0
     move-exception v0
 
@@ -2211,28 +2005,31 @@
     :goto_2
     nop
 
-    .line 460
+    .line 442
     :try_start_2
     sput-boolean v5, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->snapshotLoaded:Z
 
-    .line 461
+    .line 443
     sput-wide v3, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->snapshotLoadElapsed:J
 
-    .line 462
+    .line 444
     sput-object v2, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->cachedSnapshot:Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
     :try_end_2
     .catchall {:try_start_2 .. :try_end_2} :catchall_1
 
-    .line 463
+    .line 445
     monitor-exit v1
 
     return-object v2
 
-    .line 432
+    .line 414
     :catchall_1
     move-exception v0
 
+    :try_start_3
     monitor-exit v1
+    :try_end_3
+    .catchall {:try_start_3 .. :try_end_3} :catchall_1
 
     throw v0
 .end method
@@ -2244,30 +2041,33 @@
 
     monitor-enter v0
 
-    .line 805
+    .line 677
     :try_start_0
     sget-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     if-ne v1, p0, :cond_0
 
-    .line 806
+    .line 678
     const/4 p0, 0x0
 
     sput-object p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 808
+    .line 680
     :cond_0
     monitor-exit v0
 
     return-void
 
-    .line 804
+    .line 676
     :catchall_0
     move-exception p0
 
+    :try_start_1
     monitor-exit v0
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
     throw p0
 .end method
@@ -2279,34 +2079,37 @@
 
     monitor-enter v0
 
-    .line 811
+    .line 683
     :try_start_0
     sget-object v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 812
+    .line 684
     const/4 v2, 0x0
 
     sput-object v2, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 813
+    .line 685
     if-eqz v1, :cond_0
 
-    .line 814
+    .line 686
     invoke-virtual {v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->release()V
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 816
+    .line 688
     :cond_0
     monitor-exit v0
 
     return-void
 
-    .line 810
+    .line 682
     :catchall_0
     move-exception v1
 
+    :try_start_1
     monitor-exit v0
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
     throw v1
 .end method
@@ -2314,12 +2117,12 @@
 .method private static releaseStockPlayer(Ljava/lang/Object;)V
     .locals 8
 
-    .line 212
+    .line 220
     if-nez p0, :cond_0
 
     return-void
 
-    .line 214
+    .line 222
     :cond_0
     const/4 v0, 0x1
 
@@ -2338,24 +2141,24 @@
 
     move-result-object v2
 
-    .line 215
+    .line 223
     invoke-virtual {v2, v0}, Ljava/lang/reflect/Method;->setAccessible(Z)V
 
-    .line 216
+    .line 224
     new-array v3, v1, [Ljava/lang/Object;
 
     invoke-virtual {v2, p0, v3}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 231
+    .line 239
     goto :goto_3
 
-    .line 217
+    .line 225
     :catchall_0
     move-exception v2
 
-    .line 219
+    .line 227
     :try_start_1
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -2367,14 +2170,14 @@
 
     array-length v3, v2
 
-    const/4 v4, 0x0
+    move v4, v1
 
     :goto_0
     if-ge v4, v3, :cond_2
 
     aget-object v5, v2, v4
 
-    .line 220
+    .line 228
     const-class v6, Landroid/media/MediaPlayer;
 
     invoke-virtual {v5}, Ljava/lang/reflect/Field;->getType()Ljava/lang/Class;
@@ -2387,10 +2190,10 @@
 
     if-eqz v6, :cond_1
 
-    .line 221
+    .line 229
     invoke-virtual {v5, v0}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 222
+    .line 230
     invoke-virtual {v5, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v6
@@ -2399,10 +2202,10 @@
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_3
 
-    .line 223
+    .line 231
     if-eqz v6, :cond_1
 
-    .line 224
+    .line 232
     :try_start_2
     invoke-virtual {v6}, Landroid/media/MediaPlayer;->stop()V
     :try_end_2
@@ -2413,7 +2216,7 @@
     :catchall_1
     move-exception v7
 
-    .line 225
+    .line 233
     :goto_1
     :try_start_3
     invoke-virtual {v6}, Landroid/media/MediaPlayer;->release()V
@@ -2425,7 +2228,7 @@
     :catchall_2
     move-exception v6
 
-    .line 226
+    .line 234
     :goto_2
     const/4 v6, 0x0
 
@@ -2434,20 +2237,20 @@
     :try_end_4
     .catchall {:try_start_4 .. :try_end_4} :catchall_3
 
-    .line 219
+    .line 227
     :cond_1
     add-int/lit8 v4, v4, 0x1
 
     goto :goto_0
 
-    .line 230
+    .line 238
     :catchall_3
     move-exception v2
 
     :cond_2
     nop
 
-    .line 235
+    .line 243
     :goto_3
     :try_start_5
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
@@ -2460,20 +2263,20 @@
 
     move-result-object v2
 
-    .line 236
+    .line 244
     if-eqz v2, :cond_3
 
-    .line 237
+    .line 245
     invoke-virtual {v2, v0}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 238
+    .line 246
     invoke-virtual {v2, p0, v1}, Ljava/lang/reflect/Field;->setBoolean(Ljava/lang/Object;Z)V
     :try_end_5
     .catchall {:try_start_5 .. :try_end_5} :catchall_4
 
     goto :goto_4
 
-    .line 240
+    .line 248
     :catchall_4
     move-exception v2
 
@@ -2481,7 +2284,7 @@
     :goto_4
     nop
 
-    .line 243
+    .line 251
     :try_start_6
     invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
@@ -2493,20 +2296,20 @@
 
     move-result-object v2
 
-    .line 244
+    .line 252
     if-eqz v2, :cond_4
 
-    .line 245
+    .line 253
     invoke-virtual {v2, v0}, Ljava/lang/reflect/Field;->setAccessible(Z)V
 
-    .line 246
+    .line 254
     invoke-virtual {v2, p0, v1}, Ljava/lang/reflect/Field;->setBoolean(Ljava/lang/Object;Z)V
     :try_end_6
     .catchall {:try_start_6 .. :try_end_6} :catchall_5
 
     goto :goto_5
 
-    .line 248
+    .line 256
     :catchall_5
     move-exception p0
 
@@ -2514,24 +2317,24 @@
     :goto_5
     nop
 
-    .line 249
+    .line 257
     return-void
 .end method
 
 .method private static resolveTextureView(Ljava/lang/Object;Landroid/view/View;)Landroid/view/TextureView;
     .locals 1
 
-    .line 292
+    .line 300
     if-eqz p0, :cond_0
 
-    .line 293
+    .line 301
     const-string v0, "mAboutDeviceTopVideoBg"
 
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object p0
 
-    .line 294
+    .line 302
     instance-of v0, p0, Landroid/view/TextureView;
 
     if-eqz v0, :cond_0
@@ -2540,11 +2343,11 @@
 
     return-object p0
 
-    .line 296
+    .line 304
     :cond_0
     if-eqz p1, :cond_1
 
-    .line 297
+    .line 305
     const-class p0, Landroid/view/TextureView;
 
     invoke-static {p1, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findViewByClass(Landroid/view/View;Ljava/lang/Class;)Landroid/view/View;
@@ -2555,7 +2358,7 @@
 
     return-object p0
 
-    .line 299
+    .line 307
     :cond_1
     const/4 p0, 0x0
 
@@ -2565,17 +2368,17 @@
 .method private static resolveTopBg(Ljava/lang/Object;Landroid/view/View;)Landroid/widget/ImageView;
     .locals 4
 
-    .line 303
+    .line 311
     if-eqz p0, :cond_0
 
-    .line 304
+    .line 312
     const-string v0, "mAboutDeviceTopBg"
 
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object p0
 
-    .line 305
+    .line 313
     instance-of v0, p0, Landroid/widget/ImageView;
 
     if-eqz v0, :cond_0
@@ -2584,24 +2387,24 @@
 
     return-object p0
 
-    .line 307
+    .line 315
     :cond_0
     if-eqz p1, :cond_2
 
-    .line 308
+    .line 316
     invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
 
     move-result-object p0
 
-    .line 309
+    .line 317
     if-eqz p0, :cond_2
 
-    .line 310
+    .line 318
     invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 311
+    .line 319
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
     move-result-object v1
@@ -2614,7 +2417,7 @@
 
     move-result v1
 
-    .line 312
+    .line 320
     if-nez v1, :cond_1
 
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
@@ -2627,16 +2430,16 @@
 
     move-result v1
 
-    .line 313
+    .line 321
     :cond_1
     if-eqz v1, :cond_2
 
-    .line 314
+    .line 322
     invoke-virtual {p1, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
     move-result-object p0
 
-    .line 315
+    .line 323
     instance-of p1, p0, Landroid/widget/ImageView;
 
     if-eqz p1, :cond_2
@@ -2645,7 +2448,7 @@
 
     return-object p0
 
-    .line 319
+    .line 327
     :cond_2
     const/4 p0, 0x0
 
@@ -2655,17 +2458,17 @@
 .method private static resolveTopCard(Ljava/lang/Object;Landroid/view/View;)Landroid/view/View;
     .locals 3
 
-    .line 343
+    .line 351
     if-eqz p0, :cond_0
 
-    .line 344
+    .line 352
     const-string v0, "mTopVideoCard"
 
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object p0
 
-    .line 345
+    .line 353
     instance-of v0, p0, Landroid/view/View;
 
     if-eqz v0, :cond_0
@@ -2674,24 +2477,24 @@
 
     return-object p0
 
-    .line 347
+    .line 355
     :cond_0
     if-eqz p1, :cond_1
 
-    .line 348
+    .line 356
     invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
 
     move-result-object p0
 
-    .line 349
+    .line 357
     if-eqz p0, :cond_1
 
-    .line 350
+    .line 358
     invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 351
+    .line 359
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
     move-result-object p0
@@ -2704,17 +2507,17 @@
 
     move-result p0
 
-    .line 352
+    .line 360
     if-eqz p0, :cond_1
 
-    .line 353
+    .line 361
     invoke-virtual {p1, p0}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
     move-result-object p0
 
     return-object p0
 
-    .line 357
+    .line 365
     :cond_1
     const/4 p0, 0x0
 
@@ -2724,17 +2527,17 @@
 .method private static resolveVideoMask(Ljava/lang/Object;Landroid/view/View;)Landroid/widget/ImageView;
     .locals 4
 
-    .line 323
+    .line 331
     if-eqz p0, :cond_0
 
-    .line 324
+    .line 332
     const-string v0, "mAboutDeviceVideoMask"
 
     invoke-static {p0, v0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
 
     move-result-object p0
 
-    .line 325
+    .line 333
     instance-of v0, p0, Landroid/widget/ImageView;
 
     if-eqz v0, :cond_0
@@ -2743,24 +2546,24 @@
 
     return-object p0
 
-    .line 327
+    .line 335
     :cond_0
     if-eqz p1, :cond_2
 
-    .line 328
+    .line 336
     invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
 
     move-result-object p0
 
-    .line 329
+    .line 337
     if-eqz p0, :cond_2
 
-    .line 330
+    .line 338
     invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 331
+    .line 339
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
     move-result-object v1
@@ -2773,7 +2576,7 @@
 
     move-result v1
 
-    .line 332
+    .line 340
     if-nez v1, :cond_1
 
     invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
@@ -2786,16 +2589,16 @@
 
     move-result v1
 
-    .line 333
+    .line 341
     :cond_1
     if-eqz v1, :cond_2
 
-    .line 334
+    .line 342
     invoke-virtual {p1, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
     move-result-object p0
 
-    .line 335
+    .line 343
     instance-of p1, p0, Landroid/widget/ImageView;
 
     if-eqz p1, :cond_2
@@ -2804,7 +2607,7 @@
 
     return-object p0
 
-    .line 339
+    .line 347
     :cond_2
     const/4 p0, 0x0
 
@@ -2814,12 +2617,12 @@
 .method public static setCustomVideoDataSource(Landroid/content/Context;Landroid/media/MediaPlayer;)Z
     .locals 3
 
-    .line 558
+    .line 548
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->readSnapshot(Landroid/content/Context;)Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;
 
     move-result-object v0
 
-    .line 559
+    .line 549
     if-eqz v0, :cond_2
 
     iget v1, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
@@ -2830,26 +2633,26 @@
 
     goto :goto_1
 
-    .line 561
+    .line 551
     :cond_0
     :try_start_0
     iget-object v1, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->uri:Landroid/net/Uri;
 
     invoke-virtual {p1, p0, v1}, Landroid/media/MediaPlayer;->setDataSource(Landroid/content/Context;Landroid/net/Uri;)V
 
-    .line 562
+    .line 552
     iget-boolean p0, v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->soundEnabled:Z
 
     if-eqz p0, :cond_1
 
-    .line 563
+    .line 553
     const/high16 p0, 0x3f800000    # 1.0f
 
     invoke-virtual {p1, p0, p0}, Landroid/media/MediaPlayer;->setVolume(FF)V
 
     goto :goto_0
 
-    .line 565
+    .line 555
     :cond_1
     const/4 p0, 0x0
 
@@ -2857,17 +2660,17 @@
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 567
+    .line 557
     :goto_0
     const/4 p0, 0x1
 
     return p0
 
-    .line 568
+    .line 558
     :catchall_0
     move-exception p0
 
-    .line 569
+    .line 559
     new-instance p1, Ljava/lang/IllegalStateException;
 
     const-string v0, "Unable to open custom OTA video"
@@ -2876,7 +2679,7 @@
 
     throw p1
 
-    .line 559
+    .line 549
     :cond_2
     :goto_1
     const/4 p0, 0x0
@@ -2887,14 +2690,14 @@
 .method public static setupCustomVideo(Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)Z
     .locals 11
 
-    .line 574
+    .line 564
     const/4 v0, 0x0
 
     if-nez p0, :cond_0
 
     return v0
 
-    .line 575
+    .line 565
     :cond_0
     invoke-virtual {p0}, Landroid/view/TextureView;->getContext()Landroid/content/Context;
 
@@ -2904,7 +2707,7 @@
 
     move-result-object v1
 
-    .line 576
+    .line 566
     if-eqz v1, :cond_6
 
     iget v2, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->mode:I
@@ -2913,75 +2716,77 @@
 
     if-eq v2, v3, :cond_1
 
+    move-object v9, p0
+
     goto :goto_0
 
-    .line 582
+    .line 572
     :cond_1
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearImageCache()V
 
-    .line 583
+    .line 573
     invoke-virtual {p0, v0}, Landroid/view/TextureView;->setVisibility(I)V
 
-    .line 584
+    .line 574
     invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 585
+    .line 575
     const/16 v0, 0x8
 
     if-eqz p1, :cond_2
 
     invoke-virtual {p1, v0}, Landroid/widget/ImageView;->setVisibility(I)V
 
-    .line 586
+    .line 576
     :cond_2
     if-eqz p2, :cond_3
 
     invoke-virtual {p2, v0}, Landroid/widget/ImageView;->setVisibility(I)V
 
-    .line 588
+    .line 578
     :cond_3
     invoke-virtual {p0}, Landroid/view/TextureView;->getSurfaceTextureListener()Landroid/view/TextureView$SurfaceTextureListener;
 
     move-result-object p2
 
-    .line 589
+    .line 579
     instance-of v0, p2, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     const/4 v2, 0x1
 
     if-eqz v0, :cond_5
 
-    .line 590
+    .line 580
     check-cast p2, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 591
+    .line 581
     invoke-virtual {p2, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->matches(Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;)Z
 
     move-result v0
 
     if-eqz v0, :cond_4
 
-    .line 592
+    .line 582
     invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
 
-    .line 593
+    .line 583
     invoke-virtual {p2, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->updateCover(Landroid/widget/ImageView;)V
 
-    .line 594
+    .line 584
     invoke-virtual {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
 
-    .line 595
+    .line 585
     return v2
 
-    .line 597
+    .line 587
     :cond_4
     invoke-virtual {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->release()V
 
-    .line 599
+    .line 589
     :cond_5
-    new-instance p2, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
+    new-instance v3, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
-    .line 600
+    .line 590
     invoke-virtual {p0}, Landroid/view/TextureView;->getContext()Landroid/content/Context;
 
     move-result-object v4
@@ -2992,529 +2797,210 @@
 
     iget-boolean v8, v1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->soundEnabled:Z
 
-    move-object v3, p2
-
     move-object v9, p0
 
     move-object v10, p1
 
     invoke-direct/range {v3 .. v10}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;-><init>(Landroid/content/Context;Landroid/net/Uri;JZLandroid/view/TextureView;Landroid/widget/ImageView;)V
 
-    .line 602
-    invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
+    .line 592
+    invoke-static {v3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
 
-    .line 603
-    invoke-virtual {p0, p2}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
+    .line 593
+    invoke-virtual {v9, v3}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
 
-    .line 604
-    invoke-virtual {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
+    .line 594
+    invoke-virtual {v3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
 
-    .line 605
+    .line 595
     return v2
 
-    .line 577
+    .line 566
     :cond_6
+    move-object v9, p0
+
+    .line 567
     :goto_0
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseAnyCustomVideo()V
 
-    .line 578
-    invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->detachCustomListener(Landroid/view/TextureView;)V
+    .line 568
+    invoke-static {v9}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->detachCustomListener(Landroid/view/TextureView;)V
 
-    .line 579
-    invoke-static {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
+    .line 569
+    invoke-static {v9}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 580
+    .line 570
     return v0
 .end method
 
 .method private static setupImageMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;)V
-    .locals 2
+    .locals 1
 
-    .line 185
-    const/4 v0, 0x0
-
-    sput v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
-    .line 186
+    .line 191
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->releaseAnyCustomVideo()V
 
-    .line 187
-    const/16 v1, 0x8
+    .line 192
+    const/16 v0, 0x8
 
     if-eqz p2, :cond_0
 
-    .line 188
-    invoke-virtual {p2, v1}, Landroid/view/TextureView;->setVisibility(I)V
-
-    .line 189
-    invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
-
-    .line 191
-    :cond_0
-    if-eqz p4, :cond_1
-
-    .line 192
-    invoke-virtual {p4, v1}, Landroid/widget/ImageView;->setVisibility(I)V
+    .line 193
+    invoke-virtual {p2, v0}, Landroid/view/TextureView;->setVisibility(I)V
 
     .line 194
+    invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
+
+    .line 196
+    :cond_0
+    const/4 p2, 0x0
+
+    if-eqz p4, :cond_1
+
+    .line 197
+    invoke-virtual {p4, v0}, Landroid/widget/ImageView;->setVisibility(I)V
+
+    .line 198
+    invoke-virtual {p4, p2}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+
+    .line 200
     :cond_1
     if-nez p3, :cond_2
 
     return-void
 
-    .line 196
+    .line 202
     :cond_2
     invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->loadImageDrawable(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;)Landroid/graphics/drawable/Drawable;
 
     move-result-object p0
 
-    .line 197
+    .line 203
     if-eqz p0, :cond_4
 
-    .line 198
+    .line 204
     invoke-virtual {p3}, Landroid/widget/ImageView;->getDrawable()Landroid/graphics/drawable/Drawable;
 
     move-result-object p1
 
     if-eq p1, p0, :cond_3
 
-    .line 199
+    .line 205
     invoke-virtual {p3, p0}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
 
-    .line 201
+    .line 207
     :cond_3
+    invoke-virtual {p3, p2}, Landroid/widget/ImageView;->setColorFilter(Landroid/graphics/ColorFilter;)V
+
+    .line 208
+    const/16 p0, 0xff
+
+    invoke-virtual {p3, p0}, Landroid/widget/ImageView;->setImageAlpha(I)V
+
+    .line 209
     sget-object p0, Landroid/widget/ImageView$ScaleType;->CENTER_CROP:Landroid/widget/ImageView$ScaleType;
 
     invoke-virtual {p3, p0}, Landroid/widget/ImageView;->setScaleType(Landroid/widget/ImageView$ScaleType;)V
 
-    .line 202
-    invoke-virtual {p3, v0}, Landroid/widget/ImageView;->setVisibility(I)V
+    .line 210
+    const/4 p0, 0x0
 
-    .line 203
+    invoke-virtual {p3, p0}, Landroid/widget/ImageView;->setVisibility(I)V
+
+    .line 211
     invoke-static {p3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 205
+    .line 213
     :cond_4
-    return-void
-.end method
-
-.method private static setupTelegramClick(Ljava/lang/Object;Landroid/view/View;Landroid/view/View;)V
-    .locals 6
-
-    .line 688
-    new-instance v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;
-
-    invoke-direct {v0, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;-><init>(Ljava/lang/Object;)V
-
-    .line 702
-    if-eqz p1, :cond_3
-
-    .line 703
-    invoke-virtual {p1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 704
-    const-string v1, "update_find"
-
-    invoke-static {p1, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findViewByName(Landroid/view/View;Ljava/lang/String;)Landroid/view/View;
-
-    move-result-object v1
-
-    .line 705
-    if-eqz v1, :cond_0
-
-    invoke-virtual {v1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 707
-    :cond_0
-    const-string v1, "update_txt"
-
-    invoke-static {p1, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findViewByName(Landroid/view/View;Ljava/lang/String;)Landroid/view/View;
-
-    move-result-object v1
-
-    .line 708
-    if-eqz v1, :cond_1
-
-    invoke-virtual {v1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 710
-    :cond_1
-    const-string v1, "update_btn"
-
-    invoke-static {p1, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findViewByName(Landroid/view/View;Ljava/lang/String;)Landroid/view/View;
-
-    move-result-object v1
-
-    .line 711
-    if-eqz v1, :cond_2
-
-    invoke-virtual {v1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 713
-    :cond_2
-    const-string v1, "easter_egg_video"
-
-    invoke-static {p1, v1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findViewByName(Landroid/view/View;Ljava/lang/String;)Landroid/view/View;
-
-    move-result-object p1
-
-    .line 714
-    if-eqz p1, :cond_3
-
-    invoke-virtual {p1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 717
-    :cond_3
-    if-eqz p2, :cond_4
-
-    .line 718
-    invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->makeTouchTransparent(Landroid/view/View;)V
-
-    .line 721
-    :cond_4
-    if-eqz p0, :cond_c
-
-    .line 722
-    const-string p1, "mUpdateFind"
-
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    .line 723
-    instance-of p2, p1, Landroid/view/View;
-
-    if-eqz p2, :cond_5
-
-    .line 724
-    check-cast p1, Landroid/view/View;
-
-    invoke-virtual {p1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 726
-    :cond_5
-    const-string p1, "mUpdateTxt"
-
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    .line 727
-    instance-of p2, p1, Landroid/view/View;
-
-    if-eqz p2, :cond_6
-
-    .line 728
-    check-cast p1, Landroid/view/View;
-
-    invoke-virtual {p1, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    .line 730
-    :cond_6
-    const-string p1, "mTopVideoCard"
-
-    invoke-static {p0, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getFieldValue(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    .line 731
-    instance-of p2, p1, Landroid/view/View;
-
-    if-eqz p2, :cond_7
-
-    .line 732
-    check-cast p1, Landroid/view/View;
-
-    invoke-static {p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->makeTouchTransparent(Landroid/view/View;)V
-
-    .line 736
-    :cond_7
-    const/4 p1, 0x0
-
-    const/4 p2, 0x1
-
-    :try_start_0
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    const-string v1, "setIntent"
-
-    new-array v2, p2, [Ljava/lang/Class;
-
-    const-class v3, Landroid/content/Intent;
-
-    aput-object v3, v2, p1
-
-    invoke-static {v0, v1, v2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findMethod(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v0
-
-    .line 737
-    if-eqz v0, :cond_8
-
-    .line 738
-    invoke-virtual {v0, p2}, Ljava/lang/reflect/Method;->setAccessible(Z)V
-
-    .line 739
-    invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->getTargetIntent()Landroid/content/Intent;
-
-    move-result-object v1
-
-    new-array v2, p2, [Ljava/lang/Object;
-
-    aput-object v1, v2, p1
-
-    invoke-virtual {v0, p0, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
-
-    goto :goto_0
-
-    .line 741
-    :catchall_0
-    move-exception v0
-
-    :cond_8
-    :goto_0
-    nop
-
-    .line 744
-    nop
-
-    .line 745
-    :try_start_1
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Class;->getClassLoader()Ljava/lang/ClassLoader;
-
-    move-result-object v0
-    :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_2
-
-    .line 747
-    :try_start_2
-    const-string v1, "androidx.preference.Preference$OnPreferenceClickListener"
-
-    invoke-static {v1, p1, v0}, Ljava/lang/Class;->forName(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;
-
-    move-result-object v0
-    :try_end_2
-    .catchall {:try_start_2 .. :try_end_2} :catchall_1
-
-    .line 755
-    goto :goto_2
-
-    .line 748
-    :catchall_1
-    move-exception v0
-
-    .line 749
-    :try_start_3
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Class;->getClasses()[Ljava/lang/Class;
-
-    move-result-object v0
-
-    array-length v1, v0
-
-    const/4 v2, 0x0
-
-    :goto_1
-    if-ge v2, v1, :cond_a
-
-    aget-object v3, v0, v2
-
-    .line 750
-    const-string v4, "OnPreferenceClickListener"
-
-    invoke-virtual {v3}, Ljava/lang/Class;->getSimpleName()Ljava/lang/String;
-
-    move-result-object v5
-
-    invoke-virtual {v4, v5}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v4
-
-    if-eqz v4, :cond_9
-
-    .line 751
-    nop
-
-    .line 752
-    move-object v0, v3
-
-    goto :goto_2
-
-    .line 749
-    :cond_9
-    add-int/lit8 v2, v2, 0x1
-
-    goto :goto_1
-
-    :cond_a
-    const/4 v0, 0x0
-
-    .line 756
-    :goto_2
-    if-eqz v0, :cond_b
-
-    .line 757
-    nop
-
-    .line 758
-    invoke-virtual {v0}, Ljava/lang/Class;->getClassLoader()Ljava/lang/ClassLoader;
-
-    move-result-object v1
-
-    new-array v2, p2, [Ljava/lang/Class;
-
-    aput-object v0, v2, p1
-
-    new-instance v3, Lcom/oplus/settings/widget/preference/WkOtaCardHook$3;
-
-    invoke-direct {v3, p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$3;-><init>(Ljava/lang/Object;)V
-
-    .line 757
-    invoke-static {v1, v2, v3}, Ljava/lang/reflect/Proxy;->newProxyInstance(Ljava/lang/ClassLoader;[Ljava/lang/Class;Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;
-
-    move-result-object v1
-
-    .line 771
-    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v2
-
-    const-string v3, "setOnPreferenceClickListener"
-
-    new-array v4, p2, [Ljava/lang/Class;
-
-    aput-object v0, v4, p1
-
-    invoke-static {v2, v3, v4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->findMethod(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v0
-
-    .line 772
-    if-eqz v0, :cond_b
-
-    .line 773
-    invoke-virtual {v0, p2}, Ljava/lang/reflect/Method;->setAccessible(Z)V
-
-    .line 774
-    new-array p2, p2, [Ljava/lang/Object;
-
-    aput-object v1, p2, p1
-
-    invoke-virtual {v0, p0, p2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-    :try_end_3
-    .catchall {:try_start_3 .. :try_end_3} :catchall_2
-
-    goto :goto_3
-
-    .line 777
-    :catchall_2
-    move-exception p0
-
-    :cond_b
-    :goto_3
-    nop
-
-    .line 779
-    :cond_c
     return-void
 .end method
 
 .method private static setupVideoMode(Landroid/content/Context;Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;Landroid/view/TextureView;Landroid/widget/ImageView;Landroid/widget/ImageView;Landroid/view/View;)V
     .locals 10
 
-    .line 146
+    .line 138
     invoke-static {}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearImageCache()V
 
-    .line 147
-    const-string p5, "WkOtaCardHook"
+    .line 139
+    const-string v0, "WkOtaCardHook"
 
     if-nez p2, :cond_0
 
-    .line 148
+    .line 140
     const-string p0, "TextureView not found for custom video"
 
-    invoke-static {p5, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+    invoke-static {v0, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 149
+    .line 141
     return-void
 
-    .line 152
+    .line 144
     :cond_0
-    const/4 v0, 0x0
+    const/4 v1, 0x0
 
-    invoke-virtual {p2, v0}, Landroid/view/TextureView;->setVisibility(I)V
+    invoke-virtual {p2, v1}, Landroid/view/TextureView;->setVisibility(I)V
 
-    .line 153
-    invoke-virtual {p2, v0}, Landroid/view/TextureView;->setClickable(Z)V
-
-    .line 154
-    invoke-virtual {p2, v0}, Landroid/view/TextureView;->setFocusable(Z)V
-
-    .line 155
+    .line 145
     invoke-static {p2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->clearEffect(Landroid/view/View;)V
 
-    .line 157
+    .line 147
     if-eqz p4, :cond_1
 
-    .line 158
+    .line 148
     const/16 v1, 0x8
 
     invoke-virtual {p4, v1}, Landroid/widget/ImageView;->setVisibility(I)V
 
-    .line 161
+    .line 149
+    const/4 v1, 0x0
+
+    invoke-virtual {p4, v1}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+
+    .line 152
     :cond_1
-    sget-object p4, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activeVideoListener:Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
+    invoke-virtual {p2}, Landroid/view/TextureView;->getSurfaceTextureListener()Landroid/view/TextureView$SurfaceTextureListener;
 
-    .line 162
-    if-eqz p4, :cond_2
+    move-result-object p4
 
+    .line 153
+    instance-of v1, p4, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
+
+    if-eqz v1, :cond_3
+
+    .line 154
+    check-cast p4, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
+
+    .line 155
     invoke-virtual {p4, p1}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->matches(Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;)Z
 
     move-result v1
 
     if-eqz v1, :cond_2
 
-    .line 163
-    invoke-virtual {p4, p2, p3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->rebind(Landroid/view/TextureView;Landroid/widget/ImageView;)V
+    .line 156
+    invoke-static {p4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
 
-    .line 164
-    invoke-virtual {p2, p4}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
+    .line 157
+    invoke-virtual {p4, p3}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->updateCover(Landroid/widget/ImageView;)V
 
-    .line 165
+    .line 158
+    invoke-virtual {p4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
+
+    .line 159
     return-void
 
-    .line 168
+    .line 161
     :cond_2
-    if-eqz p4, :cond_3
-
-    .line 169
-    sput v0, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->savedPlaybackPosition:I
-
-    .line 170
     invoke-virtual {p4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->release()V
 
-    .line 173
+    .line 164
     :cond_3
-    new-instance p4, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
+    new-instance v2, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;
 
     iget-object v4, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->uri:Landroid/net/Uri;
 
     iget-wide v5, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->revision:J
 
     iget-boolean v7, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->soundEnabled:Z
-
-    move-object v2, p4
 
     move-object v3, p0
 
@@ -3524,13 +3010,13 @@
 
     invoke-direct/range {v2 .. v9}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;-><init>(Landroid/content/Context;Landroid/net/Uri;JZLandroid/view/TextureView;Landroid/widget/ImageView;)V
 
-    .line 176
-    invoke-static {p4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
+    .line 167
+    invoke-static {v2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook;->activate(Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;)V
 
-    .line 177
-    invoke-virtual {p2, p4}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
+    .line 168
+    invoke-virtual {v8, v2}, Landroid/view/TextureView;->setSurfaceTextureListener(Landroid/view/TextureView$SurfaceTextureListener;)V
 
-    .line 178
+    .line 169
     iget-boolean p0, p1, Lcom/oplus/settings/widget/preference/WkOtaCardHook$Snapshot;->soundEnabled:Z
 
     new-instance p1, Ljava/lang/StringBuilder;
@@ -3557,11 +3043,26 @@
 
     move-result-object p0
 
-    invoke-static {p5, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    invoke-static {v0, p0}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 179
-    invoke-virtual {p4}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
+    .line 170
+    invoke-virtual {v2}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$CustomVideoListener;->startIfAvailable()V
 
-    .line 180
+    .line 173
+    new-instance p0, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;
+
+    invoke-direct {p0}, Lcom/oplus/settings/widget/preference/WkOtaCardHook$2;-><init>()V
+
+    .line 182
+    invoke-virtual {v8, p0}, Landroid/view/TextureView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    .line 183
+    if-eqz p5, :cond_4
+
+    .line 184
+    invoke-virtual {p5, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    .line 186
+    :cond_4
     return-void
 .end method
