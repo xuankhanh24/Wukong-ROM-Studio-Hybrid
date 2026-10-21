@@ -270,6 +270,39 @@ jobs:
     outputs:
       executor_started: ${{ steps.hybrid.outputs.executor_started }}
     steps:
+      - name: "03.0 · Cấu hình được cấp / Allocated runner resources"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Report measured capacity before disk expansion, not plan estimates.
+          report="$(mktemp)"
+          {
+            echo '## Cấu hình runner được cấp / Allocated runner resources'
+            echo
+            echo '| Resource | Actual allocation |'
+            echo '|---|---|'
+            printf '| Runner | %s / %s |\n' "${RUNNER_ENVIRONMENT:-unknown}" "${RUNNER_OS:-Linux}"
+            printf '| OS / architecture | %s / %s |\n' "$(uname -sr)" "$(uname -m)"
+            printf '| Runner image | %s (%s) |\n' "${ImageOS:-self-hosted}" "${ImageVersion:-unknown}"
+            printf '| Logical CPUs available | %s |\n' "$(nproc)"
+            cpu_model="$(LC_ALL=C lscpu | awk -F: '/^Model name:/ {sub(/^[ \t]+/, "", $2); print $2; exit}')"
+            printf '| CPU model | %s |\n' "${cpu_model:-unknown}"
+            awk '/^MemTotal:/ {total=$2} /^MemAvailable:/ {available=$2}
+              END {printf "| RAM total / available | %.2f / %.2f GiB |\n", total/1048576, available/1048576}' /proc/meminfo
+            awk '/^SwapTotal:/ {total=$2} /^SwapFree:/ {available=$2}
+              END {printf "| Swap total / free | %.2f / %.2f GiB |\n", total/1048576, available/1048576}' /proc/meminfo
+            echo
+            echo '### Disk before workspace expansion'
+            echo 'Values below are filesystems, not additive disk allocations.'
+            echo '~~~text'
+            df -hP / "${GITHUB_WORKSPACE:-.}" "${RUNNER_TEMP:-/tmp}"
+            echo '~~~'
+          } > "$report"
+          cat "$report"
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          rm -f -- "$report"
       - name: "03 · Mở rộng workspace / Expand hosted disk"
         uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
         with:
@@ -370,6 +403,39 @@ jobs:
     outputs:
       executor_started: ${{ steps.hybrid.outputs.executor_started }}
     steps:
+      - name: "03.0 · Cấu hình được cấp / Allocated runner resources"
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Report measured capacity before disk expansion, not plan estimates.
+          report="$(mktemp)"
+          {
+            echo '## Cấu hình runner được cấp / Allocated runner resources'
+            echo
+            echo '| Resource | Actual allocation |'
+            echo '|---|---|'
+            printf '| Runner | %s / %s |\n' "${RUNNER_ENVIRONMENT:-unknown}" "${RUNNER_OS:-Linux}"
+            printf '| OS / architecture | %s / %s |\n' "$(uname -sr)" "$(uname -m)"
+            printf '| Runner image | %s (%s) |\n' "${ImageOS:-self-hosted}" "${ImageVersion:-unknown}"
+            printf '| Logical CPUs available | %s |\n' "$(nproc)"
+            cpu_model="$(LC_ALL=C lscpu | awk -F: '/^Model name:/ {sub(/^[ \t]+/, "", $2); print $2; exit}')"
+            printf '| CPU model | %s |\n' "${cpu_model:-unknown}"
+            awk '/^MemTotal:/ {total=$2} /^MemAvailable:/ {available=$2}
+              END {printf "| RAM total / available | %.2f / %.2f GiB |\n", total/1048576, available/1048576}' /proc/meminfo
+            awk '/^SwapTotal:/ {total=$2} /^SwapFree:/ {available=$2}
+              END {printf "| Swap total / free | %.2f / %.2f GiB |\n", total/1048576, available/1048576}' /proc/meminfo
+            echo
+            echo '### Disk before workspace expansion'
+            echo 'Values below are filesystems, not additive disk allocations.'
+            echo '~~~text'
+            df -hP / "${GITHUB_WORKSPACE:-.}" "${RUNNER_TEMP:-/tmp}"
+            echo '~~~'
+          } > "$report"
+          cat "$report"
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          rm -f -- "$report"
       - name: "03.1 · Lấy mã điều phối / Checkout orchestrator"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

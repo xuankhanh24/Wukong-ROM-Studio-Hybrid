@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -14,6 +15,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class GitHubActionsUITests(unittest.TestCase):
+    def test_both_build_routes_report_allocated_resources_before_preparation(self):
+        workflow = (ROOT / '.github/workflows/wukong-build.yml').read_text(encoding='utf-8')
+        for route in ('hosted', 'self-hosted'):
+            section = workflow.split(f'\n  {route}:', 1)[1]
+            # Isolate one job without relying on its successor's name.
+            section = re.split(r'\n  [\w-]+:\n', section, maxsplit=1)[0]
+            first_step = section.split('    steps:', 1)[1].lstrip()
+            self.assertTrue(first_step.startswith('- name: "03.0 · Cấu hình được cấp'))
+            for command in ('$(nproc)', 'lscpu', '/proc/meminfo', 'df -hP', 'GITHUB_STEP_SUMMARY'):
+                self.assertIn(command, first_step)
+
     def test_transfer_summary_preserves_last_speed_and_deduplicates_provider_aliases(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'summary.md'
