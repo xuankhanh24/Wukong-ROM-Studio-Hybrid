@@ -785,6 +785,8 @@ function renderActiveJob(job, events, inspection = null) {
     : null;
   const focusedJobControlKey = focusedJobControl?.dataset.jobFocus || "";
   if (!job) { root.hidden = true; root.replaceChildren(); delete root.dataset.jobId; return; }
+  const openPatchCodes = new Set(root.dataset.jobId === (job.job_id || job.jobId)
+    ? [...root.querySelectorAll(".job-patch-codes[open]")].map(node => node.dataset.mod) : []);
   root.hidden = false;
   root.dataset.jobId = job.job_id || job.jobId;
   const metadata = jobMetadata(job);
@@ -840,20 +842,35 @@ function renderActiveJob(job, events, inspection = null) {
     const list = document.createElement("dl");
     for (const selection of patchSelections) {
       const row = document.createElement("div");
-      const name = document.createElement("dt"); name.textContent = selection.mod;
+      const name = document.createElement("dt");
+      const modName = document.createElement("span"); modName.textContent = selection.mod;
+      name.append(modName);
+      if (selection.count !== null) {
+        const count = document.createElement("span"); count.className = "job-patch-count";
+        count.textContent = `${selection.count}/${selection.total}`;
+        count.setAttribute("aria-label", `${selection.count}/${selection.total} ${t("selected")}`);
+        name.append(count);
+      }
       const detail = document.createElement("dd");
       const mode = document.createElement("p");
-      mode.textContent = selection.mode + (selection.count === null ? "" : ` · ${selection.count}/${selection.total}`);
+      mode.textContent = selection.mode;
       detail.append(mode);
       if (selection.patches.length) {
-        const features = document.createElement("ul");
+        const features = document.createElement("ul"); features.className = "job-patch-chips";
         for (const patch of selection.patches) {
           const item = document.createElement("li");
-          const title = document.createElement("span"); title.textContent = patch.label;
-          const id = document.createElement("code"); id.textContent = patch.id;
-          item.append(title, id); features.append(item);
+          item.textContent = patch.label; features.append(item);
         }
         detail.append(features);
+        const codes = document.createElement("details"); codes.className = "job-patch-codes";
+        codes.dataset.mod = selection.mod; codes.open = openPatchCodes.has(selection.mod);
+        const summary = document.createElement("summary"); summary.textContent = t("jobPatchCodes");
+        summary.dataset.jobFocus = `patch-codes-${selection.mod}`;
+        const ids = document.createElement("div");
+        for (const patch of selection.patches) {
+          const id = document.createElement("code"); id.textContent = patch.id; ids.append(id);
+        }
+        codes.append(summary, ids); detail.append(codes);
       }
       row.append(name, detail); list.append(row);
     }

@@ -299,18 +299,30 @@ main { padding-top: 36px !important; padding-bottom: 128px; }
 .job-context { flex-wrap: wrap; align-items: flex-start; }
 .job-patch-context { width: 100%; min-width: 0; margin-top: 8px; }
 .job-context .job-patch-context > strong { font-size: 14px; }
-.job-patch-context p { margin: 5px 0 10px; font-size: 12px; line-height: 1.5; color: var(--muted); }
-.job-patch-context dl { margin: 0; }
-.job-patch-context dl > div { display: grid; grid-template-columns: minmax(110px, 150px) minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
-.job-patch-context dt { font: 600 12px/1.5 "Geist Mono", monospace; overflow-wrap: anywhere; }
+.job-patch-context p { margin: 5px 0 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.job-patch-context > p { max-width: 65ch; }
+.job-patch-context dl { margin: 0; padding-inline: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.job-patch-context dl > div { display: grid; grid-template-columns: minmax(145px, 190px) minmax(0, 1fr); gap: 16px; padding: 14px 0; }
+.job-patch-context dl > div + div { border-top: 1px solid var(--line); }
+.job-patch-context dt { display: flex; flex-wrap: wrap; align-items: baseline; align-content: start; gap: 8px; font-size: 13px; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
+.job-patch-count { padding: 2px 6px; border-radius: var(--radius-sm); color: var(--accent-strong); background: var(--accent-soft); font: 600 11px/1.5 "Geist Mono", monospace; font-variant-numeric: tabular-nums; }
 .job-patch-context dd { min-width: 0; margin: 0; }
-.job-patch-context dd > p { margin-top: 0; }
-.job-patch-context ul { display: grid; gap: 6px; margin: 0; padding-left: 18px; }
-.job-patch-context li { font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
-.job-patch-context code { margin-left: 8px; font-size: 11px; color: var(--muted); }
+.job-patch-context dd > p { margin: 0 0 8px; }
+.job-patch-context dd > p:only-child { margin-bottom: 0; }
+.job-patch-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.job-patch-chips li { max-width: 100%; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line)); border-radius: var(--radius-md); color: var(--accent-strong); background: var(--accent-soft); font-size: 12px; font-weight: 550; line-height: 1.5; overflow-wrap: anywhere; }
+.job-patch-codes { margin-top: 4px; }
+.job-patch-codes > summary { display: flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; padding: 6px 4px; border-radius: var(--radius-sm); color: var(--muted); font-size: 12px; cursor: pointer; list-style: none; }
+.job-patch-codes > summary::-webkit-details-marker { display: none; }
+.job-patch-codes > summary::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
+.job-patch-codes[open] > summary::before { transform: rotate(45deg); }
+.job-patch-codes > summary:hover { color: var(--accent-strong); background: var(--accent-soft); }
+.job-patch-codes > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.job-patch-codes > div { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
+.job-patch-codes code { max-width: 100%; padding: 3px 6px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--muted); background: var(--surface-raised); font: 500 11px/1.5 "Geist Mono", monospace; overflow-wrap: anywhere; }
 @media (max-width: 600px) {
-  .job-patch-context dl > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
-  .job-patch-context code { display: block; margin-left: 0; }
+  .job-patch-context dl > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .job-patch-context dt { justify-content: space-between; }
 }
 .job-events { max-height: 540px; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; }
 .job-events article { content-visibility: auto; contain-intrinsic-size: auto 76px; }

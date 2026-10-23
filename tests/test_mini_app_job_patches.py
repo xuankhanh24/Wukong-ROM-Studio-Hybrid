@@ -6,7 +6,7 @@ from tests.test_telegram_mini_app import _render_mini_app_in_chrome
 
 class MiniAppJobPatchTests(unittest.TestCase):
     def test_saved_patch_context_in_both_languages_and_viewports(self):
-        for width in (390, 1440):
+        for width in (390, 900, 1440):
             with self.subTest(width=width):
                 def exercise(page):
                     page.evaluate("""async () => {
@@ -20,7 +20,10 @@ class MiniAppJobPatchTests(unittest.TestCase):
                             recipe: {device: 'PJZ110', build: {
                                 mods: ['Launcher_mod', 'Fix_noti', 'WK_Manager'],
                                 launcherFeatures: ['ram', 'feed'], fixNotiFeatures: ['level2'],
-                                wkManagerPatches: ['multi_audio', 'power_button_remap'],
+                                modVersion: 'ColorOS_17.0.0', modReleaseVersion: 'V7.0',
+                                wkManagerPatches: ['keybox_manager', 'play_integrity_spoof', 'gamespoof',
+                                    'hma_privacy_spoof', 'kernel_manager', 'power_button_remap',
+                                    'multi_window', 'disable_flag_secure', 'black_window', 'multi_audio'],
                                 enabledSteps: ['apply_mod']
                             }}
                         };
@@ -31,11 +34,12 @@ class MiniAppJobPatchTests(unittest.TestCase):
                     self.assertTrue(context.is_visible())
                     text = context.inner_text()
                     for expected in ('Hiển thị RAM đa nhiệm', 'Google Feed', 'LV2',
-                                     'Âm thanh nhiều ứng dụng', 'Remap nút nguồn', '2/9', '2/10'):
+                                     'Âm thanh nhiều ứng dụng', 'Remap nút nguồn', '2/9', '10/10'):
                         self.assertIn(expected, text)
                     self.assertNotIn('LV1', text)
                     self.assertNotIn('global_region', text)
-                    self.assertEqual(context.locator('li').count(), 5)
+                    self.assertEqual(context.locator('li').count(), 13)
+                    self.assertFalse(context.locator('code').first.is_visible())
                     # Current draft checkboxes differ; re-render still uses the saved job.
                     page.evaluate("""async () => {
                         document.querySelectorAll('.mod-feature-options input').forEach(n => n.checked = false);
@@ -43,6 +47,22 @@ class MiniAppJobPatchTests(unittest.TestCase):
                         renderActiveJob(window.patchContextJob, []);
                     }""")
                     self.assertEqual(context.inner_text(), text)
+                    codes = context.locator('.job-patch-codes').first
+                    codes.locator('summary').focus()
+                    codes.locator('summary').press('Enter')
+                    self.assertTrue(codes.locator('code').first.is_visible())
+                    page.evaluate("""async () => {
+                        const {renderActiveJob} = await import('/modules/jobs.js');
+                        renderActiveJob({...window.patchContextJob, stage: 'apply_mod'}, []);
+                    }""")
+                    self.assertTrue(codes.locator('code').first.is_visible())
+                    self.assertEqual(page.locator(':focus').get_attribute('data-job-focus'), 'patch-codes-Launcher_mod')
+                    codes.locator('summary').press('Enter')
+                    self.assertFalse(codes.locator('code').first.is_visible())
+                    if width == 900:
+                        page.evaluate("""async () => {
+                            const {applyTheme} = await import('/modules/dock.js'); applyTheme('dark');
+                        }""")
                     self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), width)
                     output = Path(__file__).resolve().parents[1] / '.tmp' / 'job-patch-context'
                     output.mkdir(parents=True, exist_ok=True)

@@ -82,6 +82,7 @@ if (fromHash) {
 const translations = {
   vi: {
     jobPatchDetails: "Patch theo từng chức năng",
+    jobPatchCodes: "Mã patch",
     jobPatchRecipeHint: "Lựa chọn đã lưu khi tạo job. Kết quả áp dụng xem trong nhật ký build.",
     jobPatchSelected: "Patch đã chọn", jobPatchStock: "Patch trên Launcher gốc",
     jobPatchNone: "Không chọn patch", jobPatchLegacy: "Cấu hình cũ / mặc định — không lưu chi tiết patch",
@@ -124,6 +125,7 @@ const translations = {
   },
   en: {
     jobPatchDetails: "Patches by feature",
+    jobPatchCodes: "Patch IDs",
     jobPatchRecipeHint: "Selections saved when this job was created. See the build log for application results.",
     jobPatchSelected: "Selected patches", jobPatchStock: "Patch stock Launcher",
     jobPatchNone: "No patches selected", jobPatchLegacy: "Legacy / default configuration — patch details not saved",
