@@ -6,6 +6,7 @@ import { toast } from "./shell.js";
 import { openAdminUser, refreshAdminUserActivity } from "./admin.js";
 import { navigate, prefersReducedMotion } from "./dock.js";
 import { profileAvatar } from "./profile.js";
+import { jobPatchSelections } from "../lib/job-patches.js";
 
 function renderSelectedJob() {
   if (state.adminJobView) renderActiveJob(state.adminJobView.job, state.adminJobView.events, state.adminJobView);
@@ -826,12 +827,44 @@ function renderActiveJob(job, events, inspection = null) {
   }));
   else { const empty = document.createElement("small"); empty.textContent = t("noModsSelected"); mods.append(empty); }
   contextTitle.append(contextLabel, mods);
+  const patchSelections = jobPatchSelections(build, t);
+  if (patchSelections.length) {
+    const patches = document.createElement("div"); patches.className = "job-patch-context";
+    const label = document.createElement("strong"); label.textContent = t("jobPatchDetails");
+    const hint = document.createElement("p"); hint.textContent = t("jobPatchRecipeHint");
+    patches.append(label, hint);
+    if (Array.isArray(build.enabledSteps) && !build.enabledSteps.includes("apply_mod")) {
+      const skipped = document.createElement("p"); skipped.textContent = t("jobPatchStepSkipped");
+      patches.append(skipped);
+    }
+    const list = document.createElement("dl");
+    for (const selection of patchSelections) {
+      const row = document.createElement("div");
+      const name = document.createElement("dt"); name.textContent = selection.mod;
+      const detail = document.createElement("dd");
+      const mode = document.createElement("p");
+      mode.textContent = selection.mode + (selection.count === null ? "" : ` · ${selection.count}/${selection.total}`);
+      detail.append(mode);
+      if (selection.patches.length) {
+        const features = document.createElement("ul");
+        for (const patch of selection.patches) {
+          const item = document.createElement("li");
+          const title = document.createElement("span"); title.textContent = patch.label;
+          const id = document.createElement("code"); id.textContent = patch.id;
+          item.append(title, id); features.append(item);
+        }
+        detail.append(features);
+      }
+      row.append(name, detail); list.append(row);
+    }
+    patches.append(list); context.append(patches);
+  }
   const contextCopy = document.createElement("div"); contextCopy.className = "job-release-context";
   const pack = document.createElement("small"); pack.textContent = build.modVersion || "—";
   const release = document.createElement("b"); release.textContent = build.modReleaseVersion || "—";
   const count = document.createElement("span"); count.textContent = `${(build.mods || []).length} ${t("selected")}`;
   contextCopy.append(pack, release, count);
-  context.append(contextTitle, contextCopy);
+  context.prepend(contextTitle, contextCopy);
   const upload = [...events].reverse().find((event) => event.type === "upload_progress");
   const uploadSnapshot = upload ? uploadProgressSnapshot(upload) : null;
   const uploadDetail = upload

@@ -81,6 +81,11 @@ if (fromHash) {
 
 const translations = {
   vi: {
+    jobPatchDetails: "Patch theo từng chức năng",
+    jobPatchRecipeHint: "Lựa chọn đã lưu khi tạo job. Kết quả áp dụng xem trong nhật ký build.",
+    jobPatchSelected: "Patch đã chọn", jobPatchStock: "Patch trên Launcher gốc",
+    jobPatchNone: "Không chọn patch", jobPatchLegacy: "Cấu hình cũ / mặc định — không lưu chi tiết patch",
+    jobPatchStepSkipped: "Job này bỏ qua bước Áp dụng MOD; các lựa chọn dưới đây không được thực thi.",
     logOnDemandHint: "Chỉ cập nhật trạng thái. Nhật ký tải khi bạn mở, không tự tải thêm.", loadNewLogEvents: "Tải nhật ký mới",
     sharedMod: "Dùng chung", sharedModHint: "Mod STARK dùng chung cho các nền MOD.",
     launcherFeaturesTitle: "Launcher_mod · Chọn chức năng", fixNotiFeaturesTitle: "Fix_noti · Chọn cấp độ",
@@ -118,6 +123,11 @@ const translations = {
     runtimePipeline: "PIPELINE", runtimeWaiting: "Chờ recipe hợp lệ", runtimeReady: "Recipe sẵn sàng gửi", runtimeLastBuild: "BUILD GẦN NHẤT", runtimeJobs: "Xem trong Jobs", checklistSource: "Nguồn ROM", checklistSourcePending: "Chưa có URL hợp lệ", checklistSourceDone: "Đã nhận diện nguồn", checklistDevice: "Thiết bị đích", checklistDevicePending: "Cần chọn thủ công", checklistDeviceDone: "Đã chọn thiết bị", checklistRunner: "Tuyến thực thi", checklistRunnerDone: "Đã cấu hình runner", readinessProgress: "{done}/3 điều kiện", pipelinePending: "Chưa chạy", pipelineRunning: "Đang chạy", pipelineComplete: "Hoàn tất", pipelineFailed: "Lỗi", pipelineSkipped: "Bỏ qua", modGroupGoogle: "Google & ứng dụng", modGroupCamera: "Camera & hình ảnh", modGroupInterface: "Giao diện hệ thống", modGroupSecurity: "Bảo mật & quyền", modGroupCore: "Hệ thống & công cụ", modGroupOther: "Khác", modExclusiveNotice: "Disable_flag_secure và WK_Manager không thể dùng cùng nhau."
   },
   en: {
+    jobPatchDetails: "Patches by feature",
+    jobPatchRecipeHint: "Selections saved when this job was created. See the build log for application results.",
+    jobPatchSelected: "Selected patches", jobPatchStock: "Patch stock Launcher",
+    jobPatchNone: "No patches selected", jobPatchLegacy: "Legacy / default configuration — patch details not saved",
+    jobPatchStepSkipped: "This job skips Apply MOD; the selections below will not run.",
     logOnDemandHint: "Status updates only. Logs load on request, with no automatic streaming.", loadNewLogEvents: "Load new log entries",
     sharedMod: "Shared", sharedModHint: "Shared STARK mod available across MOD packs.",
     launcherFeaturesTitle: "Launcher_mod · Features", fixNotiFeaturesTitle: "Fix_noti · Level",
