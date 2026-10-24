@@ -218,12 +218,14 @@ def plan_patch(roots, profile, source_index=None, selected=None):
     for feature in profile['features']:
         for entry in feature['classes']:
             owner = entry['owner']
-            candidates = source_index.get(entry['source'], []) if entry['source'] else []
+            candidates = source_index.get(entry['source'], []) if entry.get('source') else []
             if owner in candidates:
                 candidates = [owner]
             elif candidates:
                 candidates = [candidate for candidate in candidates
-                              if ('$' in candidate) == ('$' in owner)]
+                              if candidate.count('$') == owner.count('$')]
+                if not candidates:
+                    raise ValueError(f'Cannot bind class {owner}: no candidate with matching nesting')
             exact = [root / (owner[1:-1] + '.smali') for root in root_paths]
             exact = [path for path in exact if path.is_file()]
             if candidates:
@@ -249,7 +251,7 @@ def plan_patch(roots, profile, source_index=None, selected=None):
                         compatible.append(candidate)
                 paths = compatible
             if len(paths) != 1:
-                raise ValueError(f"{feature['id']}: class {entry['source'] or owner} has {len(paths)} candidates")
+                raise ValueError(f"Ambiguous class {entry.get('source') or owner}: {len(paths)} candidates")
             path = paths[0]
             content = files.setdefault(path, path.read_text(encoding='utf-8'))
             actual_owner = re.search(r'(?m)^\.class .* (L[^;]+;)', content)[1]
@@ -277,8 +279,14 @@ def plan_patch(roots, profile, source_index=None, selected=None):
         candidates = source_index.get(source, [])
         if owner in candidates:
             aliases.setdefault(owner, owner)
-        elif len(candidates) == 1:
-            aliases.setdefault(owner, candidates[0])
+        else:
+            if '$' in owner:
+                suffix = owner[owner.index('$'):]
+                candidates = [candidate for candidate in candidates if candidate.endswith(suffix)]
+            else:
+                candidates = [candidate for candidate in candidates if '$' not in candidate]
+            if len(candidates) == 1:
+                aliases.setdefault(owner, candidates[0])
     matches, additions, seen, members = [], {}, set(), {}
     for feature, entry, path in entries:
         content = files[path]

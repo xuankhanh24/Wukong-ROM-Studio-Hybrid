@@ -208,10 +208,6 @@ public final class WorkspacePullDownHelper {
         }
     }
 
-    public static void onResume(Object controller) {
-        cleanupAfterLaunch(controller);
-    }
-
     private static int getIntField(Object obj, String name, int def) {
         try {
             Field f = findField(obj.getClass(), name);

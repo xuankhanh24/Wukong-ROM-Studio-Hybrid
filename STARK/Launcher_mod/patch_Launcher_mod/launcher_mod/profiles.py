@@ -124,20 +124,32 @@ def decode_for_profile(apk, baksmali, profile):
 
 
 def inspect_profile(roots, profile, sources):
-    profile = resolve_profile(roots, profile, sources)
+    # Validate the same complete plan that will be applied. Isolating each rule
+    # loses cross-class ABI bindings and cannot detect overlaps or field clashes.
+    profile = resolve_profile(roots, select_profile(profile), sources)
+    try:
+        plan_patch(roots.values(), profile, sources)
+        plan_error = None
+    except ValueError as error:
+        plan_error = str(error)
     rows = []
     for feature in profile['features']:
         for entry in feature['classes']:
             for rule in entry['methods']:
                 candidate = {**profile, 'features': [{**feature, 'classes': [{**entry, 'methods': [rule], 'fields': []}]}]}
                 try:
-                    plan_patch(roots.values(), candidate, sources)
                     status, reason = 'matched', None
+                    if plan_error is not None or rule.get('optional'):
+                        _, matches, additions, _ = plan_patch(roots.values(), candidate, sources)
+                        if rule.get('optional') and not matches and not additions:
+                            status, reason = 'skipped_optional', 'Optional stock method graph not present'
                 except ValueError as error:
                     status, reason = 'unsupported', str(error)
                 rows.append({'feature': feature['id'], 'owner': entry['owner'], 'method': (rule['before'] or rule['after']).splitlines()[0], 'status': status, 'reason': reason})
-    return {'matched': sum(x['status'] == 'matched' for x in rows), 'total': len(rows), 'rules': rows}
-
+    return {'compatible': plan_error is None, 'plan_error': plan_error,
+            'matched': sum(x['status'] == 'matched' for x in rows),
+            'skipped_optional': sum(x['status'] == 'skipped_optional' for x in rows),
+            'total': len(rows), 'rules': rows}
 
 def prepare_patches(apk, baksmali, profile_path=None, selected=None):
     profile = select_profile(load_profile(profile_path or choose_profile(apk)), selected)
@@ -149,7 +161,7 @@ def prepare_patches(apk, baksmali, profile_path=None, selected=None):
     }, indent=2), encoding='utf-8')
     coverage = inspect_profile(roots, profile, sources)
     (work / 'compatibility.json').write_text(json.dumps(coverage, indent=2), encoding='utf-8')
-    if coverage['matched'] != coverage['total']:
+    if not coverage['compatible']:
         raise ValueError(f"Unsupported APK: {coverage['matched']}/{coverage['total']} rules matched; details: {work / 'compatibility.json'}")
     report = apply_profile(roots.values(), profile, sources, report_path=work / 'patch_report.json')
     print(f"Applied {report['modified_methods']} method patches, {report['added_methods']} added methods in {report['modified_classes']} classes", flush=True)
@@ -173,3 +185,6 @@ if __name__ == '__main__':
     report = inspect_profile(roots, profile, sources)
     (work / 'compatibility.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     print(f"Matched {report['matched']}/{report['total']}: {work / 'compatibility.json'}", flush=True)
+    if not report['compatible']:
+        print(f"Unsupported APK: {report['plan_error']}", flush=True)
+        raise SystemExit(1)

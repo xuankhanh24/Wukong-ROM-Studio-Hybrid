@@ -14,23 +14,7 @@
     "dock_support.json",
     "ram.json"
   ],
-  "type_sources": {
-    "Lcom/android/common/config/FeatureOption;": "FeatureOption.kt",
-    "Lcom/android/common/util/AppFeatureUtils;": "AppFeatureUtils.kt",
-    "Lkotlin/jvm/JvmStatic;": "JvmPlatformAnnotations.kt",
-    "Lcom/android/launcher3/OplusHotseat;": "OplusHotseat.java",
-    "Lcom/android/common/util/ScreenUtils;": "ScreenUtils.kt",
-    "Lcom/android/launcher3/hotseat/expand/ExpandUtils;": "ExpandUtils.kt",
-    "Lcom/android/launcher3/uioverrides/states/blurdrawable/OplusBlurProperties;": "OplusBlurProperties.kt",
-    "Lcom/android/launcher3/uioverrides/states/blurdrawable/BlurTransitionDrawable;": "BlurTransitionDrawable.kt",
-    "Lcom/android/launcher3/util/LauncherMaterialEffectUtils;": "LauncherMaterialEffectUtils.kt",
-    "Lcom/android/launcher3/CellLayout;": "CellLayout.java",
-    "Lcom/android/launcher3/util/SmoothRoundedManager;": "SmoothRoundedManager.kt",
-    "Lcom/android/launcher3/uioverrides/states/blurdrawable/IBlurBaseController;": "IBlurBaseController.kt",
-    "Lcom/android/launcher3/ShortcutAndWidgetContainer;": "ShortcutAndWidgetContainer.java",
-    "Lcom/android/launcher3/uioverrides/states/blurdrawable/BlurBaseFactory;": "BlurBaseFactory.kt",
-    "Lep/g;": "MemoryInfoManager.java"
-  },
+  "type_sources": {},
   "validation": "build-only",
   "dependencies": {
     "settings": [

@@ -73,8 +73,11 @@ public class WkTaskbarSeekBarPreference extends COUIPreference {
 
         try {
             Class<?> em = Class.forName("com.android.launcher3.hotseat.expand.ExpandDataManager");
-            Method m = em.getMethod("updateRecentTaskDelay");
-            m.invoke(null);
+            try {
+                em.getMethod("updateRecentTaskDelay").invoke(null);
+            } catch (NoSuchMethodException missingLegacyOverload) {
+                em.getMethod("updateRecentTaskDelay", long.class).invoke(null, 0L);
+            }
         } catch (Throwable ignored) {}
     }
 

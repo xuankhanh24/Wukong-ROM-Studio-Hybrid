@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.util.Log;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Cached feature flags; expensive hardware discovery runs on configuration events. */
 public final class TweaksHelper {
@@ -203,6 +204,57 @@ public final class TweaksHelper {
     private static volatile boolean sReflectionInited = false;
     private static Method sMethodFoldExpanded = null;
     private static Boolean sIsHardwareTablet = null;
+    private static Method sScreenProfileLandscape;
+    private static Method sScreenLandscape;
+
+    // Cache missing members too: an absent OEM API must not throw every frame.
+    private static final class OrientationAccess {
+        final Method config, landscape, recentsLandscape;
+        final Field landscapeField, legacyLandscapeField;
+        OrientationAccess(Class<?> type) {
+            config = method(type, "config");
+            landscape = method(type, "isLandscape");
+            recentsLandscape = method(type, "isLandScape");
+            landscapeField = field(type, "isLandscape");
+            legacyLandscapeField = field(type, "p");
+        }
+    }
+
+    private static final ConcurrentHashMap<Class<?>, OrientationAccess> sOrientationAccess =
+            new ConcurrentHashMap<>();
+
+    private static Method method(Class<?> type, String name, Class<?>... parameters) {
+        try { return type.getMethod(name, parameters); }
+        catch (ReflectiveOperationException | SecurityException ignored) { return null; }
+    }
+
+    private static Field field(Class<?> type, String name) {
+        try { return type.getField(name); }
+        catch (ReflectiveOperationException | SecurityException ignored) { return null; }
+    }
+
+    private static OrientationAccess orientationAccess(Object value) {
+        Class<?> type = value.getClass();
+        OrientationAccess access = sOrientationAccess.get(type);
+        if (access == null) {
+            OrientationAccess candidate = new OrientationAccess(type);
+            access = sOrientationAccess.putIfAbsent(type, candidate);
+            if (access == null) access = candidate;
+        }
+        return access;
+    }
+
+    private static Object invoke(Method method, Object receiver, Object... arguments) {
+        if (method == null) return null;
+        try { return method.invoke(receiver, arguments); }
+        catch (ReflectiveOperationException | RuntimeException ignored) { return null; }
+    }
+
+    private static boolean booleanField(Field field, Object receiver) {
+        if (field == null) return false;
+        try { return Boolean.TRUE.equals(field.get(receiver)); }
+        catch (IllegalAccessException | RuntimeException ignored) { return false; }
+    }
 
     private static void ensureReflectionInited() {
         if (sReflectionInited) return;
@@ -211,6 +263,11 @@ public final class TweaksHelper {
             try {
                 Class<?> su = Class.forName("com.android.common.util.ScreenUtils");
                 try { sMethodFoldExpanded = su.getMethod("isFoldScreenExpanded"); } catch (Throwable ignored) {}
+                sScreenLandscape = method(su, "isDeviceInLandscape");
+                try {
+                    sScreenProfileLandscape = method(su, "isDeviceProfileInLandscape",
+                            Class.forName("com.android.launcher3.DeviceProfile"));
+                } catch (ClassNotFoundException ignored) { }
             } catch (Throwable ignored) {}
 
             try {
@@ -266,51 +323,17 @@ public final class TweaksHelper {
             return true;
         }
         if (deviceProfile != null) {
-            try {
-                Method mConfig = deviceProfile.getClass().getMethod("config");
-                Object config = mConfig.invoke(deviceProfile);
-                if (config != null) {
-                    try {
-                        Method mIsLand = config.getClass().getMethod("isLandscape");
-                        Object res = mIsLand.invoke(config);
-                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
-                            return true;
-                        }
-                    } catch (Throwable ignored) {}
-                    try {
-                        Field f = config.getClass().getField("isLandscape");
-                        Object res = f.get(config);
-                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
-                            return true;
-                        }
-                    } catch (Throwable ignored) {}
-                    try {
-                        Field f = config.getClass().getField("p");
-                        Object res = f.get(config);
-                        if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
-                            return true;
-                        }
-                    } catch (Throwable ignored) {}
-                }
-            } catch (Throwable ignored) {}
+            Object config = invoke(orientationAccess(deviceProfile).config, deviceProfile);
+            if (config != null) {
+                OrientationAccess access = orientationAccess(config);
+                if (Boolean.TRUE.equals(invoke(access.landscape, config))
+                        || booleanField(access.landscapeField, config)
+                        || booleanField(access.legacyLandscapeField, config)) return true;
+            }
         }
-        try {
-            Class<?> su = Class.forName("com.android.common.util.ScreenUtils");
-            try {
-                Method m = su.getMethod("isDeviceProfileInLandscape", Class.forName("com.android.launcher3.DeviceProfile"));
-                Object res = m.invoke(null, deviceProfile);
-                if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
-                    return true;
-                }
-            } catch (Throwable ignored) {}
-            try {
-                Method m = su.getMethod("isDeviceInLandscape");
-                Object res = m.invoke(null);
-                if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
-                    return true;
-                }
-            } catch (Throwable ignored) {}
-        } catch (Throwable ignored) {}
+        ensureReflectionInited();
+        if ((deviceProfile != null && Boolean.TRUE.equals(invoke(sScreenProfileLandscape, null, deviceProfile)))
+                || Boolean.TRUE.equals(invoke(sScreenLandscape, null))) return true;
         Context ctx = sAppContext != null ? sAppContext : getCon();
         if (ctx != null && ctx.getResources() != null) {
             Configuration cfg = ctx.getResources().getConfiguration();
@@ -337,15 +360,12 @@ public final class TweaksHelper {
     public static boolean shouldShowAsGrid(Object recentsView) {
         if (!sWkTablet) return false;
         if (recentsView != null) {
-            try {
-                Method m = recentsView.getClass().getMethod("isLandScape");
-                Object res = m.invoke(recentsView);
-                if (res instanceof Boolean) {
-                    boolean isLand = ((Boolean) res).booleanValue();
-                    sIsLandscape = isLand;
-                    if (isLand) return false;
-                }
-            } catch (Throwable ignored) {}
+            Object result = invoke(orientationAccess(recentsView).recentsLandscape, recentsView);
+            if (result instanceof Boolean) {
+                boolean isLand = ((Boolean) result).booleanValue();
+                sIsLandscape = isLand;
+                if (isLand) return false;
+            }
         }
         return !isDeviceInLandscape(null);
     }
