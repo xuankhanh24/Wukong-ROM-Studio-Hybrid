@@ -16,7 +16,7 @@ from .paths import DIST, INPUTS, stock_apk
 from .toolchain import find_tool
 from .helpers import compile_helpers
 from .profiles import prepare_patches, adapt_helper_abi
-from .verify import verify
+from .verify import verify, verify_recents_resume_cleanup
 from .resources import prepare_resources
 from .dex import remove_class_definitions
 from .packaging import extract_apk_signing_block, inject_apk_signing_block, package_magisk_module
@@ -172,6 +172,7 @@ def main(argv=None):
     # BƯỚC 5: ĐÓNG GÓI MODULE MAGISK / KERNELSU / APATCH
     print("\n[BƯỚC 5/6] Đóng gói Module flash Magisk / KernelSU / APatch...", flush=True)
     verification = verify(final_apk, stock_apk=target_apk)
+    verification.update(verify_recents_resume_cleanup(final_apk))
     log_ok(f"DEX verification: {verification}")
     package_magisk_module(final_apk, module_zip)
     build_report = {**selection, 'stock_apk': str(target_apk), 'apk': str(final_apk),

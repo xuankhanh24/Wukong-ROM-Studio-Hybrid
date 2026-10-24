@@ -80,6 +80,18 @@ def dex_metadata(data):
     return classes, definitions, set(references), parents, set(field_references), field_definitions, abstracts, interfaces
 
 
+def verify_recents_resume_cleanup(apk):
+    """Reject the retired helper that restores Home alpha during app -> Recents."""
+    obsolete = ('Lcom/android/launcher/settings/WorkspacePullDownHelper;'
+                '->onResume(Ljava/lang/Object;)V')
+    with zipfile.ZipFile(apk) as archive:
+        affected = [name for name in archive.namelist()
+                    if name.endswith('.dex') and obsolete in dex_metadata(archive.read(name))[2]]
+    if affected:
+        raise ValueError(f'Obsolete Recents resume cleanup remains in {affected}: {obsolete}')
+    return {'obsolete_recents_resume_cleanup': []}
+
+
 def verify(apk, stock_apk=None):
     with zipfile.ZipFile(apk) as archive:
         dexes = {}
